@@ -1,5 +1,5 @@
 <?php 
-//if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
+// TODO add following code after finishing: if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
 
 function getPlayerData($username){
 
@@ -293,6 +293,7 @@ function match_grabber($matchid_output, $api_key, $username){
 
 
 
+// TODO add following code after finishing: 
 // } else {
 //     http_response_code("403");
 // }
