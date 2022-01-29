@@ -3,69 +3,56 @@
 
 function getPlayerData($username){
 
-    // set api_key variable
-    $api_key = "RGAPI-d4aa514f-c8ef-4388-b44f-80f27990bb10";
-    // $usernames = ["ILEALORI","DasNerdwork","Vollbard","OkaxNeon","SamiraIsMyWaifu","Psytrance+Irelia","Android+69"];
-    $puuid = array();
-    $sumid = array();
-
-    // foreach($usernames as $username){
-    // echo $username . "\n<br>";
-    // create curl resource
-
+    // initialize api_key variable
+    $api_key = "RGAPI-547934c5-fc96-4da4-99ba-3df4a45110d8";
+    $playerData = array();
+    
+    // initialize playerdata curl request by username
     $ch = curl_init();
-
-    // set url
+    // set url & return the transfer as a string
     curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" . $username . "?api_key=" . $api_key);
-
-    //return the transfer as a string
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-    // $output contains the output string
+    // $output contains the output string & $httpcode contains the returncode (e.g. 404 not found)
     $output = curl_exec($ch);
-
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
     // close curl resource to free up system resources
     curl_close($ch);
-
+    
+    // fetch if 403 Access forbidden -> outdated API Key
     if($httpcode == "403"){
         echo "<h2>API Key outdated!</h2>";
     }
     
+    // fetch if maximum requests reached
     if($httpcode == "429"){
-        sleep(121);        
+        sleep(121); // wait 120 seconds until max requests reset
+        $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" . $username . "?api_key=" . $api_key);
-    
-        //return the transfer as a string
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    
-        // $output contains the output string
         $output = curl_exec($ch);
-    
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    
-        // close curl resource to free up system resources
         curl_close($ch);
     }
 
-    // echo "<pre style='background-color: #1f1f1f;'>";
-    // echo "<center>[Accountdaten]</center>";
-    // echo "Spielername: " . $username . "<br>";
-    // echo "Level: " . json_decode($output)->summonerLevel . "<br>";
+    // collect requested values in array
+    $playerData["Name"] = json_decode($output)->name;
+    $playerData["PUUID"] = json_decode($output)->puuid;
+    $playerData["SumID"] = json_decode($output)->id;
+    $playerData["AccountID"] = json_decode($output)->accountId;
+    $playerData["Level"] = json_decode($output)->summonerLevel;
+    $playerData["Icon"] = json_decode($output)->profileIconId;
+    $playerData["LastChange"] = json_decode($output)->revisionDate;
 
-    if(isset(json_decode($output)->puuid)) {
-        echo "PUUID: " . json_decode($output)->puuid . "<br>";
-        $puuid = json_decode($output)->puuid;
-    }
-    if(isset(json_decode($output)->id)) {
-        echo "Summoner ID: " . json_decode($output)->id . "<br>";
-        $sumid = json_decode($output)->id;
-    }
-    // $puuid[] = json_decode($output)->puuid;
-    // echo "</pre>";
+    // print collected values
+    echo "Name: " . $playerData["Name"] . "<br>";
+    echo "PUUID: " . $playerData["PUUID"] . "<br>";
+    echo "SumID: " . $playerData["SumID"] . "<br>";
+    echo "AccountID: " . $playerData["AccountID"] . "<br>";
+    echo "Level: " . $playerData["Level"] . "<br>";
+    echo "Icon: " . $playerData["Icon"] . "<br>";
+    echo "LastChange: " . $playerData["LastChange"] . "<br>";
   
-    return $puuid;
+    return $playerData;
 }
 
 // // Match ID Grabber
