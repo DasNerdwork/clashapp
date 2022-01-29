@@ -7,7 +7,7 @@ Beschwörername: <input type="text" name="search"><br>
 include('functions.php');
 
 foreach($_POST as $result) {
-    $id = getPlayerData($result);
+    $id = getPlayerData($result)["PUUID"];
     getMatchesByPUUID($id);
 }
 
