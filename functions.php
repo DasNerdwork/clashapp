@@ -73,14 +73,8 @@ function getPlayerData($username){
 function grabMatches($puuid, $username){
     global $api_key;
     $starttime = "1640991600"; //01.01.22 0:00h
-    // $endtime = $date->getTimestamp();
     $gametype = "ranked";
     $matchcount = "100";
-
-    // Start curl request
-
-    // Set curl URL
-    // curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?startTime=" . $starttime . "&endTime=" . $endtime . "&type=" . $gametype . "&start=0&count=" . $matchcount . "&api_key=" . $api_key);
     $start = 0;
     $id_count = 100;
     $i = 0;
@@ -119,6 +113,7 @@ function grabMatches($puuid, $username){
         }
         
         //daten holen für die alle bisher geholten matches
+        // print "<pre>";print_r($matchid_output);print "</pre>";
         match_grabber($matchid_output,$api_key,$username);
 
         // echo("<pre style='background-color: #1f1f1f;'>");
@@ -138,7 +133,7 @@ function grabMatches($puuid, $username){
 
 
 //     $i = 0;
-    echo "hier ist $i";
+    echo "Gefundene Matchdaten: $i";
 
 }
 
