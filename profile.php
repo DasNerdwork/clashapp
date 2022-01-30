@@ -8,12 +8,14 @@ Beschwörername: <input type="text" name="search"><br>
 include('functions.php');
 
 if (isset($_POST["lookup"])) {
-    $puuid = getPlayerData($_POST["search"])["PUUID"];
+    $query = preg_replace('/\s+/', '+', $_POST["search"]);
+    $puuid = getPlayerData($query)["PUUID"];
     getMatchesByPUUID($puuid);
 }
 
 if (isset($_POST["load"])) {
-    $puuid = getPlayerData($_POST["search"])["PUUID"];
+    $query = preg_replace('/\s+/', '+', $_POST["search"]);
+    $puuid = getPlayerData($query)["PUUID"];
     grabMatches($puuid, $_POST["search"]);
 }
 
