@@ -1,16 +1,21 @@
 <form action="/clashapp/profile.php" method="POST">
 Beschwörername: <input type="text" name="search"><br>
-
-<input type="submit" value="submit" />
+<input type="submit" name="lookup" value="Suchen"/>
+<input type="submit" name="load" value="Aktualisieren"/>
 </form>
+
 <?php
 include('functions.php');
 
-foreach($_POST as $result) {
-    $id = getPlayerData($result)["PUUID"];
-    getMatchesByPUUID($id);
+if (isset($_POST["lookup"])) {
+    $puuid = getPlayerData($_POST["search"])["PUUID"];
+    getMatchesByPUUID($puuid);
 }
 
+if (isset($_POST["load"])) {
+    $puuid = getPlayerData($_POST["search"])["PUUID"];
+    grabMatches($puuid, $_POST["search"]);
+}
 
 
 
