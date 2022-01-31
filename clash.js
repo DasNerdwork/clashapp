@@ -3,7 +3,4 @@ $(document).ready( function() {
   if (window.location.pathname == '/clash') {
     $('#clash').load('/clashapp/profile.php');
   }
-
-
-
 });
