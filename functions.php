@@ -143,7 +143,7 @@ $matches_count = scandir("/var/www/html/wordpress/clashapp/data/matches/");
 $count = 0;
 echo "<table class='table'>";
 
-for($i = 2; $i < count($matches_count)-1; $i++){
+for($i = count($matches_count)-1; $i > 2; $i--){
     // echo $matches_count[$i]."<br>";
     $handle = file_get_contents("/var/www/html/wordpress/clashapp/data/matches/".$matches_count[$i]);
 
@@ -164,6 +164,7 @@ for($i = 2; $i < count($matches_count)-1; $i++){
             $count++;
             for($in = 0; $in < 10; $in++){
                 if($inhalt->info->participants[$in]->puuid == $puuid) {
+                    echo "<tr>";
                     if($inhalt->info->participants[$in]->win == true) {
                         echo '<td class="online" style="color:#1aa23a"><b>W</b></td>';
                     } else {
@@ -278,7 +279,7 @@ for($i = 2; $i < count($matches_count)-1; $i++){
                     break;
             }
             echo "<td>Matchtyp: ".$matchtype . "</td></tr>"; 
-
+            echo "</tr>";
         }
     }
 }
