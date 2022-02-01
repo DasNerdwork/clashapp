@@ -1,4 +1,4 @@
-<form action="/clashapp/profile.php" method="POST">
+<form action="/clash" method="POST">
 Beschwörername: <input type="text" name="search"><br>
 <input type="submit" name="lookup" value="Suchen"/>
 <input type="submit" name="load" value="Aktualisieren"/>
@@ -6,6 +6,8 @@ Beschwörername: <input type="text" name="search"><br>
 
 <?php
 include('functions.php');
+
+echo 'Test: ' . htmlspecialchars($_GET["name"]);
 
 if (isset($_POST["lookup"])) {
     $query = preg_replace('/\s+/', '+', $_POST["search"]);
