@@ -1,6 +1,6 @@
 <?php 
 // TODO add following code after finishing: if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
-$api_key = "RGAPI-409559d3-8184-437f-b008-f0d5dbe0252c";
+$api_key = "RGAPI-55adf39d-67cd-478e-968b-fb01bbe3d768";
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 
 function getPlayerData($username){
@@ -144,6 +144,7 @@ $count = 0;
 echo "<table class='table'>";
 
 for($i = count($matches_count)-1; $i > 2; $i--){
+    ob_start();
     // echo $matches_count[$i]."<br>";
     $handle = file_get_contents("/var/www/html/wordpress/clashapp/data/matches/".$matches_count[$i]);
 
@@ -282,6 +283,8 @@ for($i = count($matches_count)-1; $i > 2; $i--){
             echo "</tr>";
         }
     }
+    ob_flush();
+    flush();
 }
 echo "</table>";
 
@@ -292,7 +295,7 @@ echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden";
 function match_grabber($matchid_output, $api_key, $username){
     // Match Grabber
     foreach (json_decode($matchid_output) as $matchid) {
-
+        ob_start();
         // Start curl request
         if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
             $ch = curl_init(); 
@@ -345,6 +348,8 @@ function match_grabber($matchid_output, $api_key, $username){
             echo $noanswer;
             $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
         }
+    ob_flush();
+    flush();
     }
 }
     
