@@ -51,9 +51,11 @@ function getPlayerData($username){
     }
     echo "Name: " . $playerData["Name"] . "<br>";
     echo "Level: " . $playerData["Level"] . "<br>";
-    $rankedinfo = getCurrentRank($playerData["SumID"]);
-    echo "Rank: " . $rankedinfo["Tier"] . " " . $rankedinfo["Rank"] . " mit " . $rankedinfo["LP"] . "LP in " . $rankedinfo["Queue"] . "<br>";
-    echo "Wins: " . $rankedinfo["Wins"] . " / Losses: " . $rankedinfo["Losses"] . " - Winrate: " . round((($rankedinfo["Wins"]/($rankedinfo["Wins"]+$rankedinfo["Losses"]))*100),2) . "%<br><br>";
+    $rankedInfo = getCurrentRank($playerData["SumID"]);
+    foreach($rankedInfo as $rankedQueue){
+    echo "Rank: " . $rankedQueue["Tier"] . " " . $rankedQueue["Rank"] . " mit " . $rankedQueue["LP"] . " LP in " . $rankedQueue["Queue"] . "<br>";
+    echo "Wins: " . $rankedQueue["Wins"] . " / Losses: " . $rankedQueue["Losses"] . " - Winrate: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><br>";
+    }
     echo "<b>! For Testing Purposes Only !</b><br>";
     echo "PUUID: " . $playerData["PUUID"] . "<br>";
     echo "SumID: " . $playerData["SumID"] . "<br>";
@@ -70,16 +72,16 @@ function getPlayerData($username){
 //     //echo $date->format('Y-m-d H:i:s') . "<br>";
 
 //     // Variables for curl request
-function grabMatches($puuid, $username){
+function getMatchIDs($puuid){
     global $api_key;
-    $starttime = "1640991600"; //01.01.22 0:00h
+    $matchIDArray = array();
     $gametype = "ranked";
     $matchcount = "100";
     $start = 0;
     $id_count = 100;
-    $i = 0;
     
     while ($id_count == 100) {
+
         $ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gametype . "&start=" . $start . "&count=" . $matchcount . "&api_key=" . $api_key);
@@ -114,27 +116,19 @@ function grabMatches($puuid, $username){
         
         //daten holen für die alle bisher geholten matches
         // print "<pre>";print_r($matchid_output);print "</pre>";
-        match_grabber($matchid_output,$api_key,$username);
+        // match_grabber($matchid_output,$api_key,$username);
 
         // echo("<pre style='background-color: #1f1f1f;'>");
         // echo("<center>[Matchhistory]</center>");
-        
-        // foreach (json_decode($matchid_output) as $match) {
-        //     echo("ID" . $i . ": " . $match . "<br>");
-        //     $i++;
-        // }
-        // echo("</pre>");
+    
+        foreach (json_decode($matchid_output) as $match) {
+            array_push($matchIDArray, $match);
 
-
+         }
         $start += 100;
         $id_count = count(json_decode($matchid_output, true));
-        $i += count(json_decode($matchid_output, true));
     }
-
-
-//     $i = 0;
-    echo "Gefundene Matchdaten: $i";
-
+    return $matchIDArray;
 }
 
 function getMatchesByPUUID($puuid){
@@ -348,8 +342,6 @@ function match_grabber($matchid_output, $api_key, $username){
             echo $noanswer;
             $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
         }
-    ob_flush();
-    flush();
     }
 }
     
@@ -371,6 +363,28 @@ function runeIconFetcher($id){
     }
 }
 
+// function championIconFetcher($id){
+//     global $currentpatch;
+//     $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
+//     $json = json_decode($data);
+//     foreach($json->data as $champion){
+//         if($id == $champion->key){
+//             return $rune->icon;
+//         }
+//     }
+// }
+
+function championIdToName($id){
+    global $currentpatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
+    $json = json_decode($data);
+    foreach($json->data as $champion){
+        if($id == $champion->key){
+            return $champion->name;
+        }
+    }
+}
+
 function runeTreeIconFetcher($id){
     global $currentpatch;
     $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/runesReforged.json');
@@ -384,6 +398,7 @@ function runeTreeIconFetcher($id){
 
 function getCurrentRank($sumid){
     $rankData = array();
+    $rankReturnArray = array();
     global $api_key;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid."?api_key=".$api_key);
@@ -405,14 +420,63 @@ function getCurrentRank($sumid){
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
-    $rankData["Queue"] = json_decode($output)[0]->queueType;
-    $rankData["Tier"] = json_decode($output)[0]->tier;
-    $rankData["Rank"] = json_decode($output)[0]->rank;
-    $rankData["LP"] = json_decode($output)[0]->leaguePoints;
-    $rankData["Wins"] = json_decode($output)[0]->wins;
-    $rankData["Losses"] = json_decode($output)[0]->losses;
-    return $rankData;
+    foreach(json_decode($output, true) as $rankArray){
+        $rankData["Queue"] = $rankArray["queueType"];
+        $rankData["Tier"] = $rankArray["tier"];
+        $rankData["Rank"] = $rankArray["rank"];
+        $rankData["LP"] = $rankArray["leaguePoints"];
+        $rankData["Wins"] = $rankArray["wins"];
+        $rankData["Losses"] = $rankArray["losses"];
+        array_push($rankReturnArray, $rankData);
+    }
+    return $rankReturnArray;
 }
+
+function getMasteryScores($sumid){
+    $masteryData = array();
+    $masteryReturnArray = array();
+    global $api_key;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid."?api_key=".$api_key);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $output = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if($httpcode == "403"){
+        echo "<h2>API Key outdated!</h2>";
+    }  
+    // fetch if maximum requests reached
+    if($httpcode == "429"){
+        sleep(121); // wait 120 seconds until max requests reset
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid."?api_key=".$api_key);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    }
+    foreach(json_decode($output, true) as $masteryArray){
+        if($masteryArray["championLevel"] > 4 || $masteryArray["championPoints"] > 19999){
+            $masteryData["Champion"] = championIdToName($masteryArray["championId"]);
+            $masteryData["Lvl"] = $masteryArray["championLevel"];
+            $masteryData["Points"] = number_format($masteryArray["championPoints"]);
+            $masteryData["LastPlayed"] = date('d.m.Y H:i:s', $masteryArray["lastPlayTime"]/1000);
+            $masteryData["LvlUpTokens"] = $masteryArray["tokensEarned"];
+            $masteryData["SumID"] = $masteryArray["summonerId"];
+            // print_r($masteryData);
+            array_push($masteryReturnArray, $masteryData);
+        }
+        
+    }
+    return $masteryReturnArray;
+}
+
+function savePlayerInfo(){
+
+}
+
+
+
 
 
 
