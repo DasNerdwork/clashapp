@@ -12,7 +12,6 @@
             alert("[" + d.toLocaleTimeString() + "] ERROR: Eingabe fehlerhaft oder unvollständig.\n\nErlaubte Zeichen sind a-Z, 0-9 und Alphabete andere Sprachen.\nZudem muss ein Beschwörername zwischen 3-16 Zeichen lang sein.");
         }
      }
-
 </script>
 </header>
 
@@ -32,9 +31,41 @@ include('functions.php');
 
 if (isset($_GET["name"])) {
     $query = preg_replace('/\s+/', '+', $_GET["name"]);
-    $puuid = getPlayerData($query)["PUUID"];
-    getMatchesByPUUID($puuid);
+    $playerData = getPlayerData($query);
+    $sumid = $playerData["SumID"];
+    $masteryData = getMasteryScores($sumid);
+    $rankData = getCurrentRank($sumid);
+    $jsonArray = array();
+    $jsonArray["PlayerData"] = $playerData;
+    $jsonArray["RankData"] = $rankData;
+    $jsonArray["MasteryData"] = $masteryData;
+    $puuid = $playerData["PUUID"];
 
+    if(file_exists('/var/www/html/wordpress/clashapp/data/'.$playerData["Name"].'.json')){
+        $existingJson =  file_get_contents('/var/www/html/wordpress/clashapp/data/'.$playerData["Name"].'.json');
+    } else { $existingJson = ""; } // else empty $existingJson string so following if-statement forced into else part
+
+    $fp = fopen('/var/www/html/wordpress/clashapp/data/'.$playerData["Name"].'.json', 'c');
+    // Open the file only to write. If it doesnt exist it will be created. If it exists it won't be truncated (would result in permanent delete-create loop)
+
+    if($existingJson == json_encode($jsonArray)){
+        // If current existing file equals the new downloaded array data do nothing
+    } else {
+        // Else update the current existing (or not existing) file with the newest data
+        fwrite($fp, json_encode($jsonArray));
+        fclose($fp);
+    }
+    $matchids = getMatchIDs($puuid);
+    echo "<pre>";
+    print_r($matchids);
+    echo "</pre>";
+
+
+    // foreach($matchids as $match){
+
+    // }
+    
+    getMatchesByPUUID($puuid);
 }
 
 // if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
