@@ -33,13 +33,16 @@ if (isset($_GET["name"])) {
     $query = preg_replace('/\s+/', '+', $_GET["name"]);
     $playerData = getPlayerData($query);
     $sumid = $playerData["SumID"];
+    $puuid = $playerData["PUUID"];
     $masteryData = getMasteryScores($sumid);
     $rankData = getCurrentRank($sumid);
+    $matchids = getMatchIDs($puuid);
     $jsonArray = array();
     $jsonArray["PlayerData"] = $playerData;
     $jsonArray["RankData"] = $rankData;
     $jsonArray["MasteryData"] = $masteryData;
-    $puuid = $playerData["PUUID"];
+    $jsonArray["MatchIDs"] = $matchids;
+
 
     if(file_exists('/var/www/html/wordpress/clashapp/data/'.$playerData["Name"].'.json')){
         $existingJson =  file_get_contents('/var/www/html/wordpress/clashapp/data/'.$playerData["Name"].'.json');
@@ -55,11 +58,14 @@ if (isset($_GET["name"])) {
         fwrite($fp, json_encode($jsonArray));
         fclose($fp);
     }
-    $matchids = getMatchIDs($puuid);
-    echo "<pre>";
-    print_r($matchids);
-    echo "</pre>";
 
+    $playerDataArray = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/'.$playerData["Name"].'.json'), true);
+    foreach($playerDataArray["MatchIDs"] as $match){
+        if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/'.$match.'.json')){
+            getMatchByID($match, $playerData["Name"]);
+        }
+
+    }
 
     // foreach($matchids as $match){
 
