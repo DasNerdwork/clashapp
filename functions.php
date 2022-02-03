@@ -286,15 +286,29 @@ echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden";
 }
 
 
-function match_grabber($matchid_output, $api_key, $username){
+function getMatchByID($matchid, $username){
+    global $api_key;
     // Match Grabber
-    foreach (json_decode($matchid_output) as $matchid) {
-        ob_start();
-        // Start curl request
-        if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
-            $ch = curl_init(); 
+    // Start curl request
+    if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
+        $ch = curl_init(); 
 
-            // Set curl URL
+        // Set curl URL
+        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
+    
+        //return the transfer as a string
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    
+        // $output contains the output string
+        $match_output = curl_exec($ch);
+    
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    
+        // close curl resource to free up system resources
+        curl_close($ch);      
+    
+        if($httpcode == "429"){
+            sleep(121);
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
         
             //return the transfer as a string
@@ -306,42 +320,26 @@ function match_grabber($matchid_output, $api_key, $username){
             $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         
             // close curl resource to free up system resources
-            curl_close($ch);      
-        
-            if($httpcode == "429"){
-                sleep(121);
-                curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
-            
-                //return the transfer as a string
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            
-                // $output contains the output string
-                $match_output = curl_exec($ch);
-            
-                $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            
-                // close curl resource to free up system resources
-                curl_close($ch);
-            }
-            // echo("<pre style='background-color: #1f1f1f; height: 1000px; width: 100%;'>");
-            // echo json_encode(json_decode($match_output), JSON_PRETTY_PRINT);
-
-            $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $answer = "[" . $current_time->format('H:i:s') . "] Got new matchdata from " . $username . ": " . $matchid . ".json - Status: " . $httpcode . "\n<br>";
-            echo $answer;
-            $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
-            // echo("</pre>");
-            // $i++;
-            
-            $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
-            fwrite($fp, $match_output);
-            fclose($fp);
-        }else{
-            $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $noanswer = "[" . $current_time->format('H:i:s') . "] " . $matchid . ".json existiert bereits\n<br>";
-            echo $noanswer;
-            $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
+            curl_close($ch);
         }
+        // echo("<pre style='background-color: #1f1f1f; height: 1000px; width: 100%;'>");
+        // echo json_encode(json_decode($match_output), JSON_PRETTY_PRINT);
+
+        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $answer = "[" . $current_time->format('H:i:s') . "] Got new matchdata from " . $username . ": " . $matchid . ".json - Status: " . $httpcode . "\n<br>";
+        echo $answer;
+        $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
+        // echo("</pre>");
+        // $i++;
+        
+        $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
+        fwrite($fp, $match_output);
+        fclose($fp);
+    }else{
+        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $noanswer = "[" . $current_time->format('H:i:s') . "] " . $matchid . ".json existiert bereits\n<br>";
+        echo $noanswer;
+        $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
     }
 }
     
