@@ -35,7 +35,6 @@ function updateProfile($id){
             fwrite($fp, json_encode($jsonArray));
             fclose($fp);
         }
-
         $playerDataArray = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
         foreach($playerDataArray["MatchIDs"] as $match){
             if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/'.$match.'.json')){
