@@ -309,7 +309,7 @@ function getMatchByID($matchid, $username){
         // echo json_encode(json_decode($match_output), JSON_PRETTY_PRINT);
 
         $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $answer = "[" . $current_time->format('H:i:s') . "] Got new matchdata from " . $username . ": " . $matchid . ".json - Status: " . $httpcode . "\n<br>";
+        $answer = "[" . $current_time->format('H:i:s') . "] Got new matchdata from " . $username . ": " . $matchid . ".json - Status: " . $httpcode . "\n";
         echo $answer;
         $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
         // echo("</pre>");
