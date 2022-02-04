@@ -28,8 +28,8 @@
 
 <?php
 
-include('functions.php');
-include('update.php');
+include_once('functions.php');
+include_once('update.php');
 
 if (isset($_GET["name"])){
     // Format text field input to swap spaces with '+' for correct api requests
@@ -54,7 +54,8 @@ if (isset($_GET["name"])){
         $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
         if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
             $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
-            if(isset($playerDataJSON["PlayerData"]["Name"]) && $_GET["name"] == $playerDataJSON["PlayerData"]["Name"]){ // if playerdata->name of file equals input
+
+            if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
                 $playerData = $playerDataJSON["PlayerData"];
                 $playerName = $playerDataJSON["PlayerData"]["Name"];
                 $sumid = $playerDataJSON["PlayerData"]["SumID"];
@@ -74,14 +75,14 @@ if (isset($_GET["name"])){
 
 
 
-
+if($formattedInput != "") {
     // print collected values
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
         echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="64"><br>';
     }
     echo "Name: " . $playerData["Name"] . "<br>";
     echo "Level: " . $playerData["Level"] . "<br>";
-    $rankedInfo = getCurrentRank($playerData["SumID"]);
+    $rankedInfo = getCurrentRank($sumid);
     foreach($rankedInfo as $rankedQueue){
     echo "Rank: " . $rankedQueue["Tier"] . " " . $rankedQueue["Rank"] . " mit " . $rankedQueue["LP"] . " LP in " . $rankedQueue["Queue"] . "<br>";
     echo "Wins: " . $rankedQueue["Wins"] . " / Losses: " . $rankedQueue["Losses"] . " - Winrate: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><br>";
@@ -93,8 +94,8 @@ if (isset($_GET["name"])){
     echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
     
     getMatchesByPUUID($puuid);
+    }
 }
-
 // if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
 //     if (isset($_POST["load"])) {
 //         $query = preg_replace('/\s+/', '+', $_POST["search"]);
