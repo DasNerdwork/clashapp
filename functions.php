@@ -44,23 +44,6 @@ function getPlayerData($username){
     $playerData["SumID"] = json_decode($output)->id;
     $playerData["AccountID"] = json_decode($output)->accountId;
     $playerData["LastChange"] = json_decode($output)->revisionDate;
-
-    // print collected values
-    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="64"><br>';
-    }
-    echo "Name: " . $playerData["Name"] . "<br>";
-    echo "Level: " . $playerData["Level"] . "<br>";
-    $rankedInfo = getCurrentRank($playerData["SumID"]);
-    foreach($rankedInfo as $rankedQueue){
-    echo "Rank: " . $rankedQueue["Tier"] . " " . $rankedQueue["Rank"] . " mit " . $rankedQueue["LP"] . " LP in " . $rankedQueue["Queue"] . "<br>";
-    echo "Wins: " . $rankedQueue["Wins"] . " / Losses: " . $rankedQueue["Losses"] . " - Winrate: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><br>";
-    }
-    echo "<b>! For Testing Purposes Only !</b><br>";
-    echo "PUUID: " . $playerData["PUUID"] . "<br>";
-    echo "SumID: " . $playerData["SumID"] . "<br>";
-    echo "AccountID: " . $playerData["AccountID"] . "<br>";
-    echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
   
     return $playerData;
 }
