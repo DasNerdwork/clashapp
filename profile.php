@@ -66,20 +66,14 @@ if (isset($_GET["name"])){
             }
         }
     }
-    if(!isset($sumid)) {
+    if(!isset($sumid) && $formattedInput != "") {
         updateProfile($formattedInput);
     }
 
   
 
 
-    $playerDataArray = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
-    foreach($playerDataArray["MatchIDs"] as $match){
-        if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/'.$match.'.json')){
-            getMatchByID($match, $playerName);
-        }
 
-    }
 
     // print collected values
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){

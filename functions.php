@@ -121,12 +121,10 @@ $count = 0;
 echo "<table class='table'>";
 
 for($i = count($matches_count)-1; $i > 2; $i--){
-    ob_start();
     // echo $matches_count[$i]."<br>";
     $handle = file_get_contents("/var/www/html/wordpress/clashapp/data/matches/".$matches_count[$i]);
 
     $inhalt = json_decode($handle);
-
     // print_r($inhalt->metadata->participants);
 
     // echo $puuid[1]."<br>";
@@ -231,8 +229,6 @@ for($i = count($matches_count)-1; $i > 2; $i--){
                     echo '</td>';
 
 
-
-
                     if(isset($inhalt->info->gameEndTimestamp)) {
                         $matchdate = date('d.m.Y H:i:s', $inhalt->info->gameEndTimestamp/1000);
                         echo "<td>Datum: " . $matchdate . "</td>";
@@ -260,8 +256,6 @@ for($i = count($matches_count)-1; $i > 2; $i--){
             echo "</tr>";
         }
     }
-    ob_flush();
-    flush();
 }
 echo "</table>";
 
