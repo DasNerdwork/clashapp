@@ -31,7 +31,7 @@
 <form id="suchfeld" action="/clash/" onsubmit="return false;" method="GET" autocomplete="off">
     Beschwörername: <input type="text" name="name" id="name">
     <input type="submit" id="submitBtn" onclick="sanitize(this.form.name.value);disableUpdateBtn();">
-    <button type="button" id="updateBtn" onclick="showLoader();">Aktualisieren</button>
+    <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;">Aktualisieren</button>
     <div class="sbl-circ" id="loader"></div>
 </form>
 
@@ -91,6 +91,7 @@ if($formattedInput != "") {
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
         echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="64"><br>';
     }
+    echo "<table class='table' style='width:100%'><tr><td>";
     echo "Name: " . $playerData["Name"] . "<br>";
     echo "Level: " . $playerData["Level"] . "<br>";
     $rankedInfo = getCurrentRank($sumid);
@@ -103,7 +104,14 @@ if($formattedInput != "") {
     echo "SumID: " . $playerData["SumID"] . "<br>";
     echo "AccountID: " . $playerData["AccountID"] . "<br>";
     echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
-    
+    echo "</td><td style='width:300px'>";
+    echo "Testfeld 1";
+    echo "</td><td style='width:300px'>";
+    echo "Testfeld 2";
+    echo "</td><td style='width:300px'>";
+    echo "Testfeld 3";
+    echo "</table>";  
+
     getMatchesByPUUID($puuid);
     }
 }
