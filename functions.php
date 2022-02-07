@@ -1,6 +1,6 @@
 <?php 
 // TODO add following code after finishing: if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
-$api_key = "RGAPI-89c816be-ed77-4915-887c-b7a8b4f6807d";
+$api_key = "RGAPI-4034d5f7-ce1d-4e91-b93d-c85fbdc64265";
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 
 function getPlayerData($username){

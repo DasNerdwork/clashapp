@@ -1,6 +1,6 @@
-$(document).ready( function() {
-    // Lade text in div
-  if (window.location.pathname == '/clash') {
-    $('#clash').load('/clashapp/profile.php');
+document.addEventListener("DOMContentLoaded", function(){
+  var regex = RegExp("(\/clash\/).+$"); 
+  if (window.location.pathname.match(regex)) {
+    document.getElementById("updateBtn").style.display = "initial";
   }
 });
