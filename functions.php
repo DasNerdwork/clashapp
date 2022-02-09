@@ -1,6 +1,6 @@
 <?php 
 // TODO add following code after finishing: if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
-$api_key = "RGAPI-4034d5f7-ce1d-4e91-b93d-c85fbdc64265";
+$api_key = "RGAPI-d8945d21-81a4-47c0-8de9-2b5250b7f8f0";
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 
 function getPlayerData($username){
@@ -114,7 +114,7 @@ function getMatchIDs($puuid){
     return $matchIDArray;
 }
 
-function getMatchesByPUUID($puuid){
+function getMatchDetailsByPUUID($puuid){
 global $currentpatch;
 $matches_count = scandir("/var/www/html/wordpress/clashapp/data/matches/");
 $count = 0;
@@ -446,8 +446,49 @@ function getMasteryScores($sumid){
     return $masteryReturnArray;
 }
 
-function savePlayerInfo(){
+function getMostCommon($attribut, $matchIDArray, $puuid){
+    $averageArray = array();
+    $matchIDDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/matches/');
+    foreach ($matchIDDirectory as $matchIDJSON) { // going through all files
+        if(!($matchIDJSON == "." || $matchIDJSON == "..")){
+            $matchData = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON));
+            for($i = 0; $i < 10; $i++){
+                if($matchData->info->participants[$i]->puuid == $puuid) {
+                    array_push($averageArray, $matchData->info->participants[$i]->$attribut);
+                }
+            }
+        }
+    }
 
+    $values = array_count_values($averageArray);
+    arsort($values);
+    $tops = array_slice(array_keys($values), 0, 3, true);
+    echo "<pre>";
+    echo "Most common of " . $attribut . ": <br>";
+    print_r($tops);
+    echo "</pre>";
+}
+
+function getAverage($attribut, $matchIDArray, $puuid){
+    $averageArray = array();
+    $matchIDDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/matches/');
+    foreach ($matchIDDirectory as $matchIDJSON) { // going through all files
+        if(!($matchIDJSON == "." || $matchIDJSON == "..")){
+            $matchData = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON));
+            for($i = 0; $i < 10; $i++){
+                if($matchData->info->participants[$i]->puuid == $puuid) {
+                    array_push($averageArray, $matchData->info->participants[$i]->$attribut);
+                }
+            }
+        }
+    }
+
+    $filteredArray = array_filter($averageArray);
+    $average = array_sum($filteredArray)/count($filteredArray);
+    echo "<pre>";
+    echo "Average of " . $attribut . ": <br>";
+    print_r(round($average));
+    echo "</pre>";
 }
 
 
