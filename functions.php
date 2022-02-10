@@ -446,54 +446,59 @@ function getMasteryScores($sumid){
     return $masteryReturnArray;
 }
 
-function getMostCommon($attribut, $matchIDArray, $puuid){
-    $averageArray = array();
-    $matchIDDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/matches/');
-    foreach ($matchIDDirectory as $matchIDJSON) { // going through all files
-        if(!($matchIDJSON == "." || $matchIDJSON == "..")){
-            $matchData = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON));
-            for($i = 0; $i < 10; $i++){
-                if($matchData->info->participants[$i]->puuid == $puuid) {
-                    array_push($averageArray, $matchData->info->participants[$i]->$attribut);
+function getMostCommon($attributes, $matchDataArray, $puuid){
+    $mostCommonArray = array();
+    foreach ($matchDataArray as $matchData) { // going through all files
+        for($i = 0; $i < 10; $i++){//going through all player
+            if($matchData->info->participants[$i]->puuid == $puuid) {
+                foreach ($attributes as $attribute){
+                    $mostCommonArray[$attribute][] = $matchData->info->participants[$i]->$attribute;
                 }
             }
         }
     }
 
-    $values = array_count_values($averageArray);
-    arsort($values);
-    $tops = array_slice(array_keys($values), 0, 3, true);
-    echo "<pre>";
-    echo "Most common of " . $attribut . ": <br>";
-    print_r($tops);
-    echo "</pre>";
+    // 3 am häufigtsten vorkommenden  "kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore"
+
+    foreach ($attributes as $attribute){ 
+        $values[$attribute] = array_count_values($mostCommonArray[$attribute]);
+        arsort($values[$attribute]);
+        $values[$attribute] = array_slice(array_keys($values[$attribute]), 0, 3, true);
+        echo "<pre>";
+        echo "Most common of " . $attribute . ": <br>";
+        print_r($values[$attribute]);
+        echo "</pre>";
+    }
 }
 
-function getAverage($attribut, $matchIDArray, $puuid){
+function getAverage($attributes, $matchDataArray, $puuid){
     $averageArray = array();
-    $matchIDDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/matches/');
-    foreach ($matchIDDirectory as $matchIDJSON) { // going through all files
-        if(!($matchIDJSON == "." || $matchIDJSON == "..")){
-            $matchData = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON));
-            for($i = 0; $i < 10; $i++){
-                if($matchData->info->participants[$i]->puuid == $puuid) {
-                    array_push($averageArray, $matchData->info->participants[$i]->$attribut);
+    // print_r($matchDataArray);die();
+    foreach ($matchDataArray as $matchData) { // going through all files
+        for($i = 0; $i < 10; $i++){
+            if($matchData->info->participants[$i]->puuid == $puuid) {
+                foreach ($attributes as $attribute){
+                    $averageArray[$attribute] += $matchData->info->participants[$i]->$attribute;
+                    
                 }
             }
         }
     }
-
-    $filteredArray = array_filter($averageArray);
-    $average = array_sum($filteredArray)/count($filteredArray);
-    echo "<pre>";
-    echo "Average of " . $attribut . ": <br>";
-    print_r(round($average));
-    echo "</pre>";
+    foreach ($averageArray as $key => $arrayElement){
+        echo "<pre>";
+        echo "Average of " . $key . ": ";
+        echo ($averageArray[$key] = round($arrayElement / count($matchDataArray)));
+        echo "</pre>";
+    }
 }
 
-
-
-
+function getMatchData($matchIDArray){
+    $matchData = array();
+    foreach ($matchIDArray as $key => $matchIDJSON) { // going through all files
+        $matchData[$key] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
+    }
+    return $matchData;
+}
 
 
 
