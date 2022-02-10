@@ -106,6 +106,7 @@ if($formattedInput != "") {
     echo "SumID: " . $playerData["SumID"] . "<br>";
     echo "AccountID: " . $playerData["AccountID"] . "<br>";
     echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
+    print_r("API Key: ".getenv('API_KEY'));
     echo "</td><td style='width:300px'>";
     echo "Testfeld 1";
     echo "</td><td style='width:300px'>";
@@ -114,23 +115,19 @@ if($formattedInput != "") {
     echo "Testfeld 3";
     echo "</table>";  
 
+    $start = microtime(true);
+    $matchDaten = getMatchData($matchids);
+
     echo "<table class='table' style='width:100%'><tr><td>";
-    getMostCommon("kills", $matchids, $puuid);
-    getMostCommon("deaths", $matchids, $puuid);
-    getMostCommon("assists", $matchids, $puuid);
-    getMostCommon("teamPosition", $matchids, $puuid);
-    getMostCommon("championName", $matchids, $puuid);
-    getMostCommon("detectorWardsPlaced", $matchids, $puuid);
-    getMostCommon("visionScore", $matchids, $puuid);
+    $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
+    getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
     echo "</td><td>";
-    getAverage("kills", $matchids, $puuid);
-    getAverage("deaths", $matchids, $puuid);
-    getAverage("assists", $matchids, $puuid);
-    getAverage("totalDamageDealt", $matchids, $puuid);
-    getAverage("goldEarned", $matchids, $puuid);
-    getAverage("detectorWardsPlaced", $matchids, $puuid);
-    getAverage("visionScore", $matchids, $puuid);
+    $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
+    getAverage($averageAttributes, $matchDaten, $puuid);
+
     echo "</td></tr></table>";  
+
+    echo microtime(true) - $start;
 
     getMatchDetailsByPUUID($puuid);
     }
