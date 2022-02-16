@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", function(){
   var allClashPages = RegExp("(\/clash\/).+$");
   var mainPage = RegExp("(\/clash.*)$"); 
-  console.log(mainPage + " " + window.location.pathname)
   if (window.location.pathname.match(allClashPages)) {
     document.getElementById("updateBtn").style.display = "initial";
   } else if (window.location.pathname.match(mainPage)) {

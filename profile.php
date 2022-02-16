@@ -23,6 +23,13 @@
         document.getElementById("submitBtn").disabled = true;
         document.getElementById("updateBtn").innerHTML = "Aktualisiere...";
     }
+    function hideLoader(){
+        document.getElementById("loader").style.opacity = 0;
+        document.getElementById("name").disabled = false;
+        document.getElementById("updateBtn").disabled = false;
+        document.getElementById("submitBtn").disabled = false;
+        document.getElementById("updateBtn").innerHTML = "Aktualisieren";
+    }
     function disableUpdateBtn(){
         document.getElementById("updateBtn").disabled = true;
     }
@@ -32,7 +39,7 @@
 <body style="background-color:#1a1a1a; color:#ddd">
 
 <form id="suchfeld" action="/clash/" onsubmit="return false;" method="GET" autocomplete="off" style="display: flex;">
-    <input type="text" name="name" id="name" placeholder="Beschwörername">
+    <input type="text" name="name" id="name" value="<?= $_REQUEST["name"]?>" placeholder="Beschwörername">
     <input type="submit" id="submitBtn" value="Suchen" onclick="sanitize(this.form.name.value);disableUpdateBtn();">
     <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;">Aktualisieren</button>
     <div class="sbl-circ" id="loader"></div>
@@ -48,15 +55,24 @@ include_once('update.php');
 if (isset($_GET["name"])){
     // Format text field input to swap spaces with '+' for correct api requests
     $formattedInput = preg_replace('/\s+/', '+', $_GET["name"]);
+
 ?>
     <script>
         $('#updateBtn').click(function() {
             $.ajax({
             type: "POST",
             url: "../clashapp/update.php",
-            data: { id: "<?=$formattedInput ?>" }
+            data: { username: "<?=$formattedInput ?>" }
             }).done(function( msg ) {
-                location.reload(); 
+                console.log(msg)
+                var statusJson = JSON.parse(msg);
+                if(statusJson.status == "up-to-date"){
+                    var d = new Date();
+                    alert("[" + d.toLocaleTimeString() + "] Benutzerdaten bereits auf dem neusten Stand\n");
+                    hideLoader();
+                }else{
+                    window.location.reload();
+                }
             });
         });
     </script>
@@ -64,11 +80,11 @@ if (isset($_GET["name"])){
 <?php
 
     $playerDataDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/player/');
+
     foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
         $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
         if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
             $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
-
             if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
                 $playerData = $playerDataJSON["PlayerData"];
                 $playerName = $playerDataJSON["PlayerData"]["Name"];
@@ -82,10 +98,26 @@ if (isset($_GET["name"])){
         }
     }
     if(!isset($sumid) && $formattedInput != "") {
-        updateProfile($formattedInput);
+        updateProfile($formattedInput, 75);
+        foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
+            $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
+            if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
+                $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
+                    $playerData = $playerDataJSON["PlayerData"];
+                    $playerName = $playerDataJSON["PlayerData"]["Name"];
+                    $sumid = $playerDataJSON["PlayerData"]["SumID"];
+                    $puuid = $playerDataJSON["PlayerData"]["PUUID"];
+                    $rankData = $playerDataJSON["RankData"];
+                    $masteryData = $playerDataJSON["MasteryData"];
+                    $matchids = $playerDataJSON["MatchIDs"];
+                    break;
+                }
+            }
+        }
     }
 
-  
+ 
 
 
 
@@ -116,8 +148,8 @@ if($formattedInput != "") {
     echo "</table>";  
 
     $start = microtime(true);
+    
     $matchDaten = getMatchData($matchids);
-
     echo "<table class='table' style='width:100%'><tr><td>";
     $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
     getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
