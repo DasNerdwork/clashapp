@@ -1,14 +1,13 @@
 <?php 
 // TODO add following code after finishing: if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
-$api_key = "RGAPI-d8945d21-81a4-47c0-8de9-2b5250b7f8f0";
+$api_key = "RGAPI-248b1635-b345-48f5-9766-ef07b75eae32";
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 
 function getPlayerData($username){
-
+    // echo $username;
     // initialize api_key variable
     global $api_key, $currentpatch;
     $playerData = array();
-    
     // initialize playerdata curl request by username
     $ch = curl_init();
     // set url & return the transfer as a string
@@ -55,25 +54,33 @@ function getPlayerData($username){
 //     //echo $date->format('Y-m-d H:i:s') . "<br>";
 
 //     // Variables for curl request
-function getMatchIDs($puuid){
+function getMatchIDs($puuid,$maxMatchIds){
     global $api_key;
     $matchIDArray = array();
     $gametype = "ranked";
-    $matchcount = "100";
     $start = 0;
     $id_count = 100;
+    $matchcount = "100";
+
+
+
     
-    while ($id_count == 100) {
+    while ($start < $maxMatchIds) {
+        if(($start + 100) > $maxMatchIds){
+            $matchcount = 100 - (($start + 100) - $maxMatchIds);
+        }
 
         $ch = curl_init();
-
+        
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gametype . "&start=" . $start . "&count=" . $matchcount . "&api_key=" . $api_key);
-
+        // echo "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gametype . "&start=" . $start . "&count=" . $matchcount . "&api_key=" . $api_key;
         //return the transfer as a string
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
         // $output contains the output string
         $matchid_output = curl_exec($ch);
+
+        // print_r($matchid_output);
 
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         
@@ -97,7 +104,7 @@ function getMatchIDs($puuid){
             curl_close($ch);
         }
         
-        //daten holen für die alle bisher geholten matches
+        // daten holen für die alle bisher geholten matches
         // print "<pre>";print_r($matchid_output);print "</pre>";
         // match_grabber($matchid_output,$api_key,$username);
 
@@ -107,7 +114,7 @@ function getMatchIDs($puuid){
         foreach (json_decode($matchid_output) as $match) {
             array_push($matchIDArray, $match);
 
-         }
+        }
         $start += 100;
         $id_count = count(json_decode($matchid_output, true));
     }
@@ -135,7 +142,7 @@ for($i = count($matches_count)-1; $i > 2; $i--){
     // print_r($k);
     // echo in_array($puuid[1], $inhalt->metadata->participants);
     
-    if(isset($inhalt->metadata->participants)) {
+    if(isset($inhalt->metadata->participants) && $inhalt->info->gameDuration != 0) {
         if(in_array($puuid, (array) $inhalt->metadata->participants)){
             $count++;
             for($in = 0; $in < 10; $in++){
@@ -267,6 +274,15 @@ function getMatchByID($matchid, $username){
     global $api_key;
     // Match Grabber
     // Start curl request
+    $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log';
+    // if(filesize($logPath) > 1000000){
+    //     $file = file($logPath);
+    //     $file = array_chunk($file, ceil(count($file)/2))[1];
+    //     file_put_contents($logPath, $file);
+    //     $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+    //     $slimmed = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: File bigger than 1MB -> Removed first 10.000 lines";
+    //     file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
+    // }
     if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
         $ch = curl_init(); 
 
@@ -286,6 +302,9 @@ function getMatchByID($matchid, $username){
     
         if($httpcode == "429"){
             sleep(121);
+            $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+            $limit = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit exceeded, 121 Second sleep starting now - Status: " . $httpcode;
+            file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
         
             //return the transfer as a string
@@ -299,27 +318,24 @@ function getMatchByID($matchid, $username){
             // close curl resource to free up system resources
             curl_close($ch);
         }
-        // echo("<pre style='background-color: #1f1f1f; height: 1000px; width: 100%;'>");
-        // echo json_encode(json_decode($match_output), JSON_PRETTY_PRINT);
-
         $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $answer = "[" . $current_time->format('H:i:s') . "] Got new matchdata from " . $username . ": " . $matchid . ".json - Status: " . $httpcode . "\n";
-        echo $answer;
-        $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
-        // echo("</pre>");
-        // $i++;
-        
+        $answer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpcode;
+        file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
         $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
         fwrite($fp, $match_output);
         fclose($fp);
     }else{
         $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $noanswer = "[" . $current_time->format('H:i:s') . "] " . $matchid . ".json existiert bereits\n<br>";
-        echo $noanswer;
-        $myfile = file_put_contents('/var/www/html/wordpress/clashapp/data/matches/log.txt', $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
+        $noanswer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
+        file_put_contents($logPath, $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
     }
 }
-    
+ 
+function getfilesize(){
+    $filesize = filesize("/var/www/html/wordpress/clashapp/data/logs/patcher.log");
+    echo $filesize/(pow(1024,2)),"\n";
+}
+
 // This function iterates through the current patches runesReforged.json and returns the folder of the rune icons 
 function runeIconFetcher($id){
     global $currentpatch;
@@ -493,10 +509,18 @@ function getAverage($attributes, $matchDataArray, $puuid){
 }
 
 function getMatchData($matchIDArray){
+    // print_r($matchIDArray);
+    $startMemory = memory_get_usage();
+
+
     $matchData = array();
     foreach ($matchIDArray as $key => $matchIDJSON) { // going through all files
+    
+    if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> return
         $matchData[$key] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
     }
+    // echo memory_get_usage() - $startMemory, ' bytes';
+    // echo memory_get_usage() ,' bytes';
     return $matchData;
 }
 
