@@ -1,11 +1,9 @@
 <?php 
-// TODO add following code after finishing: if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
-$api_key = "RGAPI-434bbbb7-80bf-42b1-9971-ffe379620938";
+$api_key = "RGAPI-434bbbb7-80bf-42b1-9971-ffe379620938"; // ToDo
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 $counter = 0;
 
 function getPlayerData($username){
-    // echo $username;
     // initialize api_key variable
     global $api_key, $currentpatch;
     $playerData = array();
@@ -336,10 +334,13 @@ function getMatchByID($matchid, $username){
         file_put_contents($logPath, $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
     }
 }
- 
-function getfilesize(){
-    $filesize = filesize("/var/www/html/wordpress/clashapp/data/logs/patcher.log");
-    echo $filesize/(pow(1024,2)),"\n";
+
+// Testing Function to execute single elements via console
+// php -r "require 'functions.php'; testing();"
+function testing(){
+    $matches_count = scandir("/var/www/html/wordpress/clashapp/data/matches/");
+    $matches_count = array_slice($matches_count, 0, 10);
+    print_r($matches_count);
 }
 
 // This function iterates through the current patches runesReforged.json and returns the folder of the rune icons 
@@ -359,17 +360,6 @@ function runeIconFetcher($id){
         }
     }
 }
-
-// function championIconFetcher($id){
-//     global $currentpatch;
-//     $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
-//     $json = json_decode($data);
-//     foreach($json->data as $champion){
-//         if($id == $champion->key){
-//             return $rune->icon;
-//         }
-//     }
-// }
 
 function championIdToName($id){
     global $currentpatch;
@@ -457,10 +447,10 @@ function getMasteryScores($sumid){
             $masteryData["Champion"] = championIdToName($masteryArray["championId"]);
             $masteryData["Lvl"] = $masteryArray["championLevel"];
             $masteryData["Points"] = number_format($masteryArray["championPoints"]);
-            $masteryData["LastPlayed"] = date('d.m.Y H:i:s', $masteryArray["lastPlayTime"]/1000);
-            $masteryData["LvlUpTokens"] = $masteryArray["tokensEarned"];
-            $masteryData["SumID"] = $masteryArray["summonerId"];
-            // print_r($masteryData);
+            $masteryData["LastPlayed"] = $masteryArray["lastPlayTime"]/1000; // to get human-readable one -> date('d.m.Y H:i:s', $masteryData["LastPlayed"]);
+            if($masteryArray["tokensEarned"] > 0){
+                $masteryData["LvlUpTokens"] = $masteryArray["tokensEarned"]; // in case tokens for lvl 6 or 7 in inventory add them too
+            }
             array_push($masteryReturnArray, $masteryData);
         }
         
@@ -530,14 +520,17 @@ function getMatchData($matchIDArray){
     return $matchData;
 }
 
-
-
-
-
-// TODO add following code after finishing: 
-// } else {
-//     http_response_code("403");
-// }
+function printMasteryInfo($masteryArray, $index){
+    global $currentpatch;
+    if($masteryArray[$index]["Champion"] == "FiddleSticks"){$masteryArray[$index]["Champion"] = "Fiddlesticks";} // TODO One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ 
+    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png')){
+        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png" width="64"><br>';
+    }
+    echo $masteryArray[$index]["Champion"]."<br>";
+    echo "<br>Mastery Level: ".$masteryArray[$index]["Lvl"]."<br>";
+    echo "Points: ".$masteryArray[$index]["Points"]."<br>";
+    echo "Last played: ".date('d.m.Y', $masteryArray[$index]["LastPlayed"]);
+}
 ?>
 
 

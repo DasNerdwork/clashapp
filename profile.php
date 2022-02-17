@@ -138,14 +138,15 @@ if($formattedInput != "") {
     echo "SumID: " . $playerData["SumID"] . "<br>";
     echo "AccountID: " . $playerData["AccountID"] . "<br>";
     echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
-    print_r("API Key: ".getenv('API_KEY'));
-    echo "</td><td style='width:300px'>";
-    echo "Testfeld 1";
-    echo "</td><td style='width:300px'>";
-    echo "Testfeld 2";
-    echo "</td><td style='width:300px'>";
-    echo "Testfeld 3";
-    echo "</table>";  
+    print_r("API Key: ".getenv('API_KEY')."<br>");
+ 
+    echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
+    printMasteryInfo($masteryData, 0);
+    echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
+    printMasteryInfo($masteryData, 1);
+    echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
+    printMasteryInfo($masteryData, 2);
+    echo "</td></table>";  
 
     $start = microtime(true);
     
