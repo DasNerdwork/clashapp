@@ -1,7 +1,8 @@
 <?php 
 // TODO add following code after finishing: if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
-$api_key = "RGAPI-248b1635-b345-48f5-9766-ef07b75eae32";
+$api_key = "RGAPI-434bbbb7-80bf-42b1-9971-ffe379620938";
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
+$counter = 0;
 
 function getPlayerData($username){
     // echo $username;
@@ -272,17 +273,21 @@ echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden";
 
 function getMatchByID($matchid, $username){
     global $api_key;
+    global $counter;
     // Match Grabber
     // Start curl request
     $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log';
-    // if(filesize($logPath) > 1000000){
-    //     $file = file($logPath);
-    //     $file = array_chunk($file, ceil(count($file)/2))[1];
-    //     file_put_contents($logPath, $file);
-    //     $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-    //     $slimmed = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: File bigger than 1MB -> Removed first 10.000 lines";
-    //     file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
-    // }
+    if(filesize($logPath) > 10000000 && $counter == 0){
+        $counter++;
+        $file = file($logPath);
+        $file = array_chunk($file, ceil(count($file)/2))[1];
+        file_put_contents($logPath, $file, LOCK_EX);
+        clearstatcache(true, $logPath);
+        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $slimmed = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".number_format((filesize($logPath)/1048576), 3)." MB)";
+        file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
+        $counter = 0;
+    }
     if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
         $ch = curl_init(); 
 
@@ -303,7 +308,7 @@ function getMatchByID($matchid, $username){
         if($httpcode == "429"){
             sleep(121);
             $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $limit = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit exceeded, 121 Second sleep starting now - Status: " . $httpcode;
+            $limit = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 121 seconds - Status: " . $httpcode . " Too Many Requests";
             file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
         
@@ -318,8 +323,9 @@ function getMatchByID($matchid, $username){
             // close curl resource to free up system resources
             curl_close($ch);
         }
+        clearstatcache(true, $logPath);
         $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $answer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpcode;
+        $answer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpcode . " (Size: ".number_format((filesize($logPath)/1048576), 3)." MB)";
         file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
         $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
         fwrite($fp, $match_output);

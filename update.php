@@ -22,6 +22,7 @@ function updateProfile($id, $maxMatchIds){
     $jsonArray["RankData"] = $rankData;
     $jsonArray["MasteryData"] = $masteryData;
     $jsonArray["MatchIDs"] = $matchids;
+    $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log';
     
     if($sumid != ""){
         if(file_exists('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json')){
@@ -49,6 +50,12 @@ function updateProfile($id, $maxMatchIds){
                 getMatchByID($match, $playerName);
             }
         }
+        clearstatcache(true, $logPath);
+        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $endofup = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: End of update for \"" . $playerName . "\" - (Final Matchcount: ".count($playerDataArray["MatchIDs"]).", Approximate Filesize: ".number_format((filesize($logPath)/1048576), 3)." MB)";
+        $border = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
+        file_put_contents($logPath, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
+        file_put_contents($logPath, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
         if($maxMatchIds > 75){
             echo '{"status":"updated"}';
         }else if($maxMatchIds == 75){
