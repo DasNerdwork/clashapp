@@ -10,7 +10,7 @@ if(isset($_POST["username"])){
 }
 
 function updateProfile($id, $maxMatchIds){
-    $playerData = getPlayerData($id);
+    $playerData = getPlayerData("name",$id);
     $playerName = $playerData["Name"];
     $sumid = $playerData["SumID"];
     $puuid = $playerData["PUUID"];

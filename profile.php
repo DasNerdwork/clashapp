@@ -138,7 +138,7 @@ if($formattedInput != "") {
     echo "SumID: " . $playerData["SumID"] . "<br>";
     echo "AccountID: " . $playerData["AccountID"] . "<br>";
     echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
-    print_r("API Key: ".getenv('API_KEY')."<br>");
+    //print_r("API Key: ".getenv('API_KEY')."<br>"); // API Key as Env Variable
  
     echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
     printMasteryInfo($masteryData, 0);
@@ -160,7 +160,9 @@ if($formattedInput != "") {
 
     echo "</td></tr></table>";  
 
-    echo microtime(true) - $start;
+    mostPlayedWith($matchDaten, $puuid);
+
+    echo "<br>Ladezeit: ".number_format(microtime(true) - $start, 2)." Sekunden<br>";
 
     getMatchDetailsByPUUID($puuid);
     }

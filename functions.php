@@ -1,16 +1,23 @@
 <?php 
-$api_key = "RGAPI-434bbbb7-80bf-42b1-9971-ffe379620938"; // ToDo
+$api_key = "RGAPI-473ab014-3952-4fb0-970f-f92337bba8af"; // ToDo
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 $counter = 0;
 
-function getPlayerData($username){
+function getPlayerData($type, $username){
     // initialize api_key variable
     global $api_key, $currentpatch;
     $playerData = array();
+    
+    if($type == "name"){
+        $requesturlvar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/";
+    } else if($type == "puuid"){
+        $requesturlvar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
+    }
+
     // initialize playerdata curl request by username
     $ch = curl_init();
     // set url & return the transfer as a string
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" . $username . "?api_key=" . $api_key);
+    curl_setopt($ch, CURLOPT_URL, $requesturlvar . $username . "?api_key=" . $api_key);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     // $output contains the output string & $httpcode contains the returncode (e.g. 404 not found)
     $output = curl_exec($ch);
@@ -27,7 +34,7 @@ function getPlayerData($username){
     if($httpcode == "429"){
         sleep(121); // wait 120 seconds until max requests reset
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/" . $username . "?api_key=" . $api_key);
+        curl_setopt($ch, CURLOPT_URL, $requesturlvar . $username . "?api_key=" . $api_key);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -464,7 +471,9 @@ function getMostCommon($attributes, $matchDataArray, $puuid){
         for($i = 0; $i < 10; $i++){//going through all player
             if($matchData->info->participants[$i]->puuid == $puuid) {
                 foreach ($attributes as $attribute){
-                    $mostCommonArray[$attribute][] = $matchData->info->participants[$i]->$attribute;
+                    if($matchData->info->participants[$i]->$attribute != ""){
+                        $mostCommonArray[$attribute][] = $matchData->info->participants[$i]->$attribute;
+                    }
                 }
             }
         }
@@ -473,12 +482,13 @@ function getMostCommon($attributes, $matchDataArray, $puuid){
     // 3 am häufigtsten vorkommenden  "kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore"
 
     foreach ($attributes as $attribute){ 
-        $values[$attribute] = array_count_values($mostCommonArray[$attribute]);
-        arsort($values[$attribute]);
-        $values[$attribute] = array_slice(array_keys($values[$attribute]), 0, 3, true);
+        $temp[$attribute] = array_count_values($mostCommonArray[$attribute]);
+        arsort($temp[$attribute]);
+        $values[$attribute] = array_slice(array_keys($temp[$attribute]), 0, 3, true);
+        $count[$attribute] = array_slice(array_values($temp[$attribute]), 0, 3, true);
         echo "<pre>";
-        echo "Most common of " . $attribute . ": <br>";
-        print_r($values[$attribute]);
+        echo "Most common " . $attribute . ": <br>";
+        echo $count[$attribute][0]." mal ".$values[$attribute][0]." -> ".$count[$attribute][1]." mal ".$values[$attribute][1]." -> ".$count[$attribute][2]." mal ".$values[$attribute][2];
         echo "</pre>";
     }
 }
@@ -502,6 +512,26 @@ function getAverage($attributes, $matchDataArray, $puuid){
         echo ($averageArray[$key] = round($arrayElement / count($matchDataArray)));
         echo "</pre>";
     }
+}
+
+function mostPlayedWith($matchDataArray, $puuid){
+    $mostPlayedArray = array();
+    foreach ($matchDataArray as $matchData) { // going through all files
+        for($i = 0; $i < 10; $i++){//going through all player
+            if($matchData->info->participants[$i]->puuid != $puuid){
+                $mostPlayedArray[] = $matchData->info->participants[$i]->summonerName;
+            }
+        }
+    }
+
+    $temp = array_count_values($mostPlayedArray);
+    arsort($temp);
+    $value = array_slice(array_keys($temp), 0, 5, true);
+    $count = array_slice(array_values($temp), 0, 5, true);
+    echo "<pre>";
+    echo "Most played with:<br>";
+    echo $count[0]." mal mit ".$value[0]."<br>".$count[1]." mal mit ".$value[1]."<br>".$count[2]." mal mit ".$value[2]."<br>".$count[3]." mal mit ".$value[3]."<br>".$count[4]." mal mit ".$value[4];
+    echo "</pre>";
 }
 
 function getMatchData($matchIDArray){
