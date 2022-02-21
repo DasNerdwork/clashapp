@@ -1,0 +1,14 @@
+{
+    "id": 3721,
+    "themeId": 6,
+    "nameKey": "ionia",
+    "nameKeySecondary": "day_2",
+    "schedule": [
+        {
+            "id": 3841,
+            "registrationTime": 1645371900000,
+            "startTime": 1645387200000,
+            "cancelled": false
+        }
+    ]
+}

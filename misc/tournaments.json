@@ -1,0 +1,44 @@
+[
+    {
+        "id": 3721,
+        "themeId": 6,
+        "nameKey": "ionia",
+        "nameKeySecondary": "day_2",
+        "schedule": [
+            {
+                "id": 3841,
+                "registrationTime": 1645371900000,
+                "startTime": 1645387200000,
+                "cancelled": false
+            }
+        ]
+    },
+    {
+        "id": 3741,
+        "themeId": 6,
+        "nameKey": "ionia",
+        "nameKeySecondary": "day_3",
+        "schedule": [
+            {
+                "id": 3861,
+                "registrationTime": 1646495100000,
+                "startTime": 1646510400000,
+                "cancelled": false
+            }
+        ]
+    },
+    {
+        "id": 3722,
+        "themeId": 6,
+        "nameKey": "ionia",
+        "nameKeySecondary": "day_4",
+        "schedule": [
+            {
+                "id": 3842,
+                "registrationTime": 1646581500000,
+                "startTime": 1646596800000,
+                "cancelled": false
+            }
+        ]
+    }
+]

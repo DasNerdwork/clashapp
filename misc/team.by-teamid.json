@@ -1,0 +1,75 @@
+[{
+    "id": "1dfe42ce-ddf0-4688-a8c5-eeb70574df46",
+    "tournamentId": 3721,
+    "name": "GEROS MASTER Maschinen",
+    "iconId": 14,
+    "tier": 1,
+    "captain": "hENYn_gNpeIQj-Gk5WsX7uRP-Z-mSOY4S19cZBTvh98iUtc",
+    "abbreviation": "GER",
+    "players": [
+        {
+            "summonerId": "hENYn_gNpeIQj-Gk5WsX7uRP-Z-mSOY4S19cZBTvh98iUtc",
+            "position": "FILL",
+            "role": "CAPTAIN"
+        },
+        {
+            "summonerId": "LrRNOhV95goac06Emm_GdrAfntZYX5BrM_NfxkexeZ_8r_k",
+            "position": "MIDDLE",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "kzQ8siE3BbwyY43x4z8l9xGBSuqzWBKKLRYo-adM3VQvPG3Y",
+            "position": "UTILITY",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "q-KoZ2l-IiPkl1ut9KrHbFrJDnNlBKYf5Rmnehlh-pk7DgU",
+            "position": "BOTTOM",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "95Qrp1BSAG1-c4vAcbj_9wf-BhV6QCRMbmUyYCMe7RAxT5De",
+            "position": "TOP",
+            "role": "MEMBER"
+        }
+    ]
+}
+
+
+
+,{
+    "id": "4892086",
+    "tournamentId": 3721,
+    "name": "horst lichter fanclub",
+    "iconId": 28,
+    "tier": 2,
+    "captain": "26Ym3UadSd85IeThN6FhVFkDuj8ePsClTR7WogjIMiENWoM",
+    "abbreviation": "bfr",
+    "players": [
+        {
+            "summonerId": "1g9IXil8R7cpjXLGEqXPLYFEemCDLwNoSJtqs7cM-dEjTYNX",
+            "position": "UTILITY",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "9q2r0kGufhyTfUcAs2WETacbRj4qwxyTQGrWFoE8eOPMIqCBYaXdvi_bfw",
+            "position": "BOTTOM",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "3Zz_QADKbaDNJUJXXV0n_GzbXLddL-BhzOWs-zbT4hOIy2EK",
+            "position": "TOP",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "26Ym3UadSd85IeThN6FhVFkDuj8ePsClTR7WogjIMiENWoM",
+            "position": "JUNGLE",
+            "role": "CAPTAIN"
+        },
+        {
+            "summonerId": "6dtRaQkveUZU3m2X5rRAhEzKayJptcSNvAQRslpzDdBgkLPm",
+            "position": "MIDDLE",
+            "role": "MEMBER"
+        }
+    ]
+}]

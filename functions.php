@@ -1,5 +1,5 @@
 <?php 
-$api_key = "RGAPI-473ab014-3952-4fb0-970f-f92337bba8af"; // ToDo
+$api_key = "RGAPI-c58eb628-8945-4056-a569-152fbebca9a9"; // ToDo
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 $counter = 0;
 
