@@ -561,6 +561,162 @@ function printMasteryInfo($masteryArray, $index){
     echo "Points: ".$masteryArray[$index]["Points"]."<br>";
     echo "Last played: ".date('d.m.Y', $masteryArray[$index]["LastPlayed"]);
 }
+
+function getMostLosses($variant, $matchDataArray, $puuid){
+    $mostLossesArray = array();
+    foreach ($matchDataArray as $matchData) { // going through all files
+        for($i = 0; $i < 10; $i++){
+            if($matchData->info->participants[$i]->puuid == $puuid){
+                if($matchData->info->participants[$i]->teamPosition != ""){
+                    $ourLane = $matchData->info->participants[$i]->teamPosition;
+                } else if ($matchData->info->participants[$i]->individualPosition != "" && $matchData->info->participants[$i]->individualPosition != "Invalid"){
+                    $ourLane = $matchData->info->participants[$i]->individualPosition;
+                } else {
+                    $ourLane = "N/A";
+                }
+                $mostLossesArray[$matchData->metadata->matchId][] = ["lane" => $ourLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win, "teamID" => $matchData->info->participants[$i]->teamId];
+                break;
+            }
+        }
+
+        for($i = 0; $i < 10; $i++){
+            if($matchData->info->participants[$i]->win != $mostLossesArray[$matchData->metadata->matchId][0]["win"] && $matchData->info->participants[$i]->teamId != $mostLossesArray[$matchData->metadata->matchId][0]["teamID"]){
+                if($matchData->info->participants[$i]->teamPosition != ""){
+                    $enemyLane = $matchData->info->participants[$i]->teamPosition;
+                } else if ($matchData->info->participants[$i]->individualPosition != "" && $matchData->info->participants[$i]->individualPosition != "Invalid"){
+                    $enemyLane = $matchData->info->participants[$i]->individualPosition;
+                } else {
+                    $enemyLane = "N/A";
+                }
+                // echo $mostLossesArray[$matchData->metadata->matchId][$i]["name"]."<br>";
+                $mostLossesArray[$matchData->metadata->matchId][] = ["lane" => $enemyLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win];
+            }
+        }
+    }
+    
+    $champ_array = array();
+    
+    if($variant == "lane"){
+        $maxcount = 5;
+        foreach ($mostLossesArray as $Larray) { // going through all files
+            $lane = $Larray[0]["lane"];
+            
+            for($i = 1; $i < 6; $i++){
+                if($lane == $Larray[$i]["lane"] && !$Larray[$i]["win"]){
+                    $champ_array[$Larray[$i]["champion"]]["win"]++;
+                }else if($lane == $Larray[$i]["lane"] && $Larray[$i]["win"]){
+                    $champ_array[$Larray[$i]["champion"]]["lose"]++;
+                }
+                if($lane == $Larray[$i]["lane"]){
+                    $champ_array[$Larray[$i]["champion"]]["count"] = $champ_array[$Larray[$i]["champion"]]["win"] + $champ_array[$Larray[$i]["champion"]]["lose"];
+                    $champ_array[$Larray[$i]["champion"]]["winrate"] = ($champ_array[$Larray[$i]["champion"]]["win"] / $champ_array[$Larray[$i]["champion"]]["count"]) * 100;
+                    asort($champ_array[$Larray[$i]["champion"]]); // can be removed later on
+                }
+            }
+        }
+    }else if($variant == "general"){
+        $maxcount = 10;
+        foreach ($mostLossesArray as $Larray) { // going through all files
+            for($i = 1; $i < 6; $i++){
+                if(!$Larray[$i]["win"]){
+                    $champ_array[$Larray[$i]["champion"]]["win"]++;
+                }else if($Larray[$i]["win"]){
+                    $champ_array[$Larray[$i]["champion"]]["lose"]++;
+                }
+                $champ_array[$Larray[$i]["champion"]]["count"] = $champ_array[$Larray[$i]["champion"]]["win"] + $champ_array[$Larray[$i]["champion"]]["lose"];
+                $champ_array[$Larray[$i]["champion"]]["winrate"] = ($champ_array[$Larray[$i]["champion"]]["win"] / $champ_array[$Larray[$i]["champion"]]["count"]) * 100;
+                asort($champ_array[$Larray[$i]["champion"]]); // can be removed later on
+            }
+        }
+    }
+
+    uasort($champ_array, function($a, $b) use($key){
+        return $a['winrate'] <=> $b['winrate'];
+    });
+
+    foreach($champ_array as $key => $champion){
+        if(!($champion["count"] >= $maxcount)){
+            unset($champ_array[$key]);
+        }
+    }
+    $result = number_format($champ_array[array_key_first($champ_array)]["winrate"], 2, ',', ' ');
+    echo array_key_first($champ_array) . " (" . $result . "%) in " . $champ_array[array_key_first($champ_array)]["count"] . " matches";
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//             if($matchData->info->participants[$i]->puuid == $puuid && $matchData->info->participants[$i]->win == false){
+//                 if($matchData->info->participants[$i]->puuid != $puuid && $matchData->info->participants[$i]->win == true){
+//                 }
+//                 if($variant == "lane"){
+//                     $lane = $matchData->info->participants[$i]->teamPosition;
+//                     $teamID = $matchData->info->participants[$i]->teamId;
+//                     $win = false;
+//                     foreach($matchData->info->participants)
+//                 }
+//                 // foreach ($attributes as $attribute){
+//                 //     $averageArray[$attribute] += $matchData->info->participants[$i]->$attribute;
+                    
+//                 // }
+//                 break;
+//             }else if($matchData->info->participants[$i]->puuid == $puuid && $matchData->info->participants[$i]->win == true){
+//                 $win = true;
+//                 break;
+//             }else if($matchData->info->participants[$i]->puuid != $puuid){
+                
+//             }
+//         }
+
+//         if($win == false){
+//             foreach($tempArray as $temp){
+
+//             } 
+//         }
+//         // lane mit array vergleichen 
+//     }
+//     foreach ($averageArray as $key => $arrayElement){
+//         echo "<pre>";
+//         echo "Average of " . $key . ": ";
+//         echo ($averageArray[$key] = round($arrayElement / count($matchDataArray)));
+//         echo "</pre>";
+//     }
+// }
+
+// wenn gegner bester spieler 40% besser als gegner lane dann nimm bester spieler 
+
+// Variante 1: Most losses against enemy laner
+// Variante 2: Most losses against champion
+// Variante 3: Most losses against best-stat champion
+
+
+
+
 ?>
 
 
