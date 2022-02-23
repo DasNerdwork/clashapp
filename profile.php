@@ -165,10 +165,16 @@ if($formattedInput != "") {
     echo "<br>Ladezeit: ".number_format(microtime(true) - $start, 2)." Sekunden<br>";
     echo "<br>";
     echo "Most Losses in Lane against: ";
-    getMostLosses("lane", $matchDaten, $puuid);
+    getMostLossesAgainst("lane", $matchDaten, $puuid);
     echo "<br>";
     echo "Most Losses in Total against: ";
-    getMostLosses("general", $matchDaten, $puuid);
+    getMostLossesAgainst("general", $matchDaten, $puuid);
+    echo "<br>";
+    echo "Highest Winrate in Lane with: ";
+    getHighestWinrateWith("lane", $matchDaten, $puuid);
+    echo "<br>";
+    echo "Highest Winrate in Total with: ";
+    getHighestWinrateWith("general", $matchDaten, $puuid);
     echo "<br>";
     getMatchDetailsByPUUID($puuid);
     }
