@@ -170,12 +170,18 @@ if($formattedInput != "") {
     echo "Most Losses in Total against: ";
     getMostLossesAgainst("general", $matchDaten, $puuid);
     echo "<br>";
-    echo "Highest Winrate in Lane with: ";
-    getHighestWinrateWith("lane", $matchDaten, $puuid);
+    echo "Highest Winrate in Lane against: ";
+    getHighestWinrateAgainst("lane", $matchDaten, $puuid);
     echo "<br>";
-    echo "Highest Winrate in Total with: ";
-    getHighestWinrateWith("general", $matchDaten, $puuid);
-    echo "<br>";
+    echo "Highest Winrate in Total against: ";
+    getHighestWinrateAgainst("general", $matchDaten, $puuid);
+    echo "<br><br>";
+    getHighestWinrateWith("GENERAL", $matchDaten, $puuid);
+    getHighestWinrateWith("TOP", $matchDaten, $puuid);
+    getHighestWinrateWith("JUNGLE", $matchDaten, $puuid);
+    getHighestWinrateWith("MID", $matchDaten, $puuid);
+    getHighestWinrateWith("BOT", $matchDaten, $puuid);
+    getHighestWinrateWith("UTILITY", $matchDaten, $puuid);
     getMatchDetailsByPUUID($puuid);
     }
 }
