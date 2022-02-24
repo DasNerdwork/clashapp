@@ -1,5 +1,5 @@
 <?php 
-$api_key = "RGAPI-55b4b63c-f850-4663-a30b-560a4d2355ad"; // ToDo
+$api_key = "RGAPI-57de2c0f-b17d-49a4-ae45-d295a7ac4419"; // ToDo
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 $counter = 0;
 
@@ -553,6 +553,8 @@ function getMatchData($matchIDArray){
 function printMasteryInfo($masteryArray, $index){
     global $currentpatch;
     if($masteryArray[$index]["Champion"] == "FiddleSticks"){$masteryArray[$index]["Champion"] = "Fiddlesticks";} // TODO One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ 
+    if($masteryArray[$index]["Champion"] == "Kha'Zix"){$masteryArray[$index]["Champion"] = "Khazix";} // TODO One-Line fix for KhaZix naming done, still missing renaming of every other champ 
+    if($masteryArray[$index]["Champion"] == "Tahm Kench"){$masteryArray[$index]["Champion"] = "TahmKench";} // TODO One-Line fix for Tahm Kench naming done, still missing renaming of every other champ 
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png')){
         echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png" width="64"><br>';
     }
@@ -563,14 +565,14 @@ function printMasteryInfo($masteryArray, $index){
 }
 
 function getMostLossesAgainst($variant, $matchDataArray, $puuid){
-    getHighestWinrateWithOrMostLossesAgainst("mostLosses", $variant, $matchDataArray, $puuid);
+    getHighestWinrateOrMostLossesAgainst("mostLosses", $variant, $matchDataArray, $puuid);
 }
-function getHighestWinrateWith($variant, $matchDataArray, $puuid){
-    getHighestWinrateWithOrMostLossesAgainst("highestWinrate", $variant, $matchDataArray, $puuid);
+function getHighestWinrateAgainst($variant, $matchDataArray, $puuid){
+    getHighestWinrateOrMostLossesAgainst("highestWinrate", $variant, $matchDataArray, $puuid);
 }
 
 
-function getHighestWinrateWithOrMostLossesAgainst($type, $variant, $matchDataArray, $puuid){
+function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, $puuid){
     $mostLossesArray = array();
     $maxCountArray = array();
     foreach ($matchDataArray as $matchData) { // going through all files
@@ -597,7 +599,7 @@ function getHighestWinrateWithOrMostLossesAgainst($type, $variant, $matchDataArr
                 } else {
                     $enemyLane = "N/A";
                 }
-                // echo $mostLossesArray[$matchData->metadata->matchId][$i]["name"]."<br>";
+                
                 $mostLossesArray[$matchData->metadata->matchId][] = ["lane" => $enemyLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win];
             }
         }
@@ -657,15 +659,62 @@ function getHighestWinrateWithOrMostLossesAgainst($type, $variant, $matchDataArr
             unset($champ_array[$key]);
         }
     }
-    
-    echo "<pre>";
-    print_r($champ_array);
-    echo "</pre>";
 
     $result = number_format($champ_array[array_key_first($champ_array)]["winrate"], 2, ',', ' ');
     echo array_key_first($champ_array) . " (" . $result . "%) in " . $champ_array[array_key_first($champ_array)]["count"] . " matches";
 }
 
+function getHighestWinrateWith($lane, $matchDataArray, $puuid){
+    $highestWinrateArray = array();
+    foreach ($matchDataArray as $matchData) { // going through all files
+        unset($count, $winrate);
+        for($i = 0; $i < 10; $i++){
+            if($matchData->info->participants[$i]->puuid == $puuid){
+                if($matchData->info->participants[$i]->teamPosition != ""){
+                    $myLane = $matchData->info->participants[$i]->teamPosition;
+                } else if ($matchData->info->participants[$i]->individualPosition != "" && $matchData->info->participants[$i]->individualPosition != "Invalid"){
+                    $myLane = $matchData->info->participants[$i]->individualPosition;
+                } else {
+                    $myLane = "N/A";
+                }
+                if($matchData->info->participants[$i]->win){
+                    $highestWinrateArray[$matchData->info->participants[$i]->championName]["win"]++;
+                } else {
+                    $highestWinrateArray[$matchData->info->participants[$i]->championName]["lose"]++;
+                }
+                $count = $highestWinrateArray[$matchData->info->participants[$i]->championName]["win"]+$highestWinrateArray[$matchData->info->participants[$i]->championName]["lose"];
+                $winrate = ($highestWinrateArray[$matchData->info->participants[$i]->championName]["win"]/$count)*100;
+                if($lane == "GENERAL" || $lane == $myLane){
+                    $highestWinrateArray[$matchData->info->participants[$i]->championName]["lane"] = $myLane;
+                    $highestWinrateArray[$matchData->info->participants[$i]->championName]["count"] = $count;
+                    $highestWinrateArray[$matchData->info->participants[$i]->championName]["winrate"] = $winrate;
+                }
+                break;
+            }
+        }
+    }
+
+    foreach($highestWinrateArray as $championname => $champion){
+        $maxCountArray[$championname] = $champion["count"];
+    }
+    arsort($maxCountArray);
+    $maxCount = floor(reset($maxCountArray)/2);
+
+    uasort($highestWinrateArray, function($a, $b) use($key){
+        return $b['winrate'] <=> $a['winrate'];
+    });
+    
+    foreach($highestWinrateArray as $championname => $champion){
+        if(!($champion["count"] >= $maxCount)){
+            unset($highestWinrateArray[$championname]);
+        }
+    }
+
+    $result = number_format($highestWinrateArray[array_key_first($highestWinrateArray)]["winrate"], 2, ',', ' ');
+    if($highestWinrateArray[array_key_first($highestWinrateArray)]["count"] > 5){
+        echo "Highest Winrate: (".ucfirst(strtolower($lane)).") with ". array_key_first($highestWinrateArray) . " (" . $result . "%) in " . $highestWinrateArray[array_key_first($highestWinrateArray)]["count"] . " matches<br>";
+    }
+}
 
 
 ?>
