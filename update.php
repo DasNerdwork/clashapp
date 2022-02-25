@@ -2,6 +2,7 @@
 include_once('functions.php');
 
 // print_r($_REQUEST);
+// php -r "require 'functions.php'; testing();"
 
 if(isset($_POST["username"])){
     updateProfile($_POST["username"], 150);
@@ -47,7 +48,7 @@ function updateProfile($id, $maxMatchIds){
         $playerDataArray = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
         foreach($playerDataArray["MatchIDs"] as $match){
             if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/'.$match.'.json')){
-                getMatchByID($match, $playerName);
+                downloadMatchByID($match, $playerName);
             }
         }
         clearstatcache(true, $logPath);
