@@ -6,7 +6,7 @@
  * $currentpatch => For example "12.4.1", gets fetched from the version.txt which itself gets daily updated by the patcher.py script
  * $counter => Necessary counter variable for the getMatchByID Function
  */  
-$api_key = "RGAPI-a9a7fbd1-c6a5-44e1-82e8-8b4eefef333f"; // TODO update to new API key fetch
+$api_key = "RGAPI-060fa5a8-c19a-4510-b4d2-81313442547e"; // TODO update to new API key fetch
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 $counter = 0;
 
@@ -70,6 +70,117 @@ function getPlayerData($type, $username){
   
     return $playerDataArray;
 }
+
+/** Get info about summoners mastery scores
+ * This function retrieves the all available mastery score info about a summoner
+ *
+ * Eq. to https://developer.riotgames.com/apis#champion-mastery-v4/GET_getAllChampionMasteries
+ * Also possible for Total Mastery score or masterdata only about a single champion
+ * 
+ * $sumid => The summoners encrypted summoner ID necessary to perform the API request
+ * $rankDataArray => Just a rename and rearrange of the API request return values
+ * 
+ * Returnvalue:
+ * $rankReturnArray => Just a rename of the $rankDataArray
+ */
+function getMasteryScores($sumid){
+    $masteryDataArray = array();
+    $masteryReturnArray = array();
+    global $api_key;
+
+    // Curl API request block
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid."?api_key=".$api_key);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $output = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    // 403 Forbidden
+    if($httpcode == "403"){
+        echo "<h2>API Key outdated!</h2>";
+    }  
+    // 429 Too Many Requests 
+    if($httpcode == "429"){
+        sleep(121);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid."?api_key=".$api_key);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    }
+
+    // Resolving return values
+    foreach(json_decode($output, true) as $masteryArray){
+        if($masteryArray["championLevel"] > 4 || $masteryArray["championPoints"] > 19999){
+            $masteryDataArray["Champion"] = championIdToName($masteryArray["championId"]);
+            $masteryDataArray["Lvl"] = $masteryArray["championLevel"];
+            $masteryDataArray["Points"] = number_format($masteryArray["championPoints"]);
+            $masteryDataArray["LastPlayed"] = $masteryArray["lastPlayTime"]/1000; // to get human-readable one -> date('d.m.Y H:i:s', $masteryData["LastPlayed"]);
+            // in case tokens for lvl 6 or 7 in inventory add them too
+            if($masteryArray["tokensEarned"] > 0){
+                $masteryDataArray["LvlUpTokens"] = $masteryArray["tokensEarned"];
+            }
+            $masteryReturnArray[] = $masteryDataArray;
+        }
+    }
+    return $masteryReturnArray;
+}
+
+/** Fetch ranked info of user via sumid
+ * This function retrieves the all available ranked info about a summoner
+ *
+ * Eq. to https://developer.riotgames.com/apis#league-v4/GET_getLeagueEntriesForSummoner
+ * 
+ * $sumid => The summoners encrypted summoner ID necessary to perform the API request
+ * $rankDataArray => Just a rename and rearrange of the API request return values
+ * 
+ * Returnvalue:
+ * $rankReturnArray => Just a rename of the $rankDataArray
+ */
+function getCurrentRank($sumid){
+    $rankDataArray = array();
+    $rankReturnArray = array();
+    global $api_key;
+
+    // Curl API request block
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid."?api_key=".$api_key);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $output = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    // 403 Forbidden
+    if($httpcode == "403"){
+        echo "<h2>API Key outdated!</h2>";
+    }  
+
+    // 429 Too Many Requests 
+    if($httpcode == "429"){
+        sleep(121);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid."?api_key=".$api_key);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $output = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    }
+
+    // Resolving return values
+    foreach(json_decode($output, true) as $requestArray){
+        $rankDataArray["Queue"] = $requestArray["queueType"];
+        $rankDataArray["Tier"] = $requestArray["tier"];
+        $rankDataArray["Rank"] = $requestArray["rank"];
+        $rankDataArray["LP"] = $requestArray["leaguePoints"];
+        $rankDataArray["Wins"] = $requestArray["wins"];
+        $rankDataArray["Losses"] = $requestArray["losses"];
+        $rankReturnArray[] = $rankDataArray;
+    }
+    return $rankReturnArray;
+}
+
 /** Array of MatchIDs
  * This function retrieves all match IDs of a given PUUID up to a specified maximum
  * Eq. to https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
@@ -122,6 +233,96 @@ function getMatchIDs($puuid, $maxMatchIDs){
         $start += 100;
     }
     return $matchIDArray;
+}
+
+/** Download and local storing of matchid.json
+ * This function downloads, stores and logs anything about a given matchid
+ * Eq. to https://developer.riotgames.com/apis#match-v5/GET_getMatch
+ * 
+ * $matchid => The single matchID of the game this function is supposed to download the information about
+ * $username => OPTIONAL Is the given username, as this value is only used for the logging message and not necessary to perform anything
+ * $logPath => The path where the log should be saved to
+ * 
+ * INFO: clearstatcache(); necessary for correct filesize statements as filesize() is a cached function
+ * 
+ * Returnvalue:
+ * N/A, file saving & logging instead
+ */
+function downloadMatchByID($matchid, $username = null){
+    global $api_key;
+    global $counter;
+    $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log';
+
+    // Halving of matchDownloader.log in case the logfile exceeds 10 MB
+    if(filesize($logPath) > 10000000 && $counter == 0){
+        $counter++;
+        $file = file($logPath);
+        $file = array_chunk($file, ceil(count($file)/2))[1];
+        file_put_contents($logPath, $file, LOCK_EX);
+        clearstatcache(true, $logPath);
+        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $slimmed = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".number_format((filesize($logPath)/1048576), 3)." MB)";
+        file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
+        $counter = 0;
+    }
+
+    // Only download if file doesn't exist yet
+    if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
+        $ch = curl_init(); 
+        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $match_output = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);      
+    
+        // 429 Too Many Requests
+        if($httpcode == "429"){
+            sleep(121);
+            $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+            $limit = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 121 seconds - Status: " . $httpcode . " Too Many Requests";
+            file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
+            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            $match_output = curl_exec($ch);
+            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+        }
+
+        // Write to log and save the matchid.json, else skip
+        clearstatcache(true, $logPath);
+        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $answer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpcode . " (Size: ".number_format((filesize($logPath)/1048576), 3)." MB)";
+        file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
+        $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
+        fwrite($fp, $match_output);
+        fclose($fp);
+    }else{
+        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $noanswer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
+        file_put_contents($logPath, $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
+    }
+}
+
+/** Important little function to collect locally stored matchdata into array
+ * This function loops through every given matchID's matchID.json and adds the data to a single $matchData array
+ * At the same time collecting the necessary memory amount and limiting the returnvalue to 500 matchIDs or 256MB of RAM at once
+ * 
+ * $matchIDArray => Inputarray of all MatchIDs of the user
+ * $startMemory => The necessary value to retrieve information about current stored memory amount of the array
+ * 
+ * Returnvalue:
+ * $matchData => Array full of all given MatchID.json file contents up to the below maximum
+ */
+function getMatchData($matchIDArray){
+    $startMemory = memory_get_usage();
+    $matchData = array();
+
+    // Loop through each matchID.json
+    foreach ($matchIDArray as $key => $matchIDJSON) {
+        if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
+            $matchData[$key] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
+        }
+    return $matchData;
 }
 
 /** Detailed Information about specific matches via PUUID
@@ -285,72 +486,33 @@ function getMatchDetailsByPUUID($puuid){
     echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden";
 }
 
-/** Download and local storing of matchid.json
- * This function downloads, stores and logs anything about a given matchid
- * Eq. to https://developer.riotgames.com/apis#match-v5/GET_getMatch
+/** Followup function to print getMasteryScores(); returninfo
+ * This function is only printing collected values, also possible to shove into profile.php
  * 
- * $matchid => The single matchID of the game this function is supposed to download the information about
- * $username => OPTIONAL Is the given username, as this value is only used for the logging message and not necessary to perform anything
- * $logPath => The path where the log should be saved to
- * 
- * INFO: clearstatcache(); necessary for correct filesize statements as filesize() is a cached function
+ * $masteryArray => Inputarray of all MasteryScores
+ * $index => Index of the masterychamp (0 = first & highest mastery champ, 1 = second, etc.)
  * 
  * Returnvalue:
- * N/A, file saving & logging instead
+ * N/A, just printing values to page
  */
-function downloadMatchByID($matchid, $username = null){
-    global $api_key;
-    global $counter;
-    $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log';
+function printMasteryInfo($masteryArray, $index){
+    global $currentpatch;
 
-    // Halving of matchDownloader.log in case the logfile exceeds 10 MB
-    if(filesize($logPath) > 10000000 && $counter == 0){
-        $counter++;
-        $file = file($logPath);
-        $file = array_chunk($file, ceil(count($file)/2))[1];
-        file_put_contents($logPath, $file, LOCK_EX);
-        clearstatcache(true, $logPath);
-        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $slimmed = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".number_format((filesize($logPath)/1048576), 3)." MB)";
-        file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
-        $counter = 0;
+    // TODO separate Function to fix all name errors - One-Line fixes
+    if($masteryArray[$index]["Champion"] == "FiddleSticks"){$masteryArray[$index]["Champion"] = "Fiddlesticks";}
+    if($masteryArray[$index]["Champion"] == "Kha'Zix"){$masteryArray[$index]["Champion"] = "Khazix";}
+    if($masteryArray[$index]["Champion"] == "Tahm Kench"){$masteryArray[$index]["Champion"] = "TahmKench";}
+
+    // Print image if it exists
+    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png')){
+        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png" width="64"><br>';
     }
 
-    // Only download if file doesn't exist yet
-    if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
-        $ch = curl_init(); 
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $match_output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);      
-    
-        // 429 Too Many Requests
-        if($httpcode == "429"){
-            sleep(121);
-            $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $limit = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 121 seconds - Status: " . $httpcode . " Too Many Requests";
-            file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
-            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            $match_output = curl_exec($ch);
-            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-        }
-
-        // Write to log and save the matchid.json, else skip
-        clearstatcache(true, $logPath);
-        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $answer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpcode . " (Size: ".number_format((filesize($logPath)/1048576), 3)." MB)";
-        file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
-        $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
-        fwrite($fp, $match_output);
-        fclose($fp);
-    }else{
-        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $noanswer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
-        file_put_contents($logPath, $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
-    }
+    // Print the additional info
+    echo $masteryArray[$index]["Champion"]."<br>";
+    echo "<br>Mastery Level: ".$masteryArray[$index]["Lvl"]."<br>";
+    echo "Points: ".$masteryArray[$index]["Points"]."<br>";
+    echo "Last played: ".date('d.m.Y', $masteryArray[$index]["LastPlayed"]);
 }
 
 /** Fetching rune icon ID to image path
@@ -378,25 +540,6 @@ function runeIconFetcher($id){
     }
 }
 
-/** Resolving a championid to the champions clean name
- * This function iterates through the current patches champion.json and returns the name of the champion given by id
- * 
- * $id => The passed champion ID corresponding to Riot's data found in the champion.json
- * 
- * Returnvalue:
- * $champion->name => The clean name of the champion
- */
-function championIdToName($id){
-    global $currentpatch;
-    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
-    $json = json_decode($data);
-    foreach($json->data as $champion){
-        if($id == $champion->key){
-            return $champion->name;
-        }
-    }
-}
-
 /** Fetching runetree icon ID to image path
  * This function iterates through the current patches runesReforged.json and returns the folder of the runetree icons 
  * 
@@ -416,116 +559,24 @@ function runeTreeIconFetcher($id){
     }
 }
 
-/** Fetch ranked info of user via sumid
- * This function retrieves the all available ranked info about a summoner
- *
- * Eq. to https://developer.riotgames.com/apis#league-v4/GET_getLeagueEntriesForSummoner
+/** Resolving a championid to the champions clean name
+ * This function iterates through the current patches champion.json and returns the name of the champion given by id
  * 
- * $sumid => The summoners encrypted summoner ID necessary to perform the API request
- * $rankDataArray => Just a rename and rearrange of the API request return values
+ * $id => The passed champion ID corresponding to Riot's data found in the champion.json
  * 
  * Returnvalue:
- * $rankReturnArray => Just a rename of the $rankDataArray
+ * $champion->name => The clean name of the champion
  */
-function getCurrentRank($sumid){
-    $rankDataArray = array();
-    $rankReturnArray = array();
-    global $api_key;
-
-    // Curl API request block
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid."?api_key=".$api_key);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $output = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    // 403 Forbidden
-    if($httpcode == "403"){
-        echo "<h2>API Key outdated!</h2>";
-    }  
-
-    // 429 Too Many Requests 
-    if($httpcode == "429"){
-        sleep(121);
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid."?api_key=".$api_key);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-    }
-
-    // Resolving return values
-    foreach(json_decode($output, true) as $requestArray){
-        $rankDataArray["Queue"] = $requestArray["queueType"];
-        $rankDataArray["Tier"] = $requestArray["tier"];
-        $rankDataArray["Rank"] = $requestArray["rank"];
-        $rankDataArray["LP"] = $requestArray["leaguePoints"];
-        $rankDataArray["Wins"] = $requestArray["wins"];
-        $rankDataArray["Losses"] = $requestArray["losses"];
-        $rankReturnArray[] = $rankDataArray;
-    }
-    return $rankReturnArray;
-}
-
-/** Get info about summoners mastery scores
- * This function retrieves the all available mastery score info about a summoner
- *
- * Eq. to https://developer.riotgames.com/apis#champion-mastery-v4/GET_getAllChampionMasteries
- * Also possible for Total Mastery score or masterdata only about a single champion
- * 
- * $sumid => The summoners encrypted summoner ID necessary to perform the API request
- * $rankDataArray => Just a rename and rearrange of the API request return values
- * 
- * Returnvalue:
- * $rankReturnArray => Just a rename of the $rankDataArray
- */
-function getMasteryScores($sumid){
-    $masteryDataArray = array();
-    $masteryReturnArray = array();
-    global $api_key;
-
-    // Curl API request block
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid."?api_key=".$api_key);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $output = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    // 403 Forbidden
-    if($httpcode == "403"){
-        echo "<h2>API Key outdated!</h2>";
-    }  
-    // 429 Too Many Requests 
-    if($httpcode == "429"){
-        sleep(121);
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid."?api_key=".$api_key);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-    }
-
-    // Resolving return values
-    foreach(json_decode($output, true) as $masteryArray){
-        if($masteryArray["championLevel"] > 4 || $masteryArray["championPoints"] > 19999){
-            $masteryDataArray["Champion"] = championIdToName($masteryArray["championId"]);
-            $masteryDataArray["Lvl"] = $masteryArray["championLevel"];
-            $masteryDataArray["Points"] = number_format($masteryArray["championPoints"]);
-            $masteryDataArray["LastPlayed"] = $masteryArray["lastPlayTime"]/1000; // to get human-readable one -> date('d.m.Y H:i:s', $masteryData["LastPlayed"]);
-            // in case tokens for lvl 6 or 7 in inventory add them too
-            if($masteryArray["tokensEarned"] > 0){
-                $masteryDataArray["LvlUpTokens"] = $masteryArray["tokensEarned"];
-            }
-            $masteryReturnArray[] = $masteryDataArray;
+function championIdToName($id){
+    global $currentpatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
+    $json = json_decode($data);
+    foreach($json->data as $champion){
+        if($id == $champion->key){
+            return $champion->name;
         }
     }
-    return $masteryReturnArray;
 }
-
 
 /** Fetches the 3 most common values of specific attributes
  * This function retrieves the 3 most common occurences of a specific attribute by iterating through a users matches
@@ -601,90 +652,6 @@ function getAverage($attributesArray, $matchDataArray, $puuid){
         echo ($averageArray[$key] = round($arrayElement / count($matchDataArray)));
         echo "</pre>";
     }
-}
-
-/** Gets the 5 most-played-with summoners
- * This function temp stores every summoner you played with in your team, sorts them and counts their occurences
- * 
- * $matchDataArray => Inputarray of all MatchIDs of the user (PUUID) over which we iterate
- * $puuid => The summoners PUUID necessary to confirm that the users matches are in our local stored data
- * $mostPlayedArray => The returnvalue array but not printed
- * 
- * Returnvalue:
- * N/A, only direct printing to page
- */
-function mostPlayedWith($matchDataArray, $puuid){
-    $mostPlayedArray = array();
-
-    // Store all values into separate array corresponding to each attribute
-    foreach ($matchDataArray as $matchData) {
-        for($i = 0; $i < 10; $i++){
-            if($matchData->info->participants[$i]->puuid != $puuid){
-                $mostPlayedArray[] = $matchData->info->participants[$i]->summonerName;
-            }
-        }
-    }
-
-    // Count, Sort & Slice to 5 to retrieve printable data
-    $temp = array_count_values($mostPlayedArray);
-    arsort($temp);
-    $value = array_slice(array_keys($temp), 0, 5, true);
-    $count = array_slice(array_values($temp), 0, 5, true);
-    echo "<pre>";
-    echo "Most played with:<br>";
-    echo $count[0]." mal mit ".$value[0]."<br>".$count[1]." mal mit ".$value[1]."<br>".$count[2]." mal mit ".$value[2]."<br>".$count[3]." mal mit ".$value[3]."<br>".$count[4]." mal mit ".$value[4];
-    echo "</pre>";
-}
-
-/** Important little function to collect locally stored matchdata into array
- * This function loops through every given matchID's matchID.json and adds the data to a single $matchData array
- * At the same time collecting the necessary memory amount and limiting the returnvalue to 500 matchIDs or 256MB of RAM at once
- * 
- * $matchIDArray => Inputarray of all MatchIDs of the user
- * $startMemory => The necessary value to retrieve information about current stored memory amount of the array
- * 
- * Returnvalue:
- * $matchData => Array full of all given MatchID.json file contents up to the below maximum
- */
-function getMatchData($matchIDArray){
-    $startMemory = memory_get_usage();
-    $matchData = array();
-
-    // Loop through each matchID.json
-    foreach ($matchIDArray as $key => $matchIDJSON) {
-        if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
-            $matchData[$key] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
-        }
-    return $matchData;
-}
-
-/** Followup function to print getMasteryScores(); returninfo
- * This function is only printing collected values, also possible to shove into profile.php
- * 
- * $masteryArray => Inputarray of all MasteryScores
- * $index => Index of the masterychamp (0 = first & highest mastery champ, 1 = second, etc.)
- * 
- * Returnvalue:
- * N/A, just printing values to page
- */
-function printMasteryInfo($masteryArray, $index){
-    global $currentpatch;
-
-    // TODO separate Function to fix all name errors - One-Line fixes
-    if($masteryArray[$index]["Champion"] == "FiddleSticks"){$masteryArray[$index]["Champion"] = "Fiddlesticks";}
-    if($masteryArray[$index]["Champion"] == "Kha'Zix"){$masteryArray[$index]["Champion"] = "Khazix";}
-    if($masteryArray[$index]["Champion"] == "Tahm Kench"){$masteryArray[$index]["Champion"] = "TahmKench";}
-
-    // Print image if it exists
-    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png" width="64"><br>';
-    }
-
-    // Print the additional info
-    echo $masteryArray[$index]["Champion"]."<br>";
-    echo "<br>Mastery Level: ".$masteryArray[$index]["Lvl"]."<br>";
-    echo "Points: ".$masteryArray[$index]["Points"]."<br>";
-    echo "Last played: ".date('d.m.Y', $masteryArray[$index]["LastPlayed"]);
 }
 
 /** getHighestWinrateOrMostLossesAgainst Aliase
@@ -811,6 +778,39 @@ function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, 
     // print results
     $result = number_format($champArray[array_key_first($champArray)]["winrate"], 2, ',', ' ');
     echo array_key_first($champArray) . " (" . $result . "%) in " . $champArray[array_key_first($champArray)]["count"] . " matches";
+}
+
+/** Gets the 5 most-played-with summoners
+ * This function temp stores every summoner you played with in your team, sorts them and counts their occurences
+ * 
+ * $matchDataArray => Inputarray of all MatchIDs of the user (PUUID) over which we iterate
+ * $puuid => The summoners PUUID necessary to confirm that the users matches are in our local stored data
+ * $mostPlayedArray => The returnvalue array but not printed
+ * 
+ * Returnvalue:
+ * N/A, only direct printing to page
+ */
+function mostPlayedWith($matchDataArray, $puuid){
+    $mostPlayedArray = array();
+
+    // Store all values into separate array corresponding to each attribute
+    foreach ($matchDataArray as $matchData) {
+        for($i = 0; $i < 10; $i++){
+            if($matchData->info->participants[$i]->puuid != $puuid){
+                $mostPlayedArray[] = $matchData->info->participants[$i]->summonerName;
+            }
+        }
+    }
+
+    // Count, Sort & Slice to 5 to retrieve printable data
+    $temp = array_count_values($mostPlayedArray);
+    arsort($temp);
+    $value = array_slice(array_keys($temp), 0, 5, true);
+    $count = array_slice(array_values($temp), 0, 5, true);
+    echo "<pre>";
+    echo "Most played with:<br>";
+    echo $count[0]." mal mit ".$value[0]."<br>".$count[1]." mal mit ".$value[1]."<br>".$count[2]." mal mit ".$value[2]."<br>".$count[3]." mal mit ".$value[3]."<br>".$count[4]." mal mit ".$value[4];
+    echo "</pre>";
 }
 
 /** Prints the champion and info a given player by $puuid has the highest winrate with
