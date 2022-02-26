@@ -115,6 +115,7 @@ function getMasteryScores($sumid){
     foreach(json_decode($output, true) as $masteryArray){
         if($masteryArray["championLevel"] > 4 || $masteryArray["championPoints"] > 19999){
             $masteryDataArray["Champion"] = championIdToName($masteryArray["championId"]);
+            $masteryDataArray["Filename"] = championIdToFilename($masteryArray["championId"]);
             $masteryDataArray["Lvl"] = $masteryArray["championLevel"];
             $masteryDataArray["Points"] = number_format($masteryArray["championPoints"]);
             $masteryDataArray["LastPlayed"] = $masteryArray["lastPlayTime"]/1000; // to get human-readable one -> date('d.m.Y H:i:s', $masteryData["LastPlayed"]);
@@ -125,6 +126,7 @@ function getMasteryScores($sumid){
             $masteryReturnArray[] = $masteryDataArray;
         }
     }
+    
     return $masteryReturnArray;
 }
 
@@ -499,13 +501,13 @@ function printMasteryInfo($masteryArray, $index){
     global $currentpatch;
 
     // TODO separate Function to fix all name errors - One-Line fixes
-    if($masteryArray[$index]["Champion"] == "FiddleSticks"){$masteryArray[$index]["Champion"] = "Fiddlesticks";}
-    if($masteryArray[$index]["Champion"] == "Kha'Zix"){$masteryArray[$index]["Champion"] = "Khazix";}
-    if($masteryArray[$index]["Champion"] == "Tahm Kench"){$masteryArray[$index]["Champion"] = "TahmKench";}
-
+    // if($masteryArray[$index]["Champion"] == "FiddleSticks"){$masteryArray[$index]["Champion"] = "Fiddlesticks";}
+    // if($masteryArray[$index]["Champion"] == "Kha'Zix"){$masteryArray[$index]["Champion"] = "Khazix";}
+    // if($masteryArray[$index]["Champion"] == "Tahm Kench"){$masteryArray[$index]["Champion"] = "TahmKench";}
+    
     // Print image if it exists
-    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Champion"].'.png" width="64"><br>';
+    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png')){
+        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png" width="64"><br>';
     }
 
     // Print the additional info
@@ -574,6 +576,25 @@ function championIdToName($id){
     foreach($json->data as $champion){
         if($id == $champion->key){
             return $champion->name;
+        }
+    }
+}
+
+/** Resolving a championid to the champions filename
+ * This function iterates through the current patches champion.json and returns the name of the champions image file given by id
+ * 
+ * $id => The passed champion ID corresponding to Riot's data found in the champion.json
+ * 
+ * Returnvalue:
+ * $champion->id => The filename of the champion
+ */
+function championIdToFilename($id){
+    global $currentpatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
+    $json = json_decode($data);
+    foreach($json->data as $champion){
+        if($id == $champion->key){
+            return $champion->id;
         }
     }
 }
