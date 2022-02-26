@@ -149,7 +149,10 @@ if($formattedInput != "") {
     echo "</td></table>";  
 
     $start = microtime(true);
-    
+    echo "<pre>";
+    print_r($masteryData);
+    echo "</pre>";
+
     $matchDaten = getMatchData($matchids);
     echo "<table class='table' style='width:100%'><tr><td>";
     $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
