@@ -2,13 +2,21 @@
 /** Global Variables
  * Initializing of global variables used throughout all functions below
  * 
- * $api_key => The API Key necessary to communicate with the Riot API
+ * $api_key => The API Key necessary to communicate with the Riot API, to edit: nano /etc/nginx/fastcgi_params then service nginx restart
  * $currentpatch => For example "12.4.1", gets fetched from the version.txt which itself gets daily updated by the patcher.py script
  * $counter => Necessary counter variable for the getMatchByID Function
+ * $headers => The headers required or at least recommended for the CURL request
  */  
-$api_key = "RGAPI-060fa5a8-c19a-4510-b4d2-81313442547e"; // TODO update to new API key fetch
+$api_key = getenv('API_KEY');
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 $counter = 0;
+$headers = array(
+    "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
+    "Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
+    "Accept-Charset: application/x-www-form-urlencoded; charset=UTF-8",
+    "Origin: https://dasnerdwork.net/",
+    "X-Riot-Token: ".$api_key
+ );
 
 /** General Summoner Info
  * This function retrieves all general playerdata of a given username or PUUID
@@ -23,7 +31,7 @@ $counter = 0;
  * $playerDataArray with keys "Icon", "Name", "Level", "PUUID", "SumID", "AccountID" and "LastChange" of the summoners profile
  */
 function getPlayerData($type, $username){
-    global $api_key, $currentpatch;
+    global $currentpatch, $headers;
     $playerDataArray = array();
     
     switch ($type) {
@@ -37,8 +45,9 @@ function getPlayerData($type, $username){
 
     // Curl API request block
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $requesturlvar . $username . "?api_key=" . $api_key);
+    curl_setopt($ch, CURLOPT_URL, $requesturlvar . $username);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($ch);
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -52,7 +61,7 @@ function getPlayerData($type, $username){
     if($httpcode == "429"){
         sleep(121);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $requesturlvar . $username . "?api_key=" . $api_key);
+        curl_setopt($ch, CURLOPT_URL, $requesturlvar . $username);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -86,12 +95,13 @@ function getPlayerData($type, $username){
 function getMasteryScores($sumid){
     $masteryDataArray = array();
     $masteryReturnArray = array();
-    global $api_key;
+    global $headers;
 
     // Curl API request block
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid."?api_key=".$api_key);
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($ch);
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -104,8 +114,9 @@ function getMasteryScores($sumid){
     if($httpcode == "429"){
         sleep(121);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid."?api_key=".$api_key);
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $output = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -144,12 +155,13 @@ function getMasteryScores($sumid){
 function getCurrentRank($sumid){
     $rankDataArray = array();
     $rankReturnArray = array();
-    global $api_key;
+    global $headers;
 
     // Curl API request block
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid."?api_key=".$api_key);
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($ch);
     $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -163,8 +175,9 @@ function getCurrentRank($sumid){
     if($httpcode == "429"){
         sleep(121);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid."?api_key=".$api_key);
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $output = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -198,7 +211,7 @@ function getCurrentRank($sumid){
  * $matchIDArray with all MatchIDs as separate entries
  */
 function getMatchIDs($puuid, $maxMatchIDs){
-    global $api_key;
+    global $headers;
     $matchIDArray = array();
     $gameType = "ranked";
     $start = 0;
@@ -212,8 +225,9 @@ function getMatchIDs($puuid, $maxMatchIDs){
 
         // Curl API request block
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=" . $start . "&count=" . $matchcount . "&api_key=" . $api_key);
+        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=" . $start . "&count=" . $matchcount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $matchid_output = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
@@ -221,8 +235,9 @@ function getMatchIDs($puuid, $maxMatchIDs){
         // 429 Too Many Requests 
         if($httpcode == "429"){
             sleep(121);        
-            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=".$start."&count=" . $matchcount . "&api_key=" . $api_key);
+            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=".$start."&count=" . $matchcount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             $matchid_output = curl_exec($ch);
             $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
@@ -251,8 +266,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
  * N/A, file saving & logging instead
  */
 function downloadMatchByID($matchid, $username = null){
-    global $api_key;
-    global $counter;
+    global $headers, $counter;
     $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log';
 
     // Halving of matchDownloader.log in case the logfile exceeds 10 MB
@@ -271,8 +285,9 @@ function downloadMatchByID($matchid, $username = null){
     // Only download if file doesn't exist yet
     if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
         $ch = curl_init(); 
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
+        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $match_output = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);      
@@ -283,7 +298,8 @@ function downloadMatchByID($matchid, $username = null){
             $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
             $limit = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 121 seconds - Status: " . $httpcode . " Too Many Requests";
             file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
-            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid . "/?api_key=" . $api_key);
+            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             $match_output = curl_exec($ch);
             $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -339,15 +355,16 @@ function getMatchData($matchIDArray){
  * Returnvalue:
  * N/A, displaying on page via table
  */
-function getMatchDetailsByPUUID($puuid){
+function getMatchDetailsByPUUID($matchIDArray, $puuid){
     global $currentpatch;
     $matches_count = scandir("/var/www/html/wordpress/clashapp/data/matches/");
     $count = 0;
-
+ 
     // Initiating Matchdetail Table
     echo "<table class='table'>";
-    for($i = count($matches_count)-1; $i > 2; $i--){
-        $handle = file_get_contents("/var/www/html/wordpress/clashapp/data/matches/".$matches_count[$i]);
+    $startFileIterator = microtime(true);
+    foreach ($matchIDArray as $i => $matchIDJSON) {
+        $handle = file_get_contents("/var/www/html/wordpress/clashapp/data/matches/".$matchIDJSON.".json");
         $inhalt = json_decode($handle);
         if(isset($inhalt->metadata->participants) && $inhalt->info->gameDuration != 0) {
             if(in_array($puuid, (array) $inhalt->metadata->participants)){
@@ -483,9 +500,13 @@ function getMatchDetailsByPUUID($puuid){
             }
         }
     }
+
     echo "</table>";
     // End of Matchdetail Table & Counttext of local specific amount
-    echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden";
+    echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden<br>";
+    echo "<pre>";
+    print_r($ladezeiten);
+    echo "</pre>";
 }
 
 /** Followup function to print getMasteryScores(); returninfo
