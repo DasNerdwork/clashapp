@@ -48,6 +48,8 @@
 
 
 <?php
+$startWhole = microtime(true);
+$ladezeiten = array();
 
 include_once('functions.php');
 include_once('update.php');
@@ -78,7 +80,7 @@ if (isset($_GET["name"])){
     </script>
 
 <?php
-
+$startFetchPlayerData = microtime(true);
     $playerDataDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/player/');
 
     foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
@@ -116,11 +118,9 @@ if (isset($_GET["name"])){
             }
         }
     }
+$ladezeiten["FetchPlayerData"] = number_format(microtime(true) - $startFetchPlayerData, 4);
 
- 
-
-
-
+$startPrintData = microtime(true);
 if($formattedInput != "") {
     // print collected values
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
@@ -138,7 +138,6 @@ if($formattedInput != "") {
     echo "SumID: " . $playerData["SumID"] . "<br>";
     echo "AccountID: " . $playerData["AccountID"] . "<br>";
     echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
-    //print_r("API Key: ".getenv('API_KEY')."<br>"); // API Key as Env Variable
  
     echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
     printMasteryInfo($masteryData, 0);
@@ -146,46 +145,60 @@ if($formattedInput != "") {
     printMasteryInfo($masteryData, 1);
     echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
     printMasteryInfo($masteryData, 2);
-    echo "</td></table>";  
+    echo "</td></table>"; 
+    $ladezeiten["printData"] = number_format(microtime(true) - $startPrintData, 4); 
 
-    $start = microtime(true);
-    echo "<pre>";
-    print_r($masteryData);
-    echo "</pre>";
-
+    $startMatchDataGrab = microtime(true);
     $matchDaten = getMatchData($matchids);
+    $ladezeiten["MatchDataGrab"] = number_format(microtime(true) - $startMatchDataGrab, 4);
     echo "<table class='table' style='width:100%'><tr><td>";
+    $startMostCommon = microtime(true);
     $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
+    $ladezeiten["MostCommon"] = number_format(microtime(true) - $startMostCommon, 4);
     getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
     echo "</td><td>";
+    $startAverage = microtime(true);
     $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
+    $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
     getAverage($averageAttributes, $matchDaten, $puuid);
 
     echo "</td></tr></table>";  
-
+    $startMostPlayedWith = microtime(true);
     mostPlayedWith($matchDaten, $puuid);
+    $ladezeiten["MostPlayedWith"] = number_format(microtime(true) - $startMostPlayedWith, 4);
 
-    echo "<br>Ladezeit: ".number_format(microtime(true) - $start, 2)." Sekunden<br>";
     echo "<br>";
     echo "Most Losses in Lane against: ";
+    $startMostLossesAgainst = microtime(true);
     getMostLossesAgainst("lane", $matchDaten, $puuid);
+    $ladezeiten["MostLossesAgainst"] = number_format(microtime(true) - $startMostLossesAgainst, 4);
     echo "<br>";
     echo "Most Losses in Total against: ";
     getMostLossesAgainst("general", $matchDaten, $puuid);
     echo "<br>";
     echo "Highest Winrate in Lane against: ";
+    $startHighestWinrateAgainst = microtime(true);
     getHighestWinrateAgainst("lane", $matchDaten, $puuid);
+    $ladezeiten["HighestWinrateAgainst"] = number_format(microtime(true) - $startHighestWinrateAgainst, 4);
     echo "<br>";
     echo "Highest Winrate in Total against: ";
     getHighestWinrateAgainst("general", $matchDaten, $puuid);
     echo "<br><br>";
+    $startHighestWinrateWith = microtime(true);
     getHighestWinrateWith("GENERAL", $matchDaten, $puuid);
     getHighestWinrateWith("TOP", $matchDaten, $puuid);
     getHighestWinrateWith("JUNGLE", $matchDaten, $puuid);
     getHighestWinrateWith("MID", $matchDaten, $puuid);
     getHighestWinrateWith("BOT", $matchDaten, $puuid);
     getHighestWinrateWith("UTILITY", $matchDaten, $puuid);
-    getMatchDetailsByPUUID($puuid);
+    $ladezeiten["HighestWInrateWith"] = number_format(microtime(true) - $startHighestWinrateWith, 4);
+    $startMatchDetailList = microtime(true);
+    getMatchDetailsByPUUID($matchids, $puuid);
+    $ladezeiten["MatchDetailsList"] = number_format(microtime(true) - $startMatchDetailList, 4);
+    $ladezeiten["whole"] = number_format(microtime(true) - $startWhole, 4);
+    echo "<pre>";
+    print_r($ladezeiten);
+    echo "</pre>";
     }
 }
 // if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
