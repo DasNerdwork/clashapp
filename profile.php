@@ -57,6 +57,7 @@ include_once('update.php');
 if (isset($_GET["name"])){
     // Format text field input to swap spaces with '+' for correct api requests
     $formattedInput = preg_replace('/\s+/', '+', $_GET["name"]);
+    
 
 ?>
     <script>
@@ -66,7 +67,6 @@ if (isset($_GET["name"])){
             url: "../clashapp/update.php",
             data: { username: "<?=$formattedInput ?>" }
             }).done(function( msg ) {
-                console.log(msg)
                 var statusJson = JSON.parse(msg);
                 if(statusJson.status == "up-to-date"){
                     var d = new Date();

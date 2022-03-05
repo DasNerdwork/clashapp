@@ -922,4 +922,105 @@ function getHighestWinrateWith($lane, $matchDataArray, $puuid){
         echo "Highest Winrate: (".ucfirst(strtolower($lane)).") with ". array_key_first($highestWinrateArray) . " (" . $result . "%) in " . $highestWinrateArray[array_key_first($highestWinrateArray)]["count"] . " matches<br>";
     }
 }
+
+/** Same as getPlayerData but with all the team info available
+ * This function is collected any values of a team by a given teamID
+ * 
+ * $teamID => The necessary ID of the team, received beforehand via if(isset($_POST['sumname']))
+ * $teamDataArray => Just the $teamOutput content but rearranged and renamed
+ * $httpcode => Contains the returncode of the curl request (e.g. 404 not found)
+ * 
+ * Returnvalue:
+ * $teamDataArray with keys "TeamID", "TournamentID", "Name", "Tag", "Icon", "Tier", "Captain" and the array itself of "Players"
+ */
+function getTeamByTeamID($teamID){
+    global $headers;
+    $teamDataArray = array();
+
+    // Curl API request block
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $teamOutput = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    // 403 Access forbidden -> Outdated API Key
+    if($httpcode == "403"){
+        echo "<h2>API Key outdated!</h2>";
+    }
+    
+    // 429 Too Many Requests 
+    if($httpcode == "429"){
+        sleep(121);
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $teamOutput = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    }
+
+    // Collect requested values in returnarray
+    $teamDataArray["TeamID"] = json_decode($teamOutput)->id;
+    $teamDataArray["TournamentID"] = json_decode($teamOutput)->tournamentId;
+    $teamDataArray["Name"] = json_decode($teamOutput)->name;
+    $teamDataArray["Tag"] = json_decode($teamOutput)->abbreviation;
+    $teamDataArray["Icon"] = json_decode($teamOutput)->iconId;
+    $teamDataArray["Tier"] = json_decode($teamOutput)->tier;
+    $teamDataArray["Captain"] = json_decode($teamOutput)->captain;
+    $teamDataArray["Players"] = json_decode($teamOutput, true)["players"];
+  
+    return $teamDataArray;
+}
+
+/** Always active "function" to collect the teamID of a given Summoner Name
+ * This function calls an API request as soon as the sumname gets posted from the team.php
+ * through the javascript sanitize(text) function.
+ * 
+ * As we need none of the info received below except for the teamId to proceed, only that one is echo'd back to javascript
+ * and back to the team.php
+ * There we then open a new page with the teamId in it's URL and grab it through a $_GET to proceed and execute functions 
+ * where the teamID is needed. If there is no data found we instead redirect to a 404 page, hence echo "404".
+ * 
+ * No other data has to be saved or transferred as all the data we get from this API request is also received during the
+ * following steps and e.g. the getTeamByTeamID($teamID) function above.
+ * 
+ * Returnvalue:
+ * None, echo'ing teamID back to javascript to open new windows with it appended
+ */
+if(isset($_POST['sumname'])){
+    global $headers;
+    $playerName = preg_replace('/\s+/', '+', $_POST['sumname']);
+    $playerData = getPlayerData("name",$playerName);
+
+    // Curl API request block
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    $clash_output = curl_exec($ch);
+    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    // 429 Too Many Requests 
+    if($httpcode == "429"){
+        sleep(121);        
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $clash_output = curl_exec($ch);
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    }
+
+    // Decode and echo returned data, if not existent send to 404 page
+    $clashData = json_decode($clash_output, true);
+    if(isset($clashData[0]["teamId"])){
+        echo $clashData[0]["teamId"];
+    } else {
+        echo "404";
+    }
+}
 ?>
