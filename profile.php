@@ -138,7 +138,7 @@ if($formattedInput != "") {
     echo "SumID: " . $playerData["SumID"] . "<br>";
     echo "AccountID: " . $playerData["AccountID"] . "<br>";
     echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
- 
+
     echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
     printMasteryInfo($masteryData, 0);
     echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
@@ -151,18 +151,49 @@ if($formattedInput != "") {
     $startMatchDataGrab = microtime(true);
     $matchDaten = getMatchData($matchids);
     $ladezeiten["MatchDataGrab"] = number_format(microtime(true) - $startMatchDataGrab, 4);
-    echo "<table class='table' style='width:100%'><tr><td>";
     $startMostCommon = microtime(true);
     $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
     $ladezeiten["MostCommon"] = number_format(microtime(true) - $startMostCommon, 4);
     getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
-    echo "</td><td>";
+    echo "<table class='table' style='width:100%'><tr><td>";
+    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats of ".$playerName."</b></td></tr>";
     $startAverage = microtime(true);
-    $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
+    $averageAttributes = array_keys(json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
     $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
     getAverage($averageAttributes, $matchDaten, $puuid);
+    echo "</table></td><td>";
 
-    echo "</td></tr></table>";  
+    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats in General</b></td></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"] as $key => $stat){
+        echo "<tr><td>".$key . ": ".$stat."</td></tr>";
+    }
+    echo "</table></td><td>";
+    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Support</b></td></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["UTILITY"] as $key => $stat){
+        echo "<tr><td>".$key . ": ".$stat."</td></tr>";
+    }
+    echo "</table></td><td>";
+    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Jungle</b></td></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["JUNGLE"] as $key => $stat){
+        echo "<tr><td>".$key . ": ".$stat."</td></tr>";
+    }
+    echo "</table></td><td>";
+    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Bottom</b></td></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["BOTTOM"] as $key => $stat){
+        echo "<tr><td>". $key . ": ".$stat."</td></tr>";
+    }
+    echo "</table></td><td>";
+    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Middle</b></td></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["MIDDLE"] as $key => $stat){
+        echo "<tr><td>". $key . ": ".$stat."</td></tr>";
+    }
+    echo "</table></td><td>";
+    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Top</b></td></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["TOP"] as $key => $stat){
+        echo "<tr><td>" . $key . ": ".$stat."</td></tr>";
+    }
+    echo "</table></td></tr></table>";
+    
     $startMostPlayedWith = microtime(true);
     mostPlayedWith($matchDaten, $puuid);
     $ladezeiten["MostPlayedWith"] = number_format(microtime(true) - $startMostPlayedWith, 4);

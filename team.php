@@ -16,11 +16,17 @@
                 console.log(msg)
                 window.location.href="https://dasnerdwork.net/team/" + msg;
             });
+            showLoader();
         } else {
             var d = new Date();
             alert("[" + d.toLocaleTimeString() + "] ERROR: Eingabe fehlerhaft oder unvollständig.\n\nErlaubte Zeichen sind a-Z, 0-9 und Alphabete andere Sprachen.\nZudem muss ein Beschwörername zwischen 3-16 Zeichen lang sein.");
         }
      }
+     function showLoader(){
+        document.getElementById("loader").style.opacity = 1;
+        document.getElementById("name").disabled = true;
+        document.getElementById("submitBtn").disabled = true;
+    }
 </script>
 </head>
 
@@ -36,7 +42,6 @@
 <?php
 include_once('functions.php');
 include_once('update.php');
-$playerData = "test";
 /**
  * 1. API request to get SumID by username
  * 2. API request to get player.by-summoner (to get the "teamId"
@@ -56,10 +61,60 @@ $output = json_decode(file_get_contents('/hdd1/clashapp/misc/player.by-summoner.
 
 if (isset($_GET["name"]) && $_GET["name"] != "404"){
     $teamID = $_GET["name"];
-    echo "<pre>";
-    print_r(getTeamByTeamID($teamID));
-    echo "</pre>";
+    $teamDataArray = getTeamByTeamID($teamID);
+    echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
+    echo "<h1><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1><br>";
+    echo "<table class='table' style='width:100%'><tr>";
+    $tableWidth = round(100/count($teamDataArray["Players"]));
+   foreach($teamDataArray["Players"] as $key => $player){
+        echo "<td style='vertical-align: top;'><table class='table'><tr><td style='width:".$tableWidth."%; text-align: center;'>";
+        $playerData = getPlayerData("sumid",$player["summonerId"]);
+        echo "Position: ".$player["position"]."<br>";
+        $playerName = $playerData["Name"];
+        $sumid = $playerData["SumID"];
+        $puuid = $playerData["PUUID"];
+        $masteryData = getMasteryScores($sumid);
+        $rankData = getCurrentRank($sumid);
+        $matchids = getMatchIDs($puuid, 15);
+        foreach($matchids as $matchid){
+            if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
+                downloadMatchByID($matchid, $playerName);
+            }
+        }
+        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
+            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="64"><br>';
+        }
+        echo "Name: " . $playerData["Name"] . "<br>";
+        echo "Level: " . $playerData["Level"] . "<br><br>";
+
+        echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 8em;'>";
+
+        foreach($rankData as $rankedQueue){
+        echo "Rank: " . $rankedQueue["Tier"] . " " . $rankedQueue["Rank"] . " mit " . $rankedQueue["LP"] . " LP in " . $rankedQueue["Queue"] . "<br>";
+        echo "Wins: " . $rankedQueue["Wins"] . " / Losses: " . $rankedQueue["Losses"] . " - Winrate: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><br>";
+        }
+
+        echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 33em;'>";
+        if(isset($masteryData[0])){printMasteryInfo($masteryData, 0);}
+        echo "<br><br>";
+        if(isset($masteryData[1])){printMasteryInfo($masteryData, 1);}
+        echo "<br><br>";
+        if(isset($masteryData[2])){printMasteryInfo($masteryData, 2);}
+        echo "</td></tr><tr><td style='text-align: center; vertical-align: top;'>";
+        $matchDaten = getMatchData($matchids);
+        $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
+        getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
+        $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
+        getAverage($averageAttributes, $matchDaten, $puuid);
+
+        mostPlayedWith($matchDaten, $puuid);
+    
+        // getMatchDetailsByPUUID($matchids, $puuid);
+        echo "</td></tr></table></td>";
+   }
+   echo "</tr></table>";
 }
+
 
 
 ?>
