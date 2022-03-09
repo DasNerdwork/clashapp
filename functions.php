@@ -41,6 +41,9 @@ function getPlayerData($type, $username){
         case "puuid":
             $requesturlvar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
             break;
+        case "sumid":
+            $requesturlvar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/";
+            break;
     }
 
     // Curl API request block
@@ -680,19 +683,21 @@ function getAverage($attributesArray, $matchDataArray, $puuid){
         for($i = 0; $i < 10; $i++){
             if($matchData->info->participants[$i]->puuid == $puuid) {
                 foreach ($attributesArray as $attribute){
-                    $averageArray[$attribute] += $matchData->info->participants[$i]->$attribute;
-                    
+                    if(isset($matchData->info->participants[$i]->$attribute)){
+                        $averageArray[$attribute] += $matchData->info->participants[$i]->$attribute;
+                    } else if(isset($matchData->info->participants[$i]->challenges->$attribute)){
+                        $averageArray[$attribute] += $matchData->info->participants[$i]->challenges->$attribute;
+                    }
                 }
             }
         }
     }
 
+
     // Count & Round to retrieve printable data
     foreach ($averageArray as $key => $arrayElement){
-        echo "<pre>";
-        echo "Average of " . $key . ": ";
-        echo ($averageArray[$key] = round($arrayElement / count($matchDataArray)));
-        echo "</pre>";
+        echo "<tr><td>" . $key . ": ";
+        echo ($averageArray[$key] = round($arrayElement / count($matchDataArray),2))."</td></tr>";
     }
 }
 
