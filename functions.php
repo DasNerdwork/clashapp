@@ -455,7 +455,11 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         echo $inhalt->info->participants[$in]->visionScore . " Wards: ";
                         echo $inhalt->info->participants[$in]->wardsPlaced . "x ";
                         echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/3340.png" width="16" style="vertical-align:middle"> Control Wards: ';
-                        echo $inhalt->info->participants[$in]->challenges->controlWardsPlaced . "x ";
+                        if(isset($inhalt->info->participants[$in]->challenges->controlWardsPlaced)){
+                            echo $inhalt->info->participants[$in]->challenges->controlWardsPlaced . "x ";
+                        } else if(isset($inhalt->info->participants[$in]->visionWardsBoughtInGame)){
+                            echo $inhalt->info->participants[$in]->visionWardsBoughtInGame . "x ";
+                        }
                         echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="16" style="vertical-align:middle"></td>';
 
                         // Display of the Total Values
@@ -677,6 +681,7 @@ function getMostCommon($attributesArray, $matchDataArray, $puuid){
  */
 function getAverage($attributesArray, $matchDataArray, $puuid){
     $averageArray = array();
+    $counterArray = array();
     
     // Store all values into separate array corresponding to each attribute
     foreach ($matchDataArray as $matchData) {
@@ -685,8 +690,12 @@ function getAverage($attributesArray, $matchDataArray, $puuid){
                 foreach ($attributesArray as $attribute){
                     if(isset($matchData->info->participants[$i]->$attribute)){
                         $averageArray[$attribute] += $matchData->info->participants[$i]->$attribute;
+                        $counterArray[$attribute] += 1;
                     } else if(isset($matchData->info->participants[$i]->challenges->$attribute)){
                         $averageArray[$attribute] += $matchData->info->participants[$i]->challenges->$attribute;
+                        $counterArray[$attribute] += 1;
+                    } else {
+                        $averageArray[$attribute] += 0;
                     }
                 }
             }
@@ -696,8 +705,15 @@ function getAverage($attributesArray, $matchDataArray, $puuid){
 
     // Count & Round to retrieve printable data
     foreach ($averageArray as $key => $arrayElement){
-        echo "<tr><td>" . $key . ": ";
-        echo ($averageArray[$key] = round($arrayElement / count($matchDataArray),2))."</td></tr>";
+        echo "<tr><td style='text-align: center;'>" . $key . ": </td><td>";
+        if(($arrayElement / $counterArray[$key]) < 10){
+            echo ($averageArray[$key] = round($arrayElement / $counterArray[$key],2))."</td></tr>";
+        } else if(($arrayElement / $counterArray[$key]) < 100){
+            echo ($averageArray[$key] = round($arrayElement / $counterArray[$key],1))."</td></tr>";
+        } else {
+            echo ($averageArray[$key] = round($arrayElement / $counterArray[$key]))."</td></tr>";
+        }
+
     }
 }
 
