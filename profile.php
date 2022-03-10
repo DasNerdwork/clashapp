@@ -45,7 +45,36 @@
     <div class="sbl-circ" id="loader"></div>
 </form>
 
+<style>
+#stattable {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+}
 
+#stattable td, #stattable th {
+  padding: 9px;
+  vertical-align: top;
+}
+
+#stattable tr:nth-child(even){background-color: #2a2a2a;}
+
+#stattable th {
+  background-color: #C6CCD8;
+  color: #000;
+}
+
+#substattable {
+    margin: 0px -10px 0px -10px; 
+    text-align: center;
+}
+
+#substattable th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+</style>
 
 <?php
 $startWhole = microtime(true);
@@ -155,42 +184,42 @@ if($formattedInput != "") {
     $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
     $ladezeiten["MostCommon"] = number_format(microtime(true) - $startMostCommon, 4);
     getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
-    echo "<table class='table' style='width:100%'><tr><td>";
-    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats of ".$playerName."</b></td></tr>";
+    echo "<table class='table' id='stattable' vertical-align:top;'><tr><td>";
+    echo "<table class='table' id='substattable'><tr><th>Statname</th><th>My Average</th></tr>";
     $startAverage = microtime(true);
     $averageAttributes = array_keys(json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
     $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
     getAverage($averageAttributes, $matchDaten, $puuid);
     echo "</table></td><td>";
 
-    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats in General</b></td></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"] as $key => $stat){
-        echo "<tr><td>".$key . ": ".$stat."</td></tr>";
+    echo "<table class='table' id='substattable'><tr><th><b>Average in General</b></th></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"] as $stat){
+        echo "<tr><td>".$stat."</td></tr>";
     }
     echo "</table></td><td>";
-    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Support</b></td></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["UTILITY"] as $key => $stat){
-        echo "<tr><td>".$key . ": ".$stat."</td></tr>";
+    echo "<table class='table' id='substattable'><tr><th><b>As Support</b></th></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["UTILITY"] as $stat){
+        echo "<tr><td>".$stat."</td></tr>";
     }
     echo "</table></td><td>";
-    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Jungle</b></td></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["JUNGLE"] as $key => $stat){
-        echo "<tr><td>".$key . ": ".$stat."</td></tr>";
+    echo "<table class='table' id='substattable'><tr><th><b>As Jungle</b></th></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["JUNGLE"] as $stat){
+        echo "<tr><td>".$stat."</td></tr>";
     }
     echo "</table></td><td>";
-    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Bottom</b></td></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["BOTTOM"] as $key => $stat){
-        echo "<tr><td>". $key . ": ".$stat."</td></tr>";
+    echo "<table class='table' id='substattable'><tr><th><b>As Bottom</b></th></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["BOTTOM"] as $stat){
+        echo "<tr><td>".$stat."</td></tr>";
     }
     echo "</table></td><td>";
-    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Middle</b></td></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["MIDDLE"] as $key => $stat){
-        echo "<tr><td>". $key . ": ".$stat."</td></tr>";
+    echo "<table class='table' id='substattable'><tr><th><b>As Middle</b></th></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["MIDDLE"] as $stat){
+        echo "<tr><td>".$stat."</td></tr>";
     }
     echo "</table></td><td>";
-    echo "<table class='table' style='width:14%'><tr><td><b>Average Stats on Top</b></td></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["TOP"] as $key => $stat){
-        echo "<tr><td>" . $key . ": ".$stat."</td></tr>";
+    echo "<table class='table' id='substattable'><tr><th><b>As Top</b></th></tr>";
+    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["TOP"] as $stat){
+        echo "<tr><td>".$stat."</td></tr>";
     }
     echo "</table></td></tr></table>";
     

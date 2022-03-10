@@ -61,7 +61,12 @@ def statIterator(lane):
     # Calculate rounded averages of values
     logger.info("Calculating averages of fetched data...")            
     for key, val in challengeDict.items():
-        challengeDict[key] = round(sum(val)/len(val), 2)
+        if ((sum(val)/len(val)) < 10):
+            challengeDict[key] = round(sum(val)/len(val), 2)
+        elif ((sum(val)/len(val)) < 100):
+            challengeDict[key] = round(sum(val)/len(val), 1)
+        else:
+            challengeDict[key] = round(sum(val)/len(val))
 
     # Sort return array alphabetically
     for key in sorted(challengeDict):
