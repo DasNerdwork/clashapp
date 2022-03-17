@@ -33,6 +33,27 @@
     function disableUpdateBtn(){
         document.getElementById("updateBtn").disabled = true;
     }
+    function searchStatTable() {
+    // Declare variables
+    var input, filter, table, tr, td, i, txtValue;
+    input = document.getElementById("statTableSearch");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("stattable");
+    tr = table.getElementsByTagName("tr");
+
+    // Loop through all table rows, and hide those who don't match the search query
+    for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[0];
+        if (td) {
+        txtValue = td.textContent || td.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+        } else {
+            tr[i].style.display = "none";
+        }
+        }
+    }
+    }
 </script>
 </head>
 
@@ -45,35 +66,76 @@
     <div class="sbl-circ" id="loader"></div>
 </form>
 
+
 <style>
 #stattable {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    text-align: center;
 }
 
 #stattable td, #stattable th {
-  padding: 9px;
-  vertical-align: top;
+    padding: 9px;
+    vertical-align: top;
 }
 
 #stattable tr:nth-child(even){background-color: #2a2a2a;}
 
 #stattable th {
-  background-color: #C6CCD8;
-  color: #000;
-}
-
-#substattable {
-    margin: 0px -10px 0px -10px; 
-    text-align: center;
-}
-
-#substattable th {
+    background-color: #C6CCD8;
+    color: #000;
     position: -webkit-sticky;
     position: sticky;
     top: 0;
     z-index: 2;
 }
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
 </style>
 
 <?php
@@ -183,45 +245,11 @@ if($formattedInput != "") {
     $startMostCommon = microtime(true);
     $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
     $ladezeiten["MostCommon"] = number_format(microtime(true) - $startMostCommon, 4);
-    getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
-    echo "<table class='table' id='stattable' vertical-align:top;'><tr><td>";
-    echo "<table class='table' id='substattable'><tr><th>Statname</th><th>My Average</th></tr>";
+    $playerLane = getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
     $startAverage = microtime(true);
     $averageAttributes = array_keys(json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
     $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
-    getAverage($averageAttributes, $matchDaten, $puuid);
-    echo "</table></td><td>";
-
-    echo "<table class='table' id='substattable'><tr><th><b>Average in General</b></th></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"] as $stat){
-        echo "<tr><td>".$stat."</td></tr>";
-    }
-    echo "</table></td><td>";
-    echo "<table class='table' id='substattable'><tr><th><b>As Support</b></th></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["UTILITY"] as $stat){
-        echo "<tr><td>".$stat."</td></tr>";
-    }
-    echo "</table></td><td>";
-    echo "<table class='table' id='substattable'><tr><th><b>As Jungle</b></th></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["JUNGLE"] as $stat){
-        echo "<tr><td>".$stat."</td></tr>";
-    }
-    echo "</table></td><td>";
-    echo "<table class='table' id='substattable'><tr><th><b>As Bottom</b></th></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["BOTTOM"] as $stat){
-        echo "<tr><td>".$stat."</td></tr>";
-    }
-    echo "</table></td><td>";
-    echo "<table class='table' id='substattable'><tr><th><b>As Middle</b></th></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["MIDDLE"] as $stat){
-        echo "<tr><td>".$stat."</td></tr>";
-    }
-    echo "</table></td><td>";
-    echo "<table class='table' id='substattable'><tr><th><b>As Top</b></th></tr>";
-    foreach (json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["TOP"] as $stat){
-        echo "<tr><td>".$stat."</td></tr>";
-    }
-    echo "</table></td></tr></table>";
+    getAverage($averageAttributes, $matchDaten, $puuid, $playerLane);
     
     $startMostPlayedWith = microtime(true);
     mostPlayedWith($matchDaten, $puuid);
