@@ -1,7 +1,7 @@
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<script type="text/javascript" src="/clashapp/clash.js"></script>
-<link rel="stylesheet" href="/clashapp/clash.css">
+<script type="text/javascript" src="../clashapp/clash.js"></script>
+<link rel="stylesheet" href="../clashapp/clash.css">
 <link id="clash-favicon" rel="shortcut icon" href="https://dasnerdwork.net/wp-content/uploads/favicons/clash-favicon.ico">
 <title>Clash – DasNerdwork.net</title>
 
@@ -65,79 +65,6 @@
     <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;">Aktualisieren</button>
     <div class="sbl-circ" id="loader"></div>
 </form>
-
-
-<style>
-#stattable {
-    font-family: Arial, Helvetica, sans-serif;
-    border-collapse: collapse;
-    text-align: center;
-}
-
-#stattable td, #stattable th {
-    padding: 9px;
-    vertical-align: top;
-}
-
-#stattable tr:nth-child(even){background-color: #2a2a2a;}
-
-#stattable th {
-    background-color: #C6CCD8;
-    color: #000;
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-}
-
-/* Tooltip container */
-.tooltip {
-  position: relative;
-  display: inline-block;
-}
-
-/* Tooltip text */
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 120px;
-  background-color: #555;
-  color: #fff;
-  text-align: center;
-  padding: 5px 0;
-  border-radius: 6px;
-
-  /* Position the tooltip text */
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  margin-left: -60px;
-
-  /* Fade in tooltip */
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* Tooltip arrow */
-.tooltip .tooltiptext::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  margin-left: -5px;
-  border-width: 5px;
-  border-style: solid;
-  border-color: #555 transparent transparent transparent;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-}
-
-</style>
-
 <?php
 $startWhole = microtime(true);
 $ladezeiten = array();

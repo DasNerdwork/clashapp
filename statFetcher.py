@@ -75,9 +75,9 @@ def statIterator(lane):
                 for key, val in player['challenges'].items():
                     if key in challengeNameArray:
                         challengeDict.setdefault(key, []).append(val)
-            for key, val in player.items():
-                if key in statNameArray:
-                    challengeDict.setdefault(key, []).append(val)
+                for key, val in player.items():
+                    if key in statNameArray:
+                        challengeDict.setdefault(key, []).append(val)
 
     # Calculate rounded averages of values
     logger.info("Calculating averages of fetched data...")            
@@ -120,9 +120,9 @@ def championStatIterator():
                         for key, val in player['challenges'].items():
                             if key in championChallengeNameArray:
                                 championDict[championName].setdefault(key, []).append(val)
-                    for key, val in player.items():
-                        if key in championStatNameArray:
-                            championDict[championName].setdefault(key, []).append(val)
+                        for key, val in player.items():
+                            if key in championStatNameArray:
+                                championDict[championName].setdefault(key, []).append(val)
 
     # Calculate rounded averages of values
     logger.info("Calculating averages of champion data...")    
