@@ -640,6 +640,7 @@ function championIdToFilename($id){
  */
 function getMostCommon($attributesArray, $matchDataArray, $puuid){
     $mostCommonArray = array();
+    $mostCommonReturn = array();
 
     // Store all values into separate array corresponding to each attribute
     foreach ($matchDataArray as $matchData) {
@@ -660,13 +661,14 @@ function getMostCommon($attributesArray, $matchDataArray, $puuid){
         arsort($temp[$attribute]);
         $values[$attribute] = array_slice(array_keys($temp[$attribute]), 0, 3, true);
         $count[$attribute] = array_slice(array_values($temp[$attribute]), 0, 3, true);
-        echo "<pre>";
-        echo "Most common " . $attribute . ": <br>";
-        echo $count[$attribute][0]." mal ".$values[$attribute][0]." -> ".$count[$attribute][1]." mal ".$values[$attribute][1]." -> ".$count[$attribute][2]." mal ".$values[$attribute][2];
-        echo "</pre>";
-
+        $mostCommonReturn[$attribute] = array
+            (
+            $values[$attribute][0] => $count[$attribute][0],
+            $values[$attribute][1] => $count[$attribute][1],
+            $values[$attribute][2] => $count[$attribute][2]
+            );
     }
-    return $values['teamPosition'][0];
+    return $mostCommonReturn;
 }
 
 /** Fetches the average value of specific attributes

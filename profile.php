@@ -144,6 +144,16 @@ if($formattedInput != "") {
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
         echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="64"><br>';
     }
+    $matchDaten = getMatchData($matchids);
+    $playerLanes = array_keys(array_slice(getMostCommon(array("teamPosition"), $matchDaten, $puuid), 0, 1, true)['teamPosition']);
+    $playerMainRole = $playerLanes[0];
+    $playerSecondaryRole = $playerLanes[1];
+    if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerMainRole.'.png')){
+        echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.png" width="32">';
+    }
+    if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png')){
+        echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png" width="24"><br>';
+    }
     echo "<table class='table' style='width:100%'><tr><td>";
     echo "Name: " . $playerData["Name"] . "<br>";
     echo "Level: " . $playerData["Level"] . "<br>";
@@ -167,12 +177,20 @@ if($formattedInput != "") {
     $ladezeiten["printData"] = number_format(microtime(true) - $startPrintData, 4); 
 
     $startMatchDataGrab = microtime(true);
-    $matchDaten = getMatchData($matchids);
     $ladezeiten["MatchDataGrab"] = number_format(microtime(true) - $startMatchDataGrab, 4);
     $startMostCommon = microtime(true);
     $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
     $ladezeiten["MostCommon"] = number_format(microtime(true) - $startMostCommon, 4);
-    $playerLane = getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
+    $mostCommonReturn = getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
+    echo "<pre>";
+    print_r($mostCommonReturn);
+    echo "</pre>";
+    
+    
+    $playerLane = array_key_first(array_slice($mostCommonReturn['teamPosition'], 0, 1, true));
+
+
+
     $startAverage = microtime(true);
     $averageAttributes = array_keys(json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
     $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
