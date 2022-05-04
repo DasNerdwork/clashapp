@@ -140,24 +140,73 @@ $ladezeiten["FetchPlayerData"] = number_format(microtime(true) - $startFetchPlay
 
 $startPrintData = microtime(true);
 if($formattedInput != "") {
-    // print collected values
-    // echo "<div style='margin-bottom: -360px;'>";
-    // if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
-    //     echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="82" style="margin-left: 41px; border-radius: 100%;"><br>';
-    // }
-    // if(file_exists('/var/www/html/wordpress/clashapp/data/misc/ranks/04_gold_base.ls_ch.png')){
-    //     echo '<img src="/clashapp/data/misc/ranks/04_gold_base.ls_ch.png" width="384" style="position: relative; left: -110px; top: -234px;"><br>';
-    // }
-    // echo "</div>";
+    $rankVal = 0;
+    foreach($rankData as $rankedQueue){
+        if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR"){
+            switch ($rankedQueue["Tier"]){
+                case ($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 9):
+                    $rankVal = 9;
+                    $rankNumber = "";
+                    $highestRank = $rankedQueue["Tier"];
+                    break;        
+                case ($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 8):
+                    $rankVal = 8;
+                    $rankNumber = "";
+                    $highestRank = $rankedQueue["Tier"];
+                    break;     
+                case ($rankedQueue["Tier"] == "MASTER" && $rankVal < 7):
+                    $rankVal = 7;
+                    $rankNumber = "";
+                    $highestRank = $rankedQueue["Tier"];
+                    break;                  
+                case ($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 6):
+                    $rankVal = 6;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                    break;                   
+                case ($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 5):
+                    $rankVal = 5;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                    break 2;                  
+                case ($rankedQueue["Tier"] == "GOLD" && $rankVal < 4):
+                    $rankVal = 4;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                    break;     
+                case ($rankedQueue["Tier"] == "SILVER" && $rankVal < 3):
+                    $rankVal = 3;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                    break;     
+                case ($rankedQueue["Tier"] == "BRONZE" && $rankVal < 2):
+                    $rankVal = 2;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                    break;         
+                case ($rankedQueue["Tier"] == "IRON" && $rankVal < 1):
+                    $rankVal = 1;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                    break;    
+            }
+        }
+    }
+
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
     echo "<div style='display: flex; justify-content: center; width: 170px; margin-bottom: 24px;'>";
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
         echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="82" style="border-radius: 100%;margin-top: 5px; z-index: -1;">';
     }
-    if(file_exists('/var/www/html/wordpress/clashapp/data/misc/ranks/04_gold_base.ls_ch.png')){
-        echo '<img src="/clashapp/data/misc/ranks/04_gold_base.ls_ch.png" width="384" style="position: absolute;  top: -100px; z-index: -1;">';
+    if(file_exists($profileBorderPath)){
+        echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute;  top: -100px; z-index: -1;">';
     }
+    echo "<div style='font-weight: bold; color: #e8dfcc; position: fixed; margin-top: -4px; font-size: 12px;'>".$rankNumber."</div>";
+    echo "<div style='font-weight: regular; color: #e8dfcc; position: fixed; margin-top: 91px; font-size: 12px;'>".$playerData["Level"]."</div>";
     echo "</div>";
+
 
     $matchDaten = getMatchData($matchids);
     $playerLanes = getLanePercentages($matchDaten, $puuid);

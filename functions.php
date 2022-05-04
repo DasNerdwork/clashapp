@@ -715,8 +715,6 @@ function getLanePercentages($matchDaten, $puuid){
 
 
 
-
-
 /** Fetches the average value of specific attributes
  * This function retrieves the average value of a specific attribute by iterating through a users matches
  * It is possible that it gets executed multiple times for multiple attributes, therefore $attributes is an array();
