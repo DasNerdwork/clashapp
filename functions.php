@@ -638,7 +638,7 @@ function championIdToFilename($id){
  * Returnvalue:
  * N/A, only direct printing to page
  */
-function getMostCommon($attributesArray, $matchDataArray, $puuid){
+function getMostCommon($attributesArray, $matchDataArray, $puuid, $counter){
     $mostCommonArray = array();
     $mostCommonReturn = array();
 
@@ -659,17 +659,63 @@ function getMostCommon($attributesArray, $matchDataArray, $puuid){
     foreach ($attributesArray as $attribute){
         $temp[$attribute] = array_count_values($mostCommonArray[$attribute]);
         arsort($temp[$attribute]);
-        $values[$attribute] = array_slice(array_keys($temp[$attribute]), 0, 3, true);
-        $count[$attribute] = array_slice(array_values($temp[$attribute]), 0, 3, true);
-        $mostCommonReturn[$attribute] = array
-            (
-            $values[$attribute][0] => $count[$attribute][0],
-            $values[$attribute][1] => $count[$attribute][1],
-            $values[$attribute][2] => $count[$attribute][2]
-            );
+        $values[$attribute] = array_slice(array_keys($temp[$attribute]), 0, $counter+1, true);
+        $count[$attribute] = array_slice(array_values($temp[$attribute]), 0, $counter+1, true);
+        for($i = 0; $i <= $counter; $i++){
+            $mostCommonReturn[$attribute][$values[$attribute][$i]] = $count[$attribute][$i];
+            }
     }
     return $mostCommonReturn;
 }
+
+function getLanePercentages($matchDaten, $puuid){
+    $laneReturnArray = array();
+    $laneCountArray = getMostCommon(array("teamPosition"), $matchDaten, $puuid, 4)['teamPosition'];
+    $matchCount = array_sum($laneCountArray);
+    foreach ($laneCountArray as $key => $count){
+        $laneCountArray[$key] = number_format(($count / $matchCount * 100), 2);
+    }
+    if (array_values($laneCountArray)[0] >= 90){
+        $mainLane = array_keys($laneCountArray)[0];
+        $secondaryLane = "UNKNOWN";
+    } else if (array_values($laneCountArray)[0] <= 40){
+        $mainLane = "FILL";
+        $secondaryLane = "UNKNOWN";
+    } else if (array_values($laneCountArray)[1] <= 20){
+        $mainLane = array_keys($laneCountArray)[0];
+        $secondaryLane = "FILL";
+    } else if (array_values($laneCountArray)[1] >= 20){
+        $mainLane = array_keys($laneCountArray)[0];
+        $secondaryLane = array_keys($laneCountArray)[1];
+    } else {
+        $mainLane = array_keys($laneCountArray)[0];
+        $secondaryLane = array_keys($laneCountArray)[1];
+    }
+    $laneReturnArray[0] = $mainLane;
+    $laneReturnArray[1] = $secondaryLane;
+    
+    return $laneReturnArray;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /** Fetches the average value of specific attributes
  * This function retrieves the average value of a specific attribute by iterating through a users matches
