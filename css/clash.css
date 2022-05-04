@@ -87,3 +87,11 @@
   visibility: visible;
   opacity: 1;
 }
+
+@font-face {
+  font-family: "Beaufort";
+  src: url(https://dasnerdwork.net/clashapp/data/misc/fonts/Beaufort-W01-Regular-1.ttf) format("truetype");
+}
+.beaufort { 
+  font-family: "Beaufort", Verdana, serif;
+}
