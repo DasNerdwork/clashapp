@@ -141,19 +141,37 @@ $ladezeiten["FetchPlayerData"] = number_format(microtime(true) - $startFetchPlay
 $startPrintData = microtime(true);
 if($formattedInput != "") {
     // print collected values
+    // echo "<div style='margin-bottom: -360px;'>";
+    // if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
+    //     echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="82" style="margin-left: 41px; border-radius: 100%;"><br>';
+    // }
+    // if(file_exists('/var/www/html/wordpress/clashapp/data/misc/ranks/04_gold_base.ls_ch.png')){
+    //     echo '<img src="/clashapp/data/misc/ranks/04_gold_base.ls_ch.png" width="384" style="position: relative; left: -110px; top: -234px;"><br>';
+    // }
+    // echo "</div>";
+
+    echo "<div style='display: flex; justify-content: center; width: 170px; margin-bottom: 24px;'>";
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="64"><br>';
+        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="82" style="border-radius: 100%;margin-top: 5px; z-index: -1;">';
     }
+    if(file_exists('/var/www/html/wordpress/clashapp/data/misc/ranks/04_gold_base.ls_ch.png')){
+        echo '<img src="/clashapp/data/misc/ranks/04_gold_base.ls_ch.png" width="384" style="position: absolute;  top: -100px; z-index: -1;">';
+    }
+    echo "</div>";
+
     $matchDaten = getMatchData($matchids);
-    $playerLanes = array_keys(array_slice(getMostCommon(array("teamPosition"), $matchDaten, $puuid), 0, 1, true)['teamPosition']);
+    $playerLanes = getLanePercentages($matchDaten, $puuid);
+
     $playerMainRole = $playerLanes[0];
     $playerSecondaryRole = $playerLanes[1];
+    echo "<div style='display: flex; justify-content: center; width: 170px;'>";
     if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerMainRole.'.png')){
         echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.png" width="32">';
     }
     if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png')){
-        echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png" width="24"><br>';
+        echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png" width="32"><br>';
     }
+    echo "</div>";
     echo "<table class='table' style='width:100%'><tr><td>";
     echo "Name: " . $playerData["Name"] . "<br>";
     echo "Level: " . $playerData["Level"] . "<br>";
@@ -181,7 +199,7 @@ if($formattedInput != "") {
     $startMostCommon = microtime(true);
     $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
     $ladezeiten["MostCommon"] = number_format(microtime(true) - $startMostCommon, 4);
-    $mostCommonReturn = getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
+    $mostCommonReturn = getMostCommon($mostCommonAttributes, $matchDaten, $puuid, 2);
     echo "<pre>";
     print_r($mostCommonReturn);
     echo "</pre>";
