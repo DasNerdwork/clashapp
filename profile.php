@@ -140,52 +140,64 @@ $ladezeiten["FetchPlayerData"] = number_format(microtime(true) - $startFetchPlay
 
 $startPrintData = microtime(true);
 if($formattedInput != "") {
+
+    echo "<div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px;'>";
+    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
+        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
+    }
+
     $rankVal = 0;
+    $levelFileName = "001";
+    $highEloLP = "";
+
     foreach($rankData as $rankedQueue){
-        if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR"){
+        if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
             switch ($rankedQueue["Tier"]){
-                case ($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 9):
+                case ($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 10):
+                    $rankVal = 10;
+                    $rankNumber = "";
+                    $highestRank = $rankedQueue["Tier"];
+                    $highEloLP = $rankedQueue["LP"];
+                    break;        
+                case ($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 9):
                     $rankVal = 9;
                     $rankNumber = "";
                     $highestRank = $rankedQueue["Tier"];
-                    break;        
-                case ($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 8):
+                    $highEloLP = $rankedQueue["LP"];
+                    break;     
+                case ($rankedQueue["Tier"] == "MASTER" && $rankVal < 8):
                     $rankVal = 8;
                     $rankNumber = "";
                     $highestRank = $rankedQueue["Tier"];
-                    break;     
-                case ($rankedQueue["Tier"] == "MASTER" && $rankVal < 7):
-                    $rankVal = 7;
-                    $rankNumber = "";
-                    $highestRank = $rankedQueue["Tier"];
+                    $highEloLP = $rankedQueue["LP"];
                     break;                  
-                case ($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 6):
-                    $rankVal = 6;
+                case ($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 7):
+                    $rankVal = 7;
                     $rankNumber = $rankedQueue["Rank"];
                     $highestRank = $rankedQueue["Tier"];
                     break;                   
-                case ($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 5):
+                case ($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 6):
+                    $rankVal = 6;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                    break;                  
+                case ($rankedQueue["Tier"] == "GOLD" && $rankVal < 5):
                     $rankVal = 5;
                     $rankNumber = $rankedQueue["Rank"];
                     $highestRank = $rankedQueue["Tier"];
-                    break 2;                  
-                case ($rankedQueue["Tier"] == "GOLD" && $rankVal < 4):
+                    break;     
+                case ($rankedQueue["Tier"] == "SILVER" && $rankVal < 4):
                     $rankVal = 4;
                     $rankNumber = $rankedQueue["Rank"];
                     $highestRank = $rankedQueue["Tier"];
                     break;     
-                case ($rankedQueue["Tier"] == "SILVER" && $rankVal < 3):
+                case ($rankedQueue["Tier"] == "BRONZE" && $rankVal < 3):
                     $rankVal = 3;
                     $rankNumber = $rankedQueue["Rank"];
                     $highestRank = $rankedQueue["Tier"];
-                    break;     
-                case ($rankedQueue["Tier"] == "BRONZE" && $rankVal < 2):
-                    $rankVal = 2;
-                    $rankNumber = $rankedQueue["Rank"];
-                    $highestRank = $rankedQueue["Tier"];
                     break;         
-                case ($rankedQueue["Tier"] == "IRON" && $rankVal < 1):
-                    $rankVal = 1;
+                case ($rankedQueue["Tier"] == "IRON" && $rankVal < 2):
+                    $rankVal = 2;
                     $rankNumber = $rankedQueue["Rank"];
                     $highestRank = $rankedQueue["Tier"];
                     break;    
@@ -193,27 +205,104 @@ if($formattedInput != "") {
         }
     }
 
+    if($rankVal != 0){
     $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
     $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
-    echo "<div style='display: flex; justify-content: center; width: 170px; margin-bottom: 24px;'>";
-    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="82" style="border-radius: 100%;margin-top: 5px; z-index: -1;">';
-    }
     if(file_exists($profileBorderPath)){
-        echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute;  top: -100px; z-index: -1;">';
+        echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute;  top: -80px; z-index: -1;">';
     }
-    echo "<div style='font-weight: bold; color: #e8dfcc; position: fixed; margin-top: -4px; font-size: 12px;'>".$rankNumber."</div>";
-    echo "<div style='font-weight: regular; color: #e8dfcc; position: fixed; margin-top: 91px; font-size: 12px;'>".$playerData["Level"]."</div>";
-    echo "</div>";
+    if ($highEloLP != ""){
+        echo "<div style='font-weight: bold; color: #e8dfcc; position: absolute; margin-top: -5px; font-size: 12px;'>".$highEloLP." LP</div>";
+    } else {
+        echo "<div style='font-weight: bold; color: #e8dfcc; position: absolute; margin-top: 17px; font-size: 12px;'>".$rankNumber."</div>";
+    }
+    
+    echo "<div style='color: #e8dfcc; position: absolute; margin-top: 111px; font-size: 12px;'>".$playerData["Level"]."</div>";
+    } else {
+        switch ($playerData["Level"]){
+            case ($playerData["Level"] < 30):
+                $levelFileName = "001";
+                break;
+            case ($playerData["Level"] < 50):
+                $levelFileName = "030";
+                break;
+            case ($playerData["Level"] < 75):
+                $levelFileName = "050";
+                break;
+            case ($playerData["Level"] < 100):
+                $levelFileName = "075";
+                break;
+            case ($playerData["Level"] < 125):
+                $levelFileName = "100";
+                break;           
+            case ($playerData["Level"] < 150):
+                $levelFileName = "125";
+                break;
+            case ($playerData["Level"] < 175):
+                $levelFileName = "150";
+                break;
+            case ($playerData["Level"] < 200):
+                $levelFileName = "175";
+                break;
+            case ($playerData["Level"] < 225):
+                $levelFileName = "200";
+                break;
+            case ($playerData["Level"] < 250):
+                $levelFileName = "225";
+                break;
+            case ($playerData["Level"] < 275):
+                $levelFileName = "250";
+                break;
+            case ($playerData["Level"] < 300):
+                $levelFileName = "275";
+                break;           
+            case ($playerData["Level"] < 325):
+                $levelFileName = "300";
+                break;
+            case ($playerData["Level"] < 350):
+                $levelFileName = "325";
+                break;
+            case ($playerData["Level"] < 375):
+                $levelFileName = "350";
+                break;           
+            case ($playerData["Level"] < 400):
+                $levelFileName = "375";
+                break;
+            case ($playerData["Level"] < 425):
+                $levelFileName = "400";
+                break;
+            case ($playerData["Level"] < 450):
+                $levelFileName = "425";
+                break;
+            case ($playerData["Level"] < 475):
+                $levelFileName = "450";
+                break;
+            case ($playerData["Level"] < 500):
+                $levelFileName = "475";
+                break;
+            case ($playerData["Level"] >= 500):
+                $levelFileName = "500";
+                break; 
+        }
 
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
+
+    if(file_exists($profileBorderPath)){
+        echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: 14px; z-index: -1;">';
+        }
+    echo "<div style='color: #e8dfcc; position: fixed; margin-top: 104px; font-size: 12px;'>".$playerData["Level"]."</div>";
+    }
+
+    echo "</div>";
 
     $matchDaten = getMatchData($matchids);
     $playerLanes = getLanePercentages($matchDaten, $puuid);
 
     $playerMainRole = $playerLanes[0];
     $playerSecondaryRole = $playerLanes[1];
-    echo "<div style='display: flex; justify-content: center; width: 170px;'>";
+    echo "<div style='display: flex; justify-content: center; width: 200px;'>";
     if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerMainRole.'.png')){
         echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.png" width="32">';
     }
