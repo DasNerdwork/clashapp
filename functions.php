@@ -341,8 +341,8 @@ function getMatchData($matchIDArray){
     // Loop through each matchID.json
     foreach ($matchIDArray as $key => $matchIDJSON) {
         if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
-            $matchData[$key] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
-        }
+        $matchData[$key] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
+    }
     return $matchData;
 }
 
@@ -1062,6 +1062,10 @@ function getTeamByTeamID($teamID){
         curl_close($ch);
     }
 
+    // Temporär change
+
+    $teamOutput = file_get_contents('/hdd1/clashapp/misc/team.by-teamid.json');
+
     // Collect requested values in returnarray
     $teamDataArray["TeamID"] = json_decode($teamOutput)->id;
     $teamDataArray["TournamentID"] = json_decode($teamOutput)->tournamentId;
@@ -1071,6 +1075,7 @@ function getTeamByTeamID($teamID){
     $teamDataArray["Tier"] = json_decode($teamOutput)->tier;
     $teamDataArray["Captain"] = json_decode($teamOutput)->captain;
     $teamDataArray["Players"] = json_decode($teamOutput, true)["players"];
+
 
     return $teamDataArray;
 }

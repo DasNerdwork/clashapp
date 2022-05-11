@@ -286,7 +286,7 @@ if($formattedInput != "") {
                 break; 
         }
 
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.ls_c2.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
     $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
