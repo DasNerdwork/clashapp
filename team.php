@@ -63,54 +63,277 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
     $teamID = $_GET["name"];
     $teamDataArray = getTeamByTeamID($teamID);
     echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
-    echo "<h1><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1><br>";
-    echo "<table class='table' style='width:100%'><tr>";
+    echo "<h1 class='schatten'><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1><br>";
+    echo "<table class='table' style='width:100%; table-layout: fixed;'><tr>";
     $tableWidth = round(100/count($teamDataArray["Players"]));
-   foreach($teamDataArray["Players"] as $key => $player){
-        echo "<td style='vertical-align: top;'><table class='table'><tr><td style='width:".$tableWidth."%; text-align: center;'>";
-        $playerData = getPlayerData("sumid",$player["summonerId"]);
-        echo "Position: ".$player["position"]."<br>";
+    $playerDataDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/player/');
+
+    foreach($teamDataArray["Players"] as $key => $player){
+        echo "<td style='vertical-align: top;'><table class='table schatten'><tr><td style='width:".$tableWidth."%; text-align: center;'>";
+        // print_r($player);
+        // $playerData = getPlayerData("sumid",$player["summonerId"]);
+
+        unset($sumid);
+
+        foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
+            $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
+            if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
+                // echo str_replace(".json", "", $playerDataJSONPath) ." - ". $player["summonerId"];
+                if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
+                    $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                    $playerData = $playerDataJSON["PlayerData"];
+                    $playerName = $playerDataJSON["PlayerData"]["Name"];
+                    $sumid = $playerDataJSON["PlayerData"]["SumID"];
+                    $puuid = $playerDataJSON["PlayerData"]["PUUID"];
+                    $rankData = $playerDataJSON["RankData"];
+                    $masteryData = $playerDataJSON["MasteryData"];
+                    $matchids = $playerDataJSON["MatchIDs"];
+                    break;
+                } else {
+                    // echo "No Match found :(<br>".str_replace(".json", "", $playerDataJSONPath)."<br>".$player["summonerId"]."<br>";
+                }
+            }
+        }
+        if(!isset($sumid) && $player["summonerId"] != "") {
+            updateProfile($player["summonerId"], 75, "sumid");
+            foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
+                $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
+                if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
+                    if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
+                        $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                        $playerData = $playerDataJSON["PlayerData"];
+                        $playerName = $playerDataJSON["PlayerData"]["Name"];
+                        $sumid = $playerDataJSON["PlayerData"]["SumID"];
+                        $puuid = $playerDataJSON["PlayerData"]["PUUID"];
+                        $rankData = $playerDataJSON["RankData"];
+                        $masteryData = $playerDataJSON["MasteryData"];
+                        $matchids = $playerDataJSON["MatchIDs"];
+                        break;
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+        echo "<center><div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px;'>";
+        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
+            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
+        }
+
+        $rankVal = 0;
+        $levelFileName = "001";
+        $highEloLP = "";
+
+        foreach($rankData as $rankedQueue){
+            if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
+                switch ($rankedQueue["Tier"]){
+                    case ($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 10):
+                        $rankVal = 10;
+                        $rankNumber = "";
+                        $highestRank = $rankedQueue["Tier"];
+                        $highEloLP = $rankedQueue["LP"];
+                        break;        
+                    case ($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 9):
+                        $rankVal = 9;
+                        $rankNumber = "";
+                        $highestRank = $rankedQueue["Tier"];
+                        $highEloLP = $rankedQueue["LP"];
+                        break;     
+                    case ($rankedQueue["Tier"] == "MASTER" && $rankVal < 8):
+                        $rankVal = 8;
+                        $rankNumber = "";
+                        $highestRank = $rankedQueue["Tier"];
+                        $highEloLP = $rankedQueue["LP"];
+                        break;                  
+                    case ($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 7):
+                        $rankVal = 7;
+                        $rankNumber = $rankedQueue["Rank"];
+                        $highestRank = $rankedQueue["Tier"];
+                        break;                   
+                    case ($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 6):
+                        $rankVal = 6;
+                        $rankNumber = $rankedQueue["Rank"];
+                        $highestRank = $rankedQueue["Tier"];
+                        break;                  
+                    case ($rankedQueue["Tier"] == "GOLD" && $rankVal < 5):
+                        $rankVal = 5;
+                        $rankNumber = $rankedQueue["Rank"];
+                        $highestRank = $rankedQueue["Tier"];
+                        break;     
+                    case ($rankedQueue["Tier"] == "SILVER" && $rankVal < 4):
+                        $rankVal = 4;
+                        $rankNumber = $rankedQueue["Rank"];
+                        $highestRank = $rankedQueue["Tier"];
+                        break;     
+                    case ($rankedQueue["Tier"] == "BRONZE" && $rankVal < 3):
+                        $rankVal = 3;
+                        $rankNumber = $rankedQueue["Rank"];
+                        $highestRank = $rankedQueue["Tier"];
+                        break;         
+                    case ($rankedQueue["Tier"] == "IRON" && $rankVal < 2):
+                        $rankVal = 2;
+                        $rankNumber = $rankedQueue["Rank"];
+                        $highestRank = $rankedQueue["Tier"];
+                        break;    
+                }
+            }
+        }
+
+        if($rankVal != 0){
+            $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+            $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
+
+            if(file_exists($profileBorderPath)){
+                echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute;  top: 45px; z-index: -1;">';
+            }
+            if ($highEloLP != ""){
+                echo "<div style='font-weight: bold; color: #e8dfcc; position: absolute; margin-top: -5px; font-size: 12px;'>".$highEloLP." LP</div>";
+            } else {
+                echo "<div style='font-weight: bold; color: #e8dfcc; position: absolute; margin-top: 17px; font-size: 12px;'>".$rankNumber."</div>";
+            }
+            
+            echo "<div style='color: #e8dfcc; position: absolute; margin-top: 111px; font-size: 12px;'>".$playerData["Level"]."</div>";
+        } else {
+            echo "hier ".$playerData["Name"]." ".$playerData["Tier"];
+            switch ($playerData["Level"]){
+                case ($playerData["Level"] < 30):
+                    $levelFileName = "001";
+                    break;
+                case ($playerData["Level"] < 50):
+                    $levelFileName = "030";
+                    break;
+                case ($playerData["Level"] < 75):
+                    $levelFileName = "050";
+                    break;
+                case ($playerData["Level"] < 100):
+                    $levelFileName = "075";
+                    break;
+                case ($playerData["Level"] < 125):
+                    $levelFileName = "100";
+                    break;           
+                case ($playerData["Level"] < 150):
+                    $levelFileName = "125";
+                    break;
+                case ($playerData["Level"] < 175):
+                    $levelFileName = "150";
+                    break;
+                case ($playerData["Level"] < 200):
+                    $levelFileName = "175";
+                    break;
+                case ($playerData["Level"] < 225):
+                    $levelFileName = "200";
+                    break;
+                case ($playerData["Level"] < 250):
+                    $levelFileName = "225";
+                    break;
+                case ($playerData["Level"] < 275):
+                    $levelFileName = "250";
+                    break;
+                case ($playerData["Level"] < 300):
+                    $levelFileName = "275";
+                    break;           
+                case ($playerData["Level"] < 325):
+                    $levelFileName = "300";
+                    break;
+                case ($playerData["Level"] < 350):
+                    $levelFileName = "325";
+                    break;
+                case ($playerData["Level"] < 375):
+                    $levelFileName = "350";
+                    break;           
+                case ($playerData["Level"] < 400):
+                    $levelFileName = "375";
+                    break;
+                case ($playerData["Level"] < 425):
+                    $levelFileName = "400";
+                    break;
+                case ($playerData["Level"] < 450):
+                    $levelFileName = "425";
+                    break;
+                case ($playerData["Level"] < 475):
+                    $levelFileName = "450";
+                    break;
+                case ($playerData["Level"] < 500):
+                    $levelFileName = "475";
+                    break;
+                case ($playerData["Level"] >= 500):
+                    $levelFileName = "500";
+                    break; 
+            }
+
+        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.ls_c2.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+        $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
+
+        if(file_exists($profileBorderPath)){
+            echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: 14px; z-index: -1;">';
+            }
+        echo "<div style='color: #e8dfcc; position: fixed; margin-top: 104px; font-size: 12px;'>".$playerData["Level"]."</div>";
+        }
+
+        echo "</div></center>";
+        
+        
         $playerName = $playerData["Name"];
         $sumid = $playerData["SumID"];
         $puuid = $playerData["PUUID"];
-        $masteryData = getMasteryScores($sumid);
-        $rankData = getCurrentRank($sumid);
+        // $masteryData = getMasteryScores($sumid);
+        // $rankData = getCurrentRank($sumid);
         $matchids = getMatchIDs($puuid, 15);
         foreach($matchids as $matchid){
             if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
                 downloadMatchByID($matchid, $playerName);
             }
         }
-        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
-            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="64"><br>';
-        }
-        echo "Name: " . $playerData["Name"] . "<br>";
-        echo "Level: " . $playerData["Level"] . "<br><br>";
+        echo $playerData["Name"] . "<br><br>";
 
         echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 8em;'>";
 
+        echo "<div style='display: inline-flex;'>";
         foreach($rankData as $rankedQueue){
-        echo "Rank: " . $rankedQueue["Tier"] . " " . $rankedQueue["Rank"] . " mit " . $rankedQueue["LP"] . " LP in " . $rankedQueue["Queue"] . "<br>";
-        echo "Wins: " . $rankedQueue["Wins"] . " / Losses: " . $rankedQueue["Losses"] . " - Winrate: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><br>";
+            if($rankedQueue["Queue"] == "RANKED_SOLO_5x5"){
+                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Solo/Duo:</font><br>" . ucfirst(strtolower($rankedQueue["Tier"])) . " " . $rankedQueue["Rank"] . " / " . $rankedQueue["LP"] . " LP<br>WR: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankedQueue["Wins"]+$rankedQueue["Losses"]." Games)</font></div>";
+            } else if($rankedQueue["Queue"] == "RANKED_FLEX_SR"){
+                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Flex:</font><br>" . ucfirst(strtolower($rankedQueue["Tier"])) . " " . $rankedQueue["Rank"] . " / " . $rankedQueue["LP"] . " LP<br>WR: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankedQueue["Wins"]+$rankedQueue["Losses"]." Games)</font></div>";
+            }
         }
+        echo "</div>";
 
-        echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 33em;'>";
-        if(isset($masteryData[0])){printMasteryInfo($masteryData, 0);}
-        echo "<br><br>";
-        if(isset($masteryData[1])){printMasteryInfo($masteryData, 1);}
-        echo "<br><br>";
-        if(isset($masteryData[2])){printMasteryInfo($masteryData, 2);}
-        echo "</td></tr><tr><td style='text-align: center; vertical-align: top;'>";
+        echo "</td></tr><tr><td style='vertical-align: top; text-align: center;'>";
+
+        echo "<div style='display: inline-flex;'>";
+        for($i=0; $i<3; $i++){
+            if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png')){
+                echo '<div><img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png" width="64" style="margin: 0px 28px;">';
+                echo $masteryData[$i]["Champion"]."<br>";
+                echo "MR: ".$masteryData[$i]["Lvl"]." - ".$masteryData[$i]["Points"]."K<br></div>";
+            }
+        }
+        echo "</div>";
+
+        // echo "</td></tr><tr><td style='text-align: center; vertical-align: top;'>";
+        
         $matchDaten = getMatchData($matchids);
-        $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
-        getMostCommon($mostCommonAttributes, $matchDaten, $puuid);
-        $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
-        getAverage($averageAttributes, $matchDaten, $puuid);
-
+        // $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
+        // getMostCommon($mostCommonAttributes, $matchDaten, $puuid, 2);
+        // $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
+        // getAverage($averageAttributes, $matchDaten, $puuid, "GENERAL");
         mostPlayedWith($matchDaten, $puuid);
     
         // getMatchDetailsByPUUID($matchids, $puuid);
         echo "</td></tr></table></td>";
+
    }
    echo "</tr></table>";
 }
