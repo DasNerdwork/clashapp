@@ -99,3 +99,15 @@
 .schatten {
   border: 1px white solid;
 }
+
+.low-threat {
+  color: #d3a609;
+}
+
+.low-threath {
+  color: #C35D0F;
+}
+
+.high-threat {
+  color: #b31414;
+}

@@ -934,6 +934,7 @@ function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, 
  */
 function mostPlayedWith($matchDataArray, $puuid){
     $mostPlayedArray = array();
+    $returnArray = array();
 
     // Store all values into separate array corresponding to each attribute
     foreach ($matchDataArray as $matchData) {
@@ -949,10 +950,15 @@ function mostPlayedWith($matchDataArray, $puuid){
     arsort($temp);
     $value = array_slice(array_keys($temp), 0, 5, true);
     $count = array_slice(array_values($temp), 0, 5, true);
-    echo "<pre>";
-    echo "Most played with:<br>";
-    echo $count[0]." mal mit ".$value[0]."<br>".$count[1]." mal mit ".$value[1]."<br>".$count[2]." mal mit ".$value[2]."<br>".$count[3]." mal mit ".$value[3]."<br>".$count[4]." mal mit ".$value[4];
-    echo "</pre>";
+
+    $returnArray[$value[0]] = $count[0];
+    $returnArray[$value[1]] = $count[1];
+    $returnArray[$value[2]] = $count[2];
+    $returnArray[$value[3]] = $count[3];
+    $returnArray[$value[4]] = $count[4];
+
+    // echo $count[0]." mal mit ".$value[0]."<br>".$count[1]." mal mit ".$value[1]."<br>".$count[2]." mal mit ".$value[2]."<br>".$count[3]." mal mit ".$value[3]."<br>".$count[4]." mal mit ".$value[4];
+    return $returnArray;
 }
 
 /** Prints the champion and info a given player by $puuid has the highest winrate with

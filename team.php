@@ -61,6 +61,7 @@ $output = json_decode(file_get_contents('/hdd1/clashapp/misc/player.by-summoner.
 
 if (isset($_GET["name"]) && $_GET["name"] != "404"){
     $teamID = $_GET["name"];
+
     $teamDataArray = getTeamByTeamID($teamID);
     echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
     echo "<h1 class='schatten'><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1><br>";
@@ -112,20 +113,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     }
                 }
             }
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-        
+        }      
 
         echo "<center><div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px;'>";
         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
@@ -315,9 +303,18 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         echo "<div style='display: inline-flex;'>";
         for($i=0; $i<3; $i++){
             if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png')){
-                echo '<div><img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png" width="64" style="margin: 0px 28px;">';
+                echo '<div><img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png" width="64" style="margin: 0px 28px;"><br>';
                 echo $masteryData[$i]["Champion"]."<br>";
-                echo "MR: ".$masteryData[$i]["Lvl"]." - ".$masteryData[$i]["Points"]."K<br></div>";
+                echo "MR: ".$masteryData[$i]["Lvl"]."<br>";
+                if(str_replace(',','',$masteryData[$i]["Points"]) > 250000){
+                    echo "<div class='low-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                } else if(str_replace(',','',$masteryData[$i]["Points"]) > 500000){
+                    echo "<div class='medium-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                } else if(str_replace(',','',$masteryData[$i]["Points"]) > 1000000){
+                    echo "<div class='high-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                } else {
+                    echo "<div class='no-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                }
             }
         }
         echo "</div>";
@@ -329,7 +326,19 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         // getMostCommon($mostCommonAttributes, $matchDaten, $puuid, 2);
         // $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
         // getAverage($averageAttributes, $matchDaten, $puuid, "GENERAL");
-        mostPlayedWith($matchDaten, $puuid);
+        echo "<div style='margin: 10px 0px;'>";
+        foreach (mostPlayedWith($matchDaten, $puuid) as $key => $value){
+            foreach ($teamDataArray["Players"] as $teamMember){
+                if(file_exists('/var/www/html/wordpress/clashapp/data/player/'.$teamMember["summonerId"].'.json')){
+                    $uniquePlayerName = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$teamMember["summonerId"].'.json'), true)["PlayerData"]["Name"];
+                }
+                if ($key == $uniquePlayerName){
+                    echo "Premate gefunden: ".$key." auf ".$value." Games";
+                    break;
+                }
+            }
+        }
+        echo "</div>";
     
         // getMatchDetailsByPUUID($matchids, $puuid);
         echo "</td></tr></table></td>";
