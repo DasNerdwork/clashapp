@@ -206,7 +206,7 @@ if($formattedInput != "") {
     }
 
     if($rankVal != 0){
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
     $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
@@ -286,13 +286,13 @@ if($formattedInput != "") {
                 break; 
         }
 
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.ls_c2.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
     $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
         echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: 14px; z-index: -1;">';
         }
-    echo "<div style='color: #e8dfcc; position: fixed; margin-top: 104px; font-size: 12px;'>".$playerData["Level"]."</div>";
+    echo "<div style='color: #e8dfcc; position: fixed; margin-top: 111px; font-size: 12px;'>".$playerData["Level"]."</div>";
     }
 
     echo "</div>";

@@ -96,7 +96,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             }
         }
         if(!isset($sumid) && $player["summonerId"] != "") {
-            updateProfile($player["summonerId"], 75, "sumid");
+            updateProfile($player["summonerId"], 15, "sumid");
             foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
                 $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
                 if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
@@ -184,7 +184,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
             if(file_exists($profileBorderPath)){
-                echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute;  top: 45px; z-index: -1;">';
+                echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute; top: 45px; z-index: -1;">';
             }
             if ($highEloLP != ""){
                 echo "<div style='font-weight: bold; color: #e8dfcc; position: absolute; margin-top: -5px; font-size: 12px;'>".$highEloLP." LP</div>";
@@ -194,7 +194,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             
             echo "<div style='color: #e8dfcc; position: absolute; margin-top: 111px; font-size: 12px;'>".$playerData["Level"]."</div>";
         } else {
-            echo "hier ".$playerData["Name"]." ".$playerData["Tier"];
             switch ($playerData["Level"]){
                 case ($playerData["Level"] < 30):
                     $levelFileName = "001";
@@ -261,21 +260,36 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     break; 
             }
 
-        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.ls_c2.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
         $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
         if(file_exists($profileBorderPath)){
-            echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: 14px; z-index: -1;">';
+            echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: 132px; z-index: -1;">';
             }
-        echo "<div style='color: #e8dfcc; position: fixed; margin-top: 104px; font-size: 12px;'>".$playerData["Level"]."</div>";
+        echo "<div style='color: #e8dfcc; position: absolute; margin-top: 104px; font-size: 12px;'>".$playerData["Level"]."</div>";
         }
 
         echo "</div></center>";
-        
-        
-        $playerName = $playerData["Name"];
-        $sumid = $playerData["SumID"];
-        $puuid = $playerData["PUUID"];
+        echo "<br>".$playerData["Name"] . "<br><br>";
+
+        $matchDaten = getMatchData($matchids);
+        $playerLanes = getLanePercentages($matchDaten, $puuid);
+
+        $playerMainRole = $playerLanes[0];
+        $playerSecondaryRole = $playerLanes[1];
+        $queueRole = $player["position"];
+        echo "<div style='display: inline-flex; justify-content: center;'>Positions: ";
+        if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerMainRole.'.png')){
+            echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.png" width="32">';
+        }
+        if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png')){
+            echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png" width="32">';
+        }
+        echo " queued as ";
+        if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$queueRole.'.png')){
+            echo '<img src="/clashapp/data/misc/lanes/'.$queueRole.'.png" width="32"></div><br>';
+        }
+
         // $masteryData = getMasteryScores($sumid);
         // $rankData = getCurrentRank($sumid);
         $matchids = getMatchIDs($puuid, 15);
@@ -284,9 +298,12 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                 downloadMatchByID($matchid, $playerName);
             }
         }
-        echo $playerData["Name"] . "<br><br>";
 
-        echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 8em;'>";
+        if(count($rankData) != 0){
+            echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 7em;'>";
+        } else {
+            echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 1em;'>";
+        }
 
         echo "<div style='display: inline-flex;'>";
         foreach($rankData as $rankedQueue){
@@ -296,6 +313,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                 echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Flex:</font><br>" . ucfirst(strtolower($rankedQueue["Tier"])) . " " . $rankedQueue["Rank"] . " / " . $rankedQueue["LP"] . " LP<br>WR: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankedQueue["Wins"]+$rankedQueue["Losses"]." Games)</font></div>";
             }
         }
+
         echo "</div>";
 
         echo "</td></tr><tr><td style='vertical-align: top; text-align: center;'>";
@@ -321,7 +339,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
 
         // echo "</td></tr><tr><td style='text-align: center; vertical-align: top;'>";
         
-        $matchDaten = getMatchData($matchids);
         // $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
         // getMostCommon($mostCommonAttributes, $matchDaten, $puuid, 2);
         // $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
@@ -333,12 +350,15 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     $uniquePlayerName = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$teamMember["summonerId"].'.json'), true)["PlayerData"]["Name"];
                 }
                 if ($key == $uniquePlayerName){
-                    echo "Premate gefunden: ".$key." auf ".$value." Games";
+                    echo "Prematemöglichkeit: ".$key." auf ".$value." Games<br>";
                     break;
                 }
             }
         }
         echo "</div>";
+
+        printTeamMatchDetailsByPUUID($matchids, $puuid);
+        // print_r($matchDaten);
     
         // getMatchDetailsByPUUID($matchids, $puuid);
         echo "</td></tr></table></td>";
