@@ -71,8 +71,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
 
     foreach($teamDataArray["Players"] as $key => $player){
         echo "<td style='vertical-align: top;'><table class='table schatten'><tr><td style='width:".$tableWidth."%; text-align: center;'>";
-        // print_r($player);
-        // $playerData = getPlayerData("sumid",$player["summonerId"]);
 
         unset($sumid);
 
@@ -290,8 +288,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             echo '<img src="/clashapp/data/misc/lanes/'.$queueRole.'.png" width="32"></div><br>';
         }
 
-        // $masteryData = getMasteryScores($sumid);
-        // $rankData = getCurrentRank($sumid);
         $matchids = getMatchIDs($puuid, 15);
         foreach($matchids as $matchid){
             if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
@@ -336,13 +332,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             }
         }
         echo "</div>";
-
-        // echo "</td></tr><tr><td style='text-align: center; vertical-align: top;'>";
-        
-        // $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
-        // getMostCommon($mostCommonAttributes, $matchDaten, $puuid, 2);
-        // $averageAttributes = array("kills", "deaths" ,"assists", "totalDamageDealt", "goldEarned", "detectorWardsPlaced", "visionScore");
-        // getAverage($averageAttributes, $matchDaten, $puuid, "GENERAL");
         echo "<div style='margin: 10px 0px;'>";
         foreach (mostPlayedWith($matchDaten, $puuid) as $key => $value){
             foreach ($teamDataArray["Players"] as $teamMember){
@@ -358,12 +347,9 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         echo "</div>";
 
         printTeamMatchDetailsByPUUID($matchids, $puuid);
-        // print_r($matchDaten);
-    
-        // getMatchDetailsByPUUID($matchids, $puuid);
         echo "</td></tr></table></td>";
-
    }
+
    echo "</tr></table>";
 }
 
