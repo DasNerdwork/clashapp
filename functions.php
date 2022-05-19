@@ -17,6 +17,7 @@ $headers = array(
     "Origin: https://dasnerdwork.net/",
     "X-Riot-Token: ".$api_key
  );
+ $currenttimestamp = time();
 
 /** General Summoner Info
  * This function retrieves all general playerdata of a given username or PUUID
@@ -515,6 +516,33 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
     print_r($ladezeiten);
     echo "</pre>";
 }
+/** Function to convert seconds to readable time
+ *
+ */
+function secondsToTime($seconds) {
+    switch ($seconds) {
+        case ($seconds<120):
+            return "A minute ago";
+        case ($seconds>=120 && $seconds<3600):
+            return floor($seconds / 60)." minutes ago";
+        case ($seconds>=3600 && $seconds<7200):
+            return "1 hour ago";
+        case ($seconds>=7200 && $seconds<86400):
+            return floor($seconds / 3600)." hours ago";
+        case ($seconds>=86400 && $seconds<172800):
+            return "1 day ago";
+        case ($seconds>=172800 && $seconds<2630000):
+            return floor($seconds / 86400)." days ago";
+        case ($seconds>=2630000 && $seconds<5260000):
+            return "1 month ago";
+        case ($seconds>=5260000 && $seconds<31536000):
+            return floor($seconds / 2630000)." months ago";
+        case ($seconds>=31536000 && $seconds<63072000):
+            return "1 years ago";
+        case ($seconds>=63072000):
+            return floor($seconds / 31536000)." years ago";
+    }
+}
 
 /** Detailed Information about specific matches via PUUID
  * Prints all locally stored information about all matchIDs stored in the players playerdata.json (also stored locally)
@@ -530,6 +558,7 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
  */
 function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
     global $currentpatch;
+    global $currenttimestamp;
     $matches_count = scandir("/var/www/html/wordpress/clashapp/data/matches/");
     $count = 0;
 
@@ -552,8 +581,32 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
                             echo '<td class="offline" style="color:#b31414"><b>L</b></td>';
                         }
 
-                        // // Display of the played champions icon + name
+                        // Display of Ranked Queuetype
+                        switch ($inhalt->info->queueId) {
+                            case 420:
+                                $matchtype = "Solo/Duo";
+                                echo "<td> Solo/Duo </td>";
+                                break;
+                            case 440:
+                                $matchtype = "Flex 5v5";
+                                echo "<td> Flex </td>";
+                                break;
+                            case 700:
+                                $matchtype = "Clash";
+                                echo "<td> Clash </td>";
+                                break;
+                        }
+
+                        // Display of game length
+                        echo "<td>".gmdate("i:s", $inhalt->info->gameDuration)."</td>";
+
+                        // Display when the game date was, if > than 23h -> day format, if > than 30d -> month format, etc.
+                        echo "<td>".secondsToTime($currenttimestamp-intdiv($inhalt->info->gameEndTimestamp, 1000))."</td></tr><tr>";
+
+
+                        // Display of the played champions icon
                         echo "<td>";
+                        echo $inhalt->info->participants[$in]->champLevel;
                         $champion = $inhalt->info->participants[$in]->championName;
                         if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} // TODO One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png')){
@@ -570,7 +623,20 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
                         }
                         echo "</td>";
 
-                        // // Display of the equipped keyrune + secondary tree
+                        // Display summoner spells
+                        echo "<td>";
+                        $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
+                        $summoner2Id = $inhalt->info->participants[$in]->summoner2Id;
+                        if(file_exists('/var/www/html/wordpress/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".png")){
+                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.png" width="32" style="vertical-align:middle">';
+                        }
+                        if(file_exists('/var/www/html/wordpress/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".png")){
+                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.png" width="32" style="vertical-align:middle">';
+                        }
+                        echo "</td>";
+
+                        
+                        // Display of the equipped keyrune + secondary tree
                         echo "<td>";
                         $keyrune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                         $secrune = $inhalt->info->participants[$in]->perks->styles[1]->style;
@@ -587,9 +653,17 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
                         echo "</td>";
 
                         // Display of the players Kills/Deaths/Assists
-                        echo "<td>KDA: ".$inhalt->info->participants[$in]->kills . "/";
-                        echo $inhalt->info->participants[$in]->deaths . "/";
-                        echo $inhalt->info->participants[$in]->assists . "</td>";
+                        $kills = $inhalt->info->participants[$in]->kills;
+                        $deaths = $inhalt->info->participants[$in]->deaths;
+                        $assists = $inhalt->info->participants[$in]->assists;
+                        echo "<td>".$kills . "/";
+                        echo $deaths . "/";
+                        echo $assists;
+                        if($deaths != 0){
+                            echo " KDA: ".number_format(($kills+$assists)/$deaths, 2)."</td>";
+                        } else {
+                            echo " KDA: ".number_format(($kills+$assists)/1, 2)."</td>";
+                        }
 
                         // // Display of the last items the user had at the end of the game in his inventory
                         // echo "<td>Items: ";
@@ -650,20 +724,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
                         // }
                     }
                 }
-
-                // Display of Ranked Queuetype
-                switch ($inhalt->info->queueId) {
-                    case 420:
-                        $matchtype = "Solo/Duo";
-                        break;
-                    case 440:
-                        $matchtype = "Flex 5v5";
-                        break;
-                    case 700:
-                        $matchtype = "Clash";
-                        break;
-                }
-                echo "<td>Matchtyp: ".$matchtype . "</td></tr>";
+                echo "</tr>";
             }
         }
     }
@@ -726,6 +787,17 @@ function runeIconFetcher($id){
                     }
                 }
             }
+        }
+    }
+}
+
+function summonerSpellFetcher($id){
+    global $currentpatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/summoner.json');
+    $json = json_decode($data);
+    foreach($json->data as $summoner){
+        if($id == $summoner->key){
+            return $summoner->id;
         }
     }
 }
