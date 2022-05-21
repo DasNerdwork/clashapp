@@ -342,7 +342,7 @@ function getMatchData($matchIDArray){
     // Loop through each matchID.json
     foreach ($matchIDArray as $key => $matchIDJSON) {
         if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
-        $matchData[$key] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
+        $matchData[$matchIDJSON] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
     }
     return $matchData;
 }
@@ -635,7 +635,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
                         }
                         echo "</td>";
 
-                        
+
                         // Display of the equipped keyrune + secondary tree
                         echo "<td>";
                         $keyrune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
@@ -925,7 +925,7 @@ function getLanePercentages($matchDaten, $puuid){
     }
     $laneReturnArray[0] = $mainLane;
     $laneReturnArray[1] = $secondaryLane;
-    
+
     return $laneReturnArray;
 }
 
@@ -1258,6 +1258,84 @@ function getHighestWinrateWith($lane, $matchDataArray, $puuid){
     $result = number_format($highestWinrateArray[array_key_first($highestWinrateArray)]["winrate"], 2, ',', ' ');
     if($highestWinrateArray[array_key_first($highestWinrateArray)]["count"] > 5){
         echo "Highest Winrate: (".ucfirst(strtolower($lane)).") with ". array_key_first($highestWinrateArray) . " (" . $result . "%) in " . $highestWinrateArray[array_key_first($highestWinrateArray)]["count"] . " matches<br>";
+    }
+}
+
+/** Game Ranking Function to identify the places 1-10 in a match
+ * This function returns an array of 2-decimal numbers which arrange from best player with highest score to worst one with lowest
+ * If there is twice the exact same 2-decimal NIGGA
+ *
+ */
+function getMatchRanking($matchIDArray, $matchData, $sumid){
+    $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns", 
+    "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealt", "DamageDealtMagic", "DamageDealtPhsyical", "DamageDealtTrue", "DamageDealtToChampions", "DamageTaken",
+    "Healed", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
+
+
+    foreach ($matchIDArray as $matchID) {
+        foreach ($matchData[$matchID]->info as $player) {
+            for ($i = 0; $i < 10; $i++){
+                if (isset($player[$i]->summonerId)) {
+                    $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills;
+                    $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths;
+                    $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists;
+                    $mainArray[$player[$i]->summonerId]["KDA"] = $player[$i]->challenges->kda;
+                    $mainArray[$player[$i]->summonerId]["KillParticipation"] = $player[$i]->challenges->killParticipation;
+                    $mainArray[$player[$i]->summonerId]["CS"] = $player[$i]->totalMinionsKilled;
+                    $mainArray[$player[$i]->summonerId]["Gold"] = $player[$i]->goldEarned;
+                    $mainArray[$player[$i]->summonerId]["VisionScore"] = $player[$i]->visionScore;
+                    $mainArray[$player[$i]->summonerId]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns;
+                    $mainArray[$player[$i]->summonerId]["WardsPlaced"] = $player[$i]->wardsPlaced;
+                    $mainArray[$player[$i]->summonerId]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded;
+                    $mainArray[$player[$i]->summonerId]["VisionWards"] = $player[$i]->detectorWardsPlaced;
+                    $mainArray[$player[$i]->summonerId]["Consumables"] = $player[$i]->consumablesPurchased;
+                    $mainArray[$player[$i]->summonerId]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken;
+                    $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = $player[$i]->challenges->takedowns;
+                    $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = $player[$i]->turretTakedowns;
+                    $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns;
+                    $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns;
+                    $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns;
+                    $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings;
+                    $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives;
+                    $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated;
+                    $mainArray[$player[$i]->summonerId]["DamageDealt"] = $player[$i]->totalDamageDealt;
+                    $mainArray[$player[$i]->summonerId]["DamageDealtMagic"] = $player[$i]->magicDamageDealt;
+                    $mainArray[$player[$i]->summonerId]["DamageDealtPhsyical"] = $player[$i]->physicalDamageDealt;
+                    $mainArray[$player[$i]->summonerId]["DamageDealtTrue"] = $player[$i]->trueDamageDealt;
+                    $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions;
+                    $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken;
+                    $mainArray[$player[$i]->summonerId]["Healed"] = $player[$i]->totalHeal;
+                    $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates;
+                    $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates;
+                    $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt;
+                    $mainArray[$player[$i]->summonerId]["DeathTime"] = $player[$i]->totalTimeSpentDead;
+                    $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged;
+                    $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit;
+                }
+            }
+        }
+    }
+
+    echo $matchID."<br><br>";
+    foreach ($rankingAttributeArray as $attribute){
+        unset($tempArray);
+        foreach ($mainArray as $key => $playersumid) {
+
+            $tempArray[] = array (
+                "SumID" => $key,
+                $attribute => $playersumid[$attribute],
+            );
+        }
+        
+        usort($tempArray, function($a, $b) use($attribute){
+            return $b[$attribute] <=> $a[$attribute];
+        });
+
+        foreach($tempArray as $rank => $value){
+            if ($value["SumID"] == $sumid){
+                echo "Rang: ".($rank+1)." in ".$attribute."<br>";
+            }
+        }
     }
 }
 

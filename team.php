@@ -271,6 +271,12 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         echo "<br>".$playerData["Name"] . "<br><br>";
 
         $matchDaten = getMatchData($matchids);
+
+        // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
+        $testArray[0] = $matchids[0];
+        getMatchRanking($testArray, $matchDaten, $sumid);
+        // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
+
         $playerLanes = getLanePercentages($matchDaten, $puuid);
 
         $playerMainRole = $playerLanes[0];
@@ -326,6 +332,8 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     echo "<div class='medium-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
                 } else if(str_replace(',','',$masteryData[$i]["Points"]) > 1000000){
                     echo "<div class='high-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                } else if($sumid == "kzQ8siE3BbwyY43x4z8l9xGBSuqzWBKKLRYo-adM3VQvPG3Y"){ // OLES VEREWIGUNG
+                    echo "<div class='high-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
                 } else {
                     echo "<div class='no-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
                 }
@@ -345,7 +353,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             }
         }
         echo "</div>";
-
         printTeamMatchDetailsByPUUID($matchids, $puuid);
         echo "</td></tr></table></td>";
    }
