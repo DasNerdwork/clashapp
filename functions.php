@@ -342,7 +342,9 @@ function getMatchData($matchIDArray){
     // Loop through each matchID.json
     foreach ($matchIDArray as $key => $matchIDJSON) {
         if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
-        $matchData[$matchIDJSON] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json'));
+        if(file_exists('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json')){
+           $matchData[$matchIDJSON] = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/matches/'.$matchIDJSON.'.json')); 
+        }        
     }
     return $matchData;
 }
@@ -556,14 +558,15 @@ function secondsToTime($seconds) {
  * Returnvalue:
  * N/A, displaying on page via table
  */
-function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
+function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
     global $currentpatch;
     global $currenttimestamp;
     $matches_count = scandir("/var/www/html/wordpress/clashapp/data/matches/");
     $count = 0;
 
     // Initiating Matchdetail Table
-    echo "<table class='table' style='display: inline-flex;'>";
+    echo "<button type='button' class='collapsible'>Open Collapsible</button>";
+    echo "<table class='table content' style='border-collapse: collapse;display: inline-flex;'>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
         $handle = file_get_contents("/var/www/html/wordpress/clashapp/data/matches/".$matchIDJSON.".json");
         $inhalt = json_decode($handle);
@@ -572,7 +575,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
                 $count++;
                 for($in = 0; $in < 10; $in++){
                     if($inhalt->info->participants[$in]->puuid == $puuid) {
-                        echo "<tr>";
+                        echo "<tr style='border-top: 1pt solid white;'>";
 
                         // Display of W(in) or L(ose)
                         if($inhalt->info->participants[$in]->win == true) {
@@ -620,6 +623,17 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid){
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
                         if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$matchLane.'.png')){
                             echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.png" width="16">';
+                        }
+                        echo "</td>";
+
+                        // // Test Display
+                        echo "<td>";
+                        foreach ($matchRankingArray as $matchID => $rankingValue){
+                            // print_r($matchID."<br>");
+                            // print_r($inhalt->metadata->matchId."<br>");
+                            if($matchID == $inhalt->metadata->matchId){
+                                echo "Score: ".$matchRankingArray[$matchID];
+                            }
                         }
                         echo "</td>";
 
@@ -1263,19 +1277,24 @@ function getHighestWinrateWith($lane, $matchDataArray, $puuid){
 
 /** Game Ranking Function to identify the places 1-10 in a match
  * This function returns an array of 2-decimal numbers which arrange from best player with highest score to worst one with lowest
- * If there is twice the exact same 2-decimal NIGGA
+ * If there is twice the exact same 2-decimal
  *
  */
 function getMatchRanking($matchIDArray, $matchData, $sumid){
     $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns", 
-    "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealt", "DamageDealtMagic", "DamageDealtPhsyical", "DamageDealtTrue", "DamageDealtToChampions", "DamageTaken",
-    "Healed", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
-
+    "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
+    $maxRankScore = 0;
+    $returnArray = array();
+    // $matchIDArray = array_slice($matchIDArray, 0, 15);
 
     foreach ($matchIDArray as $matchID) {
+        unset($maxRankScore);
+        unset($mainArray);
+        //going through all matches to save all data in array per sumid
         foreach ($matchData[$matchID]->info as $player) {
             for ($i = 0; $i < 10; $i++){
                 if (isset($player[$i]->summonerId)) {
+                    //mainArray[SpielerSumid1-10][Attribut] = Wert vom Attribut;
                     $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills;
                     $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths;
                     $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists;
@@ -1298,13 +1317,8 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                     $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings;
                     $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives;
                     $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated;
-                    $mainArray[$player[$i]->summonerId]["DamageDealt"] = $player[$i]->totalDamageDealt;
-                    $mainArray[$player[$i]->summonerId]["DamageDealtMagic"] = $player[$i]->magicDamageDealt;
-                    $mainArray[$player[$i]->summonerId]["DamageDealtPhsyical"] = $player[$i]->physicalDamageDealt;
-                    $mainArray[$player[$i]->summonerId]["DamageDealtTrue"] = $player[$i]->trueDamageDealt;
                     $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions;
                     $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken;
-                    $mainArray[$player[$i]->summonerId]["Healed"] = $player[$i]->totalHeal;
                     $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates;
                     $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates;
                     $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt;
@@ -1314,29 +1328,139 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                 }
             }
         }
-    }
+        // print "hier2";
+        // echo "<pre>";
+        // print_r($mainArray);         // Alles OK
+        // echo "</pre>";
 
-    echo $matchID."<br><br>";
-    foreach ($rankingAttributeArray as $attribute){
-        unset($tempArray);
-        foreach ($mainArray as $key => $playersumid) {
-
-            $tempArray[] = array (
-                "SumID" => $key,
-                $attribute => $playersumid[$attribute],
-            );
-        }
-        
-        usort($tempArray, function($a, $b) use($attribute){
-            return $b[$attribute] <=> $a[$attribute];
-        });
-
-        foreach($tempArray as $rank => $value){
-            if ($value["SumID"] == $sumid){
-                echo "Rang: ".($rank+1)." in ".$attribute."<br>";
+        foreach ($rankingAttributeArray as $attribute){
+            // print "hier3";
+            foreach ($mainArray as $key => $playersumid) {
+                $tempArray[] = array (
+                    "SumID" => $key,
+                    $attribute => $playersumid[$attribute],
+                );
             }
+            // echo "<pre>";
+            // print_r($playersumid[$attribute]);
+            // echo "</pre>";
+            // echo "<pre>1";
+            // print_r($tempArray);
+            // echo "</pre>";
+            // print "hier 3.0".$attribute;
+            if ($attribute == "Deaths" || $attribute == "DeathTime") {
+                usort($tempArray, function($a, $b) use($attribute){
+                    return $b[$attribute] <=> $a[$attribute];
+                });
+            } else if (in_array($attribute, $rankingAttributeArray)){
+                usort($tempArray, function($a, $b) use($attribute){
+                    return $a[$attribute] <=> $b[$attribute];
+                });
+            }
+            // print "hier3.1";
+            // echo "<pre>";
+            // print_r($tempArray);
+            // echo "</pre>";
+
+            foreach($tempArray as $rank => $value){
+                // print_r($value);
+                if ($value["SumID"] == $sumid){
+                    switch ($attribute){
+                        case "Kills":
+                            $maxRankScore += (($rank+1)*7);
+                            break;
+                        case "Deaths":
+                            $maxRankScore += (($rank+1)*10);
+                            break;
+                        case "Assists":
+                            $maxRankScore += (($rank+1)*7);
+                            break;
+                        case "KDA":
+                            $maxRankScore += (($rank+1)*20);
+                            break;
+                        case "CS":
+                            $maxRankScore += (($rank+1)*5);
+                            break;
+                        case "Gold":
+                            $maxRankScore += (($rank+1)*6);
+                            break;
+                        case "VisionScore":
+                            $maxRankScore += (($rank+1)*20);
+                            break;
+                        case "WardTakedowns":
+                            $maxRankScore += (($rank+1)*4);
+                            break;
+                        case "WardsPlaced":
+                            $maxRankScore += (($rank+1)*2);
+                            break;
+                        case "WardsGuarded":
+                            $maxRankScore += (($rank+1)*4);
+                            break;
+                        case "VisionWards":
+                            $maxRankScore += (($rank+1)*8);
+                            break;
+                        case "Consumables":
+                            $maxRankScore += (($rank+1)*1);
+                            break;
+                        case "TurretPlates":
+                            $maxRankScore += (($rank+1)*5);
+                            break;
+                        case "TotalTakedowns":
+                            $maxRankScore += (($rank+1)*20);
+                            break;
+                        case "TurretTakedowns":
+                            $maxRankScore += (($rank+1)*8);
+                            break;
+                        case "InhibitorTakedowns":
+                            $maxRankScore += (($rank+1)*8);
+                            break;
+                        case "DragonTakedowns":
+                            $maxRankScore += (($rank+1)*7);
+                            break;
+                        case "HeraldTakedowns":
+                            $maxRankScore += (($rank+1)*8);
+                            break;
+                        case "DamageToBuildings":
+                            $maxRankScore += (($rank+1)*3);
+                            break;
+                        case "DamageToObjectives":
+                            $maxRankScore += (($rank+1)*4);
+                            break;
+                        case "DamageMitigated":
+                            $maxRankScore += (($rank+1)*3);
+                            break;
+                        case "DamageDealtToChampions":
+                            $maxRankScore += (($rank+1)*15);
+                            break;
+                        case "DamageTaken":      
+                            $maxRankScore += (($rank+1)*8);
+                            break;
+                        case "TeamShielded":                 
+                            $maxRankScore += (($rank+1)*8);
+                            break;
+                        case "TeamHealed":                   
+                            $maxRankScore += (($rank+1)*7);
+                            break;
+                        case "TimeCC":
+                            $maxRankScore += (($rank+1)*8);
+                            break;
+                        case "DeathTime":                   
+                            $maxRankScore += (($rank+1)*20);
+                            break;
+                        case "SkillshotsDodged":                      
+                            $maxRankScore += (($rank+1)*20);
+                            break;
+                        case "SkillshotsHit":                   
+                            $maxRankScore += (($rank+1)*1);
+                            break;
+                    }
+                }
+            }
+            unset($tempArray);
         }
-    }
+        $returnArray[$matchID] = number_format(($maxRankScore/247), 2);
+    }   
+    return $returnArray;
 }
 
 /** Same as getPlayerData but with all the team info available
