@@ -1,6 +1,7 @@
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <link rel="stylesheet" href="/clashapp/clash.css">
+<script type="text/javascript" src="../clashapp/clash.js"></script>
 <link id="clash-favicon" rel="shortcut icon" href="https://dasnerdwork.net/wp-content/uploads/favicons/clash-favicon.ico">
 <title>Team – DasNerdwork.net</title>
 <script type="text/javascript">
@@ -270,12 +271,13 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         echo "</div></center>";
         echo "<br>".$playerData["Name"] . "<br><br>";
 
-        $matchDaten = getMatchData($matchids);
+        $matchids = array_slice($matchids, 0, 15);
 
-        // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
-        $testArray[0] = $matchids[0];
-        getMatchRanking($testArray, $matchDaten, $sumid);
-        // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
+        $matchDaten = getMatchData($matchids);    
+    
+        // // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
+        $matchRankingArray = getMatchRanking($matchids, $matchDaten, $sumid);
+        // // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
 
         $playerLanes = getLanePercentages($matchDaten, $puuid);
 
@@ -294,7 +296,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             echo '<img src="/clashapp/data/misc/lanes/'.$queueRole.'.png" width="32"></div><br>';
         }
 
-        $matchids = getMatchIDs($puuid, 15);
         foreach($matchids as $matchid){
             if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . ".json")){
                 downloadMatchByID($matchid, $playerName);
@@ -332,8 +333,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     echo "<div class='medium-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
                 } else if(str_replace(',','',$masteryData[$i]["Points"]) > 1000000){
                     echo "<div class='high-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
-                } else if($sumid == "kzQ8siE3BbwyY43x4z8l9xGBSuqzWBKKLRYo-adM3VQvPG3Y"){ // OLES VEREWIGUNG
-                    echo "<div class='high-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
                 } else {
                     echo "<div class='no-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
                 }
@@ -353,7 +352,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             }
         }
         echo "</div>";
-        printTeamMatchDetailsByPUUID($matchids, $puuid);
+        printTeamMatchDetailsByPUUID($matchids, $puuid, $matchRankingArray);
         echo "</td></tr></table></td>";
    }
 

@@ -206,7 +206,7 @@ if($formattedInput != "") {
     }
 
     if($rankVal != 0){
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
     $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
