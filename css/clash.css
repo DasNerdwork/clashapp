@@ -133,7 +133,7 @@
 
 /* Style the collapsible content. Note: hidden by default */
 .content {
-  padding: 0 18px;
+  /* padding: 0 18px; */
   overflow: hidden;
   transition: all 300ms;
 }
@@ -158,4 +158,99 @@ body::-webkit-scrollbar {
 body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+.match-result { grid-area: a; }
+.match-type-and-time { grid-area: b; }
+.match-time-ago { grid-area: c; }
+.champion-icon { grid-area: d; }
+.summoner-spell-1 { grid-area: e; }
+.summoner-spell-2 { grid-area: f; }
+.rune-1 { grid-area: g; }
+.rune-2 { grid-area: h; }
+.champion-level { grid-area: i; }
+.champion-lane { grid-area: j; }
+.lane-opponent { grid-area: k; }
+.matchscore { grid-area: l; }
+.kda-stats { grid-area: m; }
+.kda { grid-area: n; }
+.kill-participation { grid-area: o; }
+.damage-dealt { grid-area: p; }
+.damage-tanked { grid-area: q; }
+.damage-healed-and-shielded { grid-area: r; }
+.damage-to-objectives { grid-area: s; }
+.item0 { grid-area: t0; }
+.item1 { grid-area: t1; }
+.item2 { grid-area: t2; }
+.item3 { grid-area: t3; }
+.item4 { grid-area: t4; }
+.item5 { grid-area: t5; }
+.trinket { grid-area: u; }
+.vision-wards { grid-area: v; }
+.creepscore { grid-area: w; }
+.visionscore { grid-area: x; }
+.collapser { grid-area: y; }
+
+.grid-container {
+  display: grid;
+  grid-template-areas:
+    'a a b b b b c  c  c  c'
+    'd d e g m m t0 t1 t2 u'
+    'd d f h n o t3 t4 t5 v'
+    'i j k k p q w  w  w  v'
+    'l l l l r s x  x  x  y';
+  gap: 2px;
+  /* background-color: #2196F3; */
+  /* padding: 2px; */
+}
+
+.match {
+  display: inline-flex;
+  margin-bottom: 10px;
+  border: 1px white solid;
+}
+
+.grid-container > div {
+  /* background-color: rgba(10, 10, 10, 0.8); */
+  text-align: center;
+  padding: 4px 0;
+}
+
+.champion-level {
+  position: relative;
+  bottom: 26px;
+}
+
+.champion-lane {
+  position: relative;
+  bottom: 26px;
+}
+
+.kda-stats {
+  font-size: 24px;
+}
+
+.lane-opponent {
+  position: relative;
+  right: 35px;
+}
+
+.vision-wards-count-icon {
+  position: absolute;
+  bottom: 50px;
+  right: 0px;
+  font-size: 18px;
+  background-color: #000;
+  padding-left: 3px;
+}
+
+.match-result {
+  position: relative;
+  right: 20px;
+}
+
+.match-type-and-time {
+  text-indent: 1em;
+  position: relative;
+  right: 90px;
 }

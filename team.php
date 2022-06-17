@@ -354,6 +354,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         echo "</div>";
         printTeamMatchDetailsByPUUID($matchids, $puuid, $matchRankingArray);
         echo "</td></tr></table></td>";
+        // break; // Uncomment if only 1 player
    }
 
    echo "</tr></table>";
