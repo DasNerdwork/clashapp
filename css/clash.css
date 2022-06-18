@@ -200,14 +200,15 @@ body {
     'i j k k p q w  w  w  v'
     'l l l l r s x  x  x  y';
   gap: 2px;
-  /* background-color: #2196F3; */
-  /* padding: 2px; */
+  max-height: 130px;
 }
 
 .match {
   display: inline-flex;
   margin-bottom: 10px;
   border: 1px white solid;
+  overflow: hidden;
+  width: 100%;
 }
 
 .grid-container > div {
@@ -232,25 +233,63 @@ body {
 
 .lane-opponent {
   position: relative;
+  visibility: hidden;
   right: 35px;
 }
 
 .vision-wards-count-icon {
-  position: absolute;
-  bottom: 50px;
-  right: 0px;
-  font-size: 18px;
+  position: relative;
+  bottom: 18px;
+  right: -20px;
+  font-size: 16px;
   background-color: #000;
-  padding-left: 3px;
+  width: 12px;
+  height: 18px;
 }
 
 .match-result {
   position: relative;
   right: 20px;
+  text-align: center;
 }
 
-.match-type-and-time {
-  text-indent: 1em;
+.collapser {
   position: relative;
-  right: 90px;
+}
+
+.damage-dealt {
+  visibility: hidden;
+}
+
+.damage-tanked {
+  visibility: hidden;
+}
+
+.damage-healed-and-shielded {
+  visibility: hidden;
+}
+
+.damage-to-objectives {
+  visibility: hidden;
+}
+
+.visionscore {
+  visibility: hidden;
+}
+
+.creepscore {
+  visibility: hidden;
+}
+
+.matchscore {
+  position: relative;
+  bottom: 53px;
+  right: 30px;
+  font-size: 12px;
+}
+
+.collapser {
+  bottom: 53px;
+  right: 168px;
+  cursor: pointer;
 }
