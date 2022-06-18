@@ -52,4 +52,42 @@ document.addEventListener("DOMContentLoaded", function(){
       }
     });
   }
+  var match = document.getElementsByClassName("match");
+  var collapser = document.getElementsByClassName("collapser");
+
+  for (i = 0; i < match.length; i++) {
+    collapser[i].addEventListener("click", function() {
+      var matchcontent = this.parentNode.parentNode.getElementsByClassName("grid-container")[0];
+      console.log(this.parentNode);
+      if (matchcontent.style.maxHeight == "130px" || matchcontent.style.maxHeight == ""){
+      matchcontent.getElementsByClassName("damage-dealt")[0].style.visibility = "visible";
+      matchcontent.getElementsByClassName("damage-tanked")[0].style.visibility = "visible";
+      matchcontent.getElementsByClassName("damage-healed-and-shielded")[0].style.visibility = "visible";
+      matchcontent.getElementsByClassName("damage-to-objectives")[0].style.visibility = "visible";
+      matchcontent.getElementsByClassName("visionscore")[0].style.visibility = "visible";
+      matchcontent.getElementsByClassName("creepscore")[0].style.visibility = "visible";
+      matchcontent.getElementsByClassName("matchscore")[0].style.bottom = "0px";
+      matchcontent.getElementsByClassName("matchscore")[0].style.right = "0px";
+      matchcontent.getElementsByClassName("matchscore")[0].style.fontSize = "16px";
+      matchcontent.getElementsByClassName("lane-opponent")[0].style.visibility = "visible";
+      matchcontent.getElementsByClassName("collapser")[0].style.bottom = "0px";
+      matchcontent.getElementsByClassName("collapser")[0].style.right = "0px";
+      matchcontent.style.maxHeight = matchcontent.scrollHeight + "px";
+      } else {
+      matchcontent.getElementsByClassName("damage-dealt")[0].style.visibility = "hidden";
+      matchcontent.getElementsByClassName("damage-tanked")[0].style.visibility = "hidden";
+      matchcontent.getElementsByClassName("damage-healed-and-shielded")[0].style.visibility = "hidden";
+      matchcontent.getElementsByClassName("damage-to-objectives")[0].style.visibility = "hidden";
+      matchcontent.getElementsByClassName("visionscore")[0].style.visibility = "hidden";
+      matchcontent.getElementsByClassName("creepscore")[0].style.visibility = "hidden";
+      matchcontent.getElementsByClassName("matchscore")[0].style.bottom = "53px";
+      matchcontent.getElementsByClassName("matchscore")[0].style.right = "30px";
+      matchcontent.getElementsByClassName("matchscore")[0].style.fontSize = "12px";
+      matchcontent.getElementsByClassName("lane-opponent")[0].style.visibility = "hidden";
+      matchcontent.getElementsByClassName("collapser")[0].style.bottom = "53px";
+      matchcontent.getElementsByClassName("collapser")[0].style.right = "168px";
+      matchcontent.style.maxHeight = "130px";
+      } 
+    });
+  }
 });

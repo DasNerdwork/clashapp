@@ -576,7 +576,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                 for($in = 0; $in < 10; $in++){
                     if($inhalt->info->participants[$in]->puuid == $puuid) {
                         $teamID = $inhalt->info->participants[$in]->teamId;
-                        echo '<div class="match" onclick=testungsfunktion();>';
+                        echo '<div class="match">';
                             echo '<div class="grid-container">';
                                 echo '<div class="match-result">';
                                 // Display of W(in) or L(ose)
@@ -591,15 +591,15 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 switch ($inhalt->info->queueId) {
                                     case 420:
                                         $matchtype = "Solo/Duo";
-                                        echo "<div> Solo/Duo ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Solo/Duo ";
                                         break;
                                     case 440:
                                         $matchtype = "Flex 5v5";
-                                        echo "<div> Flex ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Flex ";
                                         break;
                                     case 700:
                                         $matchtype = "Clash";
-                                        echo "<div> Clash ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Clash ";
                                         break;
                                 }
                                 echo gmdate("i:s", $inhalt->info->gameDuration)."</div>";
