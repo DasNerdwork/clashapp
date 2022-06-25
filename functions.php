@@ -648,28 +648,29 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
 
                         // Display of the played champions icon
-                        echo '<div class="champion-icon">';
+                        echo '<div class="champion-icon" style="margin-bottom: -17px;"><div>';
                         if ($inhalt->info->participants[$in])
                         $champion = $inhalt->info->participants[$in]->championName;
                         if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} // TODO One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png')){
-                            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png" width="64" style="vertical-align:middle"></div>';
+                            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png" width="64" style="vertical-align:middle; position:relative; z-index:1;">';
+                            echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.png" width="64" style="vertical-align:middle; position:relative; bottom:64px; margin-bottom: -64px; z-index:2;"></div>';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle"></div>';
                         }
 
                         // Display of champion level at end of game
-                        echo '<div class="champion-level">';
+                        echo '<div class="champion-level" style="z-index:3; bottom: 17px; right: 23px; font-size: 13px;">';
                         echo $inhalt->info->participants[$in]->champLevel;
                         echo '</div>';
 
                         // Display of played Position
-                        echo "<div class='champion-lane'>";
+                        echo "<div class='champion-lane' style='z-index:3; position:relative; bottom: 32px; left: 23px;'>";
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
                         if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$matchLane.'.png')){
-                            echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.png" width="16">';
+                            echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.png" width="14">';
                         }
-                        echo "</div>";
+                        echo "</div></div>";
 
 
                         // Display of Match Score 1-10
@@ -1536,6 +1537,7 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
 function getTeamByTeamID($teamID){
     global $headers;
     $teamDataArray = array();
+    $logPath = '/var/www/html/wordpress/clashapp/data/logs/teamDownloader.log';
 
     // Curl API request block
     $ch = curl_init();
@@ -1575,10 +1577,95 @@ function getTeamByTeamID($teamID){
     $teamDataArray["Tier"] = json_decode($teamOutput)->tier;
     $teamDataArray["Captain"] = json_decode($teamOutput)->captain;
     $teamDataArray["Players"] = json_decode($teamOutput, true)["players"];
+    // $teamDataArray["SuggestedBans"] = "";
 
+    // if(file_exists('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json')){
+    //     $existingJson = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json'), true);
+    // } else { $existingJson = ""; }
+
+    // $fp = fopen('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json', 'c');
+    // foreach($existingJson["Players"] as $existingPlayer){
+    //     foreach($teamDataArray["Players"] as $downloadedPlayer){
+    //         if($existingPlayer == $downloadedPlayer){
+    //             echo "test";
+    //         } else {
+    //             echo "nope";
+    //         }
+    //     }
+    // }
+    // echo count($teamDataArray["Players"]);
+    // foreach($teamDataArray["Players"] as $pla){
+    //     echo "<pre>";
+    //     print_r($pla);
+    //     echo "</pre>";
+    // }
+    // foreach($existingJson["Players"] as $ply){
+    //     echo "<pre>";
+    //     print_r($ply);
+    //     echo "</pre>";
+    // }
+    // if($existingJson["Players"] == $teamDataArray["Players"]){
+    //     fclose($fp);
+    // } else {
+    //     // Else update the current existing (or not existing) file with the newest data
+    //     fwrite($fp, json_encode($teamDataArray));
+    //     fclose($fp);
+    // }
 
     return $teamDataArray;
 }
+
+function showBanSelector(){
+    global $currentpatch;
+    $i=0;
+    $championNamingData = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
+    $championNamingFile = json_decode($championNamingData);
+    foreach($championNamingFile->data as $champData){
+        /**
+         * Joke Edit 
+        */
+        if($champData->name == "Nunu & Willump"){
+            $champName = "Nunu & William";
+        } else {
+            $champName = $champData->name;
+        }
+        $i++;
+        $imgPath = $champData->image->full;
+        if($i<11){
+            if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath)){
+                echo "<div class='champ-select-champion'>";
+                echo '<img class="champ-select-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48">';
+                echo "<span class='caption' style='display: block;'>".$champName."</span>";
+                echo "</div>";
+            }
+        } else {
+            if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath)){
+                // echo "<div class='champ-select-champion' style='display: none;'>";
+                echo "<div class='champ-select-champion'>";
+                echo '<img class="champ-select-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48">';
+                echo "<span class='caption' style='display: block;'>".$champName."</span>";
+                echo "</div>";
+            }
+        }
+    }
+}
+
+// global $currentpatch;
+// $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/runesReforged.json');
+// $json = json_decode($data);
+// foreach($json as $runetree){
+//     foreach($runetree->slots as $keyrunes){
+//         foreach($keyrunes as $runeid){
+//             foreach($runeid as $rune){
+//                 if($id == $rune->id){
+//                     return $rune->icon;
+//                 }
+//             }
+//         }
+//     }
+// }
+// }
+
 
 /** Always active "function" to collect the teamID of a given Summoner Name
  * This function calls an API request as soon as the sumname gets posted from the team.php

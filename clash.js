@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", function(){
   var allClashPages = RegExp("(\/clash\/).+$");
+  var allTeamPages = RegExp("(\/team\/).+$");
   var mainPage = RegExp("(\/clash.*)$"); 
-  if (window.location.pathname.match(allClashPages)) {
+  if (window.location.pathname.match(allClashPages) || window.location.pathname.match(allTeamPages)) {
     document.getElementById("updateBtn").style.display = "initial";
   } else if (window.location.pathname.match(mainPage)) {
     suchfeld = document.getElementById("suchfeld");
@@ -37,6 +38,8 @@ document.addEventListener("DOMContentLoaded", function(){
     document.body.style.backgroundPosition = "50% 20%";
     document.body.style.backgroundSize = "40%";
     document.body.style.backgroundColor = "#c6ccd8";
+
+    // TABLE COLLAPSER
   }
   var coll = document.getElementsByClassName("collapsible");
   var i;
@@ -52,13 +55,15 @@ document.addEventListener("DOMContentLoaded", function(){
       }
     });
   }
+
+// MATCH COLLAPSER
+
   var match = document.getElementsByClassName("match");
   var collapser = document.getElementsByClassName("collapser");
 
   for (i = 0; i < match.length; i++) {
     collapser[i].addEventListener("click", function() {
       var matchcontent = this.parentNode.parentNode.getElementsByClassName("grid-container")[0];
-      console.log(this.parentNode);
       if (matchcontent.style.maxHeight == "130px" || matchcontent.style.maxHeight == ""){
       matchcontent.getElementsByClassName("damage-dealt")[0].style.visibility = "visible";
       matchcontent.getElementsByClassName("damage-tanked")[0].style.visibility = "visible";
@@ -90,4 +95,40 @@ document.addEventListener("DOMContentLoaded", function(){
       } 
     });
   }
+
+  // CHAMP SELECT
+
+  var championList = document.getElementsByClassName("champ-select-champion");
+  var champInput = document.getElementById("champSelector");
+  var selectedBans = document.getElementById("selectedBans");
+  
+  champInput.addEventListener('keyup', selectChampions);
+
+  function selectChampions(){
+    for (j = 0; j < championList.length; j++) {
+      span = championList[j].getElementsByTagName("span")[0].innerText;
+      if (span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) {
+        championList[j].style.display = "";
+      } else {
+        championList[j].style.display = "none";
+      }
+    }
+  }
+
+  $(".champ-select-champion").click(function() {
+      $.ajax({
+      type: "POST",
+      url: "../clashapp/addToFile.php",
+      data: {
+        champname: this.getElementsByTagName("span")[0].innerText,
+        teamid: window.location.pathname.split("/team/")[1]
+        }
+      }).done(function() {
+
+      });
+      // if(!(selectedBans.innerHTML.includes(this.getElementsByTagName("span")[0].innerText))){
+      //   selectedBans.innerHTML += this.getElementsByTagName("span")[0].innerText + " ";
+      // }
+  });
+
 });
