@@ -283,7 +283,7 @@ body {
 
 .matchscore {
   position: relative;
-  bottom: 53px;
+  bottom: 61px;
   right: 30px;
   font-size: 12px;
 }
@@ -293,3 +293,14 @@ body {
   right: 168px;
   cursor: pointer;
 }
+
+.champ-select-champion {
+  vertical-align: top;
+  display: inline-block;
+  text-align: center;
+  width: 80px;
+  height: 75px;
+  transition: all 0.5s ease-in-out;
+  cursor: pointer;
+}
+

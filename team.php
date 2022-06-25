@@ -28,6 +28,22 @@
         document.getElementById("name").disabled = true;
         document.getElementById("submitBtn").disabled = true;
     }
+    $('#updateBtn').click(function() {
+            $.ajax({
+            type: "POST",
+            url: "../clashapp/updateTeam.php",
+            data: { usernames: "<?=$teamPlayerNameArray ?>" }
+            }).done(function( msg ) {
+                var statusJson = JSON.parse(msg);
+                if(statusJson.status == "up-to-date"){
+                    var d = new Date();
+                    alert("[" + d.toLocaleTimeString() + "] Benutzerdaten bereits auf dem neusten Stand\n");
+                    hideLoader();
+                }else{
+                    window.location.reload();
+                }
+            });
+        });
 </script>
 </head>
 
@@ -36,12 +52,14 @@
 <form id="suchfeld" action="" onsubmit="return false;" method="GET" autocomplete="off" style="display: flex;">
     <input type="text" name="name" id="name" value="" placeholder="Beschwörername">
     <input type="submit" name="submitBtn" id="submitBtn" value="Suchen" onclick="sanitize(this.form.name.value);">
+    <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;">Aktualisieren</button>
     <div class="sbl-circ" id="loader"></div>
 </form>
 
 
 <?php
 include_once('functions.php');
+include_once('updateTeam.php');
 include_once('update.php');
 /**
  * 1. API request to get SumID by username
@@ -58,14 +76,27 @@ include_once('update.php');
  */
 
 $output = json_decode(file_get_contents('/hdd1/clashapp/misc/player.by-summoner.json'), true);
-
+$teamPlayerNameArray = array();
 
 if (isset($_GET["name"]) && $_GET["name"] != "404"){
     $teamID = $_GET["name"];
 
     $teamDataArray = getTeamByTeamID($teamID);
     echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
-    echo "<h1 class='schatten'><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1><br>";
+    echo "<h1 class='schatten' style='padding-bottom: 10px;'><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1>";
+    echo "<div id='selectedBans' style='float: right; position: relative; right: 430px;'>test</div><br><br>";
+?>
+<form id="banSearch" class="schatten" action="" onsubmit="return false;" method="GET" autocomplete="off" style="float: right; position: relative; right: 50px; width: 400px; height: 175px; overflow: hidden;">
+    <input type="text" name="champName" id="champSelector" value="" placeholder="Championname" style="margin-bottom: 10px;">
+<?php
+    echo "<div id='champSelect'>";
+    showBanSelector();
+    echo "</div>";
+
+
+
+
+    echo "</form></h1>";
     echo "<table class='table' style='width:100%; table-layout: fixed;'><tr>";
     $tableWidth = round(100/count($teamDataArray["Players"]));
     $playerDataDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/player/');
@@ -113,8 +144,8 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                 }
             }
         }      
-
-        echo "<center><div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px;'>";
+        $teamPlayerNameArray[] = $playerName;
+        echo "<center><div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px; position: relative;'>";
         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
             echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
         }
@@ -183,7 +214,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
             if(file_exists($profileBorderPath)){
-                echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute; top: 45px; z-index: -1;">';
+                echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute; top: -126px; z-index: -1;">';
             }
             if ($highEloLP != ""){
                 echo "<div style='font-weight: bold; color: #e8dfcc; position: absolute; margin-top: -5px; font-size: 12px;'>".$highEloLP." LP</div>";
@@ -263,9 +294,9 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
         if(file_exists($profileBorderPath)){
-            echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: 132px; z-index: -1;">';
+            echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: -37px; z-index: -1;">';
             }
-        echo "<div style='color: #e8dfcc; position: absolute; margin-top: 104px; font-size: 12px;'>".$playerData["Level"]."</div>";
+        echo "<div style='color: #e8dfcc; position: absolute; margin-top: 105px; font-size: 12px;'>".$playerData["Level"]."</div>";
         }
 
         echo "</div></center>";
@@ -275,9 +306,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
 
         $matchDaten = getMatchData($matchids);    
     
-        // // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
         $matchRankingArray = getMatchRanking($matchids, $matchDaten, $sumid);
-        // // TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST TEST
 
         $playerLanes = getLanePercentages($matchDaten, $puuid);
 
@@ -340,17 +369,17 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         }
         echo "</div>";
         echo "<div style='margin: 10px 0px;'>";
-        foreach (mostPlayedWith($matchDaten, $puuid) as $key => $value){
-            foreach ($teamDataArray["Players"] as $teamMember){
-                if(file_exists('/var/www/html/wordpress/clashapp/data/player/'.$teamMember["summonerId"].'.json')){
-                    $uniquePlayerName = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$teamMember["summonerId"].'.json'), true)["PlayerData"]["Name"];
-                }
-                if ($key == $uniquePlayerName){
-                    echo "Prematemöglichkeit: ".$key." auf ".$value." Games<br>";
-                    break;
-                }
-            }
-        }
+        // foreach (mostPlayedWith($matchDaten, $puuid) as $key => $value){
+        //     foreach ($teamDataArray["Players"] as $teamMember){
+        //         if(file_exists('/var/www/html/wordpress/clashapp/data/player/'.$teamMember["summonerId"].'.json')){
+        //             $uniquePlayerName = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$teamMember["summonerId"].'.json'), true)["PlayerData"]["Name"];
+        //         }
+        //         if ($key == $uniquePlayerName){
+        //             echo "Prematemöglichkeit: ".$key." auf ".$value." Games<br>";
+        //             break;
+        //         }
+        //     }
+        // }
         echo "</div>";
         printTeamMatchDetailsByPUUID($matchids, $puuid, $matchRankingArray);
         echo "</td></tr></table></td>";
@@ -358,6 +387,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
    }
 
    echo "</tr></table>";
+
 }
 
 
