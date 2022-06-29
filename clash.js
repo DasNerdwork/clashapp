@@ -100,10 +100,11 @@ document.addEventListener("DOMContentLoaded", function(){
 
   var championList = document.getElementsByClassName("champ-select-champion");
   var champInput = document.getElementById("champSelector");
-  var selectedBans = document.getElementById("selectedBans");
   
   champInput.addEventListener('keyup', selectChampions);
 
+
+  // List Filtering
   function selectChampions(){
     for (j = 0; j < championList.length; j++) {
       span = championList[j].getElementsByTagName("span")[0].innerText;
@@ -114,21 +115,63 @@ document.addEventListener("DOMContentLoaded", function(){
       }
     }
   }
+  // End of List Filtering
 
   $(".champ-select-champion").click(function() {
-      $.ajax({
-      type: "POST",
-      url: "../clashapp/addToFile.php",
-      data: {
-        champname: this.getElementsByTagName("span")[0].innerText,
-        teamid: window.location.pathname.split("/team/")[1]
-        }
-      }).done(function() {
-
-      });
-      // if(!(selectedBans.innerHTML.includes(this.getElementsByTagName("span")[0].innerText))){
-      //   selectedBans.innerHTML += this.getElementsByTagName("span")[0].innerText + " ";
-      // }
+    $.ajax({
+    type: "POST",
+    url: "../clashapp/addToFile.php",
+    data: {
+      champname: this.getElementsByTagName("span")[0].innerText,
+      champid: this.getElementsByTagName("img")[0].dataset.id,
+      teamid: window.location.pathname.split("/team/")[1]
+      }
+    })
   });
+
+
+});
+
+
+
+function selected_ban_champion(el){
+  $.ajax({
+  type: "POST",
+  url: "../clashapp/removeFromFile.php",
+  data: {
+    champid: el.getElementsByTagName("img")[0].dataset.id,
+    teamid: window.location.pathname.split("/team/")[1]
+    }
+  })
+}
+
+$(document).ready( function() {
+  var selectedBans = document.getElementById("selectedBans");
+  var teamid = window.location.pathname.split("/team/")[1];
+  var status = 0;
+  // $.getJSON('https://dasnerdwork.net/clashapp/data/teams/'+teamid+'.json', function(data) {
+  //   selectedBans.innerHTML = data["SuggestedBans"];
+  // });
+  setInterval(function() {
+    $.getJSON('https://dasnerdwork.net/clashapp/data/teams/'+teamid+'.json', function(data) {
+      // console.log(data)
+      if(data["Status"] > status){
+        status = data["Status"];
+        var html ="";
+        console.log(data["SuggestedBans"])
+        for (const element of data["SuggestedBans"]) {
+          console.log(element);
+          html += '<div class="selected-ban-champion" onclick="selected_ban_champion(this)">'+
+                    '<img class="champ-select-icon" style="height: auto;" data-id="' + element["id"] + '" src="/clashapp/data/patch/12.12.1/img/champion/' + element["id"] + '.png" width="48">'+
+                    '<span class="caption" style="display: block;">' + element["name"] + '</span>'+
+                  '</div>';
+        }
+      
+        selectedBans.innerHTML = html;
+      }
+    })
+
+
+  }, 1000);
 
 });

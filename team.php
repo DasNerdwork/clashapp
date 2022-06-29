@@ -81,12 +81,21 @@ $teamPlayerNameArray = array();
 if (isset($_GET["name"]) && $_GET["name"] != "404"){
     $teamID = $_GET["name"];
 
+    if(!(file_exists('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json'))){
+        // $suggestedBanFileContent = array();
+        $fp = fopen('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json', 'c');
+        $suggestedBanFileContent["SuggestedBans"]=[] ;
+        $suggestedBanFileContent["Status"]= 0;
+        fwrite($fp, json_encode($suggestedBanFileContent));
+        fclose($fp);
+    }
+
     $teamDataArray = getTeamByTeamID($teamID);
     echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
-    echo "<h1 class='schatten' style='padding-bottom: 10px;'><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1>";
-    echo "<div id='selectedBans' style='float: right; position: relative; right: 430px;'>test</div><br><br>";
+    echo "<h1 class='schatten' style='padding-bottom: 10px; display: inline-block;'><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1>";
+    echo "<div id='selectedBans' class='schatten' style='float: right; position: relative; right: 430px;'>test</div><br><br>";
 ?>
-<form id="banSearch" class="schatten" action="" onsubmit="return false;" method="GET" autocomplete="off" style="float: right; position: relative; right: 50px; width: 400px; height: 175px; overflow: hidden;">
+<form id="banSearch" class="schatten" action="" onsubmit="return false;" method="GET" autocomplete="off" style="float: right; position: relative; right: 50px; width: 400px; left: 400px; height: 175px; overflow: hidden;">
     <input type="text" name="champName" id="champSelector" value="" placeholder="Championname" style="margin-bottom: 10px;">
 <?php
     echo "<div id='champSelect'>";

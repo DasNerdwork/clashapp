@@ -281,6 +281,10 @@ body {
   visibility: hidden;
 }
 
+.champion-icon {
+  max-width: 100px;
+}
+
 .matchscore {
   position: relative;
   bottom: 61px;
@@ -294,13 +298,20 @@ body {
   cursor: pointer;
 }
 
-.champ-select-champion {
+.champ-select-champion, .selected-ban-champion {
   vertical-align: top;
   display: inline-block;
   text-align: center;
   width: 80px;
   height: 75px;
-  transition: all 0.5s ease-in-out;
   cursor: pointer;
+}
+
+#selectedBans {
+  width: 400px;
+  height: 175px;
+  overflow: hidden;
+  bottom: 50px;
+  left: 0px;
 }
 
