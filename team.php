@@ -93,10 +93,10 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
     $teamDataArray = getTeamByTeamID($teamID);
     echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
     echo "<h1 class='schatten' style='padding-bottom: 10px; display: inline-block;'><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1>";
-    echo "<div id='selectedBans' class='schatten' style='float: right; position: relative; right: 430px;'>test</div><br><br>";
+    echo "<div id='selectedBans' class='schatten' style='float: right; position: relative; right: 430px;'></div><br><br>";
 ?>
-<form id="banSearch" class="schatten" action="" onsubmit="return false;" method="GET" autocomplete="off" style="float: right; position: relative; right: 50px; width: 400px; left: 400px; height: 175px; overflow: hidden;">
-    <input type="text" name="champName" id="champSelector" value="" placeholder="Championname" style="margin-bottom: 10px;">
+<form id="banSearch" class="schatten" action="" onsubmit="return false;" method="GET" autocomplete="off" style="float: right; position: relative; right: 50px; width: 420px; left: 422px; height: 175px;">
+    <input type="text" name="champName" id="champSelector" value="" placeholder="Championname" style="margin-bottom: 5px;">
 <?php
     echo "<div id='champSelect'>";
     showBanSelector();
