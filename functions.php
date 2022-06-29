@@ -1631,10 +1631,11 @@ function showBanSelector(){
         }
         $i++;
         $imgPath = $champData->image->full;
+        $dataId = $champData->id;
         if($i<11){
             if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath)){
                 echo "<div class='champ-select-champion'>";
-                echo '<img class="champ-select-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48">';
+                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48">';
                 echo "<span class='caption' style='display: block;'>".$champName."</span>";
                 echo "</div>";
             }
@@ -1642,7 +1643,7 @@ function showBanSelector(){
             if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath)){
                 // echo "<div class='champ-select-champion' style='display: none;'>";
                 echo "<div class='champ-select-champion'>";
-                echo '<img class="champ-select-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48">';
+                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48">';
                 echo "<span class='caption' style='display: block;'>".$champName."</span>";
                 echo "</div>";
             }
