@@ -28,22 +28,7 @@
         document.getElementById("name").disabled = true;
         document.getElementById("submitBtn").disabled = true;
     }
-    $('#updateBtn').click(function() {
-            $.ajax({
-            type: "POST",
-            url: "../clashapp/updateTeam.php",
-            data: { usernames: "<?=$teamPlayerNameArray ?>" }
-            }).done(function( msg ) {
-                var statusJson = JSON.parse(msg);
-                if(statusJson.status == "up-to-date"){
-                    var d = new Date();
-                    alert("[" + d.toLocaleTimeString() + "] Benutzerdaten bereits auf dem neusten Stand\n");
-                    hideLoader();
-                }else{
-                    window.location.reload();
-                }
-            });
-        });
+    
 </script>
 </head>
 
@@ -156,7 +141,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         $teamPlayerNameArray[] = $playerName;
         echo "<center><div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px; position: relative;'>";
         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
-            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
+            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;" loading="lazy">';
         }
 
         $rankVal = 0;
@@ -223,7 +208,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
             if(file_exists($profileBorderPath)){
-                echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute; top: -126px; z-index: -1;">';
+                echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute; top: -126px; z-index: -1;" loading="lazy">';
             }
             if ($highEloLP != ""){
                 echo "<div style='font-weight: bold; color: #e8dfcc; position: absolute; margin-top: -5px; font-size: 12px;'>".$highEloLP." LP</div>";
@@ -303,7 +288,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
         if(file_exists($profileBorderPath)){
-            echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: -37px; z-index: -1;">';
+            echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: -37px; z-index: -1;" loading="lazy">';
             }
         echo "<div style='color: #e8dfcc; position: absolute; margin-top: 105px; font-size: 12px;'>".$playerData["Level"]."</div>";
         }
@@ -324,14 +309,14 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         $queueRole = $player["position"];
         echo "<div style='display: inline-flex; justify-content: center;'>Positions: ";
         if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerMainRole.'.png')){
-            echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.png" width="32">';
+            echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.png" width="32" loading="lazy">';
         }
         if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png')){
-            echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png" width="32">';
+            echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png" width="32" loading="lazy">';
         }
         echo " queued as ";
         if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$queueRole.'.png')){
-            echo '<img src="/clashapp/data/misc/lanes/'.$queueRole.'.png" width="32"></div><br>';
+            echo '<img src="/clashapp/data/misc/lanes/'.$queueRole.'.png" width="32" loading="lazy"></div><br>';
         }
 
         foreach($matchids as $matchid){
@@ -362,7 +347,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         echo "<div style='display: inline-flex;'>";
         for($i=0; $i<3; $i++){
             if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png')){
-                echo '<div><img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png" width="64" style="margin: 0px 28px;"><br>';
+                echo '<div><img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png" width="64" style="margin: 0px 28px;" loading="lazy"><br>';
                 echo $masteryData[$i]["Champion"]."<br>";
                 echo "MR: ".$masteryData[$i]["Lvl"]."<br>";
                 if(str_replace(',','',$masteryData[$i]["Points"]) > 250000){
@@ -395,10 +380,32 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         // break; // Uncomment if only 1 player
    }
 
-   echo "</tr></table>";
+   echo "</tr></table><pre>";
+   print_r($teamPlayerNameArray);
+   echo "</pre>";
 
 }
 
 
 
 ?>
+
+<script>
+    $('#updateBtn').click(function() {
+            $.ajax({
+            type: "POST",
+            url: "../clashapp/updateTeam.php",
+            data: { usernames: ["<?= $teamPlayerNameArray[0] ?>","<?=$teamPlayerNameArray[1] ?>","<?=$teamPlayerNameArray[2] ?>","<?=$teamPlayerNameArray[3] ?>","<?=$teamPlayerNameArray[4] ?>"] }
+            }).done(function( msg ) {
+                console.log(msg);
+                var statusJson = JSON.parse(msg);
+                if(statusJson.status == "up-to-date"){
+                    var d = new Date();
+                    console.log("[" + d.toLocaleTimeString() + "] Benutzerdaten bereits auf dem neusten Stand\n");
+                    hideLoader();
+                }else{
+                    window.location.reload();
+                }
+            });
+        });
+</script>

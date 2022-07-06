@@ -200,7 +200,7 @@ body {
     'i j k k p q w  w  w  v'
     'l l l l r s x  x  x  y';
   gap: 2px;
-  max-height: 130px;
+  max-height: 140px;
 }
 
 .match {
@@ -209,6 +209,7 @@ body {
   border: 1px white solid;
   overflow: hidden;
   width: 100%;
+  background-color: #121212;
 }
 
 .grid-container > div {
@@ -293,9 +294,15 @@ body {
 }
 
 .collapser {
-  bottom: 53px;
-  right: 168px;
+  bottom: 50px;
+  right: 210px;
   cursor: pointer;
+  font-weight: bold;
+  background-color: #0e0f18;
+  margin: 10px -260px 0px;
+  height: 16px;
+  line-height: 0px;
+  z-index: 3;
 }
 
 .champ-select-champion, .selected-ban-champion {

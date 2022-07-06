@@ -394,10 +394,10 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         $champion = $inhalt->info->participants[$in]->championName;
                         if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} // TODO One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png')){
-                            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png" width="32" style="vertical-align:middle" loading="lazy">';
                             echo " ".$inhalt->info->participants[$in]->championName . "</td>";
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                             echo " N/A</td>";
                         }
 
@@ -406,14 +406,14 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         $keyrune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                         $secrune = $inhalt->info->participants[$in]->perks->styles[1]->style;
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeIconFetcher($keyrune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyrune).'" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyrune).'" width="32" style="vertical-align:middle" loading="lazy">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune).'" width="16" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune).'" width="16" style="vertical-align:middle" loading="lazy">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo "</td>";
 
@@ -440,14 +440,14 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                             $allitems = "item".$b;
                             $itemid = $inhalt->info->participants[$in]->$allitems;
                             if($itemid == 0){
-                                echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle">';
+                                echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle" loading="lazy">';
                             } else {
                                 if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/item/'.$itemid.'.png')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/' . $itemid . '.png" width="32" style="vertical-align:middle">';
+                                    echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/' . $itemid . '.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 } else if(file_exists('/var/www/html/wordpress/clashapp/data/misc/'.$itemid.'.png')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemid.'.png" width="32" style="vertical-align:middle">';
+                                    echo '<img src="/clashapp/data/misc/'.$itemid.'.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 } else {
-                                    echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle">';
+                                    echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 }
                             }
                         }
@@ -457,13 +457,13 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         echo '<td>Vision Score: ';
                         echo $inhalt->info->participants[$in]->visionScore . " Wards: ";
                         echo $inhalt->info->participants[$in]->wardsPlaced . "x ";
-                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/3340.png" width="16" style="vertical-align:middle"> Control Wards: ';
+                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/3340.png" width="16" style="vertical-align:middle" loading="lazy"> Control Wards: ';
                         if(isset($inhalt->info->participants[$in]->challenges->controlWardsPlaced)){
                             echo $inhalt->info->participants[$in]->challenges->controlWardsPlaced . "x ";
                         } else if(isset($inhalt->info->participants[$in]->visionWardsBoughtInGame)){
                             echo $inhalt->info->participants[$in]->visionWardsBoughtInGame . "x ";
                         }
-                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="16" style="vertical-align:middle"></td>';
+                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="16" style="vertical-align:middle" loading="lazy"></td>';
 
                         // Display of the Total Values
                         echo "<td>Totals: ";
@@ -632,7 +632,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 echo "</div>";
 
                                 echo '<div class="vision-wards" style="position: relative;">';
-                                echo '<img class="parent-trinket-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="32">';
+                                echo '<img class="parent-trinket-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="32" loading="lazy">';
                                 echo '<div class="vision-wards-count-icon">'.$inhalt->info->participants[$in]->detectorWardsPlaced.'</div>';
                                 echo "</div>";
 
@@ -644,7 +644,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 echo '<div class="visionscore-count">V-Score: '.$inhalt->info->participants[$in]->visionScore.'</div>';
                                 echo "</div>";
 
-                                echo '<div class="collapser">V</div>';
+                                echo '<div class="collapser">&#8964;</div>';
 
 
                         // Display of the played champions icon
@@ -653,10 +653,10 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $champion = $inhalt->info->participants[$in]->championName;
                         if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} // TODO One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png')){
-                            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png" width="64" style="vertical-align:middle; position:relative; z-index:1;">';
-                            echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.png" width="64" style="vertical-align:middle; position:relative; bottom:64px; margin-bottom: -64px; z-index:2;"></div>';
+                            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png" width="64" style="vertical-align:middle; position:relative; z-index:1;" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.png" width="64" style="vertical-align:middle; position:relative; bottom:64px; margin-bottom: -64px; z-index:2;" loading="lazy"></div>';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle"></div>';
+                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
                         }
 
                         // Display of champion level at end of game
@@ -668,7 +668,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo "<div class='champion-lane' style='z-index:3; position:relative; bottom: 32px; left: 23px;'>";
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
                         if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$matchLane.'.png')){
-                            echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.png" width="14">';
+                            echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.png" width="14" loading="lazy">';
                         }
                         echo "</div></div>";
 
@@ -689,11 +689,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
                         $summoner2Id = $inhalt->info->participants[$in]->summoner2Id;
                         if(file_exists('/var/www/html/wordpress/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".png")){
-                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.png" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo '</div><div class="summoner-spell-2">';
                         if(file_exists('/var/www/html/wordpress/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".png")){
-                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.png" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo "</div>";
 
@@ -703,15 +703,15 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $keyrune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                         $secrune = $inhalt->info->participants[$in]->perks->styles[1]->style;
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeIconFetcher($keyrune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyrune).'" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyrune).'" width="32" style="vertical-align:middle" loading="lazy">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo '</div><div class="rune-2">';
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune).'" width="16" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune).'" width="16" style="vertical-align:middle" loading="lazy">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle">';
+                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo "</div>";
 
@@ -737,7 +737,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                             if($b == 6){
                                 for($c=0; $c<$noItemCounter; $c++){
                                     echo '<div class="item'.($lastItemSlot+1).'">';
-                                    echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle">';
+                                    echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle" loading="lazy">';
                                     echo '</div>';
                                     $lastItemSlot++;
                                 }
@@ -746,16 +746,16 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                             $allitems = "item".$b;
                             $itemid = $inhalt->info->participants[$in]->$allitems;
                             if($itemid == 0){
-                                // echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle">';
+                                // echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 $noItemCounter += 1;
                             } else {
                                 echo '<div class="item'.($b - $noItemCounter).'">';
                                 if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/item/'.$itemid.'.png')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/' . $itemid . '.png" width="32" style="vertical-align:middle">';
+                                    echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/' . $itemid . '.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 } else if(file_exists('/var/www/html/wordpress/clashapp/data/misc/'.$itemid.'.png')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemid.'.png" width="32" style="vertical-align:middle">';
+                                    echo '<img src="/clashapp/data/misc/'.$itemid.'.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 } else {
-                                    echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle">';
+                                    echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 }
                                 $lastItemSlot = $b;
                                 echo "</div>";
@@ -768,13 +768,13 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         // echo '<td>Vision Score: ';
                         // echo $inhalt->info->participants[$in]->visionScore . " Wards: ";
                         // echo $inhalt->info->participants[$in]->wardsPlaced . "x ";
-                        // echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/3340.png" width="16" style="vertical-align:middle"> Control Wards: ';
+                        // echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/3340.png" width="16" style="vertical-align:middle" loading="lazy"> Control Wards: ';
                         // if(isset($inhalt->info->participants[$in]->challenges->controlWardsPlaced)){
                         //     echo $inhalt->info->participants[$in]->challenges->controlWardsPlaced . "x ";
                         // } else if(isset($inhalt->info->participants[$in]->visionWardsBoughtInGame)){
                         //     echo $inhalt->info->participants[$in]->visionWardsBoughtInGame . "x ";
                         // }
-                        // echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="16" style="vertical-align:middle"></td>';
+                        // echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="16" style="vertical-align:middle" loading="lazy"></td>';
                     }
                 }
                 for($i = 0; $i < 10; $i++){
@@ -784,9 +784,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     $enemyChamp = $inhalt->info->participants[$i]->championName;
                     if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} // TODO One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ
                     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$enemyChamp.'.png')){
-                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$enemyChamp.'.png" width="32" style="vertical-align:middle"></div>';
+                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$enemyChamp.'.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
                     } else {
-                        echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle"></div>';
+                        echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
                     }
                     }
                     if ($inhalt->info->participants[$i]->teamId == $teamID){
@@ -831,7 +831,7 @@ function printMasteryInfo($masteryArray, $index){
 
     // Print image if it exists
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png" width="64"><br>';
+        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png" width="64" loading="lazy"><br>';
     }
 
     // Print the additional info
@@ -1624,18 +1624,14 @@ function showBanSelector(){
         /**
          * Joke Edit 
         */
-        if($champData->name == "Nunu & Willump"){
-            $champName = "Nunu & William";
-        } else {
-            $champName = $champData->name;
-        }
+        $champName = $champData->name;
         $i++;
         $imgPath = $champData->image->full;
         $dataId = $champData->id;
         if($i<11){
             if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath)){
                 echo "<div class='champ-select-champion'>";
-                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48">';
+                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
                 echo "<span class='caption' style='display: block;'>".$champName."</span>";
                 echo "</div>";
             }
@@ -1643,7 +1639,7 @@ function showBanSelector(){
             if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath)){
                 // echo "<div class='champ-select-champion' style='display: none;'>";
                 echo "<div class='champ-select-champion'>";
-                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48">';
+                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
                 echo "<span class='caption' style='display: block;'>".$champName."</span>";
                 echo "</div>";
             }

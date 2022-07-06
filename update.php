@@ -30,11 +30,13 @@ function updateProfile($id, $maxMatchIds, $type="name"){
             $existingJson = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
             
             if(getMatchIDs($puuid, 1)[0] == $existingJson["MatchIDs"][0] && (count($existingJson["MatchIDs"]) >= count($matchids))){//newest local matchid equels api first 
-                echo '{"status":"up-to-date"}';die();
+                echo '{"status":"up-to-date"}';return;
             }
-        } else { $existingJson = ""; } // else empty $existingJson string so following if-statement forced into else part
+        } else { 
+            $existingJson = ""; 
+        } // else empty $existingJson string so following if-statement forced into else part
         
-        $fp = fopen('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json', 'c');
+        $fp = fopen('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json', 'w');
         // Open the file only to write. If it doesnt exist it will be created. If it exists it won't be truncated (would result in permanent delete-create loop)
         
         if($existingJson == json_encode($jsonArray)){
@@ -42,6 +44,9 @@ function updateProfile($id, $maxMatchIds, $type="name"){
             // If current existing file equals the new downloaded array data do nothing
         } else {
             // Else update the current existing (or not existing) file with the newest data
+            // echo "<pre>";
+            // print_r($jsonArray);
+            // echo "</pre>";die();
             fwrite($fp, json_encode($jsonArray));
             fclose($fp);
         }
@@ -57,8 +62,8 @@ function updateProfile($id, $maxMatchIds, $type="name"){
         $border = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
         file_put_contents($logPath, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
         file_put_contents($logPath, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
+        echo '{"status":"updated"}';
         if($maxMatchIds > 75){
-            echo '{"status":"updated"}';
         }else if($maxMatchIds == 75){
             // echo "<script>location.reload()</script>";
         }
