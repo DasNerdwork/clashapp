@@ -6,8 +6,6 @@ include_once('functions.php');
 
 if(isset($_POST["username"])){
     updateProfile($_POST["username"], 150);
-    // echo $_POST["username"]; // ERROR <-- Postet nicht mehr von profile.php zu update.php
-    // die;
 }
 
 function updateProfile($id, $maxMatchIds, $type="name"){

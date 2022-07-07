@@ -763,18 +763,6 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
                         }
                         echo "</div>";
-
-                        // // Display of the user Vision and Wardscore
-                        // echo '<td>Vision Score: ';
-                        // echo $inhalt->info->participants[$in]->visionScore . " Wards: ";
-                        // echo $inhalt->info->participants[$in]->wardsPlaced . "x ";
-                        // echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/3340.png" width="16" style="vertical-align:middle" loading="lazy"> Control Wards: ';
-                        // if(isset($inhalt->info->participants[$in]->challenges->controlWardsPlaced)){
-                        //     echo $inhalt->info->participants[$in]->challenges->controlWardsPlaced . "x ";
-                        // } else if(isset($inhalt->info->participants[$in]->visionWardsBoughtInGame)){
-                        //     echo $inhalt->info->participants[$in]->visionWardsBoughtInGame . "x ";
-                        // }
-                        // echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="16" style="vertical-align:middle" loading="lazy"></td>';
                     }
                 }
                 for($i = 0; $i < 10; $i++){

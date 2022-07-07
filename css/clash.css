@@ -351,8 +351,26 @@ body {
   width: 420px;
   height: 159px;
   overflow: hidden;
-  bottom: 50px;
+  bottom: 135px;
   left: 0px;
+}
+
+#suggestedBans {
+  position: absolute;
+  width: 420px;
+  height: 159px;
+  overflow: hidden;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 20px;
+}
+
+#suggested-ban-title {
+      position: absolute;
+      overflow: hidden;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 0;
 }
 
 #champSelect {
