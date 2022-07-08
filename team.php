@@ -67,7 +67,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
     $teamID = $_GET["name"];
 
     if(!(file_exists('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json'))){
-        // $suggestedBanFileContent = array();
         $fp = fopen('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json', 'c');
         $suggestedBanFileContent["SuggestedBans"]=[] ;
         $suggestedBanFileContent["Status"]= 0;
@@ -76,8 +75,10 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
     }
 
     $teamDataArray = getTeamByTeamID($teamID);
-    echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
-    echo "<h1 class='schatten' style='padding-bottom: 10px; display: inline-block;'><center><!--[IconID: ".$teamDataArray["Icon"]."] -->".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1>";
+    $icon = $teamDataArray["Icon"];
+    // echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
+    echo "<h1 class='schatten' style='padding-right: 10px; display: inline-block;'><center>";
+    echo "<img src='/clashapp/data/misc/clash/logos/".$icon."/1_64.png' width='64' style='vertical-align: middle;' loading='lazy'> ".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1>";
     echo "<div><div id='suggested-ban-title'>Empfohlene Bans:</div>";
     echo "<div id='suggestedBans' class='schatten'></div></div>";
     echo "<div id='selectedBans' class='schatten' style='float: right; position: relative; right: 430px;'></div><br><br>";
