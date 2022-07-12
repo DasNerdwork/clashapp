@@ -1,7 +1,7 @@
 <?php
 /** addToFile.php adds the "selectableBan"-Array on image click to a json file for live sharing on webpage
  *
- * @param string $championID => The champion ID ist the corresponding ingame used ID of a league champion, e.g. ID: MonkeyKing in the case of Name: Wukong
+ * @param string $championID => The champion ID is the corresponding ingame used ID of a league champion, e.g. ID: MonkeyKing in the case of Name: Wukong
  * @param string $championName => The corresponding champion name of a league champion, e.g. Miss Fortune
  * @param mixed $teamID => Usually consisting of either numbers-only, numbers with dashes inbetween or a combination of letters, numbers and dashes, fetched from the URL
  * @param string $currentPatch => Current live patch grabbed as string from file (generated and checked by daily from patcher.py)
@@ -11,7 +11,7 @@
  * @param array $preexistingBanFileContent => Array formatted content of already generated file of selected bans for the team
  * @param array $suggestBanArray => Initialized as empty array but later on filled with necessary info for previous checks, either this array or the above can exist at once
  * 
- * Example data of $_POST from team.php:
+ * Example data of $_POST from clash.js:
  * $championID = "MonkeyKing";
  * $championName = "Wukong";
  * $teamID = "4892086";
