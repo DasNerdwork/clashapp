@@ -1,13 +1,31 @@
 <?php
 include_once('functions.php');
 
-// print_r($_REQUEST);
-// php -r "require 'functions.php'; testing();"
+/** update.php updates the player.json of a given user by a specific matchcount. This includes the count of give matches, matchids, mastery data, rank data, etc.
+ *
+ * @param array $playerData => API requested return json consisting of the entries Name (Playername in clean text), Playerlevel, PUUID, SumID, AccountID & the last change date
+ * @param string $playerName => The name of a player, e.g. DasNerdwork
+ * @param string $sumid => A unique ID used for one specific summoner. Riot has multiple types of these ID's for different internal uses which is why we don't only use one
+ * @param string $puuid => See description for $sumid
+ * @param array $masteryData => An array consisting of every necessery data to display the mastery scores of a summoners champions, consisting of the chamions Name, id, 
+ *                              level, mastery points earned, the timestamp of the last time played aswell as any LvlUpTokens if available
+ * @param array $rankData => An array consisting of all rank specific data, including the queue type (solo due, flex, etc.), the tier, rank name, LP count & wins and loses
+ * @param array $matchids => An array including all all matchid's up to a given max-count
+ * @param array $jsonArray => This array combines all the arrays above (playerData, rankData, masteryData & matchData) into a single structure
+ * @param array $existingJson => If the file_exists check returns true, this array contains all of the current preexisting/local stored data in the same format as the $jsonArray
+ * @param mixed $id => As we can fetch the $playerData in three different ways (by summonername, sumid or puuid) we define the input here as $id and provide what kind of $id it is
+ *                      via the $type argument. If none is provided we switch to the default of getPlayerData by summonername
+ * 
+ * Example data of $_POST:
+ * $_POST["username"] = "DasNerdwork"
+ */
 
 if(isset($_POST["username"])){
+    // If function is explicitly called via a POST (e.g. by pressing the update button on a single users profile) start the function with a maximum Match ID fetch count of 150
     updateProfile($_POST["username"], 150);
 }
 
+// Fetch all the necessary data for updating or generating a single players player.json, stored in /clashapp/data/player/
 function updateProfile($id, $maxMatchIds, $type="name"){
     $playerData = getPlayerData($type,$id);
     $playerName = $playerData["Name"];
@@ -21,51 +39,54 @@ function updateProfile($id, $maxMatchIds, $type="name"){
     $jsonArray["RankData"] = $rankData;
     $jsonArray["MasteryData"] = $masteryData;
     $jsonArray["MatchIDs"] = $matchids;
-    $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log';
-    
-    if($sumid != ""){
+    $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
+
+    /**
+     * STEP 1: Check if up-to-date
+     */
+    if($sumid != "" || $sumid != "/"){ // TODO additional sanitizing regex check for valid $sumid variants
         if(file_exists('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json')){
             $existingJson = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
-            
-            if(getMatchIDs($puuid, 1)[0] == $existingJson["MatchIDs"][0] && (count($existingJson["MatchIDs"]) >= count($matchids))){//newest local matchid equels api first 
-                echo '{"status":"up-to-date"}';return;
+            // If the newest local matchID equals the newest API requested matchID, ergo if there is nothing to update
+            // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
+            if(getMatchIDs($puuid, 1)[0] == $existingJson["MatchIDs"][0] && (count($existingJson["MatchIDs"]) >= count($matchids))){
+                echo '{"status":"up-to-date"}';
+                return; // Stop this whole process from further actions below
             }
         } else { 
+            // else empty $existingJson string so following if-statement forced into its else part
             $existingJson = ""; 
-        } // else empty $existingJson string so following if-statement forced into else part
-        
-        $fp = fopen('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json', 'w');
-        // Open the file only to write. If it doesnt exist it will be created. If it exists it won't be truncated (would result in permanent delete-create loop)
-        
-        if($existingJson == json_encode($jsonArray)){
-            fclose($fp);
-            // If current existing file equals the new downloaded array data do nothing
-        } else {
-            // Else update the current existing (or not existing) file with the newest data
-            // echo "<pre>";
-            // print_r($jsonArray);
-            // echo "</pre>";die();
-            fwrite($fp, json_encode($jsonArray));
-            fclose($fp);
         }
+
+        /**
+         * STEP 2: Rewrite file if it doesn't exist or has to be updated
+         */
+        $fp = fopen('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json', 'w');
+        // Open the file only to write. If it doesnt exist it will be created. If it exists it will be reset and updated with the newest data
+        fwrite($fp, json_encode($jsonArray));
+        fclose($fp);
+
+        /**
+         * STEP 3: Fetch all given matchIDs and download each match via downloadMatchByID
+         */
         $playerDataArray = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
         foreach($playerDataArray["MatchIDs"] as $match){
             if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/'.$match.'.json')){
                 downloadMatchByID($match, $playerName);
             }
         }
-        clearstatcache(true, $logPath);
+
+        /**
+         * STEP 4: Logging & Finishing up
+         */
+        clearstatcache(true, $logPath); // Used for proper filesize calculation at the end of line 82
         $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
         $endofup = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: End of update for \"" . $playerName . "\" - (Final Matchcount: ".count($playerDataArray["MatchIDs"]).", Approximate Filesize: ".number_format((filesize($logPath)/1048576), 3)." MB)";
         $border = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
         file_put_contents($logPath, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
         file_put_contents($logPath, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
+        // Finally return successful updated status via javascript json format
         echo '{"status":"updated"}';
-        if($maxMatchIds > 75){
-        }else if($maxMatchIds == 75){
-            // echo "<script>location.reload()</script>";
-        }
-
     }
 }
 
