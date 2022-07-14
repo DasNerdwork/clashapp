@@ -2,10 +2,11 @@
 /** Global Variables
  * Initializing of global variables used throughout all functions below
  *
- * $api_key => The API Key necessary to communicate with the Riot API, to edit: nano /etc/nginx/fastcgi_params then service nginx restart
- * $currentpatch => For example "12.4.1", gets fetched from the version.txt which itself gets daily updated by the patcher.py script
- * $counter => Necessary counter variable for the getMatchByID Function
- * $headers => The headers required or at least recommended for the CURL request
+ * @param mixed $api_key => The API Key necessary to communicate with the Riot API, to edit: nano /etc/nginx/fastcgi_params then service nginx restart
+ * @param string $currentpatch => For example "12.4.1", gets fetched from the version.txt which itself gets daily updated by the patcher.py script
+ * @param int $counter => Necessary counter variable for the getMatchByID Function
+ * @param array $headers => The headers required or at least recommended for the CURL request
+ * @param int $currenttimestam => The current time stamp usable as a global variable
  */
 $api_key = getenv('API_KEY');
 $currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
@@ -23,15 +24,15 @@ $headers = array(
  * This function retrieves all general playerdata of a given username or PUUID
  * Eq. to https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
  *
- * $type => Determines if the request gets sent to the API with a username or a PUUID
- * $username => Is the given username or PUUID
- * $output => Contains the output of the curl request as string which we later convert using json_decode
- * $httpcode => Contains the returncode of the curl request (e.g. 404 not found)
+ * @param string $type => Determines if the request gets sent to the API with a username or a PUUID
+ * @param mixed $id => Is the given username, SumID or PUUID
+ * @param array $output => Contains the output of the curl request as string which we later convert using json_decode
+ * @param string $httpcode => Contains the returncode of the curl request (e.g. 404 not found)
  *
  * Returnvalue:
- * $playerDataArray with keys "Icon", "Name", "Level", "PUUID", "SumID", "AccountID" and "LastChange" of the summoners profile
+ * @param array $playerDataArray with keys "Icon", "Name", "Level", "PUUID", "SumID", "AccountID" and "LastChange" of the summoners profile
  */
-function getPlayerData($type, $username){
+function getPlayerData($type, $id){
     global $currentpatch, $headers;
     $playerDataArray = array();
 
@@ -49,7 +50,7 @@ function getPlayerData($type, $username){
 
     // Curl API request block
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $requesturlvar . $username);
+    curl_setopt($ch, CURLOPT_URL, $requesturlvar . $id);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($ch);
@@ -65,7 +66,7 @@ function getPlayerData($type, $username){
     if($httpcode == "429"){
         sleep(121);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $requesturlvar . $username);
+        curl_setopt($ch, CURLOPT_URL, $requesturlvar . $id);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -90,11 +91,13 @@ function getPlayerData($type, $username){
  * Eq. to https://developer.riotgames.com/apis#champion-mastery-v4/GET_getAllChampionMasteries
  * Also possible for Total Mastery score or masterdata only about a single champion
  *
- * $sumid => The summoners encrypted summoner ID necessary to perform the API request
- * $rankDataArray => Just a rename and rearrange of the API request return values
+ * @param string $sumid => The summoners encrypted summoner ID necessary to perform the API request
+ * @param array $masteryDataArray => The temporary array to fetch a single champions mastery data
+ * @param array $output => Contains the output of the curl request as string which we later convert using json_decode
+ * @param string $httpcode => Contains the returncode of the curl request (e.g. 404 not found)
  *
  * Returnvalue:
- * $rankReturnArray => Just a rename of the $rankDataArray
+ * @param array $masteryReturnArray => The full return array including all single champion arrays
  */
 function getMasteryScores($sumid){
     $masteryDataArray = array();
@@ -150,11 +153,13 @@ function getMasteryScores($sumid){
  *
  * Eq. to https://developer.riotgames.com/apis#league-v4/GET_getLeagueEntriesForSummoner
  *
- * $sumid => The summoners encrypted summoner ID necessary to perform the API request
- * $rankDataArray => Just a rename and rearrange of the API request return values
- *
+ * @param string $sumid => The summoners encrypted summoner ID necessary to perform the API request
+ * @param array $rankDataArray => Just a rename and rearrange of the API request return values
+ * @param array $output => Contains the output of the curl request as string which we later convert using json_decode
+ * @param string $httpcode => Contains the returncode of the curl request (e.g. 404 not found)
+ * 
  * Returnvalue:
- * $rankReturnArray => Just a rename of the $rankDataArray
+ * @param array $rankReturnArray => Just a rename of the $rankDataArray
  */
 function getCurrentRank($sumid){
     $rankDataArray = array();
@@ -204,15 +209,15 @@ function getCurrentRank($sumid){
  * This function retrieves all match IDs of a given PUUID up to a specified maximum
  * Eq. to https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
  *
- * $puuid => Necessary PUUID of the summoner (Obtainable either through getPlayerData or via local stored file)
- * $maxMatchIDs => The maximum count to which we request matchIDs
- * $gameType => Set to the queue type of league "ranked", "normal", "tourney" or "tutorial"
- * $start => Starting at 0 and iterating by +100 every request (100 is the maximum of matchIDs you can request at once)
- * $matchcount => Always equals 100 except if it exceeds maxMatchIDs in it's next iteration, then set to max available
- *                E.g. maxMatchIDs = 219, 1. Iteration = 100, 2. Iteration = 100, 3. Iteration = 19
+ * @param string $puuid => Necessary PUUID of the summoner (Obtainable either through getPlayerData or via local stored file)
+ * @param int $maxMatchIDs => The maximum count to which we request matchIDs
+ * @param string $gameType => Set to the queue type of league "ranked", "normal", "tourney" or "tutorial"
+ * @param int $start => Starting at 0 and iterating by +100 every request (100 is the maximum of matchIDs you can request at once)
+ * @param mixed $matchcount => Always equals 100 except if it exceeds maxMatchIDs in it's next iteration, then set to max available
+ *                             E.g. maxMatchIDs = 219, 1. Iteration = 100, 2. Iteration = 100, 3. Iteration = 19
  *
  * Returnvalue:
- * $matchIDArray with all MatchIDs as separate entries
+ * @param array $matchIDArray with all MatchIDs as separate entries
  */
 function getMatchIDs($puuid, $maxMatchIDs){
     global $headers;
@@ -237,7 +242,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
         curl_close($ch);
 
         // 429 Too Many Requests
-        if($httpcode == "429"){
+        if($httpcode == "429"){ // TODO fetch function with switch to handle and log every httpcode error
             sleep(121);
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=".$start."&count=" . $matchcount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -260,9 +265,9 @@ function getMatchIDs($puuid, $maxMatchIDs){
  * This function downloads, stores and logs anything about a given matchid
  * Eq. to https://developer.riotgames.com/apis#match-v5/GET_getMatch
  *
- * $matchid => The single matchID of the game this function is supposed to download the information about
- * $username => OPTIONAL Is the given username, as this value is only used for the logging message and not necessary to perform anything
- * $logPath => The path where the log should be saved to
+ * @param string $matchid => The single matchID of the game this function is supposed to download the information about
+ * @param mixed $username => OPTIONAL Is the given username, as this value is only used for the logging message and not necessary to perform anything
+ * @param string $logPath => The path where the log should be saved to
  *
  * INFO: clearstatcache(); necessary for correct filesize statements as filesize() is a cached function
  *
@@ -325,15 +330,15 @@ function downloadMatchByID($matchid, $username = null){
     }
 }
 
-/** Important little function to collect locally stored matchdata into array
+/** Important performance-saving function to collect locally stored matchdata into dynamically used array
  * This function loops through every given matchID's matchID.json and adds the data to a single $matchData array
  * At the same time collecting the necessary memory amount and limiting the returnvalue to 500 matchIDs or 256MB of RAM at once
  *
- * $matchIDArray => Inputarray of all MatchIDs of the user
- * $startMemory => The necessary value to retrieve information about current stored memory amount of the array
+ * @param array $matchIDArray => Inputarray of all MatchIDs of the user
+ * @param int $startMemory => The necessary value to retrieve information about current stored memory amount of the array
  *
  * Returnvalue:
- * $matchData => Array full of all given MatchID.json file contents up to the below maximum
+ * @param array $matchData => Array full of all given MatchID.json file contents up to the below maximum
  */
 function getMatchData($matchIDArray){
     $startMemory = memory_get_usage();
@@ -349,21 +354,19 @@ function getMatchData($matchIDArray){
     return $matchData;
 }
 
-/** Detailed Information about specific matches via PUUID
+/** Display detailed Information about specific matches via PUUID
  * Prints all locally stored information about all matchIDs stored in the players playerdata.json (also stored locally)
  * But accessed through the players PUUID, hence only PUUID required and no API request necessary
  *
- * $puuid => The players PUUID
- * $username => Is the given username or PUUID
- * $matches_count => The full count of all locally stored matchid.json files
- * $count => the countervalue to display the amount of locally stored files in which the player (PUUID) is part of
+ * @param string $puuid => The players PUUID
+ * @param string $username => Is the given username or PUUID
+ * @param int $count => the countervalue to display the amount of locally stored files in which the player (PUUID) is part of
  *
  * Returnvalue:
  * N/A, displaying on page via table
  */
 function getMatchDetailsByPUUID($matchIDArray, $puuid){
     global $currentpatch;
-    $matches_count = scandir("/var/www/html/wordpress/clashapp/data/matches/");
     $count = 0;
 
     // Initiating Matchdetail Table
@@ -513,13 +516,14 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
 
     echo "</table>";
     // End of Matchdetail Table & Counttext of local specific amount
-    echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden<br>";
-    echo "<pre>";
-    print_r($ladezeiten);
-    echo "</pre>";
+    // echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden<br>";
 }
 /** Function to convert seconds to readable time
- *
+ * 
+ * @param int $seconds => The amount of seconds given that we wan't to convert to human-readable time words
+ * 
+ * Returnvalue:
+ * Depending on switch case as seen below, but param string
  */
 function secondsToTime($seconds) {
     switch ($seconds) {
@@ -546,22 +550,21 @@ function secondsToTime($seconds) {
     }
 }
 
-/** Detailed Information about specific matches via PUUID
- * Prints all locally stored information about all matchIDs stored in the players playerdata.json (also stored locally)
- * But accessed through the players PUUID, hence only PUUID required and no API request necessary
+/** Detailed Team-Information about a specific clash team
+ * Prints all locally stored information about all selected content stored in the players playerdata.jsons
  *
- * $puuid => The players PUUID
- * $username => Is the given username or PUUID
- * $matches_count => The full count of all locally stored matchid.json files
- * $count => the countervalue to display the amount of locally stored files in which the player (PUUID) is part of
+ * @param string $puuid => The players PUUID
+ * @param string $username => Is the given username or PUUID
+ * @param int $count => the countervalue to display the amount of locally stored files in which the player (PUUID) is part of
  *
  * Returnvalue:
  * N/A, displaying on page via table
+ * 
+ * TODO possibility to make more beautiful
  */
 function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
     global $currentpatch;
     global $currenttimestamp;
-    $matches_count = scandir("/var/www/html/wordpress/clashapp/data/matches/");
     $count = 0;
 
     // Initiating Matchdetail Table
@@ -785,7 +788,6 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                 echo "KP: ".number_format(($ownTakedowns/$totalTeamTakedowns)*100, 0). "%";
                 $totalTeamTakedowns = 0;
                 echo '</div>';
-                
                 echo '</div>';
                 echo '</div>';
             }
@@ -794,28 +796,20 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
     echo "</div>";
     // End of Matchdetail Table & Counttext of local specific amount
-    echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden<br>";
-    echo "<pre>";
-    print_r($ladezeiten);
-    echo "</pre>";
+    // echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden<br>";
 }
 
 /** Followup function to print getMasteryScores(); returninfo
  * This function is only printing collected values, also possible to shove into profile.php
  *
- * $masteryArray => Inputarray of all MasteryScores
- * $index => Index of the masterychamp (0 = first & highest mastery champ, 1 = second, etc.)
+ * @param array $masteryArray => Inputarray of all MasteryScores
+ * @param int $index => Index of the masterychamp (0 = first & highest mastery champ, 1 = second, etc.)
  *
  * Returnvalue:
  * N/A, just printing values to page
  */
 function printMasteryInfo($masteryArray, $index){
     global $currentpatch;
-
-    // TODO separate Function to fix all name errors - One-Line fixes
-    // if($masteryArray[$index]["Champion"] == "FiddleSticks"){$masteryArray[$index]["Champion"] = "Fiddlesticks";}
-    // if($masteryArray[$index]["Champion"] == "Kha'Zix"){$masteryArray[$index]["Champion"] = "Khazix";}
-    // if($masteryArray[$index]["Champion"] == "Tahm Kench"){$masteryArray[$index]["Champion"] = "TahmKench";}
 
     // Print image if it exists
     if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png')){
@@ -832,10 +826,11 @@ function printMasteryInfo($masteryArray, $index){
 /** Fetching rune icon ID to image path
  * This function iterates through the current patches runesReforged.json and returns the folder of the rune icons
  *
- * $id => The passed rune ID corresponding to Riot's data found in the runesReforged.json
+ * @param array $data => Content of the runesReforged.json containing any image path for any rune ID
+ * @param string $id => The passed rune ID corresponding to Riot's data found in the runesReforged.json
  *
  * Returnvalue:
- * $rune->icon => Path of Iconimage
+ * @param string $rune->icon => Path of Iconimage
  */
 function runeIconFetcher($id){
     global $currentpatch;
@@ -854,6 +849,15 @@ function runeIconFetcher($id){
     }
 }
 
+/** Summoner spell icon ID to image path
+ * This function iterates through the current patches summoner.json and returns the folder of the summoner icons
+ *
+ * @param array $data => Content of the summoner.json containing any image path for any summoner icon ID
+ * @param string $id => The passed summoner icon ID corresponding to Riot's data found in the summoner.json
+ *
+ * Returnvalue:
+ * @param string $summoner->id => Path of Iconimage
+ */
 function summonerSpellFetcher($id){
     global $currentpatch;
     $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/summoner.json');
@@ -868,10 +872,11 @@ function summonerSpellFetcher($id){
 /** Fetching runetree icon ID to image path
  * This function iterates through the current patches runesReforged.json and returns the folder of the runetree icons
  *
- * $id => The passed runetree ID corresponding to Riot's data found in the runesReforged.json
+ * @param array $data => Content of the runesReforged.json containing any image path for any rune icon ID
+ * @param string $id => The passed runetree ID corresponding to Riot's data found in the runesReforged.json
  *
  * Returnvalue:
- * $runetree->icon => Path of Iconimage
+ * @param string $runetree->icon => Path of Iconimage
  */
 function runeTreeIconFetcher($id){
     global $currentpatch;
@@ -887,10 +892,11 @@ function runeTreeIconFetcher($id){
 /** Resolving a championid to the champions clean name
  * This function iterates through the current patches champion.json and returns the name of the champion given by id
  *
- * $id => The passed champion ID corresponding to Riot's data found in the champion.json
+ * @param array $data => Content of the champion.json containing all necessary champion data like their clear names and IDs
+ * @param string $id => The passed champion ID corresponding to Riot's data found in the champion.json
  *
  * Returnvalue:
- * $champion->name => The clean name of the champion
+ * @param string $champion->name => The clean name of the champion
  */
 function championIdToName($id){
     global $currentpatch;
@@ -906,10 +912,11 @@ function championIdToName($id){
 /** Resolving a championid to the champions filename
  * This function iterates through the current patches champion.json and returns the name of the champions image file given by id
  *
- * $id => The passed champion ID corresponding to Riot's data found in the champion.json
+ * @param array $data => Content of the champion.json containing all necessary champion data like their clear names and IDs
+ * @param string $id => The passed champion ID corresponding to Riot's data found in the champion.json
  *
  * Returnvalue:
- * $champion->id => The filename of the champion
+ * @param string $champion->id => The filename of the champion
  */
 function championIdToFilename($id){
     global $currentpatch;
@@ -926,12 +933,12 @@ function championIdToFilename($id){
  * This function retrieves the 3 most common occurences of a specific attribute by iterating through a users matches
  * It is possible that it gets executed multiple times for multiple attributes, therefore $attributes is an array();
  *
- * $attributesArray => Array of every attribute that we want to check via this function
- * $matchDataArray => Inputarray of all MatchIDs of the user (PUUID) over which we iterate
- * $puuid => The summoners PUUID necessary to confirm that the users matches are in our local stored data
+ * @param array $attributesArray => Array of every attribute that we want to check via this function
+ * @param array $matchDataArray => Inputarray of all MatchIDs of the user (PUUID) over which we iterate
+ * @param string $puuid => The summoners PUUID necessary to confirm that the users matches are in our local stored data
  *
  * Returnvalue:
- * N/A, only direct printing to page
+ * @param array $mostCommonReturn => Array containing the sorted most common of specific attributes
  */
 function getMostCommon($attributesArray, $matchDataArray, $puuid, $counter){
     $mostCommonArray = array();
@@ -950,7 +957,7 @@ function getMostCommon($attributesArray, $matchDataArray, $puuid, $counter){
         }
     }
 
-    // Count, Sort and Slice to retrieve printable data
+    // Count, Sort and Slice to retrieve selected data
     foreach ($attributesArray as $attribute){
         $temp[$attribute] = array_count_values($mostCommonArray[$attribute]);
         arsort($temp[$attribute]);
@@ -963,6 +970,17 @@ function getMostCommon($attributesArray, $matchDataArray, $puuid, $counter){
     return $mostCommonReturn;
 }
 
+/** Calculating the percentage of specific lane presence over given matches
+ * This function calculates how high the percentage on the first two most common laning positions is. It's an advanced "getMostCommon" function for lanes
+ *
+ * @param array $laneCountArray => An array containing the position and count (of matches played there) of all 5 lanes (BOTTOM, UTILITY, MID, TOP, JUNGLE)
+ * @param int $matchCount => The whole count of all matches played, used for calculation of percentages
+ * @param string $mainLane => The highest percentage of games played on this lane
+ * @param string $secondaryLane => The second highest percentage of games played on this lane
+ *
+ * Returnvalue:
+ * @param array $laneReturnArray => An array containing the two most-played lanes
+ */
 function getLanePercentages($matchDaten, $puuid){
     $laneReturnArray = array();
     $laneCountArray = getMostCommon(array("teamPosition"), $matchDaten, $puuid, 4)['teamPosition'];
@@ -999,7 +1017,7 @@ function getLanePercentages($matchDaten, $puuid){
 
 
 
-
+                                            // 15.07.2022 // 
 
 
 
