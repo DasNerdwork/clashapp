@@ -1,12 +1,16 @@
 <?php
 /** removeFromFile.php removes the specified champion from the local teamid.json file on the server by clicking on the given image on the webpage
  *
- * @param string $championID => The champion ID is the corresponding ingame used ID of a league champion, e.g. ID: MonkeyKing in the case of Name: Wukong
- * @param mixed $teamID => Usually consisting of either numbers-only, numbers with dashes inbetween or a combination of letters, numbers and dashes, fetched from the URL
- * @param string $currentPatch => Current live patch grabbed as string from file (generated and checked by daily from patcher.py)
- * @param array $preexistingBanFileContent => Array formatted content of local teamid.json file of selected bans for the team
- * @param array $validChamps => The data parent element with all child elements of the champion.json, containing all necessary info for all current league champions
- * @param mixed $searchedID => Either the correct $championID or false if not found
+ * @author Florian Falk <dasnerdwork@gmail.com>
+ * @author Pascal Gnadt <p.gnadt@gmx.de>
+ * @copyright Copyright (c) date("Y"), Florian Falk
+ *
+ * @param string $championID The champion ID is the corresponding ingame used ID of a league champion, e.g. ID: MonkeyKing in the case of Name: Wukong
+ * @param mixed $teamID Usually consisting of either numbers-only, numbers with dashes inbetween or a combination of letters, numbers and dashes, fetched from the URL
+ * @param string $currentPatch Current live patch grabbed as string from file (generated and checked by daily from patcher.py)
+ * @param array $preexistingBanFileContent Array formatted content of local teamid.json file of selected bans for the team
+ * @param array $validChamps The data parent element with all child elements of the champion.json, containing all necessary info for all current league champions
+ * @param mixed $searchedID Either the correct $championID or false if not found
  * 
  * Example data of $_POST from clash.js:
  * $championID = "MonkeyKing";

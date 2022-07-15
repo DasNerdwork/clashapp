@@ -3,8 +3,12 @@ include_once('update.php');
 
 /** updateTeam.php updates a whole clash team consiting of 5 players by running the update.php for each player.
  * 
- * @param int $id => A counter
- * @param string $playerName => The name of a player, e.g. DasNerdwork
+ * @author Florian Falk <dasnerdwork@gmail.com>
+ * @author Pascal Gnadt <p.gnadt@gmx.de>
+ * @copyright Copyright (c) date("Y"), Florian Falk
+ *
+ * @var int $id A counter
+ * @var string $playerName The name of a player, e.g. DasNerdwork
  * 
  */
 

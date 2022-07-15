@@ -43,6 +43,11 @@
 
 
 <?php
+/**
+ * @author Florian Falk <dasnerdwork@gmail.com>
+ * @author Pascal Gnadt <p.gnadt@gmx.de>
+ * @copyright Copyright (c) date("Y"), Florian Falk
+ */
 include_once('functions.php');
 include_once('updateTeam.php');
 include_once('update.php');
