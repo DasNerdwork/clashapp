@@ -66,6 +66,13 @@
     <div class="sbl-circ" id="loader"></div>
 </form>
 <?php
+/**
+ *
+ * @author Florian Falk <dasnerdwork@gmail.com>
+ * @author Pascal Gnadt <p.gnadt@gmx.de>
+ * @copyright Copyright (c) date("Y"), Florian Falk
+ *
+ */
 $startWhole = microtime(true);
 $ladezeiten = array();
 

@@ -3,18 +3,24 @@ include_once('functions.php');
 
 /** update.php updates the player.json of a given user by a specific matchcount. This includes the count of give matches, matchids, mastery data, rank data, etc.
  *
- * @param array $playerData => API requested return json consisting of the entries Name (Playername in clean text), Playerlevel, PUUID, SumID, AccountID & the last change date
- * @param string $playerName => The name of a player, e.g. DasNerdwork
- * @param string $sumid => A unique ID used for one specific summoner. Riot has multiple types of these ID's for different internal uses which is why we don't only use one
- * @param string $puuid => See description for $sumid
- * @param array $masteryData => An array consisting of every necessery data to display the mastery scores of a summoners champions, consisting of the chamions Name, id, 
+ * @author Florian Falk <dasnerdwork@gmail.com>
+ * @author Pascal Gnadt <p.gnadt@gmx.de>
+ * @copyright Copyright (c) date("Y"), Florian Falk
+ * 
+ * @param mixed $id As we can fetch the $playerData in three different ways (by summonername, sumid or puuid) we define the input here as $id and provide what kind of $id it is
+ *                     via the $type argument. If none is provided we switch to the default of getPlayerData by summonername
+ * @param int $maxMatchIds The maximum amount of matchids we want to update to/from via an API request
+ * @param mixed $type Usually by "name" but can also be PUUID or SumID. Used for player data request variants
+ * @var array $playerData API requested return json consisting of the entries Name (Playername in clean text), Playerlevel, PUUID, SumID, AccountID & the last change date
+ * @var string $playerName The name of a player, e.g. DasNerdwork
+ * @var string $sumid A unique ID used for one specific summoner. Riot has multiple types of these ID's for different internal uses which is why we don't only use one
+ * @var string $puuid See description for $sumid
+ * @var array $masteryData An array consisting of every necessery data to display the mastery scores of a summoners champions, consisting of the chamions Name, id, 
  *                              level, mastery points earned, the timestamp of the last time played aswell as any LvlUpTokens if available
- * @param array $rankData => An array consisting of all rank specific data, including the queue type (solo due, flex, etc.), the tier, rank name, LP count & wins and loses
- * @param array $matchids => An array including all all matchid's up to a given max-count
- * @param array $jsonArray => This array combines all the arrays above (playerData, rankData, masteryData & matchData) into a single structure
- * @param array $existingJson => If the file_exists check returns true, this array contains all of the current preexisting/local stored data in the same format as the $jsonArray
- * @param mixed $id => As we can fetch the $playerData in three different ways (by summonername, sumid or puuid) we define the input here as $id and provide what kind of $id it is
- *                      via the $type argument. If none is provided we switch to the default of getPlayerData by summonername
+ * @var array $rankData An array consisting of all rank specific data, including the queue type (solo due, flex, etc.), the tier, rank name, LP count & wins and loses
+ * @var array $matchids An array including all all matchid's up to a given max-count
+ * @var array $jsonArray This array combines all the arrays above (playerData, rankData, masteryData & matchData) into a single structure
+ * @var array $existingJson If the file_exists check returns true, this array contains all of the current preexisting/local stored data in the same format as the $jsonArray
  * 
  * Example data of $_POST:
  * $_POST["username"] = "DasNerdwork"
@@ -44,7 +50,7 @@ function updateProfile($id, $maxMatchIds, $type="name"){
     /**
      * STEP 1: Check if up-to-date
      */
-    if($sumid != "" || $sumid != "/"){ // TODO additional sanitizing regex check for valid $sumid variants
+    if($sumid != "" || $sumid != "/"){ /** @todo additional sanitizing regex check for valid $sumid variants */
         if(file_exists('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json')){
             $existingJson = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
             // If the newest local matchID equals the newest API requested matchID, ergo if there is nothing to update
