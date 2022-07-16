@@ -6,23 +6,23 @@
  * 
  * Initializing of global variables used throughout all functions below
  *
- * @global mixed $api_key The API Key necessary to communicate with the Riot API, to edit: nano /etc/nginx/fastcgi_params then service nginx restart
- * @global string $currentpatch For example "12.4.1", gets fetched from the version.txt which itself gets daily updated by the patcher.py script
+ * @global mixed $apiKey The API Key necessary to communicate with the Riot API, to edit: nano /etc/nginx/fastcgi_params then service nginx restart
+ * @global string $currentPatch For example "12.4.1", gets fetched from the version.txt which itself gets daily updated by the patcher.py script
  * @global int $counter Necessary counter variable for the getMatchByID Function
  * @global array $headers The headers required or at least recommended for the CURL request
  * @global int $currenttimestam The current time stamp usable as a global variable
  */
-$api_key = getenv('API_KEY');
-$currentpatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
+$apiKey = getenv('API_KEY');
+$currentPatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
 $counter = 0;
 $headers = array(
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
     "Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
     "Accept-Charset: application/x-www-form-urlencoded; charset=UTF-8",
     "Origin: https://dasnerdwork.net/",
-    "X-Riot-Token: ".$api_key
+    "X-Riot-Token: ".$apiKey
  );
- $currenttimestamp = time();
+ $currentTimestamp = time();
 
 /** General Summoner Info
  * This function retrieves all general playerdata of a given username or PUUID
@@ -31,49 +31,49 @@ $headers = array(
  * @param string $type Determines if the request gets sent to the API with a username or a PUUID
  * @param mixed $id Is the given username, SumID or PUUID
  * @var array $output Contains the output of the curl request as string which we later convert using json_decode
- * @var string $httpcode Contains the returncode of the curl request (e.g. 404 not found)
+ * @var string $httpCode Contains the returncode of the curl request (e.g. 404 not found)
  *
  * Returnvalue:
  * @return array $playerDataArray with keys "Icon", "Name", "Level", "PUUID", "SumID", "AccountID" and "LastChange" of the summoners profile
  */
 function getPlayerData($type, $id){
-    global $currentpatch, $headers;
+    global $currentPatch, $headers;
     $playerDataArray = array();
 
     switch ($type) {
         case "name":
-            $requesturlvar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/";
+            $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/";
             break;
         case "puuid":
-            $requesturlvar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
+            $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
             break;
         case "sumid":
-            $requesturlvar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/";
+            $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/";
             break;
     }
 
     // Curl API request block
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $requesturlvar . $id);
+    curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $id);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     // 403 Access forbidden -> Outdated API Key
-    if($httpcode == "403"){
+    if($httpCode == "403"){
         echo "<h2>API Key outdated!</h2>";
     }
 
     // 429 Too Many Requests
-    if($httpcode == "429"){
+    if($httpCode == "429"){
         sleep(121);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $requesturlvar . $id);
+        curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $id);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
 
@@ -98,7 +98,7 @@ function getPlayerData($type, $id){
  * @param string $sumid The summoners encrypted summoner ID necessary to perform the API request
  * @var array $masteryDataArray The temporary array to fetch a single champions mastery data
  * @var array $output Contains the output of the curl request as string which we later convert using json_decode
- * @var string $httpcode Contains the returncode of the curl request (e.g. 404 not found)
+ * @var string $httpCode Contains the returncode of the curl request (e.g. 404 not found)
  *
  * Returnvalue:
  * @return array $masteryReturnArray The full return array including all single champion arrays
@@ -114,22 +114,22 @@ function getMasteryScores($sumid){
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     // 403 Forbidden
-    if($httpcode == "403"){
+    if($httpCode == "403"){
         echo "<h2>API Key outdated!</h2>";
     }
     // 429 Too Many Requests
-    if($httpcode == "429"){
+    if($httpCode == "429"){
         sleep(121);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
 
@@ -160,7 +160,7 @@ function getMasteryScores($sumid){
  * @param string $sumid The summoners encrypted summoner ID necessary to perform the API request
  * @var array $rankDataArray Just a rename and rearrange of the API request return values
  * @var array $output Contains the output of the curl request as string which we later convert using json_decode
- * @var string $httpcode Contains the returncode of the curl request (e.g. 404 not found)
+ * @var string $httpCode Contains the returncode of the curl request (e.g. 404 not found)
  * 
  * Returnvalue:
  * @return array $rankReturnArray Just a rename of the $rankDataArray
@@ -176,23 +176,23 @@ function getCurrentRank($sumid){
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     // 403 Forbidden
-    if($httpcode == "403"){
+    if($httpCode == "403"){
         echo "<h2>API Key outdated!</h2>";
     }
 
     // 429 Too Many Requests
-    if($httpcode == "429"){
+    if($httpCode == "429"){
         sleep(121);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
 
@@ -217,7 +217,7 @@ function getCurrentRank($sumid){
  * @param int $maxMatchIDs The maximum count to which we request matchIDs
  * @var string $gameType Set to the queue type of league "ranked", "normal", "tourney" or "tutorial"
  * @var int $start Starting at 0 and iterating by +100 every request (100 is the maximum of matchIDs you can request at once)
- * @var mixed $matchcount Always equals 100 except if it exceeds maxMatchIDs in it's next iteration, then set to max available
+ * @var mixed $matchCount Always equals 100 except if it exceeds maxMatchIDs in it's next iteration, then set to max available
  *                             E.g. maxMatchIDs = 219, 1. Iteration = 100, 2. Iteration = 100, 3. Iteration = 19
  *
  * Returnvalue:
@@ -228,36 +228,36 @@ function getMatchIDs($puuid, $maxMatchIDs){
     $matchIDArray = array();
     $gameType = "ranked";
     $start = 0;
-    $matchcount = "100";
+    $matchCount = "100";
 
     while ($start < $maxMatchIDs) {
         // If next iterations would exceed the max
         if(($start + 100) > $maxMatchIDs){
-            $matchcount = 100 - (($start + 100) - $maxMatchIDs);
+            $matchCount = 100 - (($start + 100) - $maxMatchIDs);
         }
 
         // Curl API request block
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=" . $start . "&count=" . $matchcount);
+        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $matchid_output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $matchidOutput = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         // 429 Too Many Requests
-        if($httpcode == "429"){ /** @todo fetch function with switch to handle and log every httpcode error */
+        if($httpCode == "429"){ /** @todo fetch function with switch to handle and log every httpcode error */
             sleep(121);
-            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=".$start."&count=" . $matchcount);
+            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $matchid_output = curl_exec($ch);
-            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $matchidOutput = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
         }
 
         // Add each matchID to return array
-        foreach (json_decode($matchid_output) as $match) {
+        foreach (json_decode($matchidOutput) as $match) {
             $matchIDArray[] = $match;
         }
         $start += 100;
@@ -289,8 +289,8 @@ function downloadMatchByID($matchid, $username = null){
         $file = array_chunk($file, ceil(count($file)/2))[1];
         file_put_contents($logPath, $file, LOCK_EX);
         clearstatcache(true, $logPath);
-        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $slimmed = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".number_format((filesize($logPath)/1048576), 3)." MB)";
+        $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $slimmed = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".number_format((filesize($logPath)/1048576), 3)." MB)";
         file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
         $counter = 0;
     }
@@ -301,36 +301,36 @@ function downloadMatchByID($matchid, $username = null){
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $match_output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $matchOutput = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
         // 429 Too Many Requests
-        if($httpcode == "429"){
+        if($httpCode == "429"){
             sleep(121);
-            $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $limit = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 121 seconds - Status: " . $httpcode . " Too Many Requests";
+            $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+            $limit = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 121 seconds - Status: " . $httpCode . " Too Many Requests";
             file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            $match_output = curl_exec($ch);
-            $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $matchOutput = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
         }
 
         // Write to log and save the matchid.json, else skip
         clearstatcache(true, $logPath);
-        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $answer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpcode . " (Size: ".number_format((filesize($logPath)/1048576), 3)." MB)";
+        $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $answer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpCode . " (Size: ".number_format((filesize($logPath)/1048576), 3)." MB)";
         file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
         $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
-        fwrite($fp, $match_output);
+        fwrite($fp, $matchOutput);
         fclose($fp);
     }else{
-        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $noanswer = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
-        file_put_contents($logPath, $noanswer.PHP_EOL , FILE_APPEND | LOCK_EX);
+        $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $noAnswer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
+        file_put_contents($logPath, $noAnswer.PHP_EOL , FILE_APPEND | LOCK_EX);
     }
 }
 
@@ -371,7 +371,7 @@ function getMatchData($matchIDArray){
  * @return void N/A, displaying on page via table
  */
 function getMatchDetailsByPUUID($matchIDArray, $puuid){
-    global $currentpatch;
+    global $currentPatch;
     $count = 0;
 
     // Initiating Matchdetail Table
@@ -401,8 +401,8 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         echo "<td>Champion: ";
                         $champion = $inhalt->info->participants[$in]->championName;
                         if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png')){
-                            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png" width="32" style="vertical-align:middle" loading="lazy">';
+                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png')){
+                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png" width="32" style="vertical-align:middle" loading="lazy">';
                             echo " ".$inhalt->info->participants[$in]->championName . "</td>";
                         } else {
                             echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
@@ -411,15 +411,15 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
 
                         // Display of the equipped keyrune + secondary tree
                         echo "<td>Runes: ";
-                        $keyrune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
-                        $secrune = $inhalt->info->participants[$in]->perks->styles[1]->style;
-                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeIconFetcher($keyrune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyrune).'" width="32" style="vertical-align:middle" loading="lazy">';
+                        $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
+                        $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
+                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeIconFetcher($keyRune))){
+                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'" width="32" style="vertical-align:middle" loading="lazy">';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
-                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune).'" width="16" style="vertical-align:middle" loading="lazy">';
+                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune))){
+                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'" width="16" style="vertical-align:middle" loading="lazy">';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
@@ -445,15 +445,15 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         // Display of the last items the user had at the end of the game in his inventory
                         echo "<td>Items: ";
                         for($b=0; $b<7; $b++){
-                            $allitems = "item".$b;
-                            $itemid = $inhalt->info->participants[$in]->$allitems;
-                            if($itemid == 0){
+                            $allItems = "item".$b;
+                            $itemId = $inhalt->info->participants[$in]->$allItems;
+                            if($itemId == 0){
                                 echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle" loading="lazy">';
                             } else {
-                                if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/item/'.$itemid.'.png')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/' . $itemid . '.png" width="32" style="vertical-align:middle" loading="lazy">';
-                                } else if(file_exists('/var/www/html/wordpress/clashapp/data/misc/'.$itemid.'.png')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemid.'.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.png')){
+                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                } else if(file_exists('/var/www/html/wordpress/clashapp/data/misc/'.$itemId.'.png')){
+                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 } else {
                                     echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 }
@@ -465,13 +465,13 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         echo '<td>Vision Score: ';
                         echo $inhalt->info->participants[$in]->visionScore . " Wards: ";
                         echo $inhalt->info->participants[$in]->wardsPlaced . "x ";
-                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/3340.png" width="16" style="vertical-align:middle" loading="lazy"> Control Wards: ';
+                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/3340.png" width="16" style="vertical-align:middle" loading="lazy"> Control Wards: ';
                         if(isset($inhalt->info->participants[$in]->challenges->controlWardsPlaced)){
                             echo $inhalt->info->participants[$in]->challenges->controlWardsPlaced . "x ";
                         } else if(isset($inhalt->info->participants[$in]->visionWardsBoughtInGame)){
                             echo $inhalt->info->participants[$in]->visionWardsBoughtInGame . "x ";
                         }
-                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="16" style="vertical-align:middle" loading="lazy"></td>';
+                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.png" width="16" style="vertical-align:middle" loading="lazy"></td>';
 
                         // Display of the Total Values
                         echo "<td>Totals: ";
@@ -505,16 +505,16 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                 // Display of Ranked Queuetype
                 switch ($inhalt->info->queueId) {
                     case 420:
-                        $matchtype = "Solo/Duo";
+                        $matchType = "Solo/Duo";
                         break;
                     case 440:
-                        $matchtype = "Flex 5v5";
+                        $matchType = "Flex 5v5";
                         break;
                     case 700:
-                        $matchtype = "Clash";
+                        $matchType = "Clash";
                         break;
                 }
-                echo "<td>Matchtyp: ".$matchtype . "</td></tr>";
+                echo "<td>Matchtyp: ".$matchType . "</td></tr>";
             }
         }
     }
@@ -570,8 +570,8 @@ function secondsToTime($seconds) {
  * @todo possibility to make more beautiful
  */
 function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
-    global $currentpatch;
-    global $currenttimestamp;
+    global $currentPatch;
+    global $currentTimestamp;
     $count = 0;
 
     // Initiating Matchdetail Table
@@ -600,15 +600,15 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 // Display of Ranked Queuetype & Gamelength
                                 switch ($inhalt->info->queueId) {
                                     case 420:
-                                        $matchtype = "Solo/Duo";
+                                        $matchType = "Solo/Duo";
                                         echo "<div style='text-align: left; position: relative; left: -42px;'> Solo/Duo ";
                                         break;
                                     case 440:
-                                        $matchtype = "Flex 5v5";
+                                        $matchType = "Flex 5v5";
                                         echo "<div style='text-align: left; position: relative; left: -42px;'> Flex ";
                                         break;
                                     case 700:
-                                        $matchtype = "Clash";
+                                        $matchType = "Clash";
                                         echo "<div style='text-align: left; position: relative; left: -42px;'> Clash ";
                                         break;
                                 }
@@ -642,7 +642,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 echo "</div>";
 
                                 echo '<div class="vision-wards" style="position: relative;">';
-                                echo '<img class="parent-trinket-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentpatch.'/img/item/2055.png" width="32" loading="lazy">';
+                                echo '<img class="parent-trinket-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.png" width="32" loading="lazy">';
                                 echo '<div class="vision-wards-count-icon">'.$inhalt->info->participants[$in]->detectorWardsPlaced.'</div>';
                                 echo "</div>";
 
@@ -662,8 +662,8 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         if ($inhalt->info->participants[$in])
                         $champion = $inhalt->info->participants[$in]->championName;
                         if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png')){
-                            echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$champion.'.png" width="64" style="vertical-align:middle; position:relative; z-index:1;" loading="lazy">';
+                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png')){
+                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png" width="64" style="vertical-align:middle; position:relative; z-index:1;" loading="lazy">';
                             echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.png" width="64" style="vertical-align:middle; position:relative; bottom:64px; margin-bottom: -64px; z-index:2;" loading="lazy"></div>';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
@@ -710,16 +710,16 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
                         // Display of the equipped keyrune + secondary tree
                         echo '<div class="rune-1">';
-                        $keyrune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
-                        $secrune = $inhalt->info->participants[$in]->perks->styles[1]->style;
-                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeIconFetcher($keyrune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyrune).'" width="32" style="vertical-align:middle" loading="lazy">';
+                        $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
+                        $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
+                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeIconFetcher($keyRune))){
+                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'" width="32" style="vertical-align:middle" loading="lazy">';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo '</div><div class="rune-2">';
-                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secrune).'" width="16" style="vertical-align:middle" loading="lazy">';
+                        if(file_exists('/var/www/html/wordpress/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune))){
+                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'" width="16" style="vertical-align:middle" loading="lazy">';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                         }
@@ -753,17 +753,17 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 }
                                 echo '<div class="trinket">';
                             }
-                            $allitems = "item".$b;
-                            $itemid = $inhalt->info->participants[$in]->$allitems;
-                            if($itemid == 0){
+                            $allItems = "item".$b;
+                            $itemId = $inhalt->info->participants[$in]->$allItems;
+                            if($itemId == 0){
                                 // echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 $noItemCounter += 1;
                             } else {
                                 echo '<div class="item'.($b - $noItemCounter).'">';
-                                if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/item/'.$itemid.'.png')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/item/' . $itemid . '.png" width="32" style="vertical-align:middle" loading="lazy">';
-                                } else if(file_exists('/var/www/html/wordpress/clashapp/data/misc/'.$itemid.'.png')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemid.'.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.png')){
+                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                } else if(file_exists('/var/www/html/wordpress/clashapp/data/misc/'.$itemId.'.png')){
+                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 } else {
                                     echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
                                 }
@@ -781,8 +781,8 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     echo '<div class="lane-opponent">vs. ';
                     $enemyChamp = $inhalt->info->participants[$i]->championName;
                     if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$enemyChamp.'.png')){
-                        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$enemyChamp.'.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
+                    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.png')){
+                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
                     } else {
                         echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
                     }
@@ -816,11 +816,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
  * @return void N/A, just printing values to page
  */
 function printMasteryInfo($masteryArray, $index){
-    global $currentpatch;
+    global $currentPatch;
 
     // Print image if it exists
-    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png" width="64" loading="lazy"><br>';
+    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png')){
+        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png" width="64" loading="lazy"><br>';
     }
 
     // Print the additional info
@@ -840,12 +840,12 @@ function printMasteryInfo($masteryArray, $index){
  * @return string $rune->icon Path of Iconimage
  */
 function runeIconFetcher($id){
-    global $currentpatch;
-    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/runesReforged.json');
+    global $currentPatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json');
     $json = json_decode($data);
     foreach($json as $runetree){
-        foreach($runetree->slots as $keyrunes){
-            foreach($keyrunes as $runeid){
+        foreach($runetree->slots as $keyRunes){
+            foreach($keyRunes as $runeid){
                 foreach($runeid as $rune){
                     if($id == $rune->id){
                         return $rune->icon;
@@ -866,8 +866,8 @@ function runeIconFetcher($id){
  * @return string $summoner->id Path of Iconimage
  */
 function summonerSpellFetcher($id){
-    global $currentpatch;
-    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/summoner.json');
+    global $currentPatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/data/de_DE/summoner.json');
     $json = json_decode($data);
     foreach($json->data as $summoner){
         if($id == $summoner->key){
@@ -886,8 +886,8 @@ function summonerSpellFetcher($id){
  * @return string $runetree->icon Path of Iconimage
  */
 function runeTreeIconFetcher($id){
-    global $currentpatch;
-    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/runesReforged.json');
+    global $currentPatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json');
     $json = json_decode($data);
     foreach($json as $runetree){
         if($id == $runetree->id){
@@ -906,8 +906,8 @@ function runeTreeIconFetcher($id){
  * @return string $champion->name The clean name of the champion
  */
 function championIdToName($id){
-    global $currentpatch;
-    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
+    global $currentPatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
     $json = json_decode($data);
     foreach($json->data as $champion){
         if($id == $champion->key){
@@ -926,8 +926,8 @@ function championIdToName($id){
  * @return string $champion->id The filename of the champion
  */
 function championIdToFilename($id){
-    global $currentpatch;
-    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
+    global $currentPatch;
+    $data = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
     $json = json_decode($data);
     foreach($json->data as $champion){
         if($id == $champion->key){
@@ -1395,26 +1395,14 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                 }
             }
         }
-        // print "hier2";
-        // echo "<pre>";
-        // print_r($mainArray);         // Alles OK
-        // echo "</pre>";
-
         foreach ($rankingAttributeArray as $attribute){
-            // print "hier3";
+
             foreach ($mainArray as $key => $playersumid) {
                 $tempArray[] = array (
                     "SumID" => $key,
                     $attribute => $playersumid[$attribute],
                 );
             }
-            // echo "<pre>";
-            // print_r($playersumid[$attribute]);
-            // echo "</pre>";
-            // echo "<pre>1";
-            // print_r($tempArray);
-            // echo "</pre>";
-            // print "hier 3.0".$attribute;
             if ($attribute == "Deaths" || $attribute == "DeathTime") {
                 usort($tempArray, function($a, $b) use($attribute){
                     return $b[$attribute] <=> $a[$attribute];
@@ -1424,13 +1412,7 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                     return $a[$attribute] <=> $b[$attribute];
                 });
             }
-            // print "hier3.1";
-            // echo "<pre>";
-            // print_r($tempArray);
-            // echo "</pre>";
-
             foreach($tempArray as $rank => $value){
-                // print_r($value);
                 if ($value["SumID"] == $sumid){
                     switch ($attribute){
                         case "Kills":
@@ -1535,7 +1517,7 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
  *
  * @param string $teamID The necessary ID of the team, received beforehand via if(isset($_POST['sumname']))
  * @var array teamDataArray Just the $teamOutput content but rearranged and renamed
- * @var int $httpcode Contains the returncode of the curl request (e.g. 404 not found)
+ * @var int $httpCode Contains the returncode of the curl request (e.g. 404 not found)
  *
  * Returnvalue:
  * @return array $teamDataArray with keys "TeamID", "TournamentID", "Name", "Tag", "Icon", "Tier", "Captain" and the array itself of "Players"
@@ -1551,22 +1533,22 @@ function getTeamByTeamID($teamID){
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $teamOutput = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     // 403 Access forbidden -> Outdated API Key
-    if($httpcode == "403"){
+    if($httpCode == "403"){
         echo "<h2>API Key outdated!</h2>";
     }
 
     // 429 Too Many Requests
-    if($httpcode == "429"){
+    if($httpCode == "429"){
         sleep(121);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $teamOutput = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
 
@@ -1597,9 +1579,9 @@ function getTeamByTeamID($teamID){
  * @return array $teamDataArray with keys "TeamID", "TournamentID", "Name", "Tag", "Icon", "Tier", "Captain" and the array itself of "Players"
  */
 function showBanSelector(){
-    global $currentpatch;
+    global $currentPatch;
     $i=0;
-    $championNamingData = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/data/de_DE/champion.json');
+    $championNamingData = file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
     $championNamingFile = json_decode($championNamingData);
     foreach($championNamingFile->data as $champData){
         $champName = $champData->name;
@@ -1607,16 +1589,16 @@ function showBanSelector(){
         $imgPath = $champData->image->full;
         $dataId = $champData->id;
         if($i<11){
-            if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath)){
+            if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='champ-select-champion'>";
-                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
+                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
                 echo "<span class='caption' style='display: block;'>".$champName."</span>";
                 echo "</div>";
             }
         } else {
-            if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath)){
+            if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='champ-select-champion'>";
-                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentpatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
+                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
                 echo "<span class='caption' style='display: block;'>".$champName."</span>";
                 echo "</div>";
             }
@@ -1652,23 +1634,23 @@ if(isset($_POST['sumname'])){
     curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $clash_output = curl_exec($ch);
-    $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $clashOutput = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     // 429 Too Many Requests
-    if($httpcode == "429"){
+    if($httpCode == "429"){
         sleep(121);
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $clash_output = curl_exec($ch);
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $clashOutput = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
 
     // Decode and echo returned data, if not existent send to 404 page
-    $clashData = json_decode($clash_output, true);
+    $clashData = json_decode($clashOutput, true);
     if(isset($clashData[0]["teamId"])){
         echo $clashData[0]["teamId"];
     } else {

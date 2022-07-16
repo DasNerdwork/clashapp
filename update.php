@@ -18,7 +18,7 @@ include_once('functions.php');
  * @var array $masteryData An array consisting of every necessery data to display the mastery scores of a summoners champions, consisting of the chamions Name, id, 
  *                              level, mastery points earned, the timestamp of the last time played aswell as any LvlUpTokens if available
  * @var array $rankData An array consisting of all rank specific data, including the queue type (solo due, flex, etc.), the tier, rank name, LP count & wins and loses
- * @var array $matchids An array including all all matchid's up to a given max-count
+ * @var array $matchIDs An array including all all matchid's up to a given max-count
  * @var array $jsonArray This array combines all the arrays above (playerData, rankData, masteryData & matchData) into a single structure
  * @var array $existingJson If the file_exists check returns true, this array contains all of the current preexisting/local stored data in the same format as the $jsonArray
  * 
@@ -39,12 +39,12 @@ function updateProfile($id, $maxMatchIds, $type="name"){
     $puuid = $playerData["PUUID"];
     $masteryData = getMasteryScores($sumid);
     $rankData = getCurrentRank($sumid);
-    $matchids = getMatchIDs($puuid, $maxMatchIds);
+    $matchIDs = getMatchIDs($puuid, $maxMatchIds);
     $jsonArray = array();
     $jsonArray["PlayerData"] = $playerData;
     $jsonArray["RankData"] = $rankData;
     $jsonArray["MasteryData"] = $masteryData;
-    $jsonArray["MatchIDs"] = $matchids;
+    $jsonArray["MatchIDs"] = $matchIDs;
     $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 
     /**
@@ -55,7 +55,7 @@ function updateProfile($id, $maxMatchIds, $type="name"){
             $existingJson = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
             // If the newest local matchID equals the newest API requested matchID, ergo if there is nothing to update
             // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
-            if(getMatchIDs($puuid, 1)[0] == $existingJson["MatchIDs"][0] && (count($existingJson["MatchIDs"]) >= count($matchids))){
+            if(getMatchIDs($puuid, 1)[0] == $existingJson["MatchIDs"][0] && (count($existingJson["MatchIDs"]) >= count($matchIDs))){
                 echo '{"status":"up-to-date"}';
                 return; // Stop this whole process from further actions below
             }
@@ -86,9 +86,9 @@ function updateProfile($id, $maxMatchIds, $type="name"){
          * STEP 4: Logging & Finishing up
          */
         clearstatcache(true, $logPath); // Used for proper filesize calculation at the end of line 82
-        $current_time = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $endofup = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: End of update for \"" . $playerName . "\" - (Final Matchcount: ".count($playerDataArray["MatchIDs"]).", Approximate Filesize: ".number_format((filesize($logPath)/1048576), 3)." MB)";
-        $border = "[" . $current_time->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
+        $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+        $endofup = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: End of update for \"" . $playerName . "\" - (Final Matchcount: ".count($playerDataArray["MatchIDs"]).", Approximate Filesize: ".number_format((filesize($logPath)/1048576), 3)." MB)";
+        $border = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
         file_put_contents($logPath, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
         file_put_contents($logPath, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
         // Finally return successful updated status via javascript json format
