@@ -149,8 +149,8 @@ $startPrintData = microtime(true);
 if($formattedInput != "") {
 
     echo "<div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px;'>";
-    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentpatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
+    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
+        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
     }
 
     $rankVal = 0;
