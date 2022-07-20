@@ -200,6 +200,12 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
   });
 
   $('document').ready(function() {
+    var suggestedBans = document.getElementsByClassName("suggested-ban-champion");
+    for(var i = 0; i < suggestedBans.length;i++){
+      suggestedBans[i].style.visibility = "visible";
+      $("#suggestedBans").append(suggestedBans[i])
+    }
+ 
     $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
       const currentpatch = data;
     });

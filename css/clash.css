@@ -305,13 +305,16 @@ body {
   z-index: 3;
 }
 
-.champ-select-champion, .selected-ban-champion {
+.champ-select-champion, .selected-ban-champion, .suggested-ban-champion {
   vertical-align: top;
   display: inline-block;
   text-align: center;
   width: 80px;
   height: 75px;
-  /* cursor: pointer; */
+}
+
+.suggested-ban-champion {
+  visibility: hidden;
 }
 
 .removal-overlay {
@@ -324,6 +327,14 @@ body {
 
 .selected-ban-caption {
   margin-top: 10px;
+}
+
+.suggested-ban-caption {
+  margin-top: 2px;
+}
+
+.suggested-ban-icon {
+  cursor: help;
 }
 
 .hoverer {
@@ -363,14 +374,18 @@ body {
   left: 50%;
   transform: translateX(-50%);
   top: 20px;
+  display: grid;
+  grid-template: "A A A A A";
+  padding-top: 10px;
+
 }
 
 #suggested-ban-title {
-      position: absolute;
-      overflow: hidden;
-      left: 50%;
-      transform: translateX(-50%);
-      top: 0;
+  position: absolute;
+  overflow: hidden;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
 }
 
 #champSelect {

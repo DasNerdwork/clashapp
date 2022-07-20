@@ -400,7 +400,7 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         // Display of the played champions icon + name
                         echo "<td>Champion: ";
                         $champion = $inhalt->info->participants[$in]->championName;
-                        if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
+                        if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ, see*/
                         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png')){
                             echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png" width="32" style="vertical-align:middle" loading="lazy">';
                             echo " ".$inhalt->info->participants[$in]->championName . "</td>";
@@ -1569,6 +1569,23 @@ function getTeamByTeamID($teamID){
     return $teamDataArray;
 }
 
+
+function unique_multidim_array($array, $key) {
+    $temp_array = array();
+    $i = 0;
+    $key_array = array();
+   
+    foreach($array as $val) {
+        if (!in_array($val[$key], $key_array)) {
+            $key_array[$i] = $val[$key];
+            $temp_array[$i] = $val;
+        }
+        $i++;
+    }
+    return $temp_array;
+}
+
+
 /** Printing function to display the champion selector
  *
  * @var array $championNamingFile|$championNamingData This array contains all necessary champion data of the current patches grabbed from the champion.json of datadragon
@@ -1604,6 +1621,306 @@ function showBanSelector(){
             }
         }
     }
+}
+
+/** Function that generates the teams win, lose and winrate stats, recommended picks against aswell as discommended picks against them
+ *
+ * @param array $sumidArray This array contains all 5 summonerIDs of each team member, which is later used to identifiy if one of them played and won/lost a game
+ * @param array $matchIDArray This array contains all matchIDs of all 5 clash team members without duplicates
+ * @param array $matchData The compacted matchData of all IDs from the $matchIDArray, used for performance reasons (see getMatchData())
+ * @var array $tempArray Temporary array used for array combination processes
+ * @var array $sortArray Temporary sort array used for sorting by "Matchscore" values
+ * @var int $counter The incrementing counter for every match the given team lost
+ * @var int $counter2 The incrementing counter for every match the given team won
+ *
+ * Returnvalue:
+ * @return array $returnArray Contains all info about the teams stats (wins, loses & WR) aswell as 20 recommended and 20 discommended picks
+ */
+function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
+    $matchscoreArray = array();
+    $returnArray = array();
+    $tempArray = array();
+    $sortArray = array();
+    $counter=0;
+    $counter2=0;
+
+    foreach($matchData as $inhalt){
+        foreach($inhalt->info->participants as $player){
+            if(in_array($player->summonerId, $sumidArray) && $player->win == true){
+                $teamId = $player->teamId;
+            } else if(in_array($player->summonerId, $sumidArray) && $player->win == false) {
+                $teamId = $player->teamId;
+                foreach($inhalt->info->participants as $enemy){
+                    if($enemy->teamId != $teamId){ // Select only enemy team
+                        $tempArray[$enemy->summonerId]["Champion"] = $enemy->championName;
+                        $tempArray[$enemy->summonerId]["Matchscore"] = implode("",getMatchRanking(array($inhalt->metadata->matchId), $matchData, $enemy->summonerId));
+                    }
+                }
+                $matchscoreArray[$inhalt->metadata->matchId] = $tempArray;
+                unset($tempArray);
+            }
+        }
+        foreach($inhalt->info->participants as $test){
+            if(in_array($test->summonerId, $sumidArray) && $test->win == false) {
+                $counter++; // Team has lost a game
+                break;
+            } else if(in_array($test->summonerId, $sumidArray) && $test->win == true){
+                $counter2++; // Team has won a game
+                break;
+            }
+        }
+    }
+    foreach($matchscoreArray as $singleMatch){
+        $sortArray += $singleMatch;
+    }
+
+    usort($sortArray, function($a, $b){
+        return $b["Matchscore"] <=> $a["Matchscore"];
+    });
+
+    foreach($sortArray as $key1 => $values1){
+        foreach($sortArray as $key2 => $values2){
+            if($values1["Champion"] == $values2["Champion"]){
+                $sortArray[$key1]["Champion"] = $values1["Champion"];
+                $sortArray[$key1]["Matchscore"] = round((($values1["Matchscore"]*100+$values2["Matchscore"]*100)/2)/100, 2);
+                unset($sortArray[$key2]);
+            }
+        }
+    }
+
+    usort($sortArray, function($a, $b){
+        return $b["Matchscore"] <=> $a["Matchscore"];
+    });
+
+    $returnArray["Teamstats"]["Wins"] = $counter2;
+    $returnArray["Teamstats"]["Losses"] = $counter;
+    $returnArray["Teamstats"]["Winrate"] = number_format(($counter2/($counter+$counter2))*100, 2, '.', ' ');
+
+    $weakAgainstArray = array_slice($sortArray, 0, 20); // Recommended Picks - Team is weak against those champions
+    
+    $strongAgainstArray = array_slice($sortArray, count($sortArray)-20, count($sortArray)); // Discommended Picks - Team is strong against those champions
+
+    usort($strongAgainstArray, function($a, $b){
+        return $a["Matchscore"] <=> $b["Matchscore"];
+    });
+
+    $returnArray["TeamIsWeakAgainst"] = $weakAgainstArray;
+    $returnArray["TeamIsStrongAgainst"] = $strongAgainstArray;
+
+    return $returnArray;
+}
+
+/** Function that generates the teams win, lose and winrate stats, recommended picks against aswell as discommended picks against them
+ *
+ * @param array $sumidArray This array contains all 5 summonerIDs of each team member, which is later used to identifiy if one of them played and won/lost a game
+ * @param array $matchIDArray This array contains all matchIDs of all 5 clash team members without duplicates
+ * @param array $matchData The compacted matchData of all IDs from the $matchIDArray, used for performance reasons (see getMatchData())
+ * @var array $tempArray Temporary array used for array combination processes
+ * @var array $sortedMasteryArray Temporary sort array used for sorting by "Matchscore" values
+ * @var int $counter The incrementing counter for every match the given team lost
+ * @var int $counter2 The incrementing counter for every match the given team won
+ *
+ * Returnvalue:
+ * @return array $returnArray Contains all info about the teams stats (wins, loses & WR) aswell as 20 recommended and 20 discommended picks
+ */
+function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, $matchIDArray, $matchData){
+    // $matchscoreArray = array();
+    // $returnArray = array();
+    $tempArray = array();
+    $sortedMasteryArray = array();
+    $countArray = array();
+    // $counter=0;
+    // $counter2=0;
+
+    foreach($masterDataArray as $singleMasteryData){
+        $sortedMasteryArray = array_merge($sortedMasteryArray, $singleMasteryData);
+    }
+
+    usort($sortedMasteryArray, function($a, $b){
+        $a["Points"] = str_replace(',', '', $a["Points"]);
+        $b["Points"] = str_replace(',', '', $b["Points"]);
+        return $b["Points"] <=> $a["Points"];
+    });
+
+    foreach($masterDataArray as $sumid => $playersMasteryData){
+        foreach($playersMasteryData as $data){
+            $countArray[$data["Champion"]][] = $sumid;
+        }
+    }
+
+    foreach($countArray as $champion => $players){
+        if(count($players)<2){
+            unset($countArray[$champion]);
+        }
+    }
+
+    uasort($countArray, function($a, $b){
+        return count($b) <=> count($a);
+    });
+
+    foreach($sortedMasteryArray as $key1 => $champData1){
+        foreach($sortedMasteryArray as $key2 => $champData2){
+            if(($champData1 != $champData2) && ($champData1["Champion"] == $champData2["Champion"])){
+                $sortedMasteryArray[$key1]["TotalTeamPoints"] = number_format(str_replace(',', '', $champData1["Points"])+str_replace(',', '', $champData2["Points"]));
+            }
+        }
+    }
+
+    foreach(array_keys($sortedMasteryArray) as $championData){ // Remove unnecessary information
+        // unset($sortedMasteryArray[$championData]["Filename"]); 
+        unset($sortedMasteryArray[$championData]["Lvl"]); 
+        unset($sortedMasteryArray[$championData]["LvlUpTokens"]); 
+        $sortedMasteryArray[$championData]["MatchingLanersPrio"] = 0;
+    }
+
+    foreach($countArray as $champion => $players){
+        foreach($players as $comparePlayer1){
+            foreach($players as $comparePlayer2){
+                if($comparePlayer1 != $comparePlayer2){
+                    if($playerLanesTeamArray[$comparePlayer1]["Mainrole"] != "UNKNOWN"){
+                        if(($playerLanesTeamArray[$comparePlayer1]["Mainrole"] == $playerLanesTeamArray[$comparePlayer2]["Mainrole"]) || ($playerLanesTeamArray[$comparePlayer1]["Mainrole"] == $playerLanesTeamArray[$comparePlayer2]["Secrole"])){
+                            if($playerLanesTeamArray[$comparePlayer1]["Mainrole"] != "UNKNOWN"){
+                                if($playerLanesTeamArray[$comparePlayer1]["Mainrole"] == "FILL"){
+                                    foreach($sortedMasteryArray as $key => $championData){
+                                        if($championData["Champion"] == $champion){
+                                            $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
+                                        }
+                                    }
+                                    // echo "Low Prio Match found: ".$playerLanesTeamArray[$comparePlayer1]["Mainrole"]." to ".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
+                                } else {
+                                    foreach($sortedMasteryArray as $key => $championData){
+                                        if($championData["Champion"] == $champion){
+                                            $sortedMasteryArray[$key]["MatchingLanersPrio"]++;
+                                        }
+                                    }
+                                    // echo "High Prio Match found: ".$playerLanesTeamArray[$comparePlayer1]["Mainrole"]." to ".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
+                                }
+                            }
+                        }
+                    }
+                    if($playerLanesTeamArray[$comparePlayer1]["Secrole"] != "UNKNOWN"){
+                        if(($playerLanesTeamArray[$comparePlayer1]["Secrole"] == $playerLanesTeamArray[$comparePlayer2]["Mainrole"]) || ($playerLanesTeamArray[$comparePlayer1]["Secrole"] == $playerLanesTeamArray[$comparePlayer2]["Secrole"])){
+                            if($playerLanesTeamArray[$comparePlayer1]["Secrole"] == "FILL"){
+                                foreach($sortedMasteryArray as $key => $championData){
+                                    if($championData["Champion"] == $champion){
+                                        $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
+                                    }
+                                }
+                                // echo "Low Prio Match found: ".$playerLanesTeamArray[$comparePlayer1]["Secrole"]." to ".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
+                            } else {
+                                foreach($sortedMasteryArray as $key => $championData){
+                                    if($championData["Champion"] == $champion){
+                                        $sortedMasteryArray[$key]["MatchingLanersPrio"]++;
+                                    }
+                                }
+                                // echo "High Prio Match found: ".$playerLanesTeamArray[$comparePlayer1]["Secrole"]." to ".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    $playerCountOfChampionArray = array_count_values(array_column($sortedMasteryArray, "Champion"));
+    foreach($sortedMasteryArray as $key => $championData){
+        foreach($playerCountOfChampionArray as $championName => $countData){
+            if($championData["Champion"] == $championName){
+                $sortedMasteryArray[$key]["CapablePlayers"] = $countData;
+            }
+        }
+    }
+
+    // echo "<pre>";
+    // print_r($countArray); 
+    // echo "</pre>";
+
+    // echo "<pre>";
+    // print_r($playerLanesTeamArray); 
+    // echo "</pre>";
+
+    foreach($matchIDArray as $matchID){
+        foreach($matchData[$matchID]->info->participants as $player){
+            foreach($sumidArray as $sumid){
+                if($player->summonerId == $sumid){
+                    foreach($sortedMasteryArray as $key => $championData){
+                        if($championData["Champion"] == $player->championName){
+                            $sortedMasteryArray[$key]["OccurencesInLastGames"]++;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    foreach($matchData as $inhalt){
+        foreach($inhalt->info->participants as $player){
+            if(in_array($player->summonerId, $sumidArray)){
+                foreach($sortedMasteryArray as $key => $championData){
+                    if($championData["Champion"] == $player->championName){
+                        $sortedMasteryArray[$key]["AverageMatchScore"] = number_format(($sortedMasteryArray[$key]["AverageMatchScore"]+implode("",getMatchRanking(array($inhalt->metadata->matchId), $matchData, $player->summonerId)))/2, 2, '.', '');
+                    }
+                }
+            }
+        }
+    }
+
+    foreach($sortedMasteryArray as $key => $championData){
+        $sortedMasteryArray[$key]["FinalScore"] = str_replace(',', '', $championData["Points"]/200); // MAX: Unlimited, e.g. 100k mastery -> 1, bei 1mio mastery -> 10, usw.        => 367,165 Points   -> FinalScore: 3.67
+        $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["CapablePlayers"]*0.15; // MAX: 5 capable Players -> add 1 to final score                               => 3 Capable Player -> Finalscore: +0.45
+        $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["MatchingLanersPrio"]*0.4; // MAX: 5 matching laners -> add 2 to final score                           => 4 Matching Laners-> Finalscore: +1.6
+        $sortedMasteryArray[$key]["FinalScore"] += str_replace(',', '', $sortedMasteryArray[$key]["TotalTeamPoints"]/400); // MAX: Unlimited, e.g. 800k mastery -> 2                => 521,734 Total    -> Finalscore: +1.3
+        switch ($sortedMasteryArray[$key]["LastPlayed"]){                                                                  // MAX: 1, e.g. Yesterday played                         => 3 weeks ago      -> Finalscore: +0.9
+            case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-1 year"): // Über ein Jahr her
+                $sortedMasteryArray[$key]["FinalScore"] += 0.1;
+                break;
+            case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-6 months"): // Über 6 Monate unter 1 Jahr
+                $sortedMasteryArray[$key]["FinalScore"] += 0.3;
+                break;
+            case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-3 months"): // Über 3 Monate unter 6 Monate
+                $sortedMasteryArray[$key]["FinalScore"] += 0.5;
+                break;
+            case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-1 months"): // Über einen Monat unter 3 Monate
+                $sortedMasteryArray[$key]["FinalScore"] += 0.7;
+                break;
+            case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-2 weeks"): // Über zwei Wochen unter 1 Monat
+                $sortedMasteryArray[$key]["FinalScore"] += 0.9;
+                break;
+            case $sortedMasteryArray[$key]["LastPlayed"] > strtotime("-2 weeks"): // Unter zwei Wochen her
+                $sortedMasteryArray[$key]["FinalScore"] += 1;
+                break;
+        }
+        if($sortedMasteryArray[$key]["OccurencesInLastGames"] > 0 && $sortedMasteryArray[$key]["OccurencesInLastGames"] < 5){
+            $sortedMasteryArray[$key]["FinalScore"] += 0.2;
+        } else if($sortedMasteryArray[$key]["OccurencesInLastGames"] >= 5 && $sortedMasteryArray[$key]["OccurencesInLastGames"] < 10){
+            $sortedMasteryArray[$key]["FinalScore"] += 0.4;
+        } else if($sortedMasteryArray[$key]["OccurencesInLastGames"] >= 10 && $sortedMasteryArray[$key]["OccurencesInLastGames"] < 15){
+            $sortedMasteryArray[$key]["FinalScore"] += 0.6;
+        } else if($sortedMasteryArray[$key]["OccurencesInLastGames"] >= 15 && $sortedMasteryArray[$key]["OccurencesInLastGames"] < 20){
+            $sortedMasteryArray[$key]["FinalScore"] += 0.8;
+        } else if($sortedMasteryArray[$key]["OccurencesInLastGames"] >= 20){
+            $sortedMasteryArray[$key]["FinalScore"] += 1;
+        }
+        if($sortedMasteryArray[$key]["AverageMatchScore"] > 0 && $sortedMasteryArray[$key]["AverageMatchScore"] < 3){
+            $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["AverageMatchScore"]*0.15;
+        } else if($sortedMasteryArray[$key]["AverageMatchScore"] >= 3 && $sortedMasteryArray[$key]["AverageMatchScore"] < 5){
+            $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["AverageMatchScore"]*0.2; 
+        } else if($sortedMasteryArray[$key]["AverageMatchScore"] >= 5 && $sortedMasteryArray[$key]["AverageMatchScore"] < 7){
+            $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["AverageMatchScore"]*0.25; 
+        } else if($sortedMasteryArray[$key]["AverageMatchScore"] >= 7){
+            $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["AverageMatchScore"]*0.3; 
+        }
+    }
+
+    $returnArray = unique_multidim_array($sortedMasteryArray, "Champion");
+
+    usort($returnArray, function($a, $b){
+        return $b["FinalScore"] <=> $a["FinalScore"];
+    });
+
+    $returnArray = array_slice($returnArray, 0, 10);
+
+    return $returnArray; 
 }
 
 /** Always active "function" to collect the teamID of a given Summoner Name
