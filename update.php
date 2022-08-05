@@ -92,7 +92,7 @@ function updateProfile($id, $maxMatchIds, $type="name"){
         file_put_contents($logPath, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
         file_put_contents($logPath, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
         // Finally return successful updated status via javascript json format
-        echo '{"status":"updated"}';
+        // echo '{"status":"updated"}';
     }
 }
 

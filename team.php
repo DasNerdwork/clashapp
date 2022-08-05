@@ -299,7 +299,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     $levelFileName = "500";
                     break; 
             }
-
         $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
         $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
@@ -319,6 +318,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid);
 
         $playerLanes = getLanePercentages($matchDaten, $puuid);
+
 
         $playerMainRole = $playerLanes[0];
         $playerSecondaryRole = $playerLanes[1];
@@ -344,21 +344,23 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             }
         }
 
-        if(count($rankData) != 0){
-            echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 7em;'>";
-        } else {
-            echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 1em;'>";
-        }
-
+        echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 7em;'>";
         echo "<div style='display: inline-flex;'>";
-        foreach($rankData as $rankedQueue){
-            if($rankedQueue["Queue"] == "RANKED_SOLO_5x5"){
-                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Solo/Duo:</font><br>" . ucfirst(strtolower($rankedQueue["Tier"])) . " " . $rankedQueue["Rank"] . " / " . $rankedQueue["LP"] . " LP<br>WR: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankedQueue["Wins"]+$rankedQueue["Losses"]." Games)</font></div>";
-            } else if($rankedQueue["Queue"] == "RANKED_FLEX_SR"){
-                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Flex:</font><br>" . ucfirst(strtolower($rankedQueue["Tier"])) . " " . $rankedQueue["Rank"] . " / " . $rankedQueue["LP"] . " LP<br>WR: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankedQueue["Wins"]+$rankedQueue["Losses"]." Games)</font></div>";
+        if(!empty($rankData)){
+            $key = array_search('RANKED_SOLO_5x5', array_column($rankData,"Queue"));
+            if($key !== false){
+                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Solo/Duo:</font><br>" . ucfirst(strtolower($rankData[$key]["Tier"])) . " " . $rankData[$key]["Rank"] . " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
             }
+            $key = array_search('RANKED_FLEX_SR', array_column($rankData,"Queue"));
+            if($key !== false){
+                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Flex:</font><br>" . ucfirst(strtolower($rankData[$key]["Tier"])) . " " . $rankData[$key]["Rank"] . " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
+            }
+            if(empty(array_intersect(array("RANKED_SOLO_5x5", "RANKED_FLEX_SR"), array_column($rankData,"Queue")))){
+                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'>Unranked</div>";
+            }
+        } else if(empty($rankData)){
+            echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'>Unranked</div>";
         }
-
         echo "</div>";
 
         echo "</td></tr><tr><td style='vertical-align: top; text-align: center;'>";
@@ -394,7 +396,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         //     }
         // }
         echo "</div>";
-        printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray);
+        printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray);//aktueller Fehler hier weiter machen
         // echo "<pre>";
         // print_r(getSuggestedBans($sumid, $matchDaten));
         // echo "</pre>";
@@ -418,17 +420,17 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
 //    echo "<pre>";
 //    print_r(getSuggestedPicksAndTeamstats($playerSumidTeamArray, $matchIDTeamArray, $suggestedBanMatchData));
 //    echo "</pre>";
-
    $suggestedBanArray = getSuggestedBans($playerSumidTeamArray, $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
 //    echo "<pre>";
 //    print_r($test[0]);
 //    echo "</pre>";
    foreach($suggestedBanArray as $banChampion){
         echo '<div class="suggested-ban-champion">';
-        echo '<img class="suggested-ban-icon" style="height: auto; z-index: 1;" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . $banChampion["Champion"] . '.png" width="48" loading="lazy">';
+        echo '<img class="suggested-ban-icon" style="height: auto; z-index: 1;" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Champion"]) . '.png" width="48" loading="lazy">';
         echo '<span class="suggested-ban-caption" style="display: block;">' . $banChampion["Champion"] . '</span>';
         echo '</div>';
     }
+    
 }
 
 ?>
