@@ -1,10 +1,13 @@
 $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
   const currentpatch = data;
-  document.addEventListener("DOMContentLoaded", function(){
+  $('document').ready(function() {
     var allClashPages = RegExp("(\/clash\/).+$");
     var allTeamPages = RegExp("(\/team\/).+$");
     var mainPage = RegExp("(\/clash.*)$"); 
+    console.log(window.location.pathname);
     if (window.location.pathname.match(allClashPages) || window.location.pathname.match(allTeamPages)) {
+      console.log(window.location.pathname.match(allTeamPages))
+      console.log(window.location.pathname.match(allClashPages))
       document.getElementById("updateBtn").style.display = "initial";
     } else if (window.location.pathname.match(mainPage)) {
       suchfeld = document.getElementById("suchfeld");
@@ -40,9 +43,10 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
       document.body.style.backgroundPosition = "50% 20%";
       document.body.style.backgroundSize = "40%";
       document.body.style.backgroundColor = "#c6ccd8";
+    }
 
       // TABLE COLLAPSER
-    }
+
     if(window.location.pathname.match(allTeamPages)){
       var coll = document.getElementsByClassName("collapsible");
       var i;
@@ -235,7 +239,7 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
           }
         }
       });
-    }
+    }        
   });
 });
 

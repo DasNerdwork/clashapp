@@ -601,15 +601,15 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 switch ($inhalt->info->queueId) {
                                     case 420:
                                         $matchType = "Solo/Duo";
-                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Solo/Duo ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Solo/Duo ".$matchIDJSON." ";
                                         break;
                                     case 440:
                                         $matchType = "Flex 5v5";
-                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Flex ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Flex ".$matchIDJSON." ";
                                         break;
                                     case 700:
                                         $matchType = "Clash";
-                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Clash ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Clash ".$matchIDJSON." ";
                                         break;
                                 }
                                 echo gmdate("i:s", $inhalt->info->gameDuration)."</div>";
@@ -617,7 +617,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
                                 echo '<div class="match-time-ago">';
                                 // Display when the game date was, if > than 23h -> day format, if > than 30d -> month format, etc.
-                                echo "<div>".secondsToTime($currenttimestamp-intdiv($inhalt->info->gameEndTimestamp, 1000))."</div></div>";
+                                echo "<div>".secondsToTime(strtotime('now')-intdiv($inhalt->info->gameEndTimestamp, 1000))."</div></div>";
 
                                 // Calculate own Takedowns of Kill Participation
                                 $ownTakedowns = 0;
@@ -792,7 +792,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     }
                 }
                 echo '<div class="kill-participation">';
-                echo "KP: ".number_format(($ownTakedowns/$totalTeamTakedowns)*100, 0). "%";
+                if($totalTeamTakedowns != 0){
+                    echo "KP: ".number_format(($ownTakedowns/$totalTeamTakedowns)*100, 0). "%";
+                } else {
+                    echo "KP: 0%";
+                }
                 $totalTeamTakedowns = 0;
                 echo '</div>';
                 echo '</div>';
@@ -1554,7 +1558,9 @@ function getTeamByTeamID($teamID){
 
     // Temporär change
 
-    $teamOutput = file_get_contents('/hdd1/clashapp/misc/team.by-teamid.json');
+    // $teamOutput = file_get_contents('/hdd1/clashapp/misc/team.by-teamid.json');
+    
+    $teamOutput = file_get_contents('/hdd1/clashapp/misc/clashTeam2.json');
 
     // Collect requested values in returnarray
     $teamDataArray["TeamID"] = json_decode($teamOutput)->id;
