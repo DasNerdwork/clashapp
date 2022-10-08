@@ -12,6 +12,14 @@
     animation: rotate 1s linear infinite; 
     transition: all .2s linear;
 }
+
+body,
+button,
+input,
+select,
+textarea {
+ font-family:'Montserrat',sans-serif;
+}
   
 @keyframes rotate {
 0% {
@@ -158,6 +166,8 @@ body::-webkit-scrollbar {
 body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+  background-color:#0e0f18; 
+  color:#ddd;
 }
 
 .match-result { grid-area: a; }
@@ -209,7 +219,7 @@ body {
   border: 1px white solid;
   overflow: hidden;
   width: 100%;
-  background-color: #121212;
+  background-color: #0e0f18;
 }
 
 .grid-container > div {
@@ -325,6 +335,22 @@ body {
   opacity: 0;
 }
 
+.ban-overlay {
+  height: auto;
+  z-index: 2;
+  margin-top: -48px;
+  margin-bottom: -48px;
+  opacity: 0;
+}
+
+.ban-overlay-red {
+  height: auto;
+  z-index: 3;
+  margin-top: -48px;
+  margin-bottom: -48px;
+  opacity: 0;
+}
+
 .selected-ban-caption {
   margin-top: 10px;
 }
@@ -343,8 +369,25 @@ body {
   top: 10px;
 }
 
-.hoverer:hover {
+.ban-hoverer {
+  display: inline-grid;
+  position: relative;
+  overflow: hidden;
+}
+
+.ban-hoverer:hover .ban-overlay {
+  opacity: 1;
+  overflow: hidden;
+}
+
+.ban-hoverer:active .ban-overlay-red {
+  opacity: 1;
+  overflow: hidden;
+}
+
+.hoverer:hover, .ban-hoverer:hover {
   cursor: pointer;
+  overflow: hidden;
 }
 
 .hoverer:hover .removal-overlay {
@@ -393,10 +436,17 @@ body {
   height: 145px;
 }
 
-.champ-select-icon {
-  border: 1px solid transparent;
+.clash-footer {
+  font-family:'Montserrat',sans-serif;
+  font-size: .9rem;
+  color: #333344;
+  text-align: center;
 }
-.champ-select-icon:hover {
-  cursor: pointer;
-  border: 1px solid #898989;
+
+.clash-footer-link {
+  color: #565670;
+}
+
+.clash-footer-link:hover {
+  color: #8484b3;
 }

@@ -324,9 +324,15 @@ function downloadMatchByID($matchid, $username = null){
         $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
         $answer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpCode . " (Size: ".number_format((filesize($logPath)/1048576), 3)." MB)";
         file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
-        $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
-        fwrite($fp, $matchOutput);
-        fclose($fp);
+        if($httpCode == "200"){
+            $fp = fopen('/var/www/html/wordpress/clashapp/data/matches/' . $matchid . '.json', 'w');
+            fwrite($fp, $matchOutput);
+            fclose($fp);
+        } else {
+            $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+            $warning = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: " . $matchid . " received HTTP-Code: " . $httpCode . " - Skipping";
+            file_put_contents($logPath, $warning.PHP_EOL , FILE_APPEND | LOCK_EX);
+        }
     }else{
         $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
         $noAnswer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
@@ -601,19 +607,21 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 switch ($inhalt->info->queueId) {
                                     case 420:
                                         $matchType = "Solo/Duo";
-                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Solo/Duo ".$matchIDJSON." ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Solo/Duo ";
                                         break;
                                     case 440:
                                         $matchType = "Flex 5v5";
-                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Flex ".$matchIDJSON." ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Flex ";
                                         break;
                                     case 700:
                                         $matchType = "Clash";
-                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Clash ".$matchIDJSON." ";
+                                        echo "<div style='text-align: left; position: relative; left: -42px;'> Clash ";
                                         break;
                                 }
                                 echo gmdate("i:s", $inhalt->info->gameDuration)."</div>";
                                 echo "</div>";
+
+                                echo "<div class='match-id' style='display: none;'>".$matchIDJSON."</div>";
 
                                 echo '<div class="match-time-ago">';
                                 // Display when the game date was, if > than 23h -> day format, if > than 30d -> month format, etc.
@@ -1357,7 +1365,6 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
     $maxRankScore = 0;
     $returnArray = array();
     // $matchIDArray = array_slice($matchIDArray, 0, 15);
-
     foreach ($matchIDArray as $matchID) {
         unset($maxRankScore);
         unset($mainArray);
@@ -1558,9 +1565,9 @@ function getTeamByTeamID($teamID){
 
     // Temporär change
 
-    // $teamOutput = file_get_contents('/hdd1/clashapp/misc/team.by-teamid.json');
+    $teamOutput = file_get_contents('/hdd1/clashapp/misc/team.by-teamid.json');
     
-    $teamOutput = file_get_contents('/hdd1/clashapp/misc/clashTeam2.json');
+    // $teamOutput = file_get_contents('/hdd1/clashapp/misc/clashTeam2.json');
 
     // Collect requested values in returnarray
     $teamDataArray["TeamID"] = json_decode($teamOutput)->id;
@@ -1614,19 +1621,46 @@ function showBanSelector(){
         if($i<11){
             if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='champ-select-champion'>";
-                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
-                echo "<span class='caption' style='display: block;'>".$champName."</span>";
+                    echo '<div class="ban-hoverer" onclick="">';
+                        echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
+                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.png" width="48" loading="lazy">';
+                        echo '<img class="ban-overlay-red" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
+                        echo "<span class='caption' style='display: block;'>".$champName."</span>";
                 echo "</div>";
             }
         } else {
             if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='champ-select-champion'>";
-                echo '<img class="champ-select-icon" style="height: auto;" data-id="' . $dataId . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
-                echo "<span class='caption' style='display: block;'>".$champName."</span>";
+                    echo '<div class="ban-hoverer" onclick="">';
+                        echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
+                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.png" width="48" loading="lazy">';
+                        echo '<img class="ban-overlay-red" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
+                        echo "<span class='caption' style='display: block;'>".$champName."</span>";
                 echo "</div>";
             }
         }
     }
+}
+
+/** This function collects the JSON formatted data in the abbreviations.json and maps every champion to it's own abbreviations. To make the .json more readable it is allowed
+ * to add spaces there, although they are filtered out below, so the javascript later on can easily split the string by the "," separator. The abbreviations are used as possible
+ * alternative searchterms for a champion in a form field, in this case the #champSelector. If they are supposed to match parts of words and not only the whole word all possible
+ * search terms have to be written into the abbreviations.json (like -> "abbr": "frel, frelj, freljo, freljor, freljord").
+ *
+ * @param string $champName The provided name of a champion, NOT the ID and has to be exactly written both as param here aswell as in the abbreviations.json
+ * @var array $bbrArray This array contains the decoded (as object) contents of the abbreviations.json
+ *
+ * Returnvalue:
+ * @return string $abbreviations is the return string that will get split by "," separator and added into the data-abbr attribute in the html code above
+ */
+function abbreviationFetcher($champName){
+    $abbrArray = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/abbreviations.json'));
+    foreach($abbrArray as $champFileName => $element){
+        if($champFileName === $champName){
+            $abbreviations = str_replace('_', ' ', str_replace(' ', '', $element->abbr));
+        }
+    }
+  return $abbreviations;
 }
 
 /** Function that generates the teams win, lose and winrate stats, recommended picks against aswell as discommended picks against them

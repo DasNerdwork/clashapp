@@ -1,0 +1,36 @@
+{
+    "id": "4892086",
+    "tournamentId": 3721,
+    "name": "clash team 2",
+    "iconId": 28,
+    "tier": 4,
+    "captain": "26Ym3UadSd85IeThN6FhVFkDuj8ePsClTR7WogjIMiENWoM",
+    "abbreviation": "wct",
+    "players": [
+        {
+            "summonerId": "26Ym3UadSd85IeThN6FhVFkDuj8ePsClTR7WogjIMiENWoM",
+            "position": "UTILITY",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "GB2pHX1ja9tHG9k6VVz7ieJ06iH9PWHRtqYQ0kvmzcuLvCaq",
+            "position": "BOTTOM",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "cXcS4Eo4UL381dhQlhcIm8WJo2nI20wg2UgkctK-yVziouU",
+            "position": "TOP",
+            "role": "MEMBER"
+        },
+        {
+            "summonerId": "0yX30EKkbN4fXfnVP_rJWXlXUFWlYK8RkaTFbPfXcT6wwaAp",
+            "position": "JUNGLE",
+            "role": "CAPTAIN"
+        },
+        {
+            "summonerId": "Zd5O5CzTOkmO1cxSDLUWdbrEkP9IedXSwu0dSvPuYwMohKEF",
+            "position": "MIDDLE",
+            "role": "MEMBER"
+        }
+    ]
+}
