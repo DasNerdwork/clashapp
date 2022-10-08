@@ -28,11 +28,9 @@
         document.getElementById("name").disabled = true;
         document.getElementById("submitBtn").disabled = true;
     }
-    
+
 </script>
 </head>
-
-<body style="background-color:#1a1a1a; color:#ddd">
 
 <form id="suchfeld" action="" onsubmit="return false;" method="GET" autocomplete="off" style="display: flex;">
     <input type="text" name="name" id="name" value="" placeholder="Beschwörername">
@@ -65,6 +63,7 @@ include_once('update.php');
  * 5. Download data for 15 newest matches via updateProfile($_POST["username"], 15);
  */
 
+
 $output = json_decode(file_get_contents('/hdd1/clashapp/misc/player.by-summoner.json'), true);
 $playerNameTeamArray = array();
 $playerSumidTeamArray = array();
@@ -96,9 +95,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
     showBanSelector();
     echo "</div>";
 
-
-
-
     echo "</form></h1>";
     echo "<table class='table' style='width:100%; table-layout: fixed;'><tr>";
     $tableWidth = round(100/count($teamDataArray["Players"]));
@@ -114,7 +110,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
 
         foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
             $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
-            if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
+            if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
                 // echo str_replace(".json", "", $playerDataJSONPath) ." - ". $player["summonerId"];
                 if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
                     $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
@@ -135,7 +131,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             updateProfile($player["summonerId"], 15, "sumid");
             foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
                 $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
-                if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
+                if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
                     if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
                         $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                         $playerData = $playerDataJSON["PlayerData"];
@@ -150,7 +146,6 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                 }
             }
         }
-
         $playerNameTeamArray[] = $playerName;
         $playerSumidTeamArray[] = $sumid;
         $masteryDataTeamArray[$sumid] = $masteryData;
@@ -159,70 +154,66 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
             echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;" loading="lazy">';
         }
-
         $rankVal = 0;
         $levelFileName = "001";
         $highEloLP = "";
-
         foreach($rankData as $rankedQueue){
             if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
                 switch ($rankedQueue["Tier"]){
-                    case ($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 10):
-                        $rankVal = 10;
-                        $rankNumber = "";
-                        $highestRank = $rankedQueue["Tier"];
-                        $highEloLP = $rankedQueue["LP"];
-                        break;        
-                    case ($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 9):
+                    case ($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 9):
                         $rankVal = 9;
                         $rankNumber = "";
                         $highestRank = $rankedQueue["Tier"];
                         $highEloLP = $rankedQueue["LP"];
-                        break;     
-                    case ($rankedQueue["Tier"] == "MASTER" && $rankVal < 8):
+                        break;
+                    case ($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 8):
                         $rankVal = 8;
                         $rankNumber = "";
                         $highestRank = $rankedQueue["Tier"];
                         $highEloLP = $rankedQueue["LP"];
-                        break;                  
-                    case ($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 7):
+                        break;
+                    case ($rankedQueue["Tier"] == "MASTER" && $rankVal < 7):
                         $rankVal = 7;
-                        $rankNumber = $rankedQueue["Rank"];
+                        $rankNumber = "";
                         $highestRank = $rankedQueue["Tier"];
-                        break;                   
-                    case ($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 6):
+                        $highEloLP = $rankedQueue["LP"];
+                        break;
+                    case ($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 6):
                         $rankVal = 6;
                         $rankNumber = $rankedQueue["Rank"];
                         $highestRank = $rankedQueue["Tier"];
-                        break;                  
-                    case ($rankedQueue["Tier"] == "GOLD" && $rankVal < 5):
+                        break;
+                    case ($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 5):
                         $rankVal = 5;
                         $rankNumber = $rankedQueue["Rank"];
                         $highestRank = $rankedQueue["Tier"];
-                        break;     
-                    case ($rankedQueue["Tier"] == "SILVER" && $rankVal < 4):
+                        break;
+                    case ($rankedQueue["Tier"] == "GOLD" && $rankVal < 4):
                         $rankVal = 4;
                         $rankNumber = $rankedQueue["Rank"];
                         $highestRank = $rankedQueue["Tier"];
-                        break;     
-                    case ($rankedQueue["Tier"] == "BRONZE" && $rankVal < 3):
+                        break;
+                    case ($rankedQueue["Tier"] == "SILVER" && $rankVal < 3):
                         $rankVal = 3;
                         $rankNumber = $rankedQueue["Rank"];
                         $highestRank = $rankedQueue["Tier"];
-                        break;         
-                    case ($rankedQueue["Tier"] == "IRON" && $rankVal < 2):
+                        break;
+                    case ($rankedQueue["Tier"] == "BRONZE" && $rankVal < 2):
                         $rankVal = 2;
                         $rankNumber = $rankedQueue["Rank"];
                         $highestRank = $rankedQueue["Tier"];
-                        break;    
+                        break;
+                    case ($rankedQueue["Tier"] == "IRON" && $rankVal < 1):
+                        $rankVal = 1;
+                        $rankNumber = $rankedQueue["Rank"];
+                        $highestRank = $rankedQueue["Tier"];
+                        break;
                 }
             }
         }
-
         if($rankVal != 0){
             $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
             $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
-
             if(file_exists($profileBorderPath)){
                 echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute; top: -126px; z-index: -1;" loading="lazy">';
             }
@@ -231,7 +222,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             } else {
                 echo "<div style='font-weight: bold; color: #e8dfcc; position: absolute; margin-top: 17px; font-size: 12px;'>".$rankNumber."</div>";
             }
-            
+
             echo "<div style='color: #e8dfcc; position: absolute; margin-top: 111px; font-size: 12px;'>".$playerData["Level"]."</div>";
         } else {
             switch ($playerData["Level"]){
@@ -249,7 +240,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     break;
                 case ($playerData["Level"] < 125):
                     $levelFileName = "100";
-                    break;           
+                    break;
                 case ($playerData["Level"] < 150):
                     $levelFileName = "125";
                     break;
@@ -270,7 +261,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     break;
                 case ($playerData["Level"] < 300):
                     $levelFileName = "275";
-                    break;           
+                    break;
                 case ($playerData["Level"] < 325):
                     $levelFileName = "300";
                     break;
@@ -279,7 +270,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     break;
                 case ($playerData["Level"] < 375):
                     $levelFileName = "350";
-                    break;           
+                    break;
                 case ($playerData["Level"] < 400):
                     $levelFileName = "375";
                     break;
@@ -297,7 +288,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     break;
                 case ($playerData["Level"] >= 500):
                     $levelFileName = "500";
-                    break; 
+                    break;
             }
         $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
         $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
@@ -309,18 +300,16 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         }
 
         echo "</div></center>";
-        echo "<br>".$playerData["Name"] . "<br><br>";
+
+        getMatchIDs($puuid, 15);
 
         $matchids_sliced = array_slice($matchids, 0, 15);
-
-        $matchDaten = getMatchData($matchids_sliced);    
-    
+        $matchDaten = getMatchData($matchids_sliced);
         $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid);
-
         $playerLanes = getLanePercentages($matchDaten, $puuid);
 
-
         $playerMainRole = $playerLanes[0];
+
         $playerSecondaryRole = $playerLanes[1];
         $playerLanesTeamArray[$sumid]["Mainrole"] = $playerLanes[0];
         $playerLanesTeamArray[$sumid]["Secrole"] = $playerLanes[1];
@@ -349,21 +338,21 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         if(!empty($rankData)){
             $key = array_search('RANKED_SOLO_5x5', array_column($rankData,"Queue"));
             if($key !== false){
-                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Solo/Duo:</font><br>" . ucfirst(strtolower($rankData[$key]["Tier"])) . " " . $rankData[$key]["Rank"] . " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
+                echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'><font size='-1'>Ranked Solo/Duo:</font><br>" . ucfirst(strtolower($rankData[$key]["Tier"])) . " " . $rankData[$key]["Rank"] . " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
             }
             $key = array_search('RANKED_FLEX_SR', array_column($rankData,"Queue"));
             if($key !== false){
-                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'><font size='-1'>Ranked Flex:</font><br>" . ucfirst(strtolower($rankData[$key]["Tier"])) . " " . $rankData[$key]["Rank"] . " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
+                echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'><font size='-1'>Ranked Flex:</font><br>" . ucfirst(strtolower($rankData[$key]["Tier"])) . " " . $rankData[$key]["Rank"] . " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
             }
             if(empty(array_intersect(array("RANKED_SOLO_5x5", "RANKED_FLEX_SR"), array_column($rankData,"Queue")))){
-                echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'>Unranked</div>";
+                echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'>Unranked</div>";
             }
         } else if(empty($rankData)){
-            echo "<div class='schatten' style='margin: 0px 20px; padding: 5px;'>Unranked</div>";
+            echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'>Unranked</div>";
         }
         echo "</div>";
 
-        echo "</td></tr><tr><td style='vertical-align: top; text-align: center;'>";
+        echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 8em;'>";
 
         echo "<div style='display: inline-flex;'>";
         for($i=0; $i<3; $i++){
@@ -372,18 +361,19 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                 echo $masteryData[$i]["Champion"]."<br>";
                 echo "MR: ".$masteryData[$i]["Lvl"]."<br>";
                 if(str_replace(',','',$masteryData[$i]["Points"]) > 250000){
-                    echo "<div class='low-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                    echo "<div class='low-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div><br></div>";
                 } else if(str_replace(',','',$masteryData[$i]["Points"]) > 500000){
-                    echo "<div class='medium-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                    echo "<div class='medium-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div><br></div>";
                 } else if(str_replace(',','',$masteryData[$i]["Points"]) > 1000000){
-                    echo "<div class='high-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                    echo "<div class='high-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div><br></div>";
                 } else {
-                    echo "<div class='no-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div>k<br></div>";
+                    echo "<div class='no-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div><br></div>";
                 }
             }
         }
         echo "</div>";
-        echo "<div style='margin: 10px 0px;'>";
+        echo "</td></tr><tr><td style='vertical-align: top; text-align: center;'>";
+        // echo "<div style='margin: 10px 0px;'>";
         // foreach (mostPlayedWith($matchDaten, $puuid) as $key => $value){
         //     foreach ($teamDataArray["Players"] as $teamMember){
         //         if(file_exists('/var/www/html/wordpress/clashapp/data/player/'.$teamMember["summonerId"].'.json')){
@@ -395,8 +385,8 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
         //         }
         //     }
         // }
-        echo "</div>";
-        printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray);//aktueller Fehler hier weiter machen
+        // echo "</div>";
+        printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray);
         // echo "<pre>";
         // print_r(getSuggestedBans($sumid, $matchDaten));
         // echo "</pre>";
@@ -422,17 +412,16 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
 //    echo "</pre>";
    $suggestedBanArray = getSuggestedBans($playerSumidTeamArray, $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
 //    echo "<pre>";
-//    print_r($test[0]);
+//    print_r($suggestedBanArray);
 //    echo "</pre>";
    foreach($suggestedBanArray as $banChampion){
         echo '<div class="suggested-ban-champion">';
-        echo '<img class="suggested-ban-icon" style="height: auto; z-index: 1;" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Champion"]) . '.png" width="48" loading="lazy">';
+        echo '<img class="suggested-ban-icon" style="height: auto; z-index: 1;" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.png" width="48" loading="lazy">';
         echo '<span class="suggested-ban-caption" style="display: block;">' . $banChampion["Champion"] . '</span>';
         echo '</div>';
     }
-    
-}
 
+}
 ?>
 
 <script>
@@ -454,3 +443,13 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             });
         });
 </script>
+<footer class="site-footer" id="colophon" itemtype="https://schema.org/WPFooter" itemscope="itemscope" itemid="#colophon">
+    <div class="clash-footer"><p style="text-align: center;"> Copyright © 2022 DasNerdwork.net | <a class="clash-footer-link" href="https://dasnerdwork.net/impressum">Impressum</a> &amp; <a class="clash-footer-link" href="https://dasnerdwork.net/Datenschutzerklaerung">Datenschutzerklärung</a></p>
+</footer>
+
+</body>
+
+<footer>
+    <div class="clash-footer">DasNerdwork.net isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties.
+        <br>Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.</div>
+</footer>

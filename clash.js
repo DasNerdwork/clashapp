@@ -4,10 +4,7 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
     var allClashPages = RegExp("(\/clash\/).+$");
     var allTeamPages = RegExp("(\/team\/).+$");
     var mainPage = RegExp("(\/clash.*)$"); 
-    console.log(window.location.pathname);
     if (window.location.pathname.match(allClashPages) || window.location.pathname.match(allTeamPages)) {
-      console.log(window.location.pathname.match(allTeamPages))
-      console.log(window.location.pathname.match(allClashPages))
       document.getElementById("updateBtn").style.display = "initial";
     } else if (window.location.pathname.match(mainPage)) {
       suchfeld = document.getElementById("suchfeld");
@@ -120,12 +117,12 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
       
       champInput.addEventListener('keyup', selectChampions);
 
-
+//(champInput.value.toUpperCase().indexOf(abbrList)
       // List Filtering
       function selectChampions(){
         for (j = 0; j < championList.length; j++) {
           span = championList[j].getElementsByTagName("span")[0].innerText;
-          if (span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) {
+          if ((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase()))) {
             championList[j].style.display = "";
           } else {
             championList[j].style.display = "none";
@@ -134,9 +131,9 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
       }
       // End of List Filtering
 
-      $(".champ-select-icon").click(function() {
-        var name = this.parentElement.getElementsByTagName("span")[0].innerText
-        var id = this.parentElement.getElementsByTagName("img")[0].dataset.id
+      $(".ban-hoverer").click(function() {
+        var name = this.parentElement.getElementsByTagName("span")[0].innerText;
+        var id = this.parentElement.getElementsByTagName("img")[0].dataset.id;
         $.ajax({
         type: "POST",
         url: "../clashapp/addToFile.php",
