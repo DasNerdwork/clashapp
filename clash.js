@@ -79,14 +79,14 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
           matchcontent.getElementsByClassName("matchscore")[0].style.right = "0px";
           matchcontent.getElementsByClassName("matchscore")[0].style.fontSize = "16px";
           matchcontent.getElementsByClassName("lane-opponent")[0].style.visibility = "visible";
-          matchcontent.getElementsByClassName("collapser")[0].style.bottom = "0px";
-          matchcontent.getElementsByClassName("collapser")[0].style.right = "0px";
+          matchcontent.getElementsByClassName("collapser")[0].style.top = "-22px";
+          matchcontent.getElementsByClassName("collapser")[0].style.right = "-170px";
           matchcontent.style.maxHeight = matchcontent.scrollHeight + "px";
           this.innerHTML = "&#8963;";
-          this.style.margin = "unset";
-          this.style.height = "20px";
-          this.style.lineHeight = "26px";
-          this.style.width = "32px";
+          // this.style.margin = "unset";
+          // this.style.height = "20px";
+          // this.style.lineHeight = "26px";
+          // this.style.width = "32px";
           } else {
           matchcontent.getElementsByClassName("damage-dealt")[0].style.visibility = "hidden";
           matchcontent.getElementsByClassName("damage-tanked")[0].style.visibility = "hidden";
@@ -98,18 +98,17 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
           matchcontent.getElementsByClassName("matchscore")[0].style.right = "30px";
           matchcontent.getElementsByClassName("matchscore")[0].style.fontSize = "12px";
           matchcontent.getElementsByClassName("lane-opponent")[0].style.visibility = "hidden";
-          matchcontent.getElementsByClassName("collapser")[0].style.bottom = "50px";
-          matchcontent.getElementsByClassName("collapser")[0].style.right = "210px";
+          matchcontent.getElementsByClassName("collapser")[0].style.top = "-80px";
+          matchcontent.getElementsByClassName("collapser")[0].style.right = "0px";
           matchcontent.style.maxHeight = "140px";
           this.innerHTML = "&#8964;";
-          this.style.margin = "10px -260px 0px";
-          this.style.height = "16px";
-          this.style.lineHeight = "0px";
-          this.style.width = "unset";
+          // this.style.margin = "10px -260px 0px";
+          // this.style.height = "16px";
+          // this.style.lineHeight = "0px";
+          // this.style.width = "unset";
           } 
         });
       }
-
       // CHAMP SELECT
 
       var championList = document.getElementsByClassName("champ-select-champion");
@@ -120,12 +119,32 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
 //(champInput.value.toUpperCase().indexOf(abbrList)
       // List Filtering
       function selectChampions(){
-        for (j = 0; j < championList.length; j++) {
-          span = championList[j].getElementsByTagName("span")[0].innerText;
-          if ((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase()))) {
-            championList[j].style.display = "";
+        var lanes = document.getElementsByClassName("lane-selector");
+        for (let i = 0; i < lanes.length; i++) {
+          if(lanes.item(i).style.filter == "brightness(100%)"){
+            laneFilter = lanes.item(i).dataset.lane.toUpperCase();
           } else {
-            championList[j].style.display = "none";
+            laneFilter = false;
+          }
+        }
+
+        if(!laneFilter){
+          for (j = 0; j < championList.length; j++) {
+            span = championList[j].getElementsByTagName("span")[0].innerText;
+            if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase())))) {
+              championList[j].style.display = "";
+            } else {
+              championList[j].style.display = "none";
+            }
+          }
+        } else {
+          for (j = 0; j < championList.length; j++) {
+            span = championList[j].getElementsByTagName("span")[0].innerText;
+            if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase()))) && (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(laneFilter))) {
+              championList[j].style.display = "";
+            } else {
+              championList[j].style.display = "none";
+            }
           }
         }
       }
@@ -236,18 +255,70 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
           }
         }
       });
-    }        
+    }    
   });
 });
 
 function selected_ban_champion(el){
-  el.style.display = "none";
-  $.ajax({
-  type: "POST",
-  url: "../clashapp/removeFromFile.php",
-  data: {
-    champid: el.getElementsByTagName("img")[0].dataset.id,
-    teamid: window.location.pathname.split("/team/")[1]
+  el.style.opacity = '0';
+  clickableHoverers = document.getElementsByClassName("hoverer");
+  for (h = 0; h < clickableHoverers.length; h++) {
+    clickableHoverers[h].style.pointerEvents = "none";
+  }
+    $.ajax({
+    type: "POST",
+    url: "../clashapp/removeFromFile.php",
+    data: {
+      champid: el.getElementsByTagName("img")[0].dataset.id,
+      teamid: window.location.pathname.split("/team/")[1]
+      }
+    })
+  // }, 50);
+}
+
+// LANE HIGHLIGHT
+function highlightLaneIcon(laneImg){
+  var lanes = document.getElementsByClassName("lane-selector");
+  if (laneImg.style.filter == "brightness(50%)") {
+    laneImg.style.filter = "brightness(100%)";
+    var championList = document.getElementsByClassName("champ-select-champion");
+    var champInput = document.getElementById("champSelector");
+    laneFilter = laneImg.dataset.lane.toUpperCase();
+    for (j = 0; j < championList.length; j++) {
+      span = championList[j].getElementsByTagName("span")[0].innerText;
+      if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase()))) && (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(laneFilter))) {
+        championList[j].style.display = "";
+      } else {
+        championList[j].style.display = "none";
+      }
     }
-  })
+    for (let i = 0; i < lanes.length; i++) {
+      if(lanes.item(i) != laneImg){
+        lanes.item(i).style.filter = "brightness(50%)";
+      }
+    }
+  } else {
+    laneImg.style.filter = "brightness(50%)";
+    for (let i = 0; i < lanes.length; i++) {
+      if(lanes.item(i).style.filter == "brightness(100%)"){
+        var activeLane = true;
+      } else {
+        var activeLane = false;
+      }
+    }
+    if (!activeLane){
+      var championList = document.getElementsByClassName("champ-select-champion");
+      for (j = 0; j < championList.length; j++) {
+        var champInput = document.getElementById("champSelector");
+        for (j = 0; j < championList.length; j++) {
+          span = championList[j].getElementsByTagName("span")[0].innerText;
+          if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase())))) {
+            championList[j].style.display = "";
+          } else {
+            championList[j].style.display = "none";
+          }
+        }
+      }
+    }
+  }  
 }

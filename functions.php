@@ -581,7 +581,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     $count = 0;
 
     // Initiating Matchdetail Table
-    echo "<button type='button' class='collapsible'>Open Collapsible</button>";
+    echo "<button type='button' class='collapsible'></button>";
     echo "<div class='content' style='border-collapse: collapse;'>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
         $handle = file_get_contents("/var/www/html/wordpress/clashapp/data/matches/".$matchIDJSON.".json");
