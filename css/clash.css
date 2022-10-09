@@ -20,6 +20,13 @@ select,
 textarea {
  font-family:'Montserrat',sans-serif;
 }
+
+input, input:focus, button {
+  outline: none;
+  border: 0;
+  font-size: 14;
+  padding-left: 6px;
+}
   
 @keyframes rotate {
 0% {
@@ -32,6 +39,20 @@ textarea {
     font-family: Arial, Helvetica, sans-serif;
     border-collapse: collapse;
     text-align: center;
+}
+
+#suchfeld {
+  height: 40px;
+  margin-bottom: -10px;
+}
+
+#name {
+  font-size: 16px;
+  padding-left: 10px;
+}
+
+#submitBtn, #updateBtn {
+  font-size: 16px;
 }
 
 #stattable td, #stattable th {
@@ -122,21 +143,10 @@ textarea {
 
 /* Style the button that is used to open and close the collapsible content */
 .collapsible {
-  background-color: #C6CCD8;
-  color: #444;
+  background-color: #0e0f18;
   cursor: pointer;
-  padding: 18px;
+  padding: 8px;
   width: 100%;
-  border: none;
-  text-align: left;
-  overflow: hidden;
-  outline: none;
-  font-size: 15px;
-}
-
-/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-.active, .collapsible:hover {
-  background-color: #ccc;
 }
 
 /* Style the collapsible content. Note: hidden by default */
@@ -147,15 +157,15 @@ textarea {
 }
 
 .collapsible:after {
-  content: '\02795'; /* Unicode character for "plus" sign (+) */
+  content: '\2B9F'; /* Unicode character for "plus" sign (+) */
   font-size: 13px;
   color: white;
-  float: right;
-  margin-left: 5px;
+  float: center;
+  font-weight: bold;
 }
 
 .active:after {
-  content: "\2796"; /* Unicode character for "minus" sign (-) */
+  content: "\2B9D"; /* Unicode character for "minus" sign (-) */
 }
 
 body::-webkit-scrollbar {
@@ -208,8 +218,9 @@ body {
     'd d e g m m t0 t1 t2 u'
     'd d f h n o t3 t4 t5 v'
     'i j k k p q w  w  w  v'
-    'l l l l r s x  x  x  y';
-  gap: 2px;
+    'l l l l r s x  x  x  v'
+    'y y y y y y y  y  y  y';
+  gap: 0px;
   max-height: 140px;
 }
 
@@ -304,15 +315,17 @@ body {
 }
 
 .collapser {
-  bottom: 50px;
-  right: 210px;
   cursor: pointer;
   font-weight: bold;
-  background-color: #0e0f18;
-  margin: 10px -260px 0px;
-  height: 16px;
-  line-height: 0px;
   z-index: 3;
+  position: relative;
+  top: -94px;
+}
+
+@media (min-width: 1921px){
+  .collapser {
+    top: -80px;
+  }
 }
 
 .champ-select-champion, .selected-ban-champion, .suggested-ban-champion {
@@ -321,6 +334,12 @@ body {
   text-align: center;
   width: 80px;
   height: 75px;
+}
+
+.champ-select-champion .caption {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .suggested-ban-champion {
@@ -353,6 +372,15 @@ body {
 
 .selected-ban-caption {
   margin-top: 10px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.selected-ban-champion {
+  opacity: 1;
+  -webkit-transition: opacity 100ms linear;
+  transition: opacity 100ms linear;
 }
 
 .suggested-ban-caption {
@@ -373,6 +401,10 @@ body {
   display: inline-grid;
   position: relative;
   overflow: hidden;
+}
+
+.ban-overlay, .removal-overlay {
+  transition: all .15s ease-out;
 }
 
 .ban-hoverer:hover .ban-overlay {
@@ -399,6 +431,24 @@ body {
   filter: gray; /* IE6-9 */
   -webkit-filter: grayscale(100%); /* Chrome 19+ & Safari 6+ */
   cursor: pointer;
+  transition: all .15s ease-out;
+}
+
+.lane-selector {
+  position: relative;
+  vertical-align: top;
+  float: right;
+  right: 6px;
+  filter: brightness(50%);
+  cursor: pointer;
+}
+
+.lane-selector + .lane-selector{
+  margin-right: 10px;
+}
+
+#top-ban-bar {
+  height: 34px;
 }
 
 #selectedBans {
@@ -432,8 +482,22 @@ body {
 }
 
 #champSelect {
-  overflow: auto;
+  overflow: overlay;
   height: 145px;
+}
+
+#champSelector {
+  height: 30px;
+}
+
+#banSearch {
+  float: right;
+  position: relative;
+  right: 50px;
+  width: 420px;
+  left: 422px;
+  height: 175px;
+  overflow: hidden;
 }
 
 .clash-footer {

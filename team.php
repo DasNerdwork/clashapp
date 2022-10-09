@@ -35,7 +35,7 @@
 <form id="suchfeld" action="" onsubmit="return false;" method="GET" autocomplete="off" style="display: flex;">
     <input type="text" name="name" id="name" value="" placeholder="Beschwörername">
     <input type="submit" name="submitBtn" id="submitBtn" value="Suchen" onclick="sanitize(this.form.name.value);">
-    <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;">Aktualisieren</button>
+    <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;" disabled>Aktualisieren</button>
     <div class="sbl-circ" id="loader"></div>
 </form>
 
@@ -88,8 +88,15 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
     echo "<div id='suggestedBans' class='schatten'></div></div>";
     echo "<div id='selectedBans' class='schatten' style='float: right; position: relative; right: 430px;'></div><br><br>";
 ?>
-<form id="banSearch" class="schatten" action="" onsubmit="return false;" method="GET" autocomplete="off" style="float: right; position: relative; right: 50px; width: 420px; left: 422px; height: 175px;">
-    <input type="text" name="champName" id="champSelector" value="" placeholder="Championname" style="margin-bottom: 5px;">
+<form id="banSearch" class="schatten" action="" onsubmit="return false;" method="GET" autocomplete="off">
+    <div id="top-ban-bar">
+        <input type="text" name="champName" id="champSelector" value="" placeholder="Championname" style="margin-bottom: 5px;">
+        <img class="lane-selector" style="filter: brightness(50%);" src="/clashapp/data/misc/lanes/UTILITY.png" width="28" onclick="highlightLaneIcon(this);" data-lane="sup" loading="lazy">
+        <img class="lane-selector" style="filter: brightness(50%);" src="/clashapp/data/misc/lanes/BOTTOM.png" width="28" onclick="highlightLaneIcon(this);" data-lane="adc" loading="lazy">
+        <img class="lane-selector" style="filter: brightness(50%);" src="/clashapp/data/misc/lanes/MIDDLE.png" width="28" onclick="highlightLaneIcon(this);" data-lane="mid" loading="lazy">
+        <img class="lane-selector" style="filter: brightness(50%);" src="/clashapp/data/misc/lanes/JUNGLE.png" width="28" onclick="highlightLaneIcon(this);" data-lane="jgl" loading="lazy">
+        <img class="lane-selector" style="filter: brightness(50%);" src="/clashapp/data/misc/lanes/TOP.png" width="28" onclick="highlightLaneIcon(this);" data-lane="top" loading="lazy">
+    </div>
 <?php
     echo "<div id='champSelect'>";
     showBanSelector();
