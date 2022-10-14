@@ -25,10 +25,10 @@
 $championID = $_POST["champid"];
 $championName = $_POST["champname"];
 $teamID = $_POST["teamid"];
-$currentPatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
+$currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
 
 // Array list of all valid champions, e.g. The champion Peter with ID: Peter and Name: Peter is invalid but Ashe with ID: Ashe and Name: Ashe is valid
-$validChamps = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), true)["data"];
+$validChamps = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), true)["data"];
 
 // Simple check if the url at least contains a teamID, as format from Riot changes no formatting check, just empty check
 if($teamID == "" || $teamID == "/"){
@@ -41,9 +41,9 @@ if($teamID == "" || $teamID == "/"){
         echo '{"status":"CodeInjectionDetected"}';die();
     } else {
         // If both ID and name are valid
-        if(file_exists('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json')){
+        if(file_exists('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json')){
             // $preexistingBanFileContent = File content of preexisting savefile
-            $preexistingBanFileContent = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json'), true);
+            $preexistingBanFileContent = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json'), true);
             if(array_search($championID, array_column($preexistingBanFileContent["SuggestedBans"], 'id')) !== false){
                 echo '{"status":"ElementAlreadyInArray"}';die();
             } else if (count($preexistingBanFileContent["SuggestedBans"]) >= 10) { // Maximum of 10 elements in #selectedBans
@@ -51,7 +51,7 @@ if($teamID == "" || $teamID == "/"){
             } else {
                 echo '{"status":"Success"}';
                 // If all criterias are met open preexisting file for change (adding the entry to the file)
-                $fp = fopen('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json', 'c');
+                $fp = fopen('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json', 'c');
                 if($preexistingBanFileContent["SuggestedBans"] == $championID){ // Double check to make sure
                     fclose($fp);
                 } else {
@@ -66,7 +66,7 @@ if($teamID == "" || $teamID == "/"){
             echo '{"status":"FileDoesNotExist"}'; // E.g. on first visit or file deletion -> File has to be created
             $suggestBanArray["SuggestedBans"][] = array("id"=>$championID,"name"=>$championName);
             $suggestBanArray["Status"] = 1; // Initial status of 1
-            $fp = fopen('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json', 'c');
+            $fp = fopen('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json', 'c');
             fwrite($fp, json_encode($suggestBanArray));
             fclose($fp);
         }

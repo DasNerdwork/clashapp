@@ -20,20 +20,20 @@
 // Grabbing and referencing the posted variables + current patch as string
 $championID = $_POST["champid"];
 $teamID = $_POST["teamid"];
-$currentPatch = file_get_contents("/var/www/html/wordpress/clashapp/data/patch/version.txt");
+$currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
 
 // Only proceed if file with bans exists and grab content
-if(file_exists('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json')){
-    $preexistingBanFileContent = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json'), true);
+if(file_exists('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json')){
+    $preexistingBanFileContent = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json'), true);
     // Array list of all valid champions, e.g. The champion Peter with ID: Peter is invalid but Ashe with ID: Ashe is valid
-    $validChamps = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), true)["data"];
+    $validChamps = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), true)["data"];
     // Check if posted ID is part of champion.json
     $searchedID = array_search($championID, array_column($validChamps, 'id'));
     if($searchedID !== false){
         unset($preexistingBanFileContent["SuggestedBans"][array_search($championID, array_column($preexistingBanFileContent["SuggestedBans"], 'id'))]); // Remove Champion
         if(array_search($championID, array_column($preexistingBanFileContent["SuggestedBans"], 'id')) === false){ // Check if removal was successful
             $preexistingBanFileContent["Status"]++; // Increment status counter so website updates the live display
-            $fp = fopen('/var/www/html/wordpress/clashapp/data/teams/'.$teamID.'.json', 'w'); // Clear file, add old status+1 and updated SuggestedBans
+            $fp = fopen('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json', 'w'); // Clear file, add old status+1 and updated SuggestedBans
             $preexistingBanFileContent["SuggestedBans"] = array_values($preexistingBanFileContent["SuggestedBans"]);
             fwrite($fp, json_encode($preexistingBanFileContent));
             fclose($fp);

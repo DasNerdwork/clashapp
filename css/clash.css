@@ -1,3 +1,10 @@
+@font-face {
+  font-family:'Montserrat',sans-serif;
+  src: url("/clashapp/data/fonts/Montserrat/Montserrat-Regular.ttf") format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
 .sbl-circ {
     height: 16px;
     width: 16px;
@@ -19,6 +26,16 @@ input,
 select,
 textarea {
  font-family:'Montserrat',sans-serif;
+}
+
+.full-footer {
+  /* position: fixed; */
+  bottom: 10px;
+  width: 100%;
+}
+
+#teamname {
+  max-width: 600px;
 }
 
 input, input:focus, button {
@@ -119,14 +136,14 @@ input, input:focus, button {
 
 @font-face {
   font-family: "Beaufort";
-  src: url(https://dasnerdwork.net/clashapp/data/misc/fonts/Beaufort-W01-Regular-1.ttf) format("truetype");
+  src: url(https://clash.dasnerdwork.net/clashapp/data/misc/fonts/Beaufort-W01-Regular-1.ttf) format("truetype");
 }
 .beaufort { 
   font-family: "Beaufort", Verdana, serif;
 }
 
 .schatten {
-  border: 1px white solid;
+  border: 1px rgb(124, 124, 124) solid;
 }
 
 .low-threat {
@@ -513,4 +530,12 @@ body {
 
 .clash-footer-link:hover {
   color: #8484b3;
+}
+
+.position-disclaimer {
+  display: inline-flex;
+  justify-content: space-between;
+  line-height: 32px;
+  column-gap: 6px;
+  padding-top: 6px;
 }

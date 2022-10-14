@@ -2,7 +2,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script type="text/javascript" src="../clashapp/clash.js"></script>
 <link rel="stylesheet" href="../clashapp/clash.css">
-<link id="clash-favicon" rel="shortcut icon" href="https://dasnerdwork.net/wp-content/uploads/favicons/clash-favicon.ico">
+<link id="clash-favicon" rel="shortcut icon" href="https://clash.dasnerdwork.net/clashapp/data/misc/favicon.ico">
 <title>Clash – DasNerdwork.net</title>
 
 <script type="text/javascript">
@@ -10,7 +10,7 @@
         var re = RegExp("^[" + characterSet + "\\s'-]+$");
     function sanitize(text){
         if(text.match(re) && text.length > 2 && text.length < 17){
-            window.location.href="https://dasnerdwork.net/clash/" + text;
+            window.location.href="https://clash.dasnerdwork.net/profile/" + text;
         } else {
             var d = new Date();
             alert("[" + d.toLocaleTimeString() + "] ERROR: Eingabe fehlerhaft oder unvollständig.\n\nErlaubte Zeichen sind a-Z, 0-9 und Alphabete andere Sprachen.\nZudem muss ein Beschwörername zwischen 3-16 Zeichen lang sein.");
@@ -106,12 +106,12 @@ if (isset($_GET["name"])){
 
 <?php
 $startFetchPlayerData = microtime(true);
-    $playerDataDirectory = new DirectoryIterator('/var/www/html/wordpress/clashapp/data/player/');
+    $playerDataDirectory = new DirectoryIterator('/var/www/html/clash/clashapp/data/player/');
 
     foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
         $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
         if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
-            $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+            $playerDataJSON = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
             if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
                 $playerData = $playerDataJSON["PlayerData"];
                 $playerName = $playerDataJSON["PlayerData"]["Name"];
@@ -129,7 +129,7 @@ $startFetchPlayerData = microtime(true);
         foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
             $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
             if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
-                $playerDataJSON = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                $playerDataJSON = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                 if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
                     $playerData = $playerDataJSON["PlayerData"];
                     $playerName = $playerDataJSON["PlayerData"]["Name"];
@@ -149,7 +149,7 @@ $startPrintData = microtime(true);
 if($formattedInput != "") {
 
     echo "<div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px;'>";
-    if(file_exists('/var/www/html/wordpress/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
+    if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
         echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
     }
 
@@ -213,8 +213,8 @@ if($formattedInput != "") {
     }
 
     if($rankVal != 0){
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-    $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $webBorderPath = str_replace("/var/www/html/clash","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
         echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute;  top: -80px; z-index: -1;">';
@@ -293,7 +293,7 @@ if($formattedInput != "") {
                 break; 
         }
 
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/wordpress/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
     $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
@@ -310,10 +310,10 @@ if($formattedInput != "") {
     $playerMainRole = $playerLanes[0];
     $playerSecondaryRole = $playerLanes[1];
     echo "<div style='display: flex; justify-content: center; width: 200px;'>";
-    if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerMainRole.'.png')){
+    if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerMainRole.'.png')){
         echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.png" width="32">';
     }
-    if(file_exists('/var/www/html/wordpress/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png')){
+    if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png')){
         echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png" width="32"><br>';
     }
     echo "</div>";
@@ -355,7 +355,7 @@ if($formattedInput != "") {
 
 
     $startAverage = microtime(true);
-    $averageAttributes = array_keys(json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
+    $averageAttributes = array_keys(json_decode(file_get_contents('/var/www/html/clash/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
     $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
     getAverage($averageAttributes, $matchDaten, $puuid, $playerLane);
     
@@ -397,7 +397,7 @@ if($formattedInput != "") {
     echo "</pre>";
     }
 }
-// if (strstr($_SERVER['HTTP_REFERER'],"dasnerdwork.net/clash")) {
+// if (strstr($_SERVER['HTTP_REFERER'],"clash.dasnerdwork.net/clash")) {
 //     if (isset($_POST["load"])) {
 //         $query = preg_replace('/\s+/', '+', $_POST["search"]);
 //         $puuid = getPlayerData($query)["PUUID"];
