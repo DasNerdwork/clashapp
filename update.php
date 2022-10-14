@@ -45,14 +45,14 @@ function updateProfile($id, $maxMatchIds, $type="name"){
     $jsonArray["RankData"] = $rankData;
     $jsonArray["MasteryData"] = $masteryData;
     $jsonArray["MatchIDs"] = $matchIDs;
-    $logPath = '/var/www/html/wordpress/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
+    $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 
     /**
      * STEP 1: Check if up-to-date
      */
     if($sumid != "" || $sumid != "/"){ /** @todo additional sanitizing regex check for valid $sumid variants */
-        if(file_exists('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json')){
-            $existingJson = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
+        if(file_exists('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json')){
+            $existingJson = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
             // If the newest local matchID equals the newest API requested matchID, ergo if there is nothing to update
             // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
             if(getMatchIDs($puuid, 1)[0] == $existingJson["MatchIDs"][0] && (count($existingJson["MatchIDs"]) >= count($matchIDs))){
@@ -67,7 +67,7 @@ function updateProfile($id, $maxMatchIds, $type="name"){
         /**
          * STEP 2: Rewrite file if it doesn't exist or has to be updated
          */
-        $fp = fopen('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json', 'w');
+        $fp = fopen('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json', 'w');
         // Open the file only to write. If it doesnt exist it will be created. If it exists it will be reset and updated with the newest data
         fwrite($fp, json_encode($jsonArray));
         fclose($fp);
@@ -75,9 +75,9 @@ function updateProfile($id, $maxMatchIds, $type="name"){
         /**
          * STEP 3: Fetch all given matchIDs and download each match via downloadMatchByID
          */
-        $playerDataArray = json_decode(file_get_contents('/var/www/html/wordpress/clashapp/data/player/'.$sumid.'.json'), true);
+        $playerDataArray = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
         foreach($playerDataArray["MatchIDs"] as $match){
-            if(!file_exists('/var/www/html/wordpress/clashapp/data/matches/'.$match.'.json')){
+            if(!file_exists('/var/www/html/clash/clashapp/data/matches/'.$match.'.json')){
                 downloadMatchByID($match, $playerName);
             }
         }

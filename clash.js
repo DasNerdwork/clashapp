@@ -1,12 +1,14 @@
-$.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
+$.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
+  console.log(window.location.href);
   const currentpatch = data;
   $('document').ready(function() {
     var allClashPages = RegExp("(\/clash\/).+$");
     var allTeamPages = RegExp("(\/team\/).+$");
-    var mainPage = RegExp("(\/clash.*)$"); 
     if (window.location.pathname.match(allClashPages) || window.location.pathname.match(allTeamPages)) {
       document.getElementById("updateBtn").style.display = "initial";
-    } else if (window.location.pathname.match(mainPage)) {
+    } else if (window.location.href == "https://clash.dasnerdwork.net/") {
+      footer = document.getElementById("full-footer");
+      footer.style.position = "fixed";
       suchfeld = document.getElementById("suchfeld");
       suchfeld.style.position = "absolute";
       suchfeld.style.top = "60%";
@@ -31,11 +33,11 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
       searchBtn.style.padding = "10px 60px 10px 10px";
       searchBtn.style.border = "none";
       searchBtn.style.fontSize = "20px";
-      searchBtn.style.backgroundImage = 'url(/wp-content/uploads/svg/searchicon.svg)';
+      searchBtn.style.backgroundImage = 'url(/clashapp/data/misc/svg/searchicon.svg)';
       searchBtn.style.backgroundRepeat = "no-repeat";
       searchBtn.style.backgroundPosition = "center";
       searchBtn.style.backgroundSize = "50%";
-      document.body.style.backgroundImage = 'url(/wp-content/uploads/svg/background.svg)';
+      document.body.style.backgroundImage = 'url(/clashapp/data/misc/svg/background.svg)';
       document.body.style.backgroundRepeat = "no-repeat";
       document.body.style.backgroundPosition = "50% 20%";
       document.body.style.backgroundSize = "40%";
@@ -197,7 +199,7 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
       setInterval(function() {
         $.ajax({
           cache: false,
-          url: "https://dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
+          url: "https://clash.dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
           dataType: "json",
           success: function(data) {
             if(data["Status"] > status){
@@ -226,7 +228,7 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
       $("#suggestedBans").append(suggestedBans[i])
     }
  
-    $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
+    $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
       const currentpatch = data;
     });
     var allTeamPages = RegExp("(\/team\/).+$");
@@ -237,7 +239,7 @@ $.get( "https://dasnerdwork.net/clashapp/data/patch/version.txt", function( data
 
       $.ajax({
         cache: false,
-        url: "https://dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
+        url: "https://clash.dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
         dataType: "json",
         success: function(data) {
           if(data["Status"] > status){
