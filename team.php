@@ -83,7 +83,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
     $icon = $teamDataArray["Icon"];
     // echo "TournamentID: ".$teamDataArray["TournamentID"]."<br>";
     echo "<h1 class='schatten' id='teamname' style='padding-right: 10px; display: inline-block;'><center>";
-    echo "<img src='/clashapp/data/misc/clash/logos/".$icon."/1_64.png' width='64' style='vertical-align: middle;' loading='lazy'> ".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</center></h1>";
+    echo "<img class='team-logo' src='/clashapp/data/misc/clash/logos/".$icon."/1_64.png' width='64' loading='lazy'><div class='team-title' id='team-title'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</div></center></h1>";
     echo "<div><div id='suggested-ban-title'>Empfohlene Bans:</div>";
     echo "<div id='suggestedBans' class='schatten'></div></div>";
     echo "<div id='selectedBans' class='schatten' style='float: right; position: relative; right: 430px;'></div><br><br>";
@@ -297,16 +297,17 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                     $levelFileName = "500";
                     break;
             }
+
         $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-        $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
+        $webBorderPath = str_replace("/var/www/html/clash","",$profileBorderPath);
 
         if(file_exists($profileBorderPath)){
             echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: -37px; z-index: -1;" loading="lazy">';
             }
         echo "<div style='color: #e8dfcc; position: absolute; margin-top: 105px; font-size: 12px;'>".$playerData["Level"]."</div>";
         }
-
         echo "</div></center>";
+        echo "<div class='player-name'>".$playerName."</div>";
 
         getMatchIDs($puuid, 15);
 
@@ -340,16 +341,76 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             }
         }
 
-        echo "</td></tr><tr><td style='text-align: center; vertical-align: top; height: 7em;'>";
+        echo "</td></tr><tr><td style='text-align: center; vertical-align: middle; height: 7em;'>";
         echo "<div style='display: inline-flex;'>";
         if(!empty($rankData)){
             $key = array_search('RANKED_SOLO_5x5', array_column($rankData,"Queue"));
             if($key !== false){
-                echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'><font size='-1'>Ranked Solo/Duo:</font><br>" . ucfirst(strtolower($rankData[$key]["Tier"])) . " " . $rankData[$key]["Rank"] . " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
+                echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'><font size='-1'>Ranked Solo/Duo:</font><br>";
+                switch ($rankData[$key]["Tier"]){
+                    case ($rankData[$key]["Tier"] == "CHALLENGER"):
+                        echo "<span style='color: #52cfff'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "GRANDMASTER"):
+                        echo "<span style='color: #cd423a'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "MASTER"):
+                        echo "<span style='color: #b160f3'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "DIAMOND"):
+                        echo "<span style='color: #617ecb'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "PLATINUM"):
+                        echo "<span style='color: #23af88'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "GOLD"):
+                        echo "<span style='color: #d79c5d'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "SILVER"):
+                        echo "<span style='color: #99a0b5'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "BRONZE"):
+                        echo "<span style='color: #7d534a'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "IRON"):
+                        echo "<span style='color: #392b28'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                }
+                echo " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
             }
             $key = array_search('RANKED_FLEX_SR', array_column($rankData,"Queue"));
             if($key !== false){
-                echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'><font size='-1'>Ranked Flex:</font><br>" . ucfirst(strtolower($rankData[$key]["Tier"])) . " " . $rankData[$key]["Rank"] . " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
+                echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'><font size='-1'>Ranked Flex:</font><br>";
+                switch ($rankData[$key]["Tier"]){
+                    case ($rankData[$key]["Tier"] == "CHALLENGER"):
+                        echo "<span style='color: #52cfff'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "GRANDMASTER"):
+                        echo "<span style='color: #cd423a'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "MASTER"):
+                        echo "<span style='color: #b160f3'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "DIAMOND"):
+                        echo "<span style='color: #617ecb'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "PLATINUM"):
+                        echo "<span style='color: #23af88'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "GOLD"):
+                        echo "<span style='color: #d79c5d'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "SILVER"):
+                        echo "<span style='color: #99a0b5'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "BRONZE"):
+                        echo "<span style='color: #7d534a'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                    case ($rankData[$key]["Tier"] == "IRON"):
+                        echo "<span style='color: #392b28'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        break;
+                }
+                echo " / " . $rankData[$key]["LP"] . " LP<br>WR: " . round((($rankData[$key]["Wins"]/($rankData[$key]["Wins"]+$rankData[$key]["Losses"]))*100),2) . "%<br><font size='-1'>(".$rankData[$key]["Wins"]+$rankData[$key]["Losses"]." Games)</font></div>";
             }
             if(empty(array_intersect(array("RANKED_SOLO_5x5", "RANKED_FLEX_SR"), array_column($rankData,"Queue")))){
                 echo "<div class='schatten' style='margin: 10px 20px; padding: 5px;'>Unranked</div>";
@@ -367,19 +428,27 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                 echo '<div><img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.png" width="64" style="margin: 0px 28px;" loading="lazy"><br>';
                 echo $masteryData[$i]["Champion"]."<br>";
                 echo "MR: ".$masteryData[$i]["Lvl"]."<br>";
-                if(str_replace(',','',$masteryData[$i]["Points"]) > 250000){
-                    echo "<div class='low-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div><br></div>";
-                } else if(str_replace(',','',$masteryData[$i]["Points"]) > 500000){
-                    echo "<div class='medium-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div><br></div>";
-                } else if(str_replace(',','',$masteryData[$i]["Points"]) > 1000000){
-                    echo "<div class='high-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div><br></div>";
-                } else {
-                    echo "<div class='no-threat' style='display: inline-flex;'>".$masteryData[$i]["Points"]."</div><br></div>";
+                $masteryPoints = str_replace(',','',$masteryData[$i]["Points"]);
+                if ($masteryPoints < 100000){
+                    echo "<div class='mastery-points'>".$masteryData[$i]["Points"]."</div><br></div>";
+                } else if ($masteryPoints >= 100000 && $masteryPoints < 200000){
+                    echo "<div class='mastery-points' style='color: #ffe485;'>".$masteryData[$i]["Points"]."</div><br></div>";
+                } else if ($masteryPoints >= 200000 && $masteryPoints < 300000){
+                    echo "<div class='mastery-points' style='color: #D3A609;'>".$masteryData[$i]["Points"]."</div><br></div>";
+                } else if ($masteryPoints >= 300000 && $masteryPoints < 500000){
+                    echo "<div class='mastery-points' style='color: #CB820C;'>".$masteryData[$i]["Points"]."</div><br></div>";
+                } else if ($masteryPoints >= 500000 && $masteryPoints < 700000){
+                    echo "<div class='mastery-points' style='color: #C35D0F;'>".$masteryData[$i]["Points"]."</div><br></div>";
+                } else if ($masteryPoints >= 700000 && $masteryPoints < 1000000){
+                    echo "<div class='mastery-points' style='color: #E12F08;'>".$masteryData[$i]["Points"]."</div><br></div>";
+                } else if ($masteryPoints >= 1000000){
+                    echo "<div class='mastery-points' style='color: #FF0000;'>".$masteryData[$i]["Points"]."</div><br></div>";
                 }
             }
         }
         echo "</div>";
         echo "</td></tr><tr><td style='vertical-align: top; text-align: center;'>";
+        echo "Average Matchscore: ".number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2); // Calculates and prints the average Matchscore of a player
         // echo "<div style='margin: 10px 0px;'>";
         // foreach (mostPlayedWith($matchDaten, $puuid) as $key => $value){
         //     foreach ($teamDataArray["Players"] as $teamMember){
@@ -423,8 +492,11 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
 //    echo "</pre>";
    foreach($suggestedBanArray as $banChampion){
         echo '<div class="suggested-ban-champion">';
-        echo '<img class="suggested-ban-icon" style="height: auto; z-index: 1;" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.png" width="48" loading="lazy">';
-        echo '<span class="suggested-ban-caption" style="display: block;">' . $banChampion["Champion"] . '</span>';
+            echo '<div class="ban-hoverer" onclick="">';
+                echo '<img class="suggested-ban-icon" style="height: auto; z-index: 1;" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.png" width="48" loading="lazy">';
+                echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.png" width="48" loading="lazy">';
+                echo '<img class="ban-overlay-red" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
+            echo '<span class="suggested-ban-caption" style="display: block;">' . $banChampion["Champion"] . '</span>';
         echo '</div>';
     }
 

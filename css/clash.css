@@ -16,7 +16,7 @@
     opacity: 0;
     border-radius: 50%;
     border-top-color: transparent;
-    animation: rotate 1s linear infinite; 
+    animation: rotate 1s linear infinite;
     transition: all .2s linear;
 }
 
@@ -44,12 +44,12 @@ input, input:focus, button {
   font-size: 14;
   padding-left: 6px;
 }
-  
+
 @keyframes rotate {
 0% {
     transform: rotate(0); }
 100% {
-    transform: rotate(360deg); } 
+    transform: rotate(360deg); }
 }
 
 #stattable {
@@ -138,7 +138,7 @@ input, input:focus, button {
   font-family: "Beaufort";
   src: url(https://clash.dasnerdwork.net/clashapp/data/misc/fonts/Beaufort-W01-Regular-1.ttf) format("truetype");
 }
-.beaufort { 
+.beaufort {
   font-family: "Beaufort", Verdana, serif;
 }
 
@@ -150,7 +150,7 @@ input, input:focus, button {
   color: #d3a609;
 }
 
-.low-threath {
+.medium-threath {
   color: #C35D0F;
 }
 
@@ -193,7 +193,7 @@ body::-webkit-scrollbar {
 body {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
-  background-color:#0e0f18; 
+  background-color:#0e0f18;
   color:#ddd;
 }
 
@@ -254,6 +254,20 @@ body {
   /* background-color: rgba(10, 10, 10, 0.8); */
   text-align: center;
   padding: 4px 0;
+}
+
+.team-title {
+  display: inline;
+  vertical-align: middle;
+}
+
+.team-logo {
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.player-name {
+  padding-top: 4px;
 }
 
 .champion-level {
@@ -402,6 +416,9 @@ body {
 
 .suggested-ban-caption {
   margin-top: 2px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .suggested-ban-icon {
@@ -538,4 +555,8 @@ body {
   line-height: 32px;
   column-gap: 6px;
   padding-top: 6px;
+}
+
+.mastery-points {
+  display: inline-flex;
 }

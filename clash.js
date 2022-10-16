@@ -1,5 +1,4 @@
 $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
-  console.log(window.location.href);
   const currentpatch = data;
   $('document').ready(function() {
     var allClashPages = RegExp("(\/clash\/).+$");
@@ -47,6 +46,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       // TABLE COLLAPSER
 
     if(window.location.pathname.match(allTeamPages)){
+      document.title = document.getElementById("team-title").innerText;
       var coll = document.getElementsByClassName("collapsible");
       var i;
       
@@ -122,30 +122,32 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       // List Filtering
       function selectChampions(){
         var lanes = document.getElementsByClassName("lane-selector");
-        for (let i = 0; i < lanes.length; i++) {
-          if(lanes.item(i).style.filter == "brightness(100%)"){
-            laneFilter = lanes.item(i).dataset.lane.toUpperCase();
-          } else {
-            laneFilter = false;
-          }
-        }
-
-        if(!laneFilter){
-          for (j = 0; j < championList.length; j++) {
-            span = championList[j].getElementsByTagName("span")[0].innerText;
-            if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase())))) {
-              championList[j].style.display = "";
+        if(champInput.value != ""){
+          for (let i = 0; i < lanes.length; i++) {
+            if(lanes.item(i).style.filter == "brightness(100%)"){
+              laneFilter = lanes.item(i).dataset.lane.toUpperCase();
             } else {
-              championList[j].style.display = "none";
+              laneFilter = false;
             }
           }
-        } else {
-          for (j = 0; j < championList.length; j++) {
-            span = championList[j].getElementsByTagName("span")[0].innerText;
-            if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase()))) && (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(laneFilter))) {
-              championList[j].style.display = "";
-            } else {
-              championList[j].style.display = "none";
+
+          if(!laneFilter){
+            for (j = 0; j < championList.length; j++) {
+              span = championList[j].getElementsByTagName("span")[0].innerText;
+              if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase())))) {
+                championList[j].style.display = "";
+              } else {
+                championList[j].style.display = "none";
+              }
+            }
+          } else {
+            for (j = 0; j < championList.length; j++) {
+              span = championList[j].getElementsByTagName("span")[0].innerText;
+              if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase()))) && (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(laneFilter))) {
+                championList[j].style.display = "";
+              } else {
+                championList[j].style.display = "none";
+              }
             }
           }
         }

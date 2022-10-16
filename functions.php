@@ -1625,8 +1625,8 @@ function showBanSelector(){
                         echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
                         echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.png" width="48" loading="lazy">';
                         echo '<img class="ban-overlay-red" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
-                        echo "<span class='caption' style='display: block;'>".$champName."</span>";
-                echo "</div>";
+                    echo "<span class='caption' style='display: block;'>".$champName."</span>";
+            echo "</div>";
             }
         } else {
             if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
@@ -1635,8 +1635,8 @@ function showBanSelector(){
                         echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
                         echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.png" width="48" loading="lazy">';
                         echo '<img class="ban-overlay-red" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
-                        echo "<span class='caption' style='display: block;'>".$champName."</span>";
-                echo "</div>";
+                    echo "<span class='caption' style='display: block;'>".$champName."</span>";
+            echo "</div>";
             }
         }
     }
