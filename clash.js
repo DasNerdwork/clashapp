@@ -49,7 +49,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       document.title = document.getElementById("team-title").innerText;
       var coll = document.getElementsByClassName("collapsible");
       var i;
-      
+
       for (i = 0; i < coll.length; i++) {
         coll[i].addEventListener("click", function() {
           this.classList.toggle("active");
@@ -85,10 +85,6 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
           matchcontent.getElementsByClassName("collapser")[0].style.right = "-170px";
           matchcontent.style.maxHeight = matchcontent.scrollHeight + "px";
           this.innerHTML = "&#8963;";
-          // this.style.margin = "unset";
-          // this.style.height = "20px";
-          // this.style.lineHeight = "26px";
-          // this.style.width = "32px";
           } else {
           matchcontent.getElementsByClassName("damage-dealt")[0].style.visibility = "hidden";
           matchcontent.getElementsByClassName("damage-tanked")[0].style.visibility = "hidden";
@@ -100,59 +96,51 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
           matchcontent.getElementsByClassName("matchscore")[0].style.right = "30px";
           matchcontent.getElementsByClassName("matchscore")[0].style.fontSize = "12px";
           matchcontent.getElementsByClassName("lane-opponent")[0].style.visibility = "hidden";
-          matchcontent.getElementsByClassName("collapser")[0].style.top = "-80px";
-          matchcontent.getElementsByClassName("collapser")[0].style.right = "0px";
+          matchcontent.getElementsByClassName("collapser")[0].style.top = "";
+          matchcontent.getElementsByClassName("collapser")[0].style.right = "";
           matchcontent.style.maxHeight = "140px";
           this.innerHTML = "&#8964;";
-          // this.style.margin = "10px -260px 0px";
-          // this.style.height = "16px";
-          // this.style.lineHeight = "0px";
-          // this.style.width = "unset";
-          } 
+          }
         });
       }
       // CHAMP SELECT
 
-      var championList = document.getElementsByClassName("champ-select-champion");
-      var champInput = document.getElementById("champSelector");
-      
-      champInput.addEventListener('keyup', selectChampions);
+      var championList = document.getElementsByClassName("champ-select-champion"); // separate champion icon+name elements in the list
+      var champInput = document.getElementById("champSelector"); // Input field of the champion name search
+      champInput.addEventListener('keyup', selectChampions); // event listener to fire for typing
 
-//(champInput.value.toUpperCase().indexOf(abbrList)
-      // List Filtering
-      function selectChampions(){
-        var lanes = document.getElementsByClassName("lane-selector");
-        if(champInput.value != ""){
-          for (let i = 0; i < lanes.length; i++) {
-            if(lanes.item(i).style.filter == "brightness(100%)"){
+      // CHAMPION LIST FILTERING
+      function selectChampions(){          
+        var lanes = document.getElementsByClassName("lane-selector"); // the 5 lane icons as elements in a list
+          for (let i = 0; i < lanes.length; i++) { 
+            if(lanes.item(i).style.filter == "brightness(100%)"){ // checks if a lane filter icon is set to active (brightness(100%)) and saves the specific lane name for futher sorting
               laneFilter = lanes.item(i).dataset.lane.toUpperCase();
+              break;
             } else {
               laneFilter = false;
             }
           }
-
-          if(!laneFilter){
-            for (j = 0; j < championList.length; j++) {
-              span = championList[j].getElementsByTagName("span")[0].innerText;
-              if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase())))) {
+          if(!laneFilter){ // if we don't have an active lane filter
+            for (j = 0; j < championList.length; j++) { // -> Sort if input matches element span name or abbreviation data tag
+              span = championList[j].getElementsByTagName("span")[0].innerText; // the current champion names in a list
+              if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase())))) { 
                 championList[j].style.display = "";
               } else {
                 championList[j].style.display = "none";
               }
             }
-          } else {
-            for (j = 0; j < championList.length; j++) {
-              span = championList[j].getElementsByTagName("span")[0].innerText;
+          } else { // if we have an active lane filter
+            for (j = 0; j < championList.length; j++) { // -> Sort if input matches element span name or abbreviation data tag AND either also matches the active lane filter
+              span = championList[j].getElementsByTagName("span")[0].innerText; // the current champion names in a list
               if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase()))) && (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(laneFilter))) {
                 championList[j].style.display = "";
               } else {
                 championList[j].style.display = "none";
-              }
             }
           }
         }
       }
-      // End of List Filtering
+      // END OF CHAMPION LIST FILTERING
 
       $(".ban-hoverer").click(function() {
         var name = this.parentElement.getElementsByTagName("span")[0].innerText;
@@ -185,13 +173,13 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
             html = '<div class="selected-ban-champion">'+
                         '<div class="hoverer" onclick="selected_ban_champion(this.parentElement)">'+
                           '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + id + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + id + '.png" width="48" loading="lazy">'+
-                          '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.png" width="48"></div>'+  
+                          '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.png" width="48"></div>'+
                         '<span class="selected-ban-caption" style="display: block;">' + name + '</span>'+
                       '</div>';
             selectedBans.innerHTML += html;
           }
         });
-        
+
       });
 
       var selectedBans = document.getElementById("selectedBans");
@@ -229,7 +217,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       suggestedBans[i].style.visibility = "visible";
       $("#suggestedBans").append(suggestedBans[i])
     }
- 
+
     $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
       const currentpatch = data;
     });
@@ -259,7 +247,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
           }
         }
       });
-    }    
+    }
   });
 });
 
@@ -324,5 +312,5 @@ function highlightLaneIcon(laneImg){
         }
       }
     }
-  }  
+  }
 }

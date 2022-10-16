@@ -370,7 +370,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                         echo "<span style='color: #99a0b5'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
                         break;
                     case ($rankData[$key]["Tier"] == "BRONZE"):
-                        echo "<span style='color: #7d534a'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        echo "<span style='color: #cd8d7f'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
                         break;
                     case ($rankData[$key]["Tier"] == "IRON"):
                         echo "<span style='color: #392b28'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
@@ -404,7 +404,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
                         echo "<span style='color: #99a0b5'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
                         break;
                     case ($rankData[$key]["Tier"] == "BRONZE"):
-                        echo "<span style='color: #7d534a'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
+                        echo "<span style='color: #cd8d7f'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
                         break;
                     case ($rankData[$key]["Tier"] == "IRON"):
                         echo "<span style='color: #392b28'>".ucfirst(strtolower($rankData[$key]["Tier"])). " " . $rankData[$key]["Rank"]."</span>";
