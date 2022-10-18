@@ -495,7 +495,7 @@ if (isset($_GET["name"]) && $_GET["name"] != "404"){
             echo '<div class="ban-hoverer" onclick="">';
                 echo '<img class="suggested-ban-icon" style="height: auto; z-index: 1;" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.png" width="48" loading="lazy">';
                 echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.png" width="48" loading="lazy">';
-                echo '<img class="ban-overlay-red" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
+                echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
             echo '<span class="suggested-ban-caption" style="display: block;">' . $banChampion["Champion"] . '</span>';
         echo '</div>';
     }

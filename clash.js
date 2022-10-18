@@ -171,7 +171,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
             window.location.reload();
           } else {
             html = '<div class="selected-ban-champion">'+
-                        '<div class="hoverer" onclick="selected_ban_champion(this.parentElement)">'+
+                        '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
                           '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + id + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + id + '.png" width="48" loading="lazy">'+
                           '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.png" width="48"></div>'+
                         '<span class="selected-ban-caption" style="display: block;">' + name + '</span>'+
@@ -179,7 +179,6 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
             selectedBans.innerHTML += html;
           }
         });
-
       });
 
       var selectedBans = document.getElementById("selectedBans");
@@ -197,18 +196,88 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
               var html ="";
               for (const element of data["SuggestedBans"]) {
                 html += '<div class="selected-ban-champion">'+
-                          '<div class="hoverer" onclick="selected_ban_champion(this.parentElement)">'+
+                          '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
                             '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.png" width="48" loading="lazy">'+
                             '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.png" width="48"></div>'+
                           '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
                         '</div>';
               }
               selectedBans.innerHTML = html;
+              makeDragDroppable();
             }
           }
         });
       }, 500);
     }
+
+    // DROPPABLE
+    
+  // setTimeout(function() {
+  //   makeDragDroppable();
+  // }, 600);
+
+  function makeDragDroppable(){
+    let draggables = document.getElementsByClassName('hoverer')
+    
+    for (i = 0; i < draggables.length; i++) {
+      draggables[i].addEventListener('dragstart', dragStart)
+      draggables[i].addEventListener('drop', dropped)
+      draggables[i].addEventListener('dragenter', cancelDefault)
+      draggables[i].addEventListener('dragover', dragOver)
+    }
+
+    function dragStart (e) {
+      e.dataTransfer.setData('fromName', e.srcElement.previousSibling.dataset.id);
+      e.dataTransfer.setData('isDraggable', e.srcElement.parentElement.classList); // set event data "isDraggable" to the class name "hoverer" of the parent element
+      e.dataTransfer.setDragImage(e.srcElement.previousSibling, 24, 24);
+      return oldIndex = getChildIndex(e.srcElement.parentElement.parentElement); // returning so function dropped is able to acces the old index variable
+    }
+
+    function dropped (e) {
+      var fromName = e.dataTransfer.getData('fromName');
+      var toName = e.srcElement.previousSibling.dataset.id;
+      cancelDefault(e);
+
+      // get new and old index from dragStart return
+      // var newIndex = getChildIndex(e.toElement.parentElement.parentElement) // Javascript swap of elements -> not necessary due to ajax
+      // get parent as variable
+      // var selectedBans = e.toElement.parentElement.parentElement.parentElement; // Javascript swap of elements -> not necessary due to ajax
+
+      if(e.dataTransfer.getData('isDraggable') != "hoverer"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
+        cancelDefault(e);
+      } else {
+        // console.log("Moving index "+oldIndex+" to "+newIndex);
+        // insert the dropped item at new place
+        // if (newIndex < oldIndex) {
+        //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex]);
+        // } else {
+        //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex].nextElementSibling);
+        // }
+        $.ajax({
+          type: "POST",
+          url: "../clashapp/swapInFile.php",
+          data: {
+            fromName: fromName,
+            toName: toName,
+            teamid: window.location.pathname.split("/team/")[1]
+            }
+          })
+      }
+    }
+
+    function dragOver (e) {
+      e.dataTransfer.dropEffect = "move";
+      cancelDefault(e);
+    }
+
+    function cancelDefault (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      return false
+    }
+  }
+    // END DROPPABLE
+
   });
 
   $('document').ready(function() {
@@ -237,7 +306,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
             var html ="";
             for (const element of data["SuggestedBans"]) {
               html += '<div class="selected-ban-champion">'+
-                        '<div class="hoverer" onclick="selected_ban_champion(this.parentElement)">'+
+                        '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
                           '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.png" width="48" loading="lazy">'+
                           '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.png" width="48"></div>'+
                         '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
@@ -313,4 +382,8 @@ function highlightLaneIcon(laneImg){
       }
     }
   }
+}
+
+function getChildIndex(node) {
+  return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
 }
