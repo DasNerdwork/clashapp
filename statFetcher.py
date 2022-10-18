@@ -70,6 +70,8 @@ def statIterator(lane):
         with open(filename, encoding='utf-8', mode='r') as currentFile:
             fileJson = currentFile.read()
             jdata = json.loads(fileJson)
+        if("info" not in jdata):
+            continue
         for player in jdata['info']['participants']:
             if (player.get('challenges')) and ((lane == "GENERAL") or (player['teamPosition'] == lane) or (player['individualPosition'] == lane) or (player['lane'] == lane)):
                 for key, val in player['challenges'].items():
@@ -111,6 +113,8 @@ def championStatIterator():
         with open(filename, encoding='utf-8', mode='r') as currentFile:
             fileJson = currentFile.read()
             jdata = json.loads(fileJson)
+        if("info" not in jdata):
+            continue
         for player in jdata['info']['participants']:
             for championName in championDict:
                 if championName == player['championName']:
@@ -139,8 +143,9 @@ def championStatIterator():
         # Sort return array alphabetically
         for key in sorted(championDict[championName]):
             sortedChampionDict[championName][key] = championDict[championName][key]
-    logger.info("Saving averageChampionStats.json in var/www/html/wordpress/clashapp/data/misc")
+    logger.info("Saving averageChampionStats.json in var/www/html/clash/clashapp/data/misc")
     return sortedChampionDict
+
 start_champ = time.time() 
 with open('/var/www/html/clash/clashapp/data/misc/averageChampionStats.json', 'w') as location:
     json.dump(championStatIterator(), location)
@@ -154,7 +159,7 @@ for key in averageJsonDict:
 
     counter+=1
 
-logger.info("Saving averageStats.json in var/www/html/wordpress/clashapp/data/misc")
+logger.info("Saving averageStats.json in var/www/html/clash/clashapp/data/misc")
 with open('/var/www/html/clash/clashapp/data/misc/averageStats.json', 'w') as location:
     json.dump(averageJsonDict, location)
 
