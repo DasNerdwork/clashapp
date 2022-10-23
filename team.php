@@ -32,13 +32,66 @@
 </script>
 </head>
 
-<form id="suchfeld" action="" onsubmit="return false;" method="GET" autocomplete="off" style="display: flex;">
-    <input type="text" name="name" id="name" value="" placeholder="Beschwörername">
-    <input type="submit" name="submitBtn" id="submitBtn" value="Suchen" onclick="sanitize(this.form.name.value);">
-    <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;" disabled>Aktualisieren</button>
-    <div class="sbl-circ" id="loader"></div>
-</form>
 
+<header>
+	<div class="header-nav-menu">
+		<div class="clickable-logo">
+			<a href="/" class="nav-menu-link">
+				<img src="/clashapp/data/misc/svg/logo.svg" width="150" alt="CLASH" height="48">
+			</a>
+		</div>
+		<nav>
+			<ul>
+				<li>
+                    <a href="https://clash.dasnerdwork.net/profile/" class="nav-menu-link">
+						<span>Profile</span>
+					</a>
+				</li>
+				<li>
+					<a href="https://clash.dasnerdwork.net/stats/" class="nav-menu-link">
+						<span>Stats</span>
+					</a>
+				</li>
+				<li>
+					<a href="https://clash.dasnerdwork.net/docs/" class="nav-menu-link">
+						<span>Docs</span>
+					</a>
+				</li>
+				<li>
+					<a href="https://clash.dasnerdwork.net/counters/" class="nav-menu-link">
+						<span>Counters</span>
+					</a>
+				</li>
+				<li>
+					<a href="https://clash.dasnerdwork.net/tft/" class="nav-menu-link">
+						<span>TFT</span>
+					</a>
+				</li>
+			</ul>
+		</nav>
+        <form id="suchfeld" action="" onsubmit="return false;" method="GET" autocomplete="off" style="display: flex;">
+            <input type="text" name="name" id="name" value="" placeholder="Beschwörername">
+            <input type="submit" name="submitBtn" id="submitBtn" value="Suchen" onclick="sanitize(this.form.name.value);">
+            <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;" disabled>Aktualisieren</button>
+            <div class="sbl-circ" id="loader"></div>
+        </form>
+        <div class="misc-button-menu">
+            <div>
+                <button type="button" class="select-language-button misc-button">
+                    <span>English</span>
+                </button>
+            </div>
+            <div class="login-register-button">
+                <button type="button" class="misc-button">
+                    <span>Login</span>
+                </button>
+            </div>
+            <div class="settings-button">
+                <img src="/clashapp/data/misc/settings-wheel.png" width="20" height="20"></img>
+            </div>
+        </div>
+    </div>
+</header>
 
 <?php
 /**
