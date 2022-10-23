@@ -36,6 +36,7 @@ textarea {
 
 #teamname {
   max-width: 600px;
+  transform: translateY(-46px);
 }
 
 input, input:focus, button {
@@ -60,7 +61,9 @@ input, input:focus, button {
 
 #suchfeld {
   height: 40px;
-  margin-bottom: -10px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 30%);
 }
 
 #name {
@@ -195,6 +198,7 @@ body {
   scrollbar-width: none;  /* Firefox */
   background-color:#0e0f18;
   color:#ddd;
+  margin: 0px;
 }
 
 .match-result { grid-area: a; }
@@ -522,8 +526,7 @@ li {
   height: 159px;
   overflow: hidden;
   left: 50%;
-  transform: translateX(-50%);
-  top: 20px;
+  transform: translate(-50%, -40%);
   display: grid;
   grid-template: "A A A A A";
   padding-top: 10px;
@@ -534,8 +537,7 @@ li {
   position: absolute;
   overflow: hidden;
   left: 50%;
-  transform: translateX(-50%);
-  top: 0;
+  transform: translate(-50%, -100px);
 }
 
 #champSelect {
@@ -582,4 +584,78 @@ li {
 
 .mastery-points {
   display: inline-flex;
+}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  float: left;
+  border: none;
+  font-size: 18px;
+  margin-right: 5px;
+  margin-left: 5px;
+}
+
+/* a {
+  display: block;
+  padding: 8px;
+  text-decoration: none;
+  color: #000;
+} */
+
+.clickable-logo {
+  width: 170px;
+  margin-right: -10px;
+}
+
+.header-nav-menu {
+  display: flex;
+  margin-bottom: 40px;
+
+}
+
+.nav-menu-link {
+  display: block;
+  padding: 8px;
+  text-decoration: none;
+  color: #000;
+  color: #fff;  
+}
+
+.misc-button {
+  height: 32px;
+  width: 100px;
+  transform: translateY(50%);
+  margin-right: 10px;
+  margin-left: 10px;
+  font-size: 16px;
+  line-height: 1em;
+  background-color: #565761;
+  color: #323236;
+}
+
+.settings-button {
+  transform: translateY(33%);
+  margin-right: 20px;
+  margin-left: 10px;
+  filter: brightness(0.5);
+}
+
+.select-language-button::after {
+  content: '\2B9F';
+}
+
+.misc-button-menu {
+  position: absolute;
+  display: flex;
+  right: 0px;
+  height: 64px;
+}
+
+header {
+  background-color: #141624;
 }
