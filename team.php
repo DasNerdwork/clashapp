@@ -78,13 +78,15 @@
         <div class="misc-button-menu">
             <div>
                 <button type="button" class="select-language-button misc-button">
-                    <span>English</span>
+                    <span id="language-selector">Deutsch</span>
                 </button>
             </div>
             <div class="login-register-button">
-                <button type="button" class="misc-button">
-                    <span>Login</span>
-                </button>
+                <a href="https://clash.dasnerdwork.net/login">
+                    <button type="button" class="misc-button">
+                        <span>Login</span>
+                    </button>
+                </a>
             </div>
             <div class="settings-button">
                 <img src="/clashapp/data/misc/settings-wheel.png" width="20" height="20"></img>
