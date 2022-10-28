@@ -142,6 +142,39 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       }
       // END OF CHAMPION LIST FILTERING
 
+      // GET TIME ZONE
+
+      let timezone = Intl.DateTimeFormat().resolvedOptions().locale;
+      if (timezone == "de" || timezone == "de-DE") {
+        document.getElementById("language-selector").innerHTML = "Deutsch";
+      } else {
+        document.getElementById("language-selector").innerHTML = "English";
+      }
+      // console.log("Users browser language: "+timezone)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       $(".ban-hoverer").click(function() {
         var name = this.parentElement.getElementsByTagName("span")[0].innerText;
         var id = this.parentElement.getElementsByTagName("img")[0].dataset.id;
