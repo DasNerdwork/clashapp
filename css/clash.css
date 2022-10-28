@@ -634,8 +634,9 @@ li {
   margin-left: 10px;
   font-size: 16px;
   line-height: 1em;
-  background-color: #565761;
-  color: #323236;
+  /* background-color: #565761;
+  color: #323236; */
+  cursor: pointer;
 }
 
 .settings-button {
