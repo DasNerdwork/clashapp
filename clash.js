@@ -420,3 +420,21 @@ function highlightLaneIcon(laneImg){
 function getChildIndex(node) {
   return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
 }
+
+function deleteAccount(status){
+  let button = document.getElementById("account-delete-button");
+  let cancel = document.getElementById("account-delete-cancel");
+  let confirm = document.getElementById("account-delete-confirm");
+  let form = document.getElementById("account-delete-form");
+  if(status){
+    button.style.display = "none";
+    cancel.style.display = "unset";
+    confirm.style.display = "unset";
+    form.style.display = "unset";
+  } else {
+    button.style.display = "unset";
+    cancel.style.display = "none";
+    confirm.style.display = "unset";
+    form.style.display = "none";
+  }
+}
