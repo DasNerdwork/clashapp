@@ -114,5 +114,42 @@ class DB {
             return array('status' => 'unknown', 'message' => 'Cannot find user in database. Please contact an administrator.');
         }
     }
+
+    public function delete_account($id, $username, $region, $email, $password) { // Accounts will be set to inactive for 48-72 hours and then automatically deleted by a mysql event
+        $check = $this->check_credentials($email, $password);
+        if($check['status'] == 'success'){time();
+            $sql = $this->db->prepare("UPDATE users SET deldate = ?, status = '0' WHERE id = ? AND username = ? AND region = ? AND email = ? AND (status = '1' OR status = '2')");
+            $sql->bind_param('issss', time(), $id, $username, $region, $email);
+            $sql->execute();
+            $result = $sql->affected_rows;
+
+            if($result > 0) {
+                return array('status' => 'success', 'message' => 'Account successfully deactivated! It will be deleted withing the next 48-72 hours.');
+            } else {
+                return array('status' => 'error', 'message' => 'Unable to delete account. Please contact an administrator.');
+            }
+        } else {
+            return array('status' => 'error', 'message' => 'Incorrect password. You can try again or reset your password.');
+        }
+    } 
+
+    /** MySQL Event that runs every 24 hours and deletes any deactivated account (status = 0) which has been deactivated more than 2 days ago (deldate < DATE_SUB(NOW(), INTERVAL 2 DAY))
+     *  ==> Accounts stay deactivated min. 48 hours - max. 72 hours
+     * 
+     * DELIMITER $$
+     * CREATE EVENT auto_delete_deactivated_accounts
+     *   ON SCHEDULE EVERY 24 HOUR
+     *   ON COMPLETION PRESERVE
+     *   DO BEGIN
+     *     DELETE FROM users WHERE status = "0" AND deldate < DATE_SUB(NOW(), INTERVAL 2 DAY);
+     *   END;
+     * $$;
+     * 
+     * Ex.
+     * | id | username    | region | email                | password                                                     | status | verifier | deldate    |
+     * | 29 | todelete3   | EUW    | test@test.test       | $2y$11$AYITaa2B8hT7Zis2YbLC7OKkY.f0ZPPI/NltJPoOTex7T3ty2qVei |      0 | NULL     | 1666718981 |
+     * 
+     * To restore an account: UPDATE users SET status = "1", deldate = NULL WHERE email = "test@test.test";
+     */
 }
 ?>
