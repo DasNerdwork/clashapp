@@ -1565,7 +1565,7 @@ function getTeamByTeamID($teamID){
 
     // Temporär change
 
-    // $teamOutput = file_get_contents('/hdd1/clashapp/misc/team.by-teamid.json');
+    $teamOutput = file_get_contents('/hdd1/clashapp/misc/team.by-teamid.json');
     
     // $teamOutput = file_get_contents('/hdd1/clashapp/misc/clashTeam2.json');
 

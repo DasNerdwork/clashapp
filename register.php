@@ -63,13 +63,14 @@ if (isset($_POST['submit'])) {
         echo '<div class="error"><strong>Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.</strong></div>'; 
     } else if(!(in_array($_POST['region'], array("EUW", "EUN", "NA", "KR", "BR", "JP", "RU", "OCE", "TR", "LAN", "LAS")))) {
         echo '<div class="error"><strong>The selected region is currently not supported.</strong></div>';
-    } else if($db->account_exists($_POST['email'])) {
+    } else if($db->account_exists($_POST['email'], $_POST['username'])) {
         echo '<div class="error"><strong>This account already exists. Have you forgotten your password?</strong></div>'; 
     } else {
         $options = [
             'cost' => 11,
         ];
-        $response = $db->create_account($_POST['username'], $_POST['region'], $_POST['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options), bin2hex(random_bytes(8)));
+        $verifier = bin2hex(random_bytes(8));
+        $response = $db->create_account($_POST['username'], $_POST['region'], $_POST['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options), $verifier);
         if ($response['status'] == 'success') {
             try {
                 //Server settings
@@ -78,18 +79,16 @@ if (isset($_POST['submit'])) {
                 $mail->Host       = 'smtp.gmail.com';                       //Set the SMTP server to send through
                 $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
                 $mail->Username   = 'dasnerdwork@gmail.com';                //SMTP username
-                $mail->Password   = 'ecvyvebwgplxxdsv';                     //SMTP password
+                $mail->Password   = 'omhuzidgbpvqrnfu';                     //SMTP password
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
                 $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
             
                 //Recipients
-                $mail->setFrom('no-reply@mail.dasnerdwork.net');
-                $mail->addAddress('watcherstudioz@gmail.com');              //Add a recipient
-                $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
-                $mail->addReplyTo('no-reply@mail.dasnerdwork.net');
-                echo "testitest0";
+                $mail->setFrom('dasnerdwork@gmail.com');
+                $mail->addAddress('dasnerdwork@gmail.com');              //Add a recipient
+                // $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
+                $mail->addReplyTo('no-reply@dasnerdwork.net');
                 // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
-                echo "test2";
         
                 //Attachments
                 // $mail->addAttachment('/var/tmp/file.tar.gz');            //Add attachments
@@ -97,11 +96,11 @@ if (isset($_POST['submit'])) {
         
                 //Content
                 $mail->isHTML(true);                                  //Set email format to HTML
-                $mail->Subject = 'Here is the subject';
-                $mail->Body    = 'This is the HTML message body <b>in bold!</b>';
-                $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
-                $mail->addCustomHeader('MIME-Version: 1.0');
-                $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
+                $mail->Subject = 'Activate your Account';
+                $mail->Body    = 'You can activate your account by visiting the following link: <b>https://clash.dasnerdwork.net/verify?account='.$verifier.'</b>';
+                // $mail->AltBody = 'You can activate your account by visiting the following link: https://clash.dasnerdwork.net/verify?account='.$verifier;
+                // $mail->addCustomHeader('MIME-Version: 1.0');
+                // $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
         
                 $result = $mail->Send();
         
@@ -149,19 +148,17 @@ if (isset($_POST["test"])) {
         $mail->isSMTP();                                            //Send using SMTP
         $mail->Host       = 'smtp.gmail.com';                       //Set the SMTP server to send through
         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-        $mail->Username   = 'dasnerdwork@gmail.com';                //SMTP username
-        $mail->Password   = 'ecvyvebwgplxxdsv';                     //SMTP password
+        $mail->Username   = 'no-reply@dasnerdwork.net';                //SMTP username
+        $mail->Password   = 'mddmldgvmaldqjlq';                     //SMTP password
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
         $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
     
         //Recipients
-        $mail->setFrom('no-reply@mail.dasnerdwork.net');
-        $mail->addAddress('watcherstudioz@gmail.com');              //Add a recipient
+        $mail->setFrom('no-reply@dasnerdwork.net');
+        $mail->addAddress('dasnerdwork@gmail.com');              //Add a recipient
         $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
-        $mail->addReplyTo('no-reply@mail.dasnerdwork.net');
-        echo "testitest0";
+        // $mail->addReplyTo('no-reply@mail.dasnerdwork.net');
         // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
-        echo "test2";
 
         //Attachments
         // $mail->addAttachment('/var/tmp/file.tar.gz');            //Add attachments
@@ -199,7 +196,7 @@ if (isset($_POST["test"])) {
         <strong><?php echo $error_message; ?></strong>
     </div>
 <?php } ?>
-<form method="post">
+<form method="post" autocomplete="off">
     <p>
         <label for="username">Summoner Name: </label>
         <input type="text" name="username" id="username" value="<?= $_POST["username"]?>" placeholder="Username" maxlength=16 required />
@@ -228,9 +225,9 @@ if (isset($_POST["test"])) {
         <label for="password">Password: </label>
         <input type="password" name="password" id="password" placeholder="Password" maxlength=20 required />
     </p>
-    <input type="submit" name="submit" value="Register" disabled/>
+    <input type="submit" name="submit" value="Register" />
 </form>
 
 <form method="post">
-    <input type="submit" name="test" value="Test Mail" disabled/>
+    <input type="submit" name="test" value="Test Mail" />
 </form>
