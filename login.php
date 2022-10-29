@@ -13,7 +13,7 @@ if (isset($_POST['submit'])) {
     $response = $db->check_credentials($_POST['mailorname'], $_POST['password']);
 
     if ($response['status'] == 'success') {
-        $_SESSION['user'] = array('id' => $response['id'], 'username' => $response['username']);
+        $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email']);
         header('Location: myaccount');
     }
  
