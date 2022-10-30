@@ -438,3 +438,34 @@ function deleteAccount(status){
     form.style.display = "none";
   }
 }
+
+function resetPassword(status){
+  let button = document.getElementById("reset-password-button");
+  let cancel = document.getElementById("reset-password-cancel");
+  let confirm = document.getElementById("reset-password-confirm");
+  let form = document.getElementById("reset-password-form");
+  if(status){
+    button.style.display = "none";
+    cancel.style.display = "unset";
+    confirm.style.display = "unset";
+    form.style.display = "unset";
+  } else {
+    button.style.display = "unset";
+    cancel.style.display = "none";
+    confirm.style.display = "unset";
+    form.style.display = "none";
+  }
+}
+
+function enablePWR(){
+  $('document').ready(function() {
+    let login = document.getElementById("login-button");
+    let pwrbutton = document.createElement("input");
+    pwrbutton.setAttribute("type", "submit");
+    pwrbutton.setAttribute("name", "reset");
+    pwrbutton.setAttribute("id", "reset-password-button");
+    pwrbutton.setAttribute("value", "Reset Password");
+    pwrbutton.style.marginLeft = "20px";
+    login.parentNode.insertBefore(pwrbutton, login.nextSibling);
+  });
+}

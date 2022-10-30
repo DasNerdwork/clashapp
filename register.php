@@ -2,7 +2,7 @@
 session_start();
  
 if (isset($_SESSION['user'])) {
-    header('Location: myaccount');
+    header('Location: settings');
 }
 
 require_once 'clash-db.php';
@@ -69,7 +69,7 @@ if (isset($_POST['submit'])) {
         $options = [
             'cost' => 11,
         ];
-        $verifier = bin2hex(random_bytes(8));
+        $verifier = bin2hex(random_bytes(5));
         $response = $db->create_account($_POST['username'], $_POST['region'], $_POST['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options), $verifier);
         if ($response['status'] == 'success') {
             try {
@@ -117,77 +117,77 @@ if (isset($_POST['submit'])) {
                 echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
             }
             $_SESSION['user'] = array('id' => $response['id'], 'username' => $_POST['username']);
-            header('Location: myaccount');
+            header('Location: settings');
         }
 
         $error_message = ($response['status'] == 'error') ? $response['message'] : '';
     }        
 }
 
-if (isset($_POST["test"])) {
+// if (isset($_POST["test"])) {
 
-    // $to      = "dasnerdwork@gmail.com";
-    // $subject = "the subject";
-    // $message = "hello";
-    // $headers = array(
-    //     "From" => "no-reply@mail.dasnerdwork.net",
-    //     "Reply-To" => "no-reply@mail.dasnerdwork.net",
-    //     "Return-Path" => "no-reply@mail.dasnerdwork.net",
-    //     "Organization" => "DasNerdwork.net",
-    //     "MIME-Version" => "1.0",
-    //     "Content-type" => "text/html; charset=iso-8859-1",
-    //     "X-Priority" => "3",
-    //     "X-Mailer" => "PHP/" . phpversion()
-    // );
+//     // $to      = "dasnerdwork@gmail.com";
+//     // $subject = "the subject";
+//     // $message = "hello";
+//     // $headers = array(
+//     //     "From" => "no-reply@mail.dasnerdwork.net",
+//     //     "Reply-To" => "no-reply@mail.dasnerdwork.net",
+//     //     "Return-Path" => "no-reply@mail.dasnerdwork.net",
+//     //     "Organization" => "DasNerdwork.net",
+//     //     "MIME-Version" => "1.0",
+//     //     "Content-type" => "text/html; charset=iso-8859-1",
+//     //     "X-Priority" => "3",
+//     //     "X-Mailer" => "PHP/" . phpversion()
+//     // );
     
-    //Create an instance; passing `true` enables exceptions
+//     //Create an instance; passing `true` enables exceptions
     
-    try {
-        //Server settings
-        $mail = new PHPMailer();
-        $mail->isSMTP();                                            //Send using SMTP
-        $mail->Host       = 'smtp.gmail.com';                       //Set the SMTP server to send through
-        $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-        $mail->Username   = 'no-reply@dasnerdwork.net';                //SMTP username
-        $mail->Password   = 'mddmldgvmaldqjlq';                     //SMTP password
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-        $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+//     try {
+//         //Server settings
+//         $mail = new PHPMailer();
+//         $mail->isSMTP();                                            //Send using SMTP
+//         $mail->Host       = 'smtp.gmail.com';                       //Set the SMTP server to send through
+//         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+//         $mail->Username   = 'no-reply@dasnerdwork.net';                //SMTP username
+//         $mail->Password   = 'mddmldgvmaldqjlq';                     //SMTP password
+//         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+//         $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
     
-        //Recipients
-        $mail->setFrom('no-reply@dasnerdwork.net');
-        $mail->addAddress('dasnerdwork@gmail.com');              //Add a recipient
-        $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
-        // $mail->addReplyTo('no-reply@mail.dasnerdwork.net');
-        // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+//         //Recipients
+//         $mail->setFrom('no-reply@dasnerdwork.net');
+//         $mail->addAddress('dasnerdwork@gmail.com');              //Add a recipient
+//         $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
+//         // $mail->addReplyTo('no-reply@mail.dasnerdwork.net');
+//         // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
 
-        //Attachments
-        // $mail->addAttachment('/var/tmp/file.tar.gz');            //Add attachments
-        // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');       //Optional name
+//         //Attachments
+//         // $mail->addAttachment('/var/tmp/file.tar.gz');            //Add attachments
+//         // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');       //Optional name
 
-        //Content
-        $mail->isHTML(true);                                  //Set email format to HTML
-        $mail->Subject = 'Here is the subject';
-        $mail->Body    = 'This is the HTML message body <b>in bold!</b>';
-        $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
-        $mail->addCustomHeader('MIME-Version: 1.0');
-        $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
+//         //Content
+//         $mail->isHTML(true);                                  //Set email format to HTML
+//         $mail->Subject = 'Here is the subject';
+//         $mail->Body    = 'This is the HTML message body <b>in bold!</b>';
+//         $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
+//         $mail->addCustomHeader('MIME-Version: 1.0');
+//         $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
 
-        $result = $mail->Send();
+//         $result = $mail->Send();
 
-        if(!$result) {
-            // There was an error
-            // Do some error handling things here
-            echo "nix Email";
+//         if(!$result) {
+//             // There was an error
+//             // Do some error handling things here
+//             echo "nix Email";
 
-        } else {
-            echo "Email successful";
-        }
-        echo 'Message has been sent';
-    } catch (Exception $e) {
-        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-    }
-    echo "test2";
-}
+//         } else {
+//             echo "Email successful";
+//         }
+//         echo 'Message has been sent';
+//     } catch (Exception $e) {
+//         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+//     }
+//     echo "test2";
+// }
 
 ?>
  
@@ -226,8 +226,9 @@ if (isset($_POST["test"])) {
         <input type="password" name="password" id="password" placeholder="Password" maxlength=20 required />
     </p>
     <input type="submit" name="submit" value="Register" />
+    or <a href="/login">Login
 </form>
 
-<form method="post">
+<!-- <form method="post">
     <input type="submit" name="test" value="Test Mail" />
-</form>
+</form> -->
