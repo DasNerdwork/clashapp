@@ -85,9 +85,9 @@ if (isset($_POST['submit'])) {
             
                 //Recipients
                 $mail->setFrom('dasnerdwork@gmail.com');
-                $mail->addAddress('dasnerdwork@gmail.com');              //Add a recipient
+                $mail->addAddress($_POST['email']);              //Add a recipient
                 // $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
-                $mail->addReplyTo('no-reply@dasnerdwork.net');
+                // $mail->addReplyTo('no-reply@dasnerdwork.net');
                 // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
         
                 //Attachments
