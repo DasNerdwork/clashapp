@@ -439,6 +439,42 @@ function deleteAccount(status){
   }
 }
 
+function connectAccount(status){
+  let button = document.getElementById("connect-account-button");
+  let cancel = document.getElementById("connect-account-cancel");
+  let confirm = document.getElementById("connect-account-confirm");
+  let form = document.getElementById("connect-account-form");
+  if(status){
+    button.style.display = "none";
+    cancel.style.display = "unset";
+    confirm.style.display = "unset";
+    form.style.display = "unset";
+  } else {
+    button.style.display = "unset";
+    cancel.style.display = "none";
+    confirm.style.display = "unset";
+    form.style.display = "none";
+  }
+}
+
+function disconnectAccount(status){
+  let button = document.getElementById("disconnect-account-button");
+  let cancel = document.getElementById("disconnect-account-cancel");
+  let confirm = document.getElementById("disconnect-account-confirm");
+  let form = document.getElementById("disconnect-account-form");
+  if(status){
+    button.style.display = "none";
+    cancel.style.display = "unset";
+    confirm.style.display = "unset";
+    form.style.display = "unset";
+  } else {
+    button.style.display = "unset";
+    cancel.style.display = "none";
+    confirm.style.display = "unset";
+    form.style.display = "none";
+  }
+}
+
 function resetPassword(status){
   let button = document.getElementById("reset-password-button");
   let cancel = document.getElementById("reset-password-cancel");
