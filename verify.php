@@ -2,7 +2,7 @@
 session_start();
  
 if (isset($_SESSION['user'])) {
-    header('Location: myaccount');
+    header('Location: settings');
 }
 
 require_once 'clash-db.php';

@@ -868,6 +868,25 @@ function runeIconFetcher($id){
     }
 }
 
+/** Returning random icon ID between 1 - 28 except for the current given icon ID
+ *
+ * @param int $currentIconID The passed icon ID corresponding to a user
+ * @var int $randomIconID The randomly selected icon ID between 1 - 28
+ *
+ * Returnvalue:
+ * @return int $randomIconID
+ */
+function getRandomIcon($currentIconID){
+    if($currentIconID >= 1 || $currentIconID <= 28){
+        do {
+            $randomIconID = rand(1,28);
+        } while($currentIconID == $randomIconID);
+    } else {
+        $randomIconID = rand(1,28);
+    }
+    return $randomIconID;
+}
+
 /** Summoner spell icon ID to image path
  * This function iterates through the current patches summoner.json and returns the folder of the summoner icons
  *

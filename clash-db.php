@@ -22,9 +22,9 @@ class DB {
   
     public function check_credentials($mailorname = '', $password = '') {
         if(str_contains($mailorname, '@')){
-            $sql = $this->db->prepare("SELECT id, region, username, email, password, status FROM users WHERE email = ?");
+            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, sumid FROM users WHERE email = ?");
         } else {
-            $sql = $this->db->prepare("SELECT id, region, username, email, password, status FROM users WHERE username = ?");
+            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, sumid FROM users WHERE username = ?");
         }
         $sql->bind_param('s', $mailorname);
         $sql->execute();
@@ -36,7 +36,7 @@ class DB {
  
             if ($row['status'] == '1' || $row['status'] == '2') {
                 if (password_verify($password, $row['password'])) {
-                    return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email']);
+                    return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'sumid' => $row['sumid']);
                 }
                 return array('status' => 'error', 'message' => 'Email or password is invalid.'); // The Password decrypt was unsuccessful
             }
@@ -53,6 +53,32 @@ class DB {
         $result = $sql->get_result();
 
         if($result->num_rows) {
+            return true;
+        } else {
+            return false;
+        }
+    } 
+
+    public function connect_account($username = '', $sumid) {
+        $sql = $this->db->prepare("UPDATE users SET sumid = ? WHERE username = ?");
+        $sql->bind_param('ss', $sumid, $username);
+        $sql->execute();
+        $result = $sql->affected_rows;
+
+        if($result > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    } 
+
+    public function disconnect_account($username = '', $sumid) {
+        $sql = $this->db->prepare("UPDATE users SET sumid = NULL WHERE username = ? AND sumid = ?");
+        $sql->bind_param('ss', $username, $sumid);
+        $sql->execute();
+        $result = $sql->affected_rows;
+
+        if($result > 0) {
             return true;
         } else {
             return false;
@@ -87,6 +113,24 @@ class DB {
             return array('status' => 'success', 'message' => 'Account successfully verified! You may now <a href="/login">login</a>.');
         } else {
             return array('status' => 'error', 'message' => 'Unable to verify account.');
+        }
+    } 
+
+    public function get_sumid($mailorname = '') {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("SELECT sumid FROM users WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("SELECT sumid FROM users WHERE username = ?");
+        }
+        $sql->bind_param('s', $mailorname);
+        $sql->execute();
+        $result = $sql->get_result();
+        
+        if($result->num_rows) {
+            $row = $result->fetch_assoc();
+            return array('status' => 'success', 'sumid' => $row['sumid']);
+        } else {
+            return array('status' => 'error', 'sumid' => NULL);
         }
     } 
 

@@ -2,7 +2,7 @@
 session_start();
  
 if (isset($_SESSION['user'])) {
-    header('Location: settings');
+    header('Location: /');
 }
 
 require_once 'clash-db.php';
@@ -22,8 +22,8 @@ if (isset($_POST['submit'])) {
     $response = $db->check_credentials($_POST['mailorname'], $_POST['password']);
 
     if ($response['status'] == 'success') {
-        $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email']);
-        header('Location: settings');
+        $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email'], 'sumid' => $response['sumid']);
+        header('Location: /');
     }
  
     $error_message = ($response['status'] == 'error') ? $response['message'] : '';
