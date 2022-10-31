@@ -640,10 +640,28 @@ li {
 }
 
 .settings-button {
-  transform: translateY(33%);
+  transform: translateY(34%);
   margin-right: 20px;
   margin-left: 10px;
-  filter: brightness(0.5);
+  /* filter: brightness(0.5); */
+}
+
+.profile-button {
+  transform: translate(-10%, 25%);
+}
+
+.profile-link {
+  color: #ddd;
+  text-decoration: none;
+}
+
+.profile-link-text:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.profile-link-text:active {
+  color: #ddd;
 }
 
 .select-language-button::after {
