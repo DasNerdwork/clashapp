@@ -72,6 +72,33 @@ class DB {
         }
     } 
 
+    public function set_stay_code($username = '', $staycode) {
+        $sql = $this->db->prepare("UPDATE users SET staycode = ? WHERE username = ?");
+        $sql->bind_param('ss', $staycode, $username);
+        $sql->execute();
+        $result = $sql->affected_rows;
+
+        if($result > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function get_data_via_stay_code($staycode) {
+        $sql = $this->db->prepare("SELECT id, region, username, email, sumid FROM users WHERE staycode = ?");
+        $sql->bind_param('s', $staycode);
+        $sql->execute();
+        $result = $sql->get_result();
+        
+        if($result->num_rows) {
+            $row = $result->fetch_assoc();
+            return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'sumid' => $row['sumid']);
+        } else {
+            return array('status' => 'error');
+        }
+    } 
+
     public function disconnect_account($username = '', $sumid) {
         $sql = $this->db->prepare("UPDATE users SET sumid = NULL WHERE username = ? AND sumid = ?");
         $sql->bind_param('ss', $username, $sumid);
@@ -92,7 +119,7 @@ class DB {
         $result = $sql->get_result();
 
         if(is_numeric($sql->insert_id)){
-            return array('status' => 'success', 'message' => 'Account successfully created!', 'id' => $sql->insert_id);
+            return array('status' => 'success', 'message' => 'Account successfully created!', 'id' => $sql->insert_id, 'region' => $region, 'username' => $username, 'email' => $email);
         }else{
             return array('status' => 'error', 'message' => 'Unable to create account.');
         }

@@ -76,51 +76,11 @@ if (isset($_POST['dcpassword'])) {
     }
 }
 
+include('head.php');
+setCodeHeader('Settings', true, true);
+include('header.php');
 ?>
-<head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<!-- <link rel="stylesheet" href="/clashapp/clash.css"> -->
-<script type="text/javascript" src="../clashapp/clash.js"></script>
-<style>
-.lds-ring {
-  vertical-align: middle;
-  display: inline-block;
-  position: relative;
-  width: 20px;
-  height: 20px;
-  visibility: hidden;
-}
-.lds-ring div {
-  box-sizing: border-box;
-  display: block;
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  margin: 2px;
-  border: 2px solid #000;
-  border-radius: 50%;
-  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-  border-color: #000 transparent transparent transparent;
-}
-.lds-ring div:nth-child(1) {
-  animation-delay: -0.45s;
-}
-.lds-ring div:nth-child(2) {
-  animation-delay: -0.3s;
-}
-.lds-ring div:nth-child(3) {
-  animation-delay: -0.15s;
-}
-@keyframes lds-ring {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-</style>
-</head>
+
 <?php if (!empty($account_status_message)) { ?>
 <div class="account_status">
     <strong><?php echo $account_status_message; ?></strong>
@@ -221,3 +181,7 @@ if (isset($_POST['dcpassword'])) {
         <button type="button" id="account-delete-cancel" style="display: none;" onclick="deleteAccount(false);">Cancel</button></p>
     </form>
 </div>
+
+<?php 
+include('footer.php');
+?>

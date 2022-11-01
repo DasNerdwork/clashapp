@@ -10,11 +10,16 @@ require_once 'clash-db.php';
 $return_message = '';
 
 if (isset($_GET["code"])) {
+    include('head.php');
+    setCodeHeader('Reset Password', true, true);
+    include('header.php');
+
     $db = new DB();
     $response = $db->check_reset_code($_GET["code"]);
     $return_message = $response['message'];
 
     if ($response['status'] == 'success') {
+        
 
     if (!empty($return_message)) { ?>
         <div class="error">
@@ -61,6 +66,6 @@ if (isset($_POST['submit'])) {
         }
     }
 }
-
+include('footer.php');
 ?>
  
