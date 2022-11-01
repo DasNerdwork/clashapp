@@ -20,7 +20,6 @@ $db = new DB();
 // $response = $db->account_exists("john.doe@example.com");
 
 if (isset($_POST['submit'])) {
-
     // Validate password strength & league username regex
     $uppercase = preg_match('@[A-Z]@', $_POST['password']);
     $lowercase = preg_match('@[a-z]@', $_POST['password']);
@@ -54,24 +53,33 @@ if (isset($_POST['submit'])) {
     .'\x{FFCA}-\x{FFCF}\x{FFD2}-\x{FFD7}\x{FFDA}-\x{FFDC}]+$/u', $_POST['username']);
 
     if (strlen($_POST['username']) > 16 || strlen($_POST['username']) < 3) { // Correct Summoner Name Length
-        echo '<div class="error"><strong>Summoner Names have to be between 3 and 16 characters long.</strong></div>';
+        $error_message = 'Summoner Names have to be between 3 and 16 characters long.';
     } else if(!$validName) { // Correct Summoner Name Format & Characters
-        echo '<div class="error"><strong>Summoner Name incorrect: Allowed characters are a-Z, 0-9 and alphabets of other languages.</strong></div>';
+        $error_message = 'Summoner Name incorrect: Allowed characters are a-Z, 0-9 and alphabets of other languages.';
     } else if(!(filter_var($_POST['email'], FILTER_VALIDATE_EMAIL))) { // Correct mail format
-        echo '<div class="error"><strong>Could not validate E-Mail.</strong></div>';
+        $error_message = 'Could not validate E-Mail.';
+    } else if($_POST['password'] !== $_POST['confirm-password']) {
+        $error_message = 'Passwords do not match.';
     } else if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($_POST['password']) < 8 || strlen($_POST['password']) > 32) { // The Password meets current regex settings above
-        echo '<div class="error"><strong>Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.</strong></div>'; 
+        $error_message = 'Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.'; 
     } else if(!(in_array($_POST['region'], array("EUW", "EUN", "NA", "KR", "BR", "JP", "RU", "OCE", "TR", "LAN", "LAS")))) {
-        echo '<div class="error"><strong>The selected region is currently not supported.</strong></div>';
+        $error_message = 'The selected region is currently not supported.';
     } else if($db->account_exists($_POST['email'], $_POST['username'])) {
-        echo '<div class="error"><strong>This account already exists. Have you forgotten your password?</strong></div>'; 
+        $error_message = 'This account already exists. Have you forgotten your password?'; 
     } else {
         $options = [
             'cost' => 11,
         ];
         $verifier = bin2hex(random_bytes(5));
         $response = $db->create_account($_POST['username'], $_POST['region'], $_POST['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options), $verifier);
+        $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email']);
         if ($response['status'] == 'success') {
+            if(isset($_POST['stay-logged-in'])) {
+                $stayCode = bin2hex(random_bytes(5));
+                if($db->set_stay_code($_SESSION['user']['email'], $stayCode)){
+                    setcookie("stay-logged-in", $stayCode, time() + (86400 * 30), "/"); // 86400 = 1 day | Set cookie for 30 days
+                }
+            }
             try {
                 //Server settings
                 $mail = new PHPMailer();
@@ -106,15 +114,12 @@ if (isset($_POST['submit'])) {
         
                 if(!$result) {
                     // There was an error
-                    // Do some error handling things here
-                    echo "nix Email";
-        
+                    // Do some error handling things here        
                 } else {
-                    echo "Email successful";
+                    $error_message = 'Password reset mail successfully sent.';
                 }
-                echo 'Message has been sent';
             } catch (Exception $e) {
-                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
             }
             $_SESSION['user'] = array('id' => $response['id'], 'username' => $_POST['username']);
             header('Location: settings');
@@ -189,6 +194,9 @@ if (isset($_POST['submit'])) {
 //     echo "test2";
 // }
 
+include('head.php');
+setCodeHeader('Register', true, true);
+include('header.php');
 ?>
  
 <?php if (!empty($error_message)) { ?>
@@ -196,39 +204,41 @@ if (isset($_POST['submit'])) {
         <strong><?php echo $error_message; ?></strong>
     </div>
 <?php } ?>
-<form method="post" autocomplete="off">
-    <p>
-        <label for="username">Summoner Name: </label>
-        <input type="text" name="username" id="username" value="<?= $_POST["username"]?>" placeholder="Username" maxlength=16 required />
-    </p>
-    <p>
-        <label for="region">Region: </label>
-        <select name="region" id="region" placeholder="Europe West" required>
-            <option <?php if ($_POST['region'] == 'EUW') { ?>selected="true" <?php }; ?>value="EUW">Europe West</option>
-            <option <?php if ($_POST['region'] == 'EUN') { ?>selected="true" <?php }; ?>value="EUN">Europe Nordic & East</option>
-            <option <?php if ($_POST['region'] == 'NA') { ?>selected="true" <?php }; ?>value="NA">North America</option>
-            <option <?php if ($_POST['region'] == 'KR') { ?>selected="true" <?php }; ?>value="KR">Korea</option>
-            <option <?php if ($_POST['region'] == 'BR') { ?>selected="true" <?php }; ?>value="BR">Brazil</option>
-            <option <?php if ($_POST['region'] == 'JP') { ?>selected="true" <?php }; ?>value="JP">Japan</option>
-            <option <?php if ($_POST['region'] == 'RU') { ?>selected="true" <?php }; ?>value="RU">Russia</option>
-            <option <?php if ($_POST['region'] == 'OCE') { ?>selected="true" <?php }; ?>value="OCE">Oceania</option>
-            <option <?php if ($_POST['region'] == 'TR') { ?>selected="true" <?php }; ?>value="TR">Turkey</option>
-            <option <?php if ($_POST['region'] == 'LAN') { ?>selected="true" <?php }; ?>value="LAN">Latin America North</option>
-            <option <?php if ($_POST['region'] == 'LAS') { ?>selected="true" <?php }; ?>value="LAS">Latin America South</option>
-        </select>
-    </p>
-    <p>
-        <label for="email">Email: </label>
-        <input type="email" name="email" id="email" value="<?= $_POST["email"] ?>" placeholder="mail@example.com" required />
-    </p>
-    <p>
-        <label for="password">Password: </label>
-        <input type="password" name="password" id="password" placeholder="Password" maxlength=20 required />
-    </p>
-    <input type="submit" name="submit" value="Register" />
-    or <a href="/login">Login
-</form>
-
+<div class="outer-form">
+    <form method="post" autocomplete="off" class="clash-form">
+        <div class="clash-form-title">Register your account</div>
+        <div><label for="username">Username: </label></div>
+        <div><input type="text" name="username" id="username" value="<?= $_POST["username"]?>" placeholder="Username" maxlength=16 required /></div>
+        <div><label for="region">Region: </label></div>
+        <div><select name="region" id="region" placeholder="Europe West" required>
+                <option <?php if ($_POST['region'] == 'EUW') { ?>selected="true" <?php }; ?>value="EUW">Europe West</option>
+                <option <?php if ($_POST['region'] == 'EUN') { ?>selected="true" <?php }; ?>value="EUN">Europe Nordic & East</option>
+                <option <?php if ($_POST['region'] == 'NA') { ?>selected="true" <?php }; ?>value="NA">North America</option>
+                <option <?php if ($_POST['region'] == 'KR') { ?>selected="true" <?php }; ?>value="KR">Korea</option>
+                <option <?php if ($_POST['region'] == 'BR') { ?>selected="true" <?php }; ?>value="BR">Brazil</option>
+                <option <?php if ($_POST['region'] == 'JP') { ?>selected="true" <?php }; ?>value="JP">Japan</option>
+                <option <?php if ($_POST['region'] == 'RU') { ?>selected="true" <?php }; ?>value="RU">Russia</option>
+                <option <?php if ($_POST['region'] == 'OCE') { ?>selected="true" <?php }; ?>value="OCE">Oceania</option>
+                <option <?php if ($_POST['region'] == 'TR') { ?>selected="true" <?php }; ?>value="TR">Turkey</option>
+                <option <?php if ($_POST['region'] == 'LAN') { ?>selected="true" <?php }; ?>value="LAN">Latin America North</option>
+                <option <?php if ($_POST['region'] == 'LAS') { ?>selected="true" <?php }; ?>value="LAS">Latin America South</option>
+            </select>
+        </div>
+        <div><label for="email">Email: </label></div>
+        <div><input type="email" name="email" id="email" value="<?= $_POST["email"] ?>" placeholder="mail@example.com" required /></div>
+        <div><label for="password">Password:</label></div>
+        <div><input type="password" name="password" id="password" placeholder="Password" maxlength=32 required /></div>
+        <div><input type="password" name="confirm-password" id="confirm-password" placeholder="Confirm Password" maxlength=32 required /></div>
+        <div><input type="checkbox" id="stay-logged-in" name="stay-logged-in">
+        <label for="stay-logged-in"> Stay logged in for a month</label></div>
+        <div><input type="submit" name="submit" value="Register" /></div>
+        <div>Already have an account? <a href="/login">Login</a>.</div>
+    </form>
+</div>
 <!-- <form method="post">
     <input type="submit" name="test" value="Test Mail" />
 </form> -->
+
+<?php 
+include('footer.php');
+?>

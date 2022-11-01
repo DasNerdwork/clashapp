@@ -28,10 +28,18 @@ textarea {
  font-family:'Montserrat',sans-serif;
 }
 
+body, html {
+  min-height: 100%;
+}
+
 .full-footer {
   /* position: fixed; */
   bottom: 10px;
   width: 100%;
+}
+
+.wrapper {
+  min-height: calc(100vh - 90px);
 }
 
 #teamname {
@@ -655,12 +663,16 @@ li {
   text-decoration: none;
 }
 
-.profile-link-text:hover {
+.clash-form a {
+  color: #bbb;
+}
+ /* LINK COLORING */
+.profile-link-text:hover, .clash-form a:hover {
   color: #fff;
   text-decoration: underline;
 }
 
-.profile-link-text:active {
+.profile-link-text:active, .clash-form a:active{
   color: #ddd;
 }
 
@@ -678,3 +690,111 @@ li {
 header {
   background-color: #141624;
 }
+
+.lds-ring {
+  vertical-align: middle;
+  display: inline-block;
+  position: relative;
+  width: 20px;
+  height: 20px;
+  visibility: hidden;
+}
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  border: 2px solid #000;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #000 transparent transparent transparent;
+}
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+
+/* CLASH FORMS */
+
+.outer-form {
+  position: fixed;
+  top: 50%;
+  transform: translate(50%, -50%);
+  right: 50%;
+  justify-content: center;
+  border-radius: 6px;
+}
+
+.clash-form-title {
+  margin-bottom: 1em;
+  font-size: 20px;
+}
+
+.clash-form {
+  padding: 42px 48px;
+  height: fit-content;
+  width: fit-content;
+  background-color: #141624;
+  box-sizing: border-box;
+}
+
+.login-form {
+  margin-bottom: 170px;
+}
+
+.clash-form input:not([type="checkbox"]), .clash-form select {
+  margin-top: 4px;
+  margin-bottom: 1em;
+  height: 32px;
+  font-size: 16px;
+  width: 350px;
+}
+
+.clash-form select, .clash-form select:active {
+  border: 0;
+  outline: 0px;
+}
+
+.clash-form input[type="checkbox"] {
+  vertical-align: text-top;
+  margin-bottom: 1em;
+}
+
+.clash-form input[type="submit"] {
+  background-color: #035203;
+  color: #fff;
+}
+
+#confirm-password {
+  margin-top: 0;
+}
+
+.clash-form label {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.error {
+  background-color: rgba(255, 0, 0, 25%);
+  margin-bottom: 1em;
+  line-height: 3em;
+  text-align: center;
+  transform: translateY(-40px);
+}
+
