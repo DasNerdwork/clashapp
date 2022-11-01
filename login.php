@@ -18,6 +18,12 @@ $error_message = '';
 $db = new DB();
 
 if (isset($_POST['submit'])) {
+    if(isset($_POST['stay-logged-in'])) {
+        $stayCode = bin2hex(random_bytes(5));
+        if($db->set_stay_code($_POST['mailorname'], $stayCode)){
+            setcookie("stay-logged-in", $stayCode, time() + (86400 * 30), "/"); // 86400 = 1 day | Set cookie for 30 days
+        }
+    }
     
     $response = $db->check_credentials($_POST['mailorname'], $_POST['password']);
 
@@ -92,26 +98,30 @@ if (isset($_GET['password'])) {
     echo "Password successfully reset! You may now login with your new credentials.";
 }
 
+include('head.php');
+setCodeHeader('Login', true, true);
+include('header.php');
 ?>
-<head>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-<!-- <link rel="stylesheet" href="/clashapp/clash.css"> -->
-<script type="text/javascript" src="../clashapp/clash.js"></script>
-</head>
+
 <?php if (!empty($error_message)) { ?>
     <div class="error">
         <strong><?php echo $error_message; ?></strong>
     </div>
 <?php } ?>
-<form method="post">
-    <p>
-        <label for="mailorname">Email/Username: </label>
-        <input type="text" name="mailorname" id="mailorname" placeholder="Enter Email or Username" required />
-    </p>
-    <p>
-        <label for="password">Password: </label>
-        <input type="password" name="password" id="password" placeholder="Enter Password" required />
-    </p>
-    <input type="submit" name="submit" id="login-button" value="Login" />
-    or <a href="/register">Register
-</form>
+<div class="outer-form">
+    <form method="post" class="clash-form login-form">
+        <div class="clash-form-title">Login to your account</div>
+        <div><label for="mailorname">Email/Username: </label></div>
+        <div><input type="text" name="mailorname" id="mailorname" placeholder="Enter Email or Username" required /></div>
+        <div><label for="password">Password: </label></div>
+        <div><input type="password" name="password" id="password" placeholder="Enter Password" required /></div>
+        <div><input type="checkbox" id="stay-logged-in" name="stay-logged-in">
+        <label for="stay-logged-in"> Stay logged in for a month</label></div>
+        <div><input type="submit" name="submit" id="login-button" value="Login" /></div>
+        <div>Don't have an account yet? <a href="/register">Register</a>.</div>
+    </form>
+</div>
+
+<?php 
+include('footer.php');
+?>
