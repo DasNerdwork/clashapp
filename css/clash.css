@@ -752,18 +752,54 @@ header {
   width: fit-content;
   background-color: #141624;
   box-sizing: border-box;
+  max-width: 450px;
+  text-align: center;
 }
 
 .login-form {
   margin-bottom: 170px;
 }
 
-.clash-form input:not([type="checkbox"]), .clash-form select {
+.clash-form input:not([type="checkbox"]), .clash-form select, .clash-form button {
   margin-top: 4px;
   margin-bottom: 1em;
   height: 32px;
   font-size: 16px;
+  width: 250px;
+  text-align: center;
+  background-color: #2a2d40;
+  color: #fff;
+}
+
+.clash-form input[type="text"], .clash-form input[type="password"], textarea {
+  /* margin-top: 4px;
+  margin-bottom: 1em;
+  height: 32px;
+  font-size: 16px; */
   width: 350px;
+  text-align: left;
+  background-color: #0e0f18;
+  color: #fff;
+}
+
+.clash-form input::placeholder {
+  color: #353950;
+}
+
+.clash-form label {
+  text-align: left;
+}
+
+.clash-form .small-button {
+  margin-top: 4px;
+  margin-bottom: 1em;
+  height: 32px;
+  font-size: 16px;
+  width: 100px;
+  float: right;
+  margin-left: 8px;
+  background-color: #2a2d40;
+  color: #fff;
 }
 
 .clash-form select, .clash-form select:active {
@@ -777,7 +813,80 @@ header {
 }
 
 .clash-form input[type="submit"] {
-  background-color: #035203;
+  background-color: #27358b;
+  color: #fff;
+}
+
+.clash-form button[type="submit"] {
+  background-color: #27358b;
+  color: #fff;
+}
+
+.clash-form .account-link {
+  text-align: center;
+  margin: 1em 0;
+}
+
+.clash-form li {
+    color: #fff;
+    cursor: unset;
+    padding: 0px 0px 0px 10px;
+    font-size: 12px;
+    margin: 6px;
+    text-align: left;
+    float: none;
+}
+
+.clash-form .descriptive-text {
+  font-size: 14px;
+  text-align: justify;
+  line-height: 1.5em;
+  display: block;
+}
+
+.clash-form .account-desc {
+  margin-bottom: 1em;
+}
+
+.clash-form small {
+  color: #353950;
+}
+
+#reset-password-description, #unlink-account-title, #unlink-account-desc , #link-account-title, #link-account-desc {
+  display: none;
+}
+
+#connect-account-form {
+  margin-top: 10px;
+}
+
+#unlink-account-desc {
+  margin-top: -1em;
+}
+
+#connect-account-area {
+  border-top: 2px dashed #21222c;
+  border-bottom: 2px dashed #21222c;
+  padding: 1em 0px 0px 0px;
+  margin-bottom: 2em;
+}
+
+#reset-password-cancel, #disconnect-account-cancel, #connect-account-cancel{
+  float: left;
+  margin-left: unset;
+}
+
+.clash-form ul {
+  list-style-type: "\27A4";
+  padding: 0px 0px 10px 6px;
+}
+
+.clash-form .lower-dcform {
+  margin-top: 18px;
+}
+
+#account-delete-button {
+  background-color: #560909;
   color: #fff;
 }
 
@@ -785,9 +894,19 @@ header {
   margin-top: 0;
 }
 
+#weird-fix {
+  height: 50px;
+}
+
+
+.clash-form #un-link-account-area {
+  margin-bottom: 1em;
+}
+
 .clash-form label {
   font-size: 12px;
   font-weight: bold;
+  display: block;
 }
 
 .error {
@@ -798,3 +917,27 @@ header {
   transform: translateY(-40px);
 }
 
+.account_status {
+  background-color: rgba(0, 255, 0, 25%);
+  margin-bottom: 1em;
+  line-height: 3em;
+  text-align: center;
+  transform: translateY(-40px);
+}
+
+.flow-root {
+  display: flow-root;
+  width: 350px;
+}
+
+.clash-form input:-webkit-autofill {
+  box-shadow: 0 0 0 50px #0e0f18 inset;
+  -webkit-box-shadow: 0 0 0 50px #0e0f18 inset; /* Change the color to your own background color */
+  -webkit-text-fill-color: #fff;
+}
+
+.clash-form input:-webkit-autofill:focus {
+  box-shadow: 0 0 0 50px #0e0f18 inset;
+  -webkit-box-shadow: 0 0 0 50px #0e0f18 inset;
+  -webkit-text-fill-color: #fff;
+}

@@ -472,16 +472,29 @@ function connectAccount(status){
   let cancel = document.getElementById("connect-account-cancel");
   let confirm = document.getElementById("connect-account-confirm");
   let form = document.getElementById("connect-account-form");
+  let title = document.getElementById("link-account-title");
+  let desc = document.getElementById("link-account-desc");
+  let area = document.getElementById("un-link-account-area");
   if(status){
     button.style.display = "none";
     cancel.style.display = "unset";
     confirm.style.display = "unset";
-    form.style.display = "unset";
+    form.style.display = "block";
+    title.style.display = "block";
+    desc.style.display = "block";
+    area.style.borderTop = "2px dashed #21222c";
+    area.style.borderBottom = "2px dashed #21222c";
+    area.style.padding = "10px 0px 0px 0px";
   } else {
     button.style.display = "unset";
     cancel.style.display = "none";
-    confirm.style.display = "unset";
+    confirm.style.display = "none";
     form.style.display = "none";
+    title.style.display = "none";
+    desc.style.display = "none";
+    area.style.borderTop = "none";
+    area.style.borderBottom = "none";
+    area.style.padding = "none";
   }
 }
 
@@ -490,16 +503,29 @@ function disconnectAccount(status){
   let cancel = document.getElementById("disconnect-account-cancel");
   let confirm = document.getElementById("disconnect-account-confirm");
   let form = document.getElementById("disconnect-account-form");
+  let area = document.getElementById("un-link-account-area");
+  let title = document.getElementById("unlink-account-title");
+  let desc = document.getElementById("unlink-account-desc");
   if(status){
     button.style.display = "none";
     cancel.style.display = "unset";
     confirm.style.display = "unset";
     form.style.display = "unset";
+    area.style.borderTop = "2px dashed #21222c";
+    area.style.borderBottom = "2px dashed #21222c";
+    area.style.padding = "10px 0px 0px 0px";
+    title.style.display = "block";
+    desc.style.display = "block";
   } else {
     button.style.display = "unset";
     cancel.style.display = "none";
     confirm.style.display = "unset";
     form.style.display = "none";
+    area.style.borderTop = "none";
+    area.style.borderBottom = "none";
+    area.style.padding = "none";
+    title.style.display = "none";
+    desc.style.display = "none";
   }
 }
 
@@ -508,16 +534,27 @@ function resetPassword(status){
   let cancel = document.getElementById("reset-password-cancel");
   let confirm = document.getElementById("reset-password-confirm");
   let form = document.getElementById("reset-password-form");
+  let desc = document.getElementById("reset-password-description");
+  let area = document.getElementById("reset-password-area");
+  let lower = document.getElementById("lower-dcform");
   if(status){
     button.style.display = "none";
     cancel.style.display = "unset";
     confirm.style.display = "unset";
     form.style.display = "unset";
+    desc.style.display = "unset";
+    area.style.borderTop = "2px dashed #21222c";
+    area.style.borderBottom = "2px dashed #21222c";
+    area.style.padding = "10px 0px 0px 0px";
   } else {
     button.style.display = "unset";
     cancel.style.display = "none";
-    confirm.style.display = "unset";
+    confirm.style.display = "none";
     form.style.display = "none";
+    desc.style.display = "none";
+    area.style.borderTop = "none";
+    area.style.borderBottom = "none";
+    area.style.padding = "none";
   }
 }
 
