@@ -69,10 +69,10 @@ if (isset($_POST['dcpassword'])) {
             unset($_SESSION['user']["sumid"]);
             Header('Location: '.$_SERVER['PHP_SELF'].'?verified=false');
         } else {
-            $account_status_message = "Unable to locally disconnected accounts. Please reach out to an administrator.";
+            $error_message = "Unable to locally disconnected accounts. Please reach out to an administrator.";
         }
     } else {
-        $account_status_message = 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.';
+        $error_message = 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.';
     }
 }
 
@@ -85,101 +85,128 @@ include('header.php');
 <div class="account_status">
     <strong><?php echo $account_status_message; ?></strong>
 </div>
+<?php } else if (!empty($error_message)) { ?>
+<div class="error">
+    <strong><?php echo $error_message; ?></strong>
+</div>
 <?php } ?>
-<strong><?php echo 'Welcome, '. $_SESSION['user']['username']; ?></strong>
-<div>
-    <p><input type="button" onclick="location.href='/logout';" value="Log Out"></button></p>
-</div>
-<div>
-    <button id="reset-password-button" onclick="resetPassword(true);">Reset Password</button>
-    <form method="post" id="reset-password-form" style="display: none;">
-        <p><label for="password">Password: </label></p>
-        <p><input type="password" name="current-password" id="current-password" placeholder="Current Password" required /></p>
-        <p><input type="password" name="new-password" id="new-password" placeholder="New Password" required /></p>
-        <p><input type="password" name="confirm-new-password" id="confirm-new-password" placeholder="Confirm Password" required /></p>
-        <p><button type="submit" id="reset-password-confirm" style="display: none;">Confirm</button>
-        <button type="button" id="reset-password-cancel" style="display: none;" onclick="resetPassword(false);">Cancel</button></p>
-    </form>
-</div>
-<?php if (!isset($_SESSION['user']['sumid'])) { ?> 
-<div>
-    <button id="connect-account-button" onclick="connectAccount(true);" style="margin-top: 20px;">Connect League Account</button>
-    <form method="post" id="connect-account-form" style="display: none;">
-        <p><label for="name">Summoner Name: </label></p>
-        <input type="text" name="name" id="name" required />
-        <button type="submit" id="connect-account-confirm" style="display: none;">Connect</button>
-        <button type="button" id="connect-account-cancel" style="display: none;" onclick="connectAccount(false);">Cancel</button></p>
-    </form>
-</div>
-<?php } else { 
-    $currentPlayerData = getPlayerData("sumid", $_SESSION['user']['sumid']);
-    echo '<div>Linked to 
-        <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.png" style="vertical-align:middle" width="16" loading="lazy">
-        '.$currentPlayerData["Name"].'</div>';
-    ?> 
-    
-<div>
-    <button id="disconnect-account-button" onclick="disconnectAccount(true);" style="margin-top: 20px;">Disconnect League Account</button>
-    <form method="post" id="disconnect-account-form" style="display: none;">
-        <p><label for="dcpassword">Password: </label></p>
-        <input type="password" name="dcpassword" id="dcpassword" placeholder="Confirm with password" required />
-        <p><button type="submit" id="disconnect-account-confirm" style="display: none;">Confirm</button>
-        <button type="button" id="disconnect-account-cancel" style="display: none;" onclick="disconnectAccount(false);">Cancel</button></p>
-    </form>
-</div>
-<?php }
-    if (isset($_POST['name'])) { ?> <div>
-    <?php 
-    $playerDataArray = getPlayerData("name", $_POST['name']);
-    if($playerDataArray['Icon'] != ""){
-        $randomIcon = getRandomIcon($playerDataArray["Icon"]);
-        echo '<div><h3>Found account for: '.$playerDataArray['Name'].'</h3></div>'.'<div><img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerDataArray["Icon"].'.png" style="vertical-align:middle" width="84" loading="lazy">
-         => 
-        <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$randomIcon.'.png" style="vertical-align:middle" width="84" loading="lazy">
+<div class="outer-form">
+    <div class="clash-form">
+        <div class='clash-form-title'><?php echo 'Welcome, '. $_SESSION['user']['username']; ?></div>
+        <div><input type="button" onclick="location.href='/logout';" value="Log Out"></button></div>
+        <div id="reset-password-area">
+            <button id="reset-password-button" onclick="resetPassword(true);">Reset Password</button>
+            <div id="reset-password-description">
+                <div class='clash-form-title'>Reset your password</div>
+                <span class='descriptive-text'>The same rules apply as used to register, meaning that the password has to:</span>
+                <ul class='password-conditions'>
+                    <li>Include at least one lowercase letter</li>
+                    <li>Include at least one uppercase letter</li>
+                    <li>Include at least one number</li>
+                    <li>Include at least one special character</li>
+                    <li>Be between 8 to 32 characters long</li>
+                </ul>
+                <form method="post" id="reset-password-form" style="display: none;">
+                    <div><label for="password">Password: </label></div>
+                    <div><input type="password" name="current-password" id="current-password" placeholder="Current Password" required /></div>
+                    <div><input type="password" name="new-password" id="new-password" placeholder="New Password" required /></div>
+                    <div><input type="password" name="confirm-new-password" id="confirm-new-password" placeholder="Confirm Password" required /></div>
+                    <div class="flow-root"><button type="submit" id="reset-password-confirm" class="small-button" style="display: none;">Confirm</button>
+                    <button type="button" id="reset-password-cancel" class="small-button" style="display: none;" onclick="resetPassword(false);">Cancel</button></div>
+                </form>
+            </div>
         </div>
-        <p>Temporarily change your summoner icon to the one above and click on the connect button to verify your league account.</p>
-        <p>Note: The temporary icon was given to you right after the account creation.</p>
-        <small>If you experience any problems or your account was already claimed please reach out to an administrator.</small>
-        <form method="post" id="connect-final-form">
-            <button type="button" name="final" id="connect-final-confirm" style="margin-top: 20px;">Confirm</button>
-            <div class="lds-ring" id="loader"><div></div><div></div><div></div><div></div></div>
-            <strong id="icon-error" style="display: none;">Icons stimmen nicht überein.</strong>
-        </form>
+        <div id="un-link-account-area">
+            <div class='clash-form-title' id="unlink-account-title">Unlink your account</div>
+            <span class='descriptive-text' id='unlink-account-desc'>If you wish to unlink your account please enter your password and press confirm. You can always re-link your account again.</span>
+            <?php if (!isset($_SESSION['user']['sumid'])) { ?> 
+            <div class='clash-form-title' id="link-account-title">Link your account</div>
+            <span class='descriptive-text' id='link-account-desc'>To link your account please enter your League of Legends username.</span>
+            
+            <div>
+                <button id="connect-account-button" onclick="connectAccount(true);">Connect League Account</button>
+                <form method="post" id="connect-account-form" style="display: none;">
+                    <div><label for="name">Summoner Name: </label></div>
+                    <input type="text" name="name" id="name" required />
+                    <div class="flow-root"><button type="submit" id="connect-account-confirm" class="small-button" style="display: none;">Connect</button>
+                    <button type="button" id="connect-account-cancel" class="small-button" style="display: none;" onclick="connectAccount(false);">Cancel</button></div>
+                </form>
+            </div>
+            <?php } else { 
+                $currentPlayerData = getPlayerData("sumid", $_SESSION['user']['sumid']);
+                echo '<div class="account-link">Linked to: 
+                    <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.png" style="vertical-align:middle" width="32" loading="lazy">
+                    '.$currentPlayerData["Name"].'</div>';
+                ?> 
+            <div id="lower-dcform">
+                <button id="disconnect-account-button" onclick="disconnectAccount(true);" style="margin-top: 20px;">Disconnect League Account</button>
+                <form method="post" id="disconnect-account-form" style="display: none;">
+                    <div><label for="dcpassword">Password: </label></div>
+                    <input type="password" name="dcpassword" id="dcpassword" placeholder="Confirm with password" required />
+                    <div style="height: 50px;"><button type="submit" id="disconnect-account-confirm" class="small-button" style="display: none;">Confirm</button>
+                    <button type="button" id="disconnect-account-cancel" class="small-button" style="display: none;" onclick="disconnectAccount(false);">Cancel</button></div>
+                </form>
+            </div>
+            <?php } ?>
         </div>
-        <script>
-        $("#connect-final-confirm").click(function() {
-            document.getElementById("loader").style.visibility = "visible";
-            $.ajax({
-                url: "connect.php",
-                type: "POST",
-                data: {
-                    icon: "'.$randomIcon.'",
-                    name: "'.$playerDataArray['Name'].'",
-                    sessionUsername: "'.$_SESSION['user']['username'].'"
-                },
-                success: function(data) {
-                    data = JSON.parse(data);
-                    document.getElementById("loader").style.visibility = "hidden";
-                    if(data.status == "success"){
-                        location.href = "settings?verify=true";
-                    } else {
-                        document.getElementById("icon-error").style.display = "unset";
-                    }
-                }               
-            });
-          });
-        </script>'; 
-    } else {
-        echo "<h3>Could not find an account for: ".$_POST['name']."</h3>";}}
+        <?php
+        if (isset($_POST['name'])) { ?> <div>
+        <?php 
+        $playerDataArray = getPlayerData("name", $_POST['name']);
+            if($playerDataArray['Icon'] != ""){
+                $randomIcon = getRandomIcon($playerDataArray["Icon"]);
+                echo '<div id="connect-account-area"><div class="clash-form-title" style="margin-top: 12px;">Found account for: '.$playerDataArray['Name'].'</div>'.'<div class="flow-root"><img id="current-profile-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerDataArray["Icon"].'.png" style="vertical-align:middle; float: left;" width="84" loading="lazy">
+                <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$randomIcon.'.png" style="vertical-align:middle; float: right;" width="84" loading="lazy">
+                </div>
+                <div style="margin: -3.5em 0 3em 0;">&#10148;</div>
+                <div class="descriptive-text account-desc">Temporarily change your summoner icon to the one on the <b>right</b> and click on the connect button to verify your league account.</div>
+                <div class="descriptive-text account-desc">Note: The temporary icon was given to you right after the account creation.</div>
+                <small>If you experience any problems or your account was already claimed please reach out to an administrator.</small>
+                <form method="post" id="connect-final-form">
+                    <button type="button" name="final" id="connect-final-confirm" style="margin-top: 20px;">Confirm</button>
+                    <div class="lds-ring" id="loader"><div></div><div></div><div></div><div></div></div>
+                    <div><strong id="icon-error" style="display: none; color: #560909;">Icons stimmen nicht überein.</strong></div>
+                </form>
+                </div>
+                </div>
+                <script>
+                $("#connect-final-confirm").click(function() {
+                    document.getElementById("loader").style.visibility = "visible";
+                    $.ajax({
+                        url: "connect.php",
+                        type: "POST",
+                        data: {
+                            icon: "'.$randomIcon.'",
+                            name: "'.$playerDataArray['Name'].'",
+                            sessionUsername: "'.$_SESSION['user']['username'].'"
+                        },
+                        success: function(data) {
+                            data = JSON.parse(data);
+                            document.getElementById("loader").style.visibility = "hidden";
+                            if(data.status == "success"){
+                                location.href = "settings?verify=true";
+                            } else {
+                                document.getElementById("icon-error").style.display = "unset";
+                            }
+                        }               
+                    });
+                });
+                </script>'; 
+            } else {
+                echo "<h3>Could not find an account for: ".$_POST['name']."</h3>";
+            }
+        }
         ?>
-<div>
-    <button id="account-delete-button" onclick="deleteAccount(true);" style="margin-top: 20px;">Delete Account</button>
-    <form method="post" id="account-delete-form" style="display: none;">
-        <p><label for="password">Password: </label></p>
-        <input type="password" name="password" id="password" placeholder="Confirm with password" required />
-        <p><button type="submit" id="account-delete-confirm" style="display: none;">Confirm</button>
-        <button type="button" id="account-delete-cancel" style="display: none;" onclick="deleteAccount(false);">Cancel</button></p>
-    </form>
+        <div>
+            <button id="account-delete-button" onclick="deleteAccount(true);">Delete Account</button>
+            <form method="post" id="account-delete-form" style="display: none;">
+                <div><label for="password">Password: </label></div>
+                <input type="password" name="password" id="password" placeholder="Confirm with password" required />
+                <div><button type="submit" id="account-delete-confirm" style="display: none;">Confirm</button>
+                <button type="button" id="account-delete-cancel" style="display: none;" onclick="deleteAccount(false);">Cancel</button></div>
+            </form>
+        </div>
+    </div>
 </div>
 
 <?php 
