@@ -14,7 +14,7 @@ require '/var/www/html/clash/phpmailer/src/Exception.php';
 require '/var/www/html/clash/phpmailer/src/PHPMailer.php';
 require '/var/www/html/clash/phpmailer/src/SMTP.php';
  
-$error_message = '';
+$error_message = array();
 $db = new DB();
 
 if (isset($_POST['submit'])) {
@@ -32,8 +32,9 @@ if (isset($_POST['submit'])) {
         header('Location: /');
     }
  
-    $error_message = ($response['status'] == 'error') ? $response['message'] : '';
-    $error_message .= '<script type="text/javascript">enablePWR();</script>';
+    if($response['status'] == 'error'){
+        $error_message[] = $response['message'].'<script type="text/javascript">enablePWR();</script>';
+    }
 }
 
 if (isset($_POST['reset'])) {
@@ -75,42 +76,46 @@ if (isset($_POST['reset'])) {
                 $result = $mail->Send();
 
                 if(!$result) {
-                    $error_message = "Could not deliver mail. Please contact an administrator.";
+                    $error_message[] = "Could not deliver mail. Please contact an administrator.";
                 } else {
-                    $success_message = "Successfully sent password reset mail! Please also check your spam folder.";
+                    $success_message[] = "Successfully sent password reset mail! Please also check your spam folder.";
                 }
             } catch (Exception $e) {
-                // $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                $error_message = "Message could not be sent. Please contact an administrator.";
+                // $error_message[] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                $error_message[] = "Message could not be sent. Please contact an administrator.";
             }
         } else {
-            $error_message = "A given account for ".$_POST['mailorname']." does not exist.";
+            $error_message[] = "A given account for ".$_POST['mailorname']." does not exist.";
         }
     } else {
         if((($get_reset['timestamp']+63)-time()) > 0){
-            $error_message = "A passwort reset mail has already been sent. Please wait ".($get_reset['timestamp']+63)-time()." seconds more before requesting another.";
+            $error_message[] = "A passwort reset mail has already been sent. Please wait ".($get_reset['timestamp']+63)-time()." seconds more before requesting another.";
         }
     }
 }
 
 if (isset($_GET['password'])) {
-    $success_message = "Password successfully reset! You may now login with your new credentials.";
+    $success_message[] = "Password successfully reset! You may now login with your new credentials.";
 }
 
 include('head.php');
 setCodeHeader('Login', true, true);
 include('header.php');
-?>
 
-<?php if (!empty($success_message)) { ?>
-<div class="account_status">
-    <strong><?php echo $success_message; ?></strong>
-</div>
-<?php } else if (!empty($error_message)) { ?>
-<div class="error">
-    <strong><?php echo $error_message; ?></strong>
-</div>
-<?php } ?>
+if (!empty($success_message)) { 
+    foreach($success_message as $su){
+        echo '<div class="account_status">
+                <strong>'. $su .'</strong>
+              </div>';
+    }
+} else if (!empty($error_message)) { 
+    foreach($error_message as $er){
+        echo '<div class="error">
+            <strong>'. $er .'</strong>
+        </div>';
+    }
+}
+?>
 <div class="outer-form">
     <form method="post" class="clash-form login-form">
         <div class="clash-form-title">Login to your account</div>
