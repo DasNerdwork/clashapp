@@ -53,19 +53,19 @@ if (isset($_POST['submit'])) {
     .'\x{FFCA}-\x{FFCF}\x{FFD2}-\x{FFD7}\x{FFDA}-\x{FFDC}]+$/u', $_POST['username']);
 
     if (strlen($_POST['username']) > 16 || strlen($_POST['username']) < 3) { // Correct Summoner Name Length
-        $error_message = 'Summoner Names have to be between 3 and 16 characters long.';
+        $error_message[] = 'Summoner Names have to be between 3 and 16 characters long.';
     } else if(!$validName) { // Correct Summoner Name Format & Characters
-        $error_message = 'Summoner Name incorrect: Allowed characters are a-Z, 0-9 and alphabets of other languages.';
+        $error_message[] = 'Summoner Name incorrect: Allowed characters are a-Z, 0-9 and alphabets of other languages.';
     } else if(!(filter_var($_POST['email'], FILTER_VALIDATE_EMAIL))) { // Correct mail format
-        $error_message = 'Could not validate E-Mail format. Please use a correct E-Mail.';
+        $error_message[] = 'Could not validate E-Mail format. Please use a correct E-Mail.';
     } else if($_POST['password'] !== $_POST['confirm-password']) {
-        $error_message = 'The entered passwords do not match.';
+        $error_message[] = 'The entered passwords do not match.';
     } else if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($_POST['password']) < 8 || strlen($_POST['password']) > 32) { // The Password meets current regex settings above
-        $error_message = 'Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.'; 
+        $error_message[] = 'Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.'; 
     } else if(!(in_array($_POST['region'], array("EUW")))) { // full array: array("EUW", "EUN", "NA", "KR", "BR", "JP", "RU", "OCE", "TR", "LAN", "LAS")
-        $error_message = 'The selected region is currently not supported.';
+        $error_message[] = 'The selected region is currently not supported.';
     } else if($db->account_exists($_POST['email'], $_POST['username'])) {
-        $error_message = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">forgotten your password</u>?'; // TODO change to password reset mail instead of onclick open 
+        $error_message[] = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">forgotten your password</u>?'; // TODO change to password reset mail instead of onclick open 
     } else {
         $options = [
             'cost' => 11,
@@ -113,101 +113,40 @@ if (isset($_POST['submit'])) {
                 $result = $mail->Send();
         
                 if(!$result) {
-                    $error_message = "Could not deliver mail. Please contact an administrator.";    
+                    $error_message[] = "Could not deliver mail. Please contact an administrator.";    
                 } else {
-                    $success_message = "Successfully sent account verify mail! Please also check your spam folder.";
+                    $success_message[] = "Successfully sent account verify mail! Please also check your spam folder.";
                 }
             } catch (Exception $e) {
-                // $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                $error_message = "Message could not be sent. Please contact an administrator.";
+                // $error_message[] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                $error_message[] = "Message could not be sent. Please contact an administrator.";
             }
             $_SESSION['user'] = array('id' => $response['id'], 'username' => $_POST['username']);
             header('Location: settings');
         }
 
-        $error_message = ($response['status'] == 'error') ? $response['message'] : '';
+        $error_message[] = ($response['status'] == 'error') ? $response['message'] : '';
     }        
 }
-
-// if (isset($_POST["test"])) {
-
-//     // $to      = "dasnerdwork@gmail.com";
-//     // $subject = "the subject";
-//     // $message = "hello";
-//     // $headers = array(
-//     //     "From" => "no-reply@mail.dasnerdwork.net",
-//     //     "Reply-To" => "no-reply@mail.dasnerdwork.net",
-//     //     "Return-Path" => "no-reply@mail.dasnerdwork.net",
-//     //     "Organization" => "DasNerdwork.net",
-//     //     "MIME-Version" => "1.0",
-//     //     "Content-type" => "text/html; charset=iso-8859-1",
-//     //     "X-Priority" => "3",
-//     //     "X-Mailer" => "PHP/" . phpversion()
-//     // );
-    
-//     //Create an instance; passing `true` enables exceptions
-    
-//     try {
-//         //Server settings
-//         $mail = new PHPMailer();
-//         $mail->isSMTP();                                            //Send using SMTP
-//         $mail->Host       = 'smtp.gmail.com';                       //Set the SMTP server to send through
-//         $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-//         $mail->Username   = 'no-reply@dasnerdwork.net';                //SMTP username
-//         $mail->Password   = '***REMOVED***';                     //SMTP password
-//         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-//         $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
-    
-//         //Recipients
-//         $mail->setFrom('no-reply@dasnerdwork.net');
-//         $mail->addAddress('dasnerdwork@gmail.com');              //Add a recipient
-//         $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
-//         // $mail->addReplyTo('no-reply@mail.dasnerdwork.net');
-//         // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
-
-//         //Attachments
-//         // $mail->addAttachment('/var/tmp/file.tar.gz');            //Add attachments
-//         // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');       //Optional name
-
-//         //Content
-//         $mail->isHTML(true);                                  //Set email format to HTML
-//         $mail->Subject = 'Here is the subject';
-//         $mail->Body    = 'This is the HTML message body <b>in bold!</b>';
-//         $mail->AltBody = 'This is the body in plain text for non-HTML mail clients';
-//         $mail->addCustomHeader('MIME-Version: 1.0');
-//         $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
-
-//         $result = $mail->Send();
-
-//         if(!$result) {
-//             // There was an error
-//             // Do some error handling things here
-//             echo "nix Email";
-
-//         } else {
-//             echo "Email successful";
-//         }
-//         echo 'Message has been sent';
-//     } catch (Exception $e) {
-//         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-//     }
-//     echo "test2";
-// }
 
 include('head.php');
 setCodeHeader('Register', true, true);
 include('header.php');
-?>
  
-<?php if (!empty($success_message)) { ?>
-<div class="account_status">
-    <strong><?php echo $success_message; ?></strong>
-</div>
-<?php } else if (!empty($error_message)) { ?>
-<div class="error">
-    <strong><?php echo $error_message; ?></strong>
-</div>
-<?php } ?>
+if (!empty($success_message)) { 
+    foreach($success_message as $su){
+        echo '<div class="account_status">
+                <strong>'. $su .'</strong>
+              </div>';
+    }
+} else if (!empty($error_message)) { 
+    foreach($error_message as $er){
+        echo '<div class="error">
+            <strong>'. $er .'</strong>
+        </div>';
+    }
+} 
+?>
 <div class="outer-form">
     <form method="post" autocomplete="off" class="clash-form register-form">
         <div class="clash-form-title">Register your account</div>
@@ -239,9 +178,6 @@ include('header.php');
         <div>Already have an account? <a href="/login">Login</a>.</div>
     </form>
 </div>
-<!-- <form method="post">
-    <input type="submit" name="test" value="Test Mail" />
-</form> -->
 
 <?php 
 include('footer.php');
