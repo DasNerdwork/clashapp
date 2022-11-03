@@ -449,25 +449,70 @@ function getChildIndex(node) {
   return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
 }
 
+function disableOthers(funcName){
+  let connectErrorMsg = document.getElementById("icon-error");
+  let connAccountArea = document.getElementById("connect-account-area")
+  if(connectErrorMsg != null) connectErrorMsg.style.display = "none";
+  switch (funcName) {
+    case "deleteAccount":
+      connectAccount(false);
+      disconnectAccount(false);
+      resetPassword(false);
+      if(connAccountArea != null) connAccountArea.style.display = "none";
+      break;
+    case "connectAccount":
+      deleteAccount(false);
+      disconnectAccount(false);
+      resetPassword(false);
+      break;
+    case "disconnectAccount":
+      deleteAccount(false);
+      connectAccount(false);
+      resetPassword(false);
+      if(connAccountArea != null) connAccountArea.style.display = "none";
+      break; 
+    case "resetPassword":
+      deleteAccount(false);
+      connectAccount(false);
+      disconnectAccount(false);
+      if(connAccountArea != null) connAccountArea.style.display = "none";
+      break;  
+    default:
+      break;
+  }
+}
+
 function deleteAccount(status){
+  if(status)disableOthers(arguments.callee.name);
   let button = document.getElementById("account-delete-button");
   let cancel = document.getElementById("account-delete-cancel");
   let confirm = document.getElementById("account-delete-confirm");
   let form = document.getElementById("account-delete-form");
+  let area = document.getElementById("account-delete-area");
+  let desc = document.getElementById("delete-desc");
   if(status){
-    button.style.display = "none";
-    cancel.style.display = "unset";
-    confirm.style.display = "unset";
-    form.style.display = "unset";
+if(button != null) button.style.display = "none";
+if(cancel != null) cancel.style.display = "unset";
+if(confirm != null) confirm.style.display = "unset";
+if(form != null) form.style.display = "unset";
+if(area != null) area.style.borderTop = "2px dashed #21222c";
+if(area != null) area.style.borderBottom = "2px dashed #21222c";
+if(desc != null) desc.style.display = "unset";
+if(area != null) area.style.paddingTop = "1em";
   } else {
-    button.style.display = "unset";
-    cancel.style.display = "none";
-    confirm.style.display = "unset";
-    form.style.display = "none";
+if(button != null) button.style.display = "unset";
+if(cancel != null) cancel.style.display = "none";
+if(confirm != null) confirm.style.display = "none";
+if(form != null) form.style.display = "none";
+if(area != null) area.style.borderTop = "none";
+if(area != null) area.style.borderBottom = "none";
+if(area != null) area.style.paddingTop = "0";
+if(desc != null) desc.style.display = "none";
   }
 }
 
 function connectAccount(status){
+  if(status)disableOthers(arguments.callee.name);
   let button = document.getElementById("connect-account-button");
   let cancel = document.getElementById("connect-account-cancel");
   let confirm = document.getElementById("connect-account-confirm");
@@ -475,30 +520,34 @@ function connectAccount(status){
   let title = document.getElementById("link-account-title");
   let desc = document.getElementById("link-account-desc");
   let area = document.getElementById("un-link-account-area");
+  let deleteBtn = document.getElementById("account-delete-button");
   if(status){
-    button.style.display = "none";
-    cancel.style.display = "unset";
-    confirm.style.display = "unset";
-    form.style.display = "block";
-    title.style.display = "block";
-    desc.style.display = "block";
-    area.style.borderTop = "2px dashed #21222c";
-    area.style.borderBottom = "2px dashed #21222c";
-    area.style.padding = "10px 0px 0px 0px";
+if(button != null) button.style.display = "none";
+if(cancel != null) cancel.style.display = "unset";
+if(confirm != null) confirm.style.display = "unset";
+if(form != null) form.style.display = "block";
+if(title != null) title.style.display = "block";
+if(desc != null) desc.style.display = "block";
+if(area != null) area.style.borderTop = "2px dashed #21222c";
+if(area != null) area.style.borderBottom = "2px dashed #21222c";
+if(area != null) area.style.padding = "10px 0px 0px 0px";
+if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
   } else {
-    button.style.display = "unset";
-    cancel.style.display = "none";
-    confirm.style.display = "none";
-    form.style.display = "none";
-    title.style.display = "none";
-    desc.style.display = "none";
-    area.style.borderTop = "none";
-    area.style.borderBottom = "none";
-    area.style.padding = "none";
+if(button != null) button.style.display = "unset";
+if(cancel != null) cancel.style.display = "none";
+if(confirm != null) confirm.style.display = "none";
+if(form != null) form.style.display = "none";
+if(title != null) title.style.display = "none";
+if(desc != null) desc.style.display = "none";
+if(area != null) area.style.borderTop = "none";
+if(area != null) area.style.borderBottom = "none";
+if(area != null) area.style.padding = "0";
+if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
   }
 }
 
 function disconnectAccount(status){
+  if(status)disableOthers(arguments.callee.name);
   let button = document.getElementById("disconnect-account-button");
   let cancel = document.getElementById("disconnect-account-cancel");
   let confirm = document.getElementById("disconnect-account-confirm");
@@ -506,55 +555,68 @@ function disconnectAccount(status){
   let area = document.getElementById("un-link-account-area");
   let title = document.getElementById("unlink-account-title");
   let desc = document.getElementById("unlink-account-desc");
+  let linkedTo = document.getElementById("account-link");
+  let deleteBtn = document.getElementById("account-delete-button");
   if(status){
-    button.style.display = "none";
-    cancel.style.display = "unset";
-    confirm.style.display = "unset";
-    form.style.display = "unset";
-    area.style.borderTop = "2px dashed #21222c";
-    area.style.borderBottom = "2px dashed #21222c";
-    area.style.padding = "10px 0px 0px 0px";
-    title.style.display = "block";
-    desc.style.display = "block";
+if(button != null) button.style.display = "none";
+if(cancel != null) cancel.style.display = "unset";
+if(confirm != null) confirm.style.display = "unset";
+if(form != null) form.style.display = "unset";
+if(area != null) area.style.borderTop = "2px dashed #21222c";
+if(area != null) area.style.borderBottom = "2px dashed #21222c";
+if(area != null) area.style.padding = "12px 0px 0px 0px";
+if(title != null) title.style.display = "block";
+if(desc != null) desc.style.display = "block";
+if(linkedTo != null) linkedTo.style.margin = "1em 0";
+if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
   } else {
-    button.style.display = "unset";
-    cancel.style.display = "none";
-    confirm.style.display = "unset";
-    form.style.display = "none";
-    area.style.borderTop = "none";
-    area.style.borderBottom = "none";
-    area.style.padding = "none";
-    title.style.display = "none";
-    desc.style.display = "none";
+if(button != null) button.style.display = "unset";
+if(cancel != null) cancel.style.display = "none";
+if(confirm != null) confirm.style.display = "none";
+if(form != null) form.style.display = "none";
+if(area != null) area.style.borderTop = "none";
+if(area != null) area.style.borderBottom = "none";
+if(area != null) area.style.padding = "0";
+if(title != null) title.style.display = "none";
+if(desc != null) desc.style.display = "none";
+if(linkedTo != null) linkedTo.style.margin = "0";
+if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
   }
 }
 
 function resetPassword(status){
+  if(status)disableOthers(arguments.callee.name);
   let button = document.getElementById("reset-password-button");
   let cancel = document.getElementById("reset-password-cancel");
   let confirm = document.getElementById("reset-password-confirm");
   let form = document.getElementById("reset-password-form");
   let desc = document.getElementById("reset-password-description");
   let area = document.getElementById("reset-password-area");
-  let lower = document.getElementById("lower-dcform");
+  let linkedTo = document.getElementById("account-link");
+  let connectButton = document.getElementById("connect-account-button");
   if(status){
-    button.style.display = "none";
-    cancel.style.display = "unset";
-    confirm.style.display = "unset";
-    form.style.display = "unset";
-    desc.style.display = "unset";
-    area.style.borderTop = "2px dashed #21222c";
-    area.style.borderBottom = "2px dashed #21222c";
-    area.style.padding = "10px 0px 0px 0px";
+if(button != null) button.style.display = "none";
+if(cancel != null) cancel.style.display = "unset";
+if(confirm != null) confirm.style.display = "unset";
+if(form != null) form.style.display = "unset";
+if(desc != null) desc.style.display = "unset";
+if(area != null) area.style.borderTop = "2px dashed #21222c";
+if(area != null) area.style.borderBottom = "2px dashed #21222c";
+if(area != null) area.style.padding = "12px 0px 0px 0px";
+if(connectButton != null) connectButton.style.marginTop = "1em";
+if(linkedTo != null) linkedTo.style.marginTop = "1em";
   } else {
-    button.style.display = "unset";
-    cancel.style.display = "none";
-    confirm.style.display = "none";
-    form.style.display = "none";
-    desc.style.display = "none";
-    area.style.borderTop = "none";
-    area.style.borderBottom = "none";
-    area.style.padding = "none";
+if(button != null) button.style.display = "unset";
+if(cancel != null) cancel.style.display = "none";
+if(confirm != null) confirm.style.display = "none";
+if(form != null) form.style.display = "none";
+if(desc != null) desc.style.display = "none";
+if(area != null) area.style.borderTop = "none";
+if(area != null) area.style.borderBottom = "none";
+if(area != null) area.style.padding = "0";
+if(connectButton != null) connectButton.style.marginTop = "0";
+if(linkedTo != null) linkedTo.style.marginTop = "0";
+
   }
 }
 
@@ -566,10 +628,33 @@ function enablePWR(){
     let pwrbutton = document.createElement("input");
     pwrbutton.setAttribute("type", "submit");
     pwrbutton.setAttribute("name", "reset");
-    pwrbutton.setAttribute("id", "reset-password-button");
+    pwrbutton.setAttribute("id", "reset-password-popup");
     pwrbutton.setAttribute("value", "Reset Password?");
     password.parentNode.appendChild(pwrbutton);
   });
+}
+
+function setError(message){
+  let header = document.getElementsByTagName("header")[0];
+  var errorBanners = document.getElementsByClassName("error");
+  let check = true;
+  let bannerId;
+  if(errorBanners != null){
+    for (let i = 0; i < errorBanners.length; i++) {
+      const eb = errorBanners[i];
+      if(eb.firstChild.innerHTML == message){
+        check = false
+        break
+      }
+    }
+  }
+  if(!check) return "error bereits vorhanden";
+
+  let errorMsg = document.createElement("div");
+  errorMsg.setAttribute("class", "error");
+  errorMsg.innerHTML = "<strong>"+message+"</strong>";
+  header.parentNode.insertBefore(errorMsg, header.nextElementSibling);
+  
 }
 
 $('#updateBtn').click(function() {
