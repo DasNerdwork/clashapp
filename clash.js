@@ -559,15 +559,16 @@ function resetPassword(status){
 }
 
 function enablePWR(){
+  // let pwr = document.getElementById("reset-password-button");
+  // pwr.style.visibility = "visible";
   $('document').ready(function() {
-    let login = document.getElementById("login-button");
+    let password = document.getElementById("password-label");
     let pwrbutton = document.createElement("input");
     pwrbutton.setAttribute("type", "submit");
     pwrbutton.setAttribute("name", "reset");
     pwrbutton.setAttribute("id", "reset-password-button");
-    pwrbutton.setAttribute("value", "Reset Password");
-    pwrbutton.style.marginLeft = "20px";
-    login.parentNode.insertBefore(pwrbutton, login.nextSibling.nextSibling);
+    pwrbutton.setAttribute("value", "Reset Password?");
+    password.parentNode.appendChild(pwrbutton);
   });
 }
 

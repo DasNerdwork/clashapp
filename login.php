@@ -75,27 +75,26 @@ if (isset($_POST['reset'])) {
                 $result = $mail->Send();
 
                 if(!$result) {
-                    // There was an error
-                    // Do some error handling things here
-                    echo "Could not deliver mail. Please contact an administrator.";
+                    $error_message = "Could not deliver mail. Please contact an administrator.";
                 } else {
-                    echo "Successfully sent password reset mail";
+                    $success_message = "Successfully sent password reset mail! Please also check your spam folder.";
                 }
             } catch (Exception $e) {
-                echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                // $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                $error_message = "Message could not be sent. Please contact an administrator.";
             }
         } else {
-            echo "A given account for ".$_POST['mailorname']." does not exist.";
+            $error_message = "A given account for ".$_POST['mailorname']." does not exist.";
         }
     } else {
         if((($get_reset['timestamp']+63)-time()) > 0){
-            echo "A passwort reset mail has already been sent. Please wait ".($get_reset['timestamp']+63)-time()." seconds more before requesting another.";
+            $error_message = "A passwort reset mail has already been sent. Please wait ".($get_reset['timestamp']+63)-time()." seconds more before requesting another.";
         }
     }
 }
 
 if (isset($_GET['password'])) {
-    echo "Password successfully reset! You may now login with your new credentials.";
+    $success_message = "Password successfully reset! You may now login with your new credentials.";
 }
 
 include('head.php');
@@ -103,20 +102,24 @@ setCodeHeader('Login', true, true);
 include('header.php');
 ?>
 
-<?php if (!empty($error_message)) { ?>
-    <div class="error">
-        <strong><?php echo $error_message; ?></strong>
-    </div>
+<?php if (!empty($success_message)) { ?>
+<div class="account_status">
+    <strong><?php echo $success_message; ?></strong>
+</div>
+<?php } else if (!empty($error_message)) { ?>
+<div class="error">
+    <strong><?php echo $error_message; ?></strong>
+</div>
 <?php } ?>
 <div class="outer-form">
     <form method="post" class="clash-form login-form">
         <div class="clash-form-title">Login to your account</div>
         <div><label for="mailorname">Email/Username: </label></div>
         <div><input type="text" name="mailorname" id="mailorname" placeholder="Enter Email or Username" required /></div>
-        <div><label for="password">Password: </label></div>
+        <div><label for="password" id="password-label">Password: </label></div>
         <div><input type="password" name="password" id="password" placeholder="Enter Password" required /></div>
-        <div><input type="checkbox" id="stay-logged-in" name="stay-logged-in">
-        <label for="stay-logged-in"> Stay logged in for a month</label></div>
+        <div><input type="checkbox" class="login-checkbox" id="stay-logged-in" name="stay-logged-in">
+        <label for="stay-logged-in" class="stay-logged-in"> Stay logged in for a month</label></div>
         <div><input type="submit" name="submit" id="login-button" value="Login" /></div>
         <div>Don't have an account yet? <a href="/register">Register</a>.</div>
     </form>

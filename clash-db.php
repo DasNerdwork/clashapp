@@ -38,12 +38,12 @@ class DB {
                 if (password_verify($password, $row['password'])) {
                     return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'sumid' => $row['sumid']);
                 }
-                return array('status' => 'error', 'message' => 'Email or password is invalid.'); // The Password decrypt was unsuccessful
+                return array('status' => 'error', 'message' => 'Email/Username or password is invalid.'); // The Password decrypt was unsuccessful
             }
  
             return array('status' => 'error', 'message' => 'Your account was deactivated. If you did not take this action please reach out to an administrator.'); // The Users status is set to 0 (deactivated account)
         }
-        return array('status' => 'error', 'message' => 'The given account does not exist.'); // Cannot find email in database
+        return array('status' => 'error', 'message' => 'The given account does not exist.'); // Cannot find email/username in database
     }
 
     public function account_exists($email = '', $username = '') {
@@ -173,13 +173,13 @@ class DB {
 
             switch ($row['status']) {
                 case "0":
-                    return array('status' => 'deactivated', 'message' => 'This account has been deactivated.');
+                    return array('status' => 'error', 'message' => 'This account has been deactivated.');
                 case "1":
-                    return array('status' => 'verified', 'message' => '');
+                    return array('status' => 'success', 'message' => '');
                 case "2":
-                    return array('status' => 'unverified', 'message' => 'Your account has not been verified yet. Please check your mails (including spam folder) to be able to use all functionalities.');
+                    return array('status' => 'error', 'message' => 'Your account has not been verified yet. Please check your mails (including spam folder) to be able to use all functionalities.');
                 default:
-                    return array('status' => 'unknown', 'message' => 'Unknown account status. Please contact an administrator.');
+                    return array('status' => 'error', 'message' => 'Unknown account status. Please contact an administrator.');
             }
         } else {
             return array('status' => 'unknown', 'message' => 'Cannot find user in database. Please contact an administrator.');
