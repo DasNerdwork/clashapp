@@ -742,7 +742,7 @@ header {
 }
 
 .clash-form-title {
-  margin-bottom: 1em;
+  margin-bottom: 10px;
   font-size: 20px;
 }
 
@@ -837,11 +837,11 @@ header {
   cursor: default;
 }
 
-.clash-form input[type="submit"]:hover {
+.clash-form input[type="submit"]:hover, .clash-form select:hover, .clash-form button:hover, .clash-form #setting-logout:hover {
   filter: brightness(75%);
 }
 
-.clash-form input[type="submit"]:active {
+.clash-form input[type="submit"]:active, .clash-form select:active, .clash-form button:active, .clash-form #setting-logout:active {
   filter: brightness(50%);
 }
 
@@ -852,7 +852,10 @@ header {
 
 .clash-form .account-link {
   text-align: center;
-  margin: 1em 0;
+}
+
+.clash-form #disconnect-account-button {
+  margin-top: 1em;
 }
 
 .clash-form li {
@@ -884,7 +887,7 @@ header {
   display: none;
 }
 
-#reset-password-button {
+#reset-password-popup {
   /* visibility: hidden; */
   background: none;
   border: none;
@@ -909,20 +912,17 @@ header {
 
 #connect-account-form {
   margin-top: 10px;
-}
-
-#unlink-account-desc {
-  margin-top: -1em;
+  margin-bottom: 0;
 }
 
 #connect-account-area {
   border-top: 2px dashed #21222c;
   border-bottom: 2px dashed #21222c;
   padding: 1em 0px 0px 0px;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
 }
 
-#reset-password-cancel, #disconnect-account-cancel, #connect-account-cancel{
+#reset-password-cancel, #disconnect-account-cancel, #connect-account-cancel, #account-delete-cancel {
   float: left;
   margin-left: unset;
 }
@@ -945,13 +945,12 @@ header {
   margin-top: 0;
 }
 
-#weird-fix {
-  height: 50px;
+#delete-desc {
+  display: none;
 }
 
-
-.clash-form #un-link-account-area {
-  margin-bottom: 1em;
+#weird-fix {
+  height: 50px;
 }
 
 .clash-form label:not(.stay-logged-in) {
@@ -979,6 +978,8 @@ header {
 .flow-root {
   display: flow-root;
   width: 350px;
+  height: 50px;
+  margin-top: -10px;
 }
 
 .clash-form input:-webkit-autofill, .clash-form input:-webkit-autofill:hover, .clash-form input:-webkit-autofill:focus, .clash-form textarea:-webkit-autofill, .clash-form textarea:-webkit-autofill:hover, .clash-form textarea:-webkit-autofill:focus {
