@@ -10,17 +10,19 @@ require_once 'functions.php';
 
 $db = new DB();
 $account_status = $db->check_status($_SESSION['user']['id'], $_SESSION['user']['username']);
-$account_status_message = $account_status['message'];
+if($account_status['status'] == "error"){
+    $error_message = $account_status['message'];
+} else if($account_status['status'] == "success"){
+    $success_message = $account_status['message'];
+}
 $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
-
-// print_r($_SESSION['user']);
 
 if (isset($_POST['password'])) {
     $response = $db->delete_account($_SESSION['user']['id'], $_SESSION['user']['username'], $_SESSION['user']['region'], $_SESSION['user']['email'], $_POST['password']);
     if ($response['status'] == 'success') {
         header('Location: logout');
     } else {
-        $account_status_message = $response['message'];
+        $success_message = $response['message'];
     }
 }
 
@@ -30,19 +32,23 @@ if (isset($_POST['current-password']) && isset($_POST['new-password']) && isset(
     $number    = preg_match('@[0-9]@', $_POST['new-password']);
     $specialChars = preg_match('@[^\w]@', $_POST['new-password']);
     if ($db->check_credentials($_SESSION['user']['email'], $_POST['current-password'])['status'] != 'success') {
-        echo '<strong><div>Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.</strong></div>';
+        $error_message = 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.'; // TODO change to password reset mail instead of onclick open
     } else {
          if ($_POST["new-password"] !== $_POST["confirm-new-password"]) {
-            echo "<strong><div>New passwords do not match.</strong></div>";
+            $error_message = "The entered passwords do not match.";
          } else {
-            if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($_POST['new-password']) < 8 || strlen($_POST['new-password']) > 32) {
-                echo "<strong><div>Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.</strong></div>"; 
-            } else {
-                $options = [
-                    'cost' => 11,
-                ];
-                $reset = $db->reset_password($_SESSION['user']['id'], $_SESSION['user']['username'], $_SESSION['user']['email'], password_hash($_POST['new-password'], PASSWORD_BCRYPT, $options));
-                $account_status_message = $reset['message'];
+            if ($_POST["current-password"] == $_POST["new-password"]) {
+                $error_message = "New password cannot be the same as old password.";
+             } else {
+                if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($_POST['new-password']) < 8 || strlen($_POST['new-password']) > 32) {
+                    $error_message = "Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character."; 
+                } else {
+                    $options = [
+                        'cost' => 11,
+                    ];
+                    $reset = $db->reset_password($_SESSION['user']['id'], $_SESSION['user']['username'], $_SESSION['user']['email'], password_hash($_POST['new-password'], PASSWORD_BCRYPT, $options));
+                    $success_message = $reset['message'];
+                }
             }
         }
     }
@@ -57,9 +63,9 @@ if ($_GET['verify']){
 }
 
 if ($_GET['verified'] == "true") {
-    $account_status_message = "Accounts successfully linked!";
+    $success_message = "Accounts successfully linked!";
 } else if ($_GET['verified'] == "false") {
-    $account_status_message = "Successfully disconnected accounts.";
+    $success_message = "Successfully disconnected accounts.";
 }
 
 if (isset($_POST['dcpassword'])) {
@@ -72,7 +78,7 @@ if (isset($_POST['dcpassword'])) {
             $error_message = "Unable to locally disconnected accounts. Please reach out to an administrator.";
         }
     } else {
-        $error_message = 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.';
+        $error_message = 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.'; // TODO change to password reset mail instead of onclick open
     }
 }
 
@@ -81,9 +87,9 @@ setCodeHeader('Settings', true, true);
 include('header.php');
 ?>
 
-<?php if (!empty($account_status_message)) { ?>
+<?php if (!empty($success_message)) { ?>
 <div class="account_status">
-    <strong><?php echo $account_status_message; ?></strong>
+    <strong><?php echo $success_message; ?></strong>
 </div>
 <?php } else if (!empty($error_message)) { ?>
 <div class="error">
@@ -160,7 +166,7 @@ include('header.php');
                 </div>
                 <div style="margin: -3.5em 0 3em 0;">&#10148;</div>
                 <div class="descriptive-text account-desc">Temporarily change your summoner icon to the one on the <b>right</b> and click on the connect button to verify your league account.</div>
-                <div class="descriptive-text account-desc">Note: The temporary icon was given to you right after the account creation.</div>
+                <div class="descriptive-text account-desc">Note: The temporary icon was given to you right after the account creation. You can find it by clicking on your profile picture, selecting "all" and scrolling completely down to the bottom.</div>
                 <small>If you experience any problems or your account was already claimed please reach out to an administrator.</small>
                 <form method="post" id="connect-final-form">
                     <button type="button" name="final" id="connect-final-confirm" style="margin-top: 20px;">Confirm</button>

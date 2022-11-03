@@ -57,15 +57,15 @@ if (isset($_POST['submit'])) {
     } else if(!$validName) { // Correct Summoner Name Format & Characters
         $error_message = 'Summoner Name incorrect: Allowed characters are a-Z, 0-9 and alphabets of other languages.';
     } else if(!(filter_var($_POST['email'], FILTER_VALIDATE_EMAIL))) { // Correct mail format
-        $error_message = 'Could not validate E-Mail.';
+        $error_message = 'Could not validate E-Mail format. Please use a correct E-Mail.';
     } else if($_POST['password'] !== $_POST['confirm-password']) {
-        $error_message = 'Passwords do not match.';
+        $error_message = 'The entered passwords do not match.';
     } else if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($_POST['password']) < 8 || strlen($_POST['password']) > 32) { // The Password meets current regex settings above
         $error_message = 'Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character.'; 
-    } else if(!(in_array($_POST['region'], array("EUW", "EUN", "NA", "KR", "BR", "JP", "RU", "OCE", "TR", "LAN", "LAS")))) {
+    } else if(!(in_array($_POST['region'], array("EUW")))) { // full array: array("EUW", "EUN", "NA", "KR", "BR", "JP", "RU", "OCE", "TR", "LAN", "LAS")
         $error_message = 'The selected region is currently not supported.';
     } else if($db->account_exists($_POST['email'], $_POST['username'])) {
-        $error_message = 'This account already exists. Have you forgotten your password?'; 
+        $error_message = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">forgotten your password</u>?'; // TODO change to password reset mail instead of onclick open 
     } else {
         $options = [
             'cost' => 11,
@@ -113,13 +113,13 @@ if (isset($_POST['submit'])) {
                 $result = $mail->Send();
         
                 if(!$result) {
-                    // There was an error
-                    // Do some error handling things here        
+                    $error_message = "Could not deliver mail. Please contact an administrator.";    
                 } else {
-                    $error_message = 'Password reset mail successfully sent.';
+                    $success_message = "Successfully sent account verify mail! Please also check your spam folder.";
                 }
             } catch (Exception $e) {
-                $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                // $error_message = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                $error_message = "Message could not be sent. Please contact an administrator.";
             }
             $_SESSION['user'] = array('id' => $response['id'], 'username' => $_POST['username']);
             header('Location: settings');
@@ -199,13 +199,17 @@ setCodeHeader('Register', true, true);
 include('header.php');
 ?>
  
-<?php if (!empty($error_message)) { ?>
-    <div class="error">
-        <strong><?php echo $error_message; ?></strong>
-    </div>
+<?php if (!empty($success_message)) { ?>
+<div class="account_status">
+    <strong><?php echo $success_message; ?></strong>
+</div>
+<?php } else if (!empty($error_message)) { ?>
+<div class="error">
+    <strong><?php echo $error_message; ?></strong>
+</div>
 <?php } ?>
 <div class="outer-form">
-    <form method="post" autocomplete="off" class="clash-form">
+    <form method="post" autocomplete="off" class="clash-form register-form">
         <div class="clash-form-title">Register your account</div>
         <div><label for="username">Username: </label></div>
         <div><input type="text" name="username" id="username" value="<?= $_POST["username"]?>" placeholder="Username" maxlength=16 required /></div>
@@ -227,10 +231,10 @@ include('header.php');
         <div><label for="email">Email: </label></div>
         <div><input type="email" name="email" id="email" value="<?= $_POST["email"] ?>" placeholder="mail@example.com" required /></div>
         <div><label for="password">Password:</label></div>
-        <div><input type="password" name="password" id="password" placeholder="Password" maxlength=32 required /></div>
+        <div><input type="password" name="password" id="password" placeholder="Enter Password" maxlength=32 required /></div>
         <div><input type="password" name="confirm-password" id="confirm-password" placeholder="Confirm Password" maxlength=32 required /></div>
-        <div><input type="checkbox" id="stay-logged-in" name="stay-logged-in">
-        <label for="stay-logged-in"> Stay logged in for a month</label></div>
+        <div class="login-checkbox"><input type="checkbox" id="stay-logged-in" name="stay-logged-in">
+        <label for="stay-logged-in" class="stay-logged-in"> Stay logged in for a month</label></div>
         <div><input type="submit" name="submit" value="Register" /></div>
         <div>Already have an account? <a href="/login">Login</a>.</div>
     </form>
