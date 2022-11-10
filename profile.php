@@ -57,9 +57,9 @@ include('header.php');
 <body style="background-color:#1a1a1a; color:#ddd">
 
 <form id="suchfeld" action="/clash/" onsubmit="return false;" method="GET" autocomplete="off" style="display: flex;">
-    <input type="text" name="name" id="name" value="<?= $_REQUEST["name"]?>" placeholder="Beschwörername">
-    <input type="submit" id="submitBtn" value="Suchen" onclick="sanitize(this.form.name.value);disableUpdateBtn();">
-    <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;">Aktualisieren</button>
+    <input type="text" name="name" id="name" value="<?= $_REQUEST["name"]?>" placeholder="Summonername">
+    <input type="submit" id="submitBtn" value="Search" onclick="sanitize(this.form.name.value);disableUpdateBtn();">
+    <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;">Update</button>
     <div class="sbl-circ" id="loader"></div>
 </form>
 <?php

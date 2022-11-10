@@ -43,20 +43,31 @@ if (isset($_POST['reset'])) {
         $reset = bin2hex(random_bytes(5));
         if($db->set_reset_code($_POST['mailorname'], $reset)){
             try {
+                $template = file_get_contents("/var/www/html/clash/phpmailer/templates/reset-password.html");
                 //Server settings
                 $mail = new PHPMailer();
                 $mail->isSMTP();                                            //Send using SMTP
-                $mail->Host       = 'smtp.gmail.com';                       //Set the SMTP server to send through
-                $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-                $mail->Username   = 'dasnerdwork@gmail.com';                //SMTP username
-                $mail->Password   = '***REMOVED***';                     //SMTP password
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-                $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+                $mail->Host       = 'mail.dasnerdwork.net';                       //Set the SMTP server to send through
+                $mail->SMTPDebug = SMTP::DEBUG_SERVER;
+                // $mail->SMTPAuth   = false;                                   //Enable SMTP authentication
+                // $mail->Username   = 'mail';                //SMTP username
+                // $mail->Password   = 'IfmadS2017';                     //SMTP password
+                // $mail->SMTPSecure = 'ssl';            //Enable implicit TLS encryption
+                $mail->Port       = 25;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
             
+                $mail->CharSet = 'UTF-8';
+                $mail->Encoding = 'base64';
+
+                $mail->DKIM_domain = 'dasnerdwork.net';
+                $mail->DKIM_private = '/var/www/key.private'; // Make sure to protect the key from being publicly accessible!
+                $mail->DKIM_selector = 'dkim';
+                $mail->DKIM_passphrase = '***REMOVED***DK';
+                $mail->DKIM_identity = $mail->From;
+
                 //Recipients
-                $mail->setFrom('dasnerdwork@gmail.com');
+                $mail->setFrom('mail@dasnerdwork.net');
                 $mail->addAddress('dasnerdwork@gmail.com');              //Add a recipient
-                // $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
+                $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
                 // $mail->addReplyTo('no-reply@dasnerdwork.net');
                 // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
 
@@ -66,9 +77,15 @@ if (isset($_POST['reset'])) {
 
                 //Content
                 $mail->isHTML(true);                                  //Set email format to HTML
+                $variables = array();
+                $variables['reset'] = $reset;
                 $mail->Subject = 'Reset your password';
-                $mail->Body    = 'You can reset your password by visiting the following link: <b>https://clash.dasnerdwork.net/reset?code='.$reset.'</b>';
-                $mail->Body   .= ' The link will only be valid for ~60 minutes.';
+                foreach($variables as $key => $value) {
+                    $template = str_replace('{{ '.$key.' }}', $value, $template);
+                }
+                $mail->Body = $template;
+                // $mail->Body    = 'You can reset your password by visiting the following link: <b>https://clash.dasnerdwork.net/reset?code='.$reset.'</b>';
+                // $mail->Body   .= ' The link will only be valid for ~60 minutes.';
                 // $mail->AltBody = 'You can activate your account by visiting the following link: https://clash.dasnerdwork.net/verify?account='.$verifier;
                 // $mail->addCustomHeader('MIME-Version: 1.0');
                 // $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
