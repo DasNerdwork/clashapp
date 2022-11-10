@@ -44,7 +44,7 @@ body, html {
 
 #teamname {
   max-width: 600px;
-  transform: translateY(-46px);
+  /* transform: translateY(-46px); */
 }
 
 input, input:focus, button {
@@ -524,7 +524,7 @@ li {
   width: 420px;
   height: 159px;
   overflow: hidden;
-  bottom: 135px;
+  bottom: 88px;
   left: 0px;
 }
 
@@ -563,6 +563,7 @@ li {
   right: 50px;
   width: 420px;
   left: 422px;
+  top: 88px;
   height: 175px;
   overflow: hidden;
 }
@@ -622,7 +623,7 @@ li {
 
 .header-nav-menu {
   display: flex;
-  margin-bottom: 40px;
+  /* margin-bottom: 40px; */
 
 }
 
