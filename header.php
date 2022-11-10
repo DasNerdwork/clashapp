@@ -14,41 +14,43 @@
 					</a>
 				</li>
 				<li>
-					<a href="https://clash.dasnerdwork.net/stats/" class="nav-menu-link">
+					<a href="https://clash.dasnerdwork.net/stats/" class="nav-menu-link" onclick="return false;">
 						<span>Stats</span>
 					</a>
 				</li>
 				<li>
-					<a href="https://clash.dasnerdwork.net/docs/" class="nav-menu-link">
+					<a href="https://clash.dasnerdwork.net/docs/" class="nav-menu-link" onclick="return false;">
 						<span>Docs</span>
 					</a>
 				</li>
 				<li>
-					<a href="https://clash.dasnerdwork.net/counters/" class="nav-menu-link">
+					<a href="https://clash.dasnerdwork.net/counters/" class="nav-menu-link" onclick="return false;">
 						<span>Counters</span>
 					</a>
 				</li>
 				<li>
-					<a href="https://clash.dasnerdwork.net/tft/" class="nav-menu-link">
+					<a href="https://clash.dasnerdwork.net/tft/" class="nav-menu-link" onclick="return false;">
 						<span>TFT</span>
 					</a>
 				</li>
 			</ul>
 		</nav>
         <form id="suchfeld" action="" onsubmit="return false;" method="GET" autocomplete="off" style="display: flex;">
-            <input type="text" name="name" id="name" value="" placeholder="Beschwörername">
-            <input type="submit" name="submitBtn" id="submitBtn" value="Suchen" onclick="sanitize(this.form.name.value);">
-            <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;" disabled>Aktualisieren</button>
+            <input type="text" name="name" id="name" value="" placeholder="Summonername">
+            <input type="submit" name="submitBtn" id="submitBtn" value="Search" onclick="sanitize(this.form.name.value);">
+            <button type="button" id="updateBtn" onclick="showLoader();" style="display: none;" disabled>Update</button>
             <div class="sbl-circ" id="loader"></div>
         </form>
         <div class="misc-button-menu">
             <?php if(isset($_SESSION['user']['sumid'])){ 
-            $profilePlayerData = getPlayerData('sumid', $_SESSION['user']['sumid']);
+                if(file_exists('/var/www/html/clash/clashapp/data/player/'.$_SESSION['user']['sumid'].'.json')){
+                $headerJson = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$_SESSION['user']['sumid'].'.json'), true);
+                }
             ?>
             <div class="profile-button">
-                <?php echo '<a href="https://clash.dasnerdwork.net/profile/'.$profilePlayerData["Name"].'" class="profile-link">';
-                      echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$profilePlayerData["Icon"].'.png" style="vertical-align:middle; margin-right: 10px; text-decoration: none !important; " width="32" loading="lazy">';
-                      echo '<span class="profile-link-text">'.$profilePlayerData['Name'].'</span></a>'; ?>
+                <?php echo '<a href="https://clash.dasnerdwork.net/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'" class="profile-link">';
+                      echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.png" style="vertical-align:middle; margin-right: 10px; text-decoration: none !important; " width="32" loading="lazy">';
+                      echo '<span class="profile-link-text">'.$headerJson["PlayerData"]["Name"].'</span></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="profile-button">
@@ -59,7 +61,7 @@
             <?php } ?>
             <div>
                 <button type="button" class="select-language-button misc-button">
-                    <span id="language-selector">Deutsch</span>
+                    <span id="language-selector">English</span>
                 </button>
             </div>
             <?php if(!isset($_SESSION['user'])){ ?>

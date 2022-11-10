@@ -23,6 +23,11 @@ $headers = array(
     "X-Riot-Token: ".$apiKey
  );
  $currentTimestamp = time();
+ $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns", 
+ "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
+ $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
+ "takedowns", "turretTakedowns", "inhibitorTakedowns", "dragonTakedowns", "riftHeraldTakedowns", "damageDealtToBuildings", "damageDealtToObjectives", "damageSelfMitigated", "totalDamageDealtToChampions", "totalDamageTaken", "totalDamageShieldedOnTeammates",
+ "totalHealsOnTeammates", "totalTimeCCDealt", "totalTimeSpentDead", "skillshotsDodged", "skillshotsHit", "championName", "championTransform", "individualPosition", "teamPosition", "lane", "puuid", "summonerId","summonerName", "win");
 
 /** General Summoner Info
  * This function retrieves all general playerdata of a given username or PUUID
@@ -63,12 +68,12 @@ function getPlayerData($type, $id){
 
     // 403 Access forbidden -> Outdated API Key
     if($httpCode == "403"){
-        echo "<h2>API Key outdated!</h2>";
+        echo "<h2>403 Forbidden GetPlayerData</h2>";
     }
 
     // 429 Too Many Requests
     if($httpCode == "429"){
-        sleep(121);
+        sleep(10);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $id);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -119,11 +124,11 @@ function getMasteryScores($sumid){
 
     // 403 Forbidden
     if($httpCode == "403"){
-        echo "<h2>API Key outdated!</h2>";
+        echo "<h2>403 Forbidden MasteryScores</h2>";
     }
     // 429 Too Many Requests
     if($httpCode == "429"){
-        sleep(121);
+        sleep(10);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -181,12 +186,12 @@ function getCurrentRank($sumid){
 
     // 403 Forbidden
     if($httpCode == "403"){
-        echo "<h2>API Key outdated!</h2>";
+        echo "<h2>403 Forbidden CurrentRank</h2>";
     }
 
     // 429 Too Many Requests
     if($httpCode == "429"){
-        sleep(121);
+        sleep(10);
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -247,7 +252,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
 
         // 429 Too Many Requests
         if($httpCode == "429"){ /** @todo fetch function with switch to handle and log every httpcode error */
-            sleep(121);
+            sleep(5);
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -281,6 +286,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
 function downloadMatchByID($matchid, $username = null){
     global $headers, $counter;
     $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log';
+    $errorFile = null;
 
     // Halving of matchDownloader.log in case the logfile exceeds 10 MB
     if(filesize($logPath) > 10000000 && $counter == 0){
@@ -307,9 +313,9 @@ function downloadMatchByID($matchid, $username = null){
 
         // 429 Too Many Requests
         if($httpCode == "429"){
-            sleep(121);
+            sleep(10);
             $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $limit = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 121 seconds - Status: " . $httpCode . " Too Many Requests";
+            $limit = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 5 seconds - Status: " . $httpCode . " Too Many Requests";
             file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -325,9 +331,16 @@ function downloadMatchByID($matchid, $username = null){
         $answer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpCode . " (Size: ".number_format((filesize($logPath)/1048576), 3)." MB)";
         file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
         if($httpCode == "200"){
-            $fp = fopen('/var/www/html/clash/clashapp/data/matches/' . $matchid . '.json', 'w');
-            fwrite($fp, $matchOutput);
-            fclose($fp);
+            // if(($matchOutput->info->gameDuration != "0")){ // && (isset($matchOutput->info->participants[0]->killParticipation)
+                $fp = fopen('/var/www/html/clash/clashapp/data/matches/' . $matchid . '.json', 'w');
+                fwrite($fp, $matchOutput);
+                fclose($fp);
+            // } else {
+            //     $errorFile = $matchid;
+            //     $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+            //     $warning = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: " . $matchid . " is empty or a remake - Skipping";
+            //     file_put_contents($logPath, $warning.PHP_EOL , FILE_APPEND | LOCK_EX);
+            // }
         } else {
             $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
             $warning = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: " . $matchid . " received HTTP-Code: " . $httpCode . " - Skipping";
@@ -338,6 +351,8 @@ function downloadMatchByID($matchid, $username = null){
         $noAnswer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
         file_put_contents($logPath, $noAnswer.PHP_EOL , FILE_APPEND | LOCK_EX);
     }
+    // return array("Status" => "Success", "ErrorFile" => $errorFile);
+    return;
 }
 
 /** Important performance-saving function to collect locally stored matchdata into dynamically used array
@@ -353,12 +368,42 @@ function downloadMatchByID($matchid, $username = null){
 function getMatchData($matchIDArray){
     $startMemory = memory_get_usage();
     $matchData = array();
+    global $cleanAttributeArray;
 
     // Loop through each matchID.json
     foreach ($matchIDArray as $key => $matchIDJSON) {
         if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
         if(file_exists('/var/www/html/clash/clashapp/data/matches/'.$matchIDJSON.'.json')){
            $matchData[$matchIDJSON] = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/matches/'.$matchIDJSON.'.json')); 
+           unset($matchData[$matchIDJSON]->metadata->dataVersion);
+           unset($matchData[$matchIDJSON]->info->gameId);
+           unset($matchData[$matchIDJSON]->info->gameMode);
+           unset($matchData[$matchIDJSON]->info->gameName);
+           unset($matchData[$matchIDJSON]->info->gameType);
+           unset($matchData[$matchIDJSON]->info->mapId);
+           $matchData[$matchIDJSON]->info->gameVersion = explode(".",$matchData[$matchIDJSON]->info->gameVersion)[0].".".explode(".",$matchData[$matchIDJSON]->info->gameVersion)[1];
+           foreach($matchData[$matchIDJSON]->info->participants as $player){
+                unset($player->allInPings);
+                unset($player->assistMePings);
+                unset($player->baitPings);
+                unset($player->baronKills);
+                unset($player->basicPings);
+                unset($player->bountyLevel);
+                foreach($player->challenges as $challengeName => $challValue){
+                    if(!in_array($challengeName, $cleanAttributeArray)){
+                        unset($player->challenges->$challengeName);
+                    }
+                }
+                foreach($player as $statName => $statValue){
+                    if(!in_array($statName, $cleanAttributeArray) && $statName != "challenges"){
+                        unset($player->$statName);
+                    }
+                }
+            }
+            unset($matchData[$matchIDJSON]->info->platformId); // e.g. EUW
+            unset($matchData[$matchIDJSON]->info->queueId); // E.g. 440 / Solo_Duo_Queue
+            unset($matchData[$matchIDJSON]->info->teams);
+            unset($matchData[$matchIDJSON]->info->tournamentCode);
         }        
     }
     return $matchData;
@@ -1379,10 +1424,10 @@ function getHighestWinrateWith($lane, $matchDataArray, $puuid){
  * @return array $returnArray Contains the combination of matchID and matchScore for a given player
  */
 function getMatchRanking($matchIDArray, $matchData, $sumid){
-    $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns", 
-    "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
+    global $rankingAttributeArray;
     $maxRankScore = 0;
     $returnArray = array();
+    $t = 0;
     // $matchIDArray = array_slice($matchIDArray, 0, 15);
     foreach ($matchIDArray as $matchID) {
         unset($maxRankScore);
@@ -1390,44 +1435,49 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
         //going through all matches to save all data in array per sumid
         foreach ($matchData[$matchID]->info as $player) {
             for ($i = 0; $i < 10; $i++){
-                if (isset($player[$i]->summonerId)) {
-                    //mainArray[SpielerSumid1-10][Attribut] = Wert vom Attribut;
-                    $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills;
-                    $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths;
-                    $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists;
-                    $mainArray[$player[$i]->summonerId]["KDA"] = $player[$i]->challenges->kda;
-                    $mainArray[$player[$i]->summonerId]["KillParticipation"] = $player[$i]->challenges->killParticipation;
-                    $mainArray[$player[$i]->summonerId]["CS"] = $player[$i]->totalMinionsKilled;
-                    $mainArray[$player[$i]->summonerId]["Gold"] = $player[$i]->goldEarned;
-                    $mainArray[$player[$i]->summonerId]["VisionScore"] = $player[$i]->visionScore;
-                    $mainArray[$player[$i]->summonerId]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns;
-                    $mainArray[$player[$i]->summonerId]["WardsPlaced"] = $player[$i]->wardsPlaced;
-                    $mainArray[$player[$i]->summonerId]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded;
-                    $mainArray[$player[$i]->summonerId]["VisionWards"] = $player[$i]->detectorWardsPlaced;
-                    $mainArray[$player[$i]->summonerId]["Consumables"] = $player[$i]->consumablesPurchased;
-                    $mainArray[$player[$i]->summonerId]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken;
-                    $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = $player[$i]->challenges->takedowns;
-                    $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = $player[$i]->turretTakedowns;
-                    $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns;
-                    $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns;
-                    $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns;
-                    $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings;
-                    $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives;
-                    $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated;
-                    $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions;
-                    $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken;
-                    $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates;
-                    $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates;
-                    $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt;
-                    $mainArray[$player[$i]->summonerId]["DeathTime"] = $player[$i]->totalTimeSpentDead;
-                    $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged;
-                    $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit;
+                if (isset($player[$i]->summonerId)) { // Necessary to loop over every player to get comparable results
+                    // echo $i."<br>";
+                    // Ternary Operator == if(isset(playerStat)) then set "Attribute" to the playerStat else set the "Attribute" to 0
+                    isset($player[$i]->kills) ? $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills : $mainArray[$player[$i]->summonerId]["Kills"] = 0;
+                    isset($player[$i]->deaths) ? $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths : $mainArray[$player[$i]->summonerId]["Deaths"] = 0;
+                    isset($player[$i]->assists) ? $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists : $mainArray[$player[$i]->summonerId]["Assists"] = 0;
+                    isset($player[$i]->challenges->kda) ? $mainArray[$player[$i]->summonerId]["KDA"] = $player[$i]->challenges->kda : $mainArray[$player[$i]->summonerId]["KDA"] = 0;
+                    isset($player[$i]->challenges->killParticipation) ? $mainArray[$player[$i]->summonerId]["KillParticipation"] = $player[$i]->challenges->killParticipation : $mainArray[$player[$i]->summonerId]["KillParticipation"] = 0;
+                    isset($player[$i]->totalMinionsKilled) ? $mainArray[$player[$i]->summonerId]["CS"] = $player[$i]->totalMinionsKilled : $mainArray[$player[$i]->summonerId]["CS"] = 0;
+                    isset($player[$i]->goldEarned) ? $mainArray[$player[$i]->summonerId]["Gold"] = $player[$i]->goldEarned : $mainArray[$player[$i]->summonerId]["Gold"] = 0;
+                    isset($player[$i]->visionScore) ? $mainArray[$player[$i]->summonerId]["VisionScore"] = $player[$i]->visionScore : $mainArray[$player[$i]->summonerId]["VisionScore"] = 0;
+                    isset($player[$i]->challenges->wardTakedowns) ? $mainArray[$player[$i]->summonerId]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns : $mainArray[$player[$i]->summonerId]["WardTakedowns"] = 0;
+                    isset($player[$i]->wardsPlaced) ? $mainArray[$player[$i]->summonerId]["WardsPlaced"] = $player[$i]->wardsPlaced : $mainArray[$player[$i]->summonerId]["WardsPlaced"] = 0;
+                    isset($player[$i]->challenges->wardsGuarded) ? $mainArray[$player[$i]->summonerId]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded : $mainArray[$player[$i]->summonerId]["WardsGuarded"] = 0;
+                    isset($player[$i]->detectorWardsPlaced) ? $mainArray[$player[$i]->summonerId]["VisionWards"] = $player[$i]->detectorWardsPlaced : $mainArray[$player[$i]->summonerId]["VisionWards"] = 0;
+                    isset($player[$i]->consumablesPurchased) ? $mainArray[$player[$i]->summonerId]["Consumables"] = $player[$i]->consumablesPurchased : $mainArray[$player[$i]->summonerId]["Consumables"] = 0;
+                    isset($player[$i]->challenges->turretPlatesTaken) ? $mainArray[$player[$i]->summonerId]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken : $mainArray[$player[$i]->summonerId]["TurretPlates"] = 0;
+                    isset($player[$i]->challenges->takedowns) ? $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = $player[$i]->challenges->takedowns : $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = 0;
+                    isset($player[$i]->turretTakedowns) ? $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = $player[$i]->turretTakedowns : $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = 0;
+                    isset($player[$i]->inhibitorTakedowns) ? $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns : $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = 0;
+                    isset($player[$i]->challenges->dragonTakedowns) ? $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns : $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = 0;
+                    isset($player[$i]->challenges->riftHeraldTakedowns) ? $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns : $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = 0;
+                    isset($player[$i]->damageDealtToBuildings) ? $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings : $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = 0;
+                    isset($player[$i]->damageDealtToObjectives) ? $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives : $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = 0;
+                    isset($player[$i]->damageSelfMitigated) ? $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated : $mainArray[$player[$i]->summonerId]["DamageMitigated"] = 0;
+                    isset($player[$i]->totalDamageDealtToChampions) ? $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions : $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = 0;
+                    isset($player[$i]->totalDamageTaken) ? $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken : $mainArray[$player[$i]->summonerId]["DamageTaken"] = 0;
+                    isset($player[$i]->totalDamageShieldedOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates : $mainArray[$player[$i]->summonerId]["TeamShielded"] = 0;
+                    isset($player[$i]->totalHealsOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates : $mainArray[$player[$i]->summonerId]["TeamHealed"] = 0;
+                    isset($player[$i]->totalTimeCCDealt) ? $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt : $mainArray[$player[$i]->summonerId]["TimeCC"] = 0;
+                    isset($player[$i]->totalTimeSpentDead) ? $mainArray[$player[$i]->summonerId]["DeathTime"] = $player[$i]->totalTimeSpentDead : $mainArray[$player[$i]->summonerId]["DeathTime"] = 0;
+                    isset($player[$i]->challenges->skillshotsDodged) ? $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged : $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = 0;
+                    isset($player[$i]->challenges->skillshotsHit) ? $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit : $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = 0;
                 }
             }
         }
+        // print "<pre>";print_r($mainArray);print "</pre>";
+        // echo mb_strlen(serialize((array)$mainArray), '8bit');
         foreach ($rankingAttributeArray as $attribute){
 
             foreach ($mainArray as $key => $playersumid) {
+                // echo "hier3<br>";
+
                 $tempArray[] = array (
                     "SumID" => $key,
                     $attribute => $playersumid[$attribute],
@@ -1443,6 +1493,7 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                 });
             }
             foreach($tempArray as $rank => $value){
+                // echo "hier4<br>";
                 if ($value["SumID"] == $sumid){
                     switch ($attribute){
                         case "Kills":
@@ -1553,42 +1604,43 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
  * @return array $teamDataArray with keys "TeamID", "TournamentID", "Name", "Tag", "Icon", "Tier", "Captain" and the array itself of "Players"
  */
 function getTeamByTeamID($teamID){
-    global $headers;
-    $teamDataArray = array();
-    $logPath = '/var/www/html/clash/clashapp/data/logs/teamDownloader.log';
-
-    // Curl API request block
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $teamOutput = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    // 403 Access forbidden -> Outdated API Key
-    if($httpCode == "403"){
-        echo "<h2>API Key outdated!</h2>";
-    }
-
-    // 429 Too Many Requests
-    if($httpCode == "429"){
-        sleep(121);
+    if($teamID != "test"){
+        global $headers;
+        $teamDataArray = array();
+        $logPath = '/var/www/html/clash/clashapp/data/logs/teamDownloader.log';
+        
+        // Curl API request block
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $teamOutput = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        
+        // 403 Access forbidden -> Outdated API Key
+        if($httpCode == "403"){
+            echo "<h2>403 Forbidden TeamByTeamID</h2>";
+        }
+        
+        // 429 Too Many Requests
+        if($httpCode == "429"){
+            sleep(5);
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            $teamOutput = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+        }
+    } else {
+        // Test Team Change
+        $httpCode = "200";
+        $teamOutput = file_get_contents('/var/www/html/clash/clashapp/data/misc/test.json');
     }
-
-    // Temporär change
-
-    $teamOutput = file_get_contents('/hdd1/clashapp/misc/team.by-teamid.json');
     
-    // $teamOutput = file_get_contents('/hdd1/clashapp/misc/clashTeam2.json');
-
     // Collect requested values in returnarray
+    $teamDataArray["Status"] = $httpCode;
     $teamDataArray["TeamID"] = json_decode($teamOutput)->id;
     $teamDataArray["TournamentID"] = json_decode($teamOutput)->tournamentId;
     $teamDataArray["Name"] = json_decode($teamOutput)->name;
@@ -1981,6 +2033,128 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
 
     return $returnArray; 
 }
+/**:
+ * 
+ */
+function getRankOrLevel($rankData){
+        $rankVal = 0; // This score is used to find the highest Rank from both Flex and Solo Queue | Local Variable
+        $highEloLP = ""; // If the user has reached high elo the LP count is important (just for Master, Grandmaster and Challenger)
+
+        foreach($rankData as $rankedQueue){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution) 
+            if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
+                if($rankedQueue["Tier"] == "SILVER" && $rankVal < 3){
+                    $rankVal = 3;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                } else if($rankedQueue["Tier"] == "GOLD" && $rankVal < 4){
+                    $rankVal = 4;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                } else if($rankedQueue["Tier"] == "BRONZE" && $rankVal < 2){
+                    $rankVal = 2;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                } else if($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 5){
+                    $rankVal = 5;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                } else if($rankedQueue["Tier"] == "IRON" && $rankVal < 1){
+                    $rankVal = 1;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                } else if($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 6){
+                    $rankVal = 6;
+                    $rankNumber = $rankedQueue["Rank"];
+                    $highestRank = $rankedQueue["Tier"];
+                } else if($rankedQueue["Tier"] == "MASTER" && $rankVal < 7){
+                    $rankVal = 7;
+                    $rankNumber = "";
+                    $highestRank = $rankedQueue["Tier"];
+                    $highEloLP = $rankedQueue["LP"];
+                } else if($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 8){
+                    $rankVal = 8;
+                    $rankNumber = "";
+                    $highestRank = $rankedQueue["Tier"];
+                    $highEloLP = $rankedQueue["LP"];
+                } else if($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 9){
+                    $rankVal = 9;
+                    $rankNumber = "";
+                    $highestRank = $rankedQueue["Tier"];
+                    $highEloLP = $rankedQueue["LP"];
+                }
+            }
+        }
+        if($rankVal != 0){
+            return array("Type" => "Rank", "HighestRank" => $highestRank, "HighEloLP" => $highEloLP, "RankNumber" => $rankNumber);
+        } else {
+            switch ($playerData["Level"]){
+                case ($playerData["Level"] < 30):
+                    $levelFileName = "001";
+                    break;
+                case ($playerData["Level"] < 50):
+                    $levelFileName = "030";
+                    break;
+                case ($playerData["Level"] < 75):
+                    $levelFileName = "050";
+                    break;
+                case ($playerData["Level"] < 100):
+                    $levelFileName = "075";
+                    break;
+                case ($playerData["Level"] < 125):
+                    $levelFileName = "100";
+                    break;
+                case ($playerData["Level"] < 150):
+                    $levelFileName = "125";
+                    break;
+                case ($playerData["Level"] < 175):
+                    $levelFileName = "150";
+                    break;
+                case ($playerData["Level"] < 200):
+                    $levelFileName = "175";
+                    break;
+                case ($playerData["Level"] < 225):
+                    $levelFileName = "200";
+                    break;
+                case ($playerData["Level"] < 250):
+                    $levelFileName = "225";
+                    break;
+                case ($playerData["Level"] < 275):
+                    $levelFileName = "250";
+                    break;
+                case ($playerData["Level"] < 300):
+                    $levelFileName = "275";
+                    break;
+                case ($playerData["Level"] < 325):
+                    $levelFileName = "300";
+                    break;
+                case ($playerData["Level"] < 350):
+                    $levelFileName = "325";
+                    break;
+                case ($playerData["Level"] < 375):
+                    $levelFileName = "350";
+                    break;
+                case ($playerData["Level"] < 400):
+                    $levelFileName = "375";
+                    break;
+                case ($playerData["Level"] < 425):
+                    $levelFileName = "400";
+                    break;
+                case ($playerData["Level"] < 450):
+                    $levelFileName = "425";
+                    break;
+                case ($playerData["Level"] < 475):
+                    $levelFileName = "450";
+                    break;
+                case ($playerData["Level"] < 500):
+                    $levelFileName = "475";
+                    break;
+                case ($playerData["Level"] >= 500):
+                    $levelFileName = "500";
+                    break;
+                }
+            return array("Type" => "Level", "LevelFileName" => $levelFileName);
+        }
+    }
 
 /** Always active "function" to collect the teamID of a given Summoner Name
  * This function calls an API request as soon as the sumname gets posted from the team.php
@@ -2016,7 +2190,7 @@ if(isset($_POST['sumname'])){
 
     // 429 Too Many Requests
     if($httpCode == "429"){
-        sleep(121);
+        sleep(5);
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);

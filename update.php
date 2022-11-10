@@ -33,66 +33,89 @@ if(isset($_POST["username"])){
 
 // Fetch all the necessary data for updating or generating a single players player.json, stored in /clashapp/data/player/
 function updateProfile($id, $maxMatchIds, $type="name"){
-    $playerData = getPlayerData($type,$id);
-    $playerName = $playerData["Name"];
-    $sumid = $playerData["SumID"];
-    $puuid = $playerData["PUUID"];
-    $masteryData = getMasteryScores($sumid);
-    $rankData = getCurrentRank($sumid);
-    $matchIDs = getMatchIDs($puuid, $maxMatchIds);
-    $jsonArray = array();
-    $jsonArray["PlayerData"] = $playerData;
-    $jsonArray["RankData"] = $rankData;
-    $jsonArray["MasteryData"] = $masteryData;
-    $jsonArray["MatchIDs"] = $matchIDs;
-    $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
+    if($id != ""){
+        $playerData = getPlayerData($type,$id);
+        $playerName = $playerData["Name"];
+        $sumid = $playerData["SumID"];
+        $puuid = $playerData["PUUID"];
+        $masteryData = getMasteryScores($sumid);
+        $rankData = getCurrentRank($sumid);
+        $matchIDs = getMatchIDs($puuid, $maxMatchIds);
+        $jsonArray = array();
+        $jsonArray["PlayerData"] = $playerData;
+        $jsonArray["RankData"] = $rankData;
+        $jsonArray["MasteryData"] = $masteryData;
+        $jsonArray["MatchIDs"] = $matchIDs;
+        $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 
-    /**
-     * STEP 1: Check if up-to-date
-     */
-    if($sumid != "" || $sumid != "/"){ /** @todo additional sanitizing regex check for valid $sumid variants */
-        if(file_exists('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json')){
-            $existingJson = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
-            // If the newest local matchID equals the newest API requested matchID, ergo if there is nothing to update
-            // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
-            if(getMatchIDs($puuid, 1)[0] == $existingJson["MatchIDs"][0] && (count($existingJson["MatchIDs"]) >= count($matchIDs))){
-                echo '{"status":"up-to-date"}';
-                return; // Stop this whole process from further actions below
+        /**
+         * STEP 1: Check if up-to-date
+         */
+        if($sumid != "" || $sumid != "/"){ /** @todo additional sanitizing regex check for valid $sumid variants */
+            if(file_exists('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json')){
+                $existingJson = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
+                // If the newest local matchID equals the newest API requested matchID, ergo if there is nothing to update
+                // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
+                // if(getMatchIDs($puuid, 1)[0] == $existingJson["MatchIDs"][0] && (count($existingJson["MatchIDs"]) >= count($matchIDs))){
+                //     echo '{"status":"up-to-date"}';
+                //     return; // Stop this whole process from further actions below
+                // }
+                $return = true;
+                foreach(getMatchIDs($puuid, 15) as $checkSingleMatch){
+                    if(!in_array($checkSingleMatch, $existingJson["MatchIDs"])){
+                        downloadMatchByID($checkSingleMatch, $playerName);
+                        $return = false;
+                    }
+                }
+                if($return){
+                    return '{"status":"up-to-date"}';
+                }
+
+
+            } else { 
+                // else empty $existingJson string so following if-statement forced into its else part
+                $existingJson = ""; 
             }
-        } else { 
-            // else empty $existingJson string so following if-statement forced into its else part
-            $existingJson = ""; 
-        }
 
-        /**
-         * STEP 2: Rewrite file if it doesn't exist or has to be updated
-         */
-        $fp = fopen('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json', 'w');
-        // Open the file only to write. If it doesnt exist it will be created. If it exists it will be reset and updated with the newest data
-        fwrite($fp, json_encode($jsonArray));
-        fclose($fp);
+            /**
+             * STEP 2: Rewrite file if it doesn't exist or has to be updated
+             */
 
-        /**
-         * STEP 3: Fetch all given matchIDs and download each match via downloadMatchByID
-         */
-        $playerDataArray = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
-        foreach($playerDataArray["MatchIDs"] as $match){
-            if(!file_exists('/var/www/html/clash/clashapp/data/matches/'.$match.'.json')){
-                downloadMatchByID($match, $playerName);
+            $fp = fopen('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json', 'w');
+            // Open the file only to write. If it doesnt exist it will be created. If it exists it will be reset and updated with the newest data
+            fwrite($fp, json_encode($jsonArray));
+            fclose($fp);
+
+            /**
+             * STEP 3: Fetch all given matchIDs and download each match via downloadMatchByID
+             */
+            $playerDataArray = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
+            foreach($playerDataArray["MatchIDs"] as $match){
+                if(!file_exists('/var/www/html/clash/clashapp/data/matches/'.$match.'.json')){
+                    $downloadReturn = downloadMatchByID($match, $playerName);
+                    if(($downloadReturn["Status"] == "Success") && ($downloadReturn["ErrorFile"] != null)){
+                        if(($found = array_search($downloadReturn["ErrorFile"], $jsonArray["MatchIDs"])) !== false){
+                            unset($jsonArray["MatchIDs"][$found]);
+                            $fp = fopen('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json', 'w');
+                            fwrite($fp, json_encode($jsonArray));
+                            fclose($fp);
+                        }
+                    }
+                }
             }
-        }
 
-        /**
-         * STEP 4: Logging & Finishing up
-         */
-        clearstatcache(true, $logPath); // Used for proper filesize calculation at the end of line 82
-        $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $endofup = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: End of update for \"" . $playerName . "\" - (Final Matchcount: ".count($playerDataArray["MatchIDs"]).", Approximate Filesize: ".number_format((filesize($logPath)/1048576), 3)." MB)";
-        $border = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
-        file_put_contents($logPath, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
-        file_put_contents($logPath, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
-        // Finally return successful updated status via javascript json format
-        // echo '{"status":"updated"}';
+            /**
+             * STEP 4: Logging & Finishing up
+             */
+            clearstatcache(true, $logPath); // Used for proper filesize calculation at the end of line 82
+            $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+            $endofup = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: End of update for \"" . $playerName . "\" - (Final Matchcount: ".count($playerDataArray["MatchIDs"]).", Approximate Filesize: ".number_format((filesize($logPath)/1048576), 3)." MB)";
+            $border = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
+            file_put_contents($logPath, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
+            file_put_contents($logPath, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
+            // Finally return successful updated status via javascript json format
+            // echo '{"status":"updated"}';
+        }
     }
 }
 
