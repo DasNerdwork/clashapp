@@ -3,7 +3,7 @@
 	<div class="header-nav-menu">
 		<div class="clickable-logo">
 			<a href="/" class="nav-menu-link">
-				<img src="/clashapp/data/misc/svg/logo.svg" width="150" alt="CLASH" height="48">
+				<img src="/clashapp/data/misc/webp/logo.webp" width="150" alt="CLASH" height="48">
 			</a>
 		</div>
 		<nav>
@@ -49,13 +49,13 @@
             ?>
             <div class="profile-button">
                 <?php echo '<a href="https://clash.dasnerdwork.net/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'" class="profile-link">';
-                      echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.png" style="vertical-align:middle; margin-right: 10px; text-decoration: none !important; " width="32" loading="lazy">';
+                      echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" style="vertical-align:middle; margin-right: 10px; text-decoration: none !important; " width="32" loading="lazy">';
                       echo '<span class="profile-link-text">'.$headerJson["PlayerData"]["Name"].'</span></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="profile-button">
                 <a href="https://clash.dasnerdwork.net/settings" class="profile-link">
-                    <img src="/clashapp/data/misc/profile-icon.png" style="vertical-align:middle; margin-right: 10px; text-decoration: none !important; " width="32" loading="lazy">
+                    <img src="/clashapp/data/misc/profile-icon.webp" style="vertical-align:middle; margin-right: 10px; text-decoration: none !important; " width="32" loading="lazy">
                     <?php echo '<span class="profile-link-text">'.$_SESSION['user']['username'].'</span></a>'; ?> 
             </div>
             <?php } ?>
@@ -83,7 +83,7 @@
             <?php } ?>
             <div class="settings-button">
                 <a href="/settings">
-                    <img src="/clashapp/data/misc/settings-wheel.png" width="20" height="20"></img>
+                    <img src="/clashapp/data/misc/settings-wheel.webp" width="20" height="20"></img>
                 </a>
             </div>
         </div>

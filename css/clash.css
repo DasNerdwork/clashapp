@@ -33,8 +33,8 @@ body, html {
 }
 
 .full-footer {
-  /* position: fixed; */
-  bottom: 10px;
+  position: relative;
+  bottom: -8px;
   width: 100%;
 }
 
@@ -592,7 +592,7 @@ li {
 }
 
 .mastery-points {
-  display: inline-flex;
+  margin-top: -26px;
 }
 
 ul {
@@ -608,13 +608,6 @@ li {
   margin-right: 5px;
   margin-left: 5px;
 }
-
-/* a {
-  display: block;
-  padding: 8px;
-  text-decoration: none;
-  color: #000;
-} */
 
 .clickable-logo {
   width: 170px;
@@ -989,4 +982,8 @@ header {
   -webkit-text-fill-color: #fff;
   border: none;
   outline: none;
+}
+
+.lane-icon {
+  filter: saturate(0) brightness(1.4);
 }
