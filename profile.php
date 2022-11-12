@@ -146,8 +146,8 @@ $startPrintData = microtime(true);
 if($formattedInput != "") {
 
     echo "<div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px;'>";
-    if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.png" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
+    if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
+        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
     }
 
     $rankVal = 0;
@@ -210,7 +210,7 @@ if($formattedInput != "") {
     }
 
     if($rankVal != 0){
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
     $webBorderPath = str_replace("/var/www/html/clash","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
@@ -290,7 +290,7 @@ if($formattedInput != "") {
                 break; 
         }
 
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.png', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
     $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
@@ -307,11 +307,11 @@ if($formattedInput != "") {
     $playerMainRole = $playerLanes[0];
     $playerSecondaryRole = $playerLanes[1];
     echo "<div style='display: flex; justify-content: center; width: 200px;'>";
-    if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerMainRole.'.png')){
-        echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.png" width="32">';
+    if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
+        echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32">';
     }
-    if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png')){
-        echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.png" width="32"><br>';
+    if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
+        echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32"><br>';
     }
     echo "</div>";
     echo "<table class='table' style='width:100%'><tr><td>";
