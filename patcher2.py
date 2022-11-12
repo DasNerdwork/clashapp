@@ -46,7 +46,7 @@ url = "http://ddragon.leagueoflegends.com/api/versions.json"
 json_file = urlopen(url)
 variables = json.load(json_file)
 json_file.close()
-folder = "/var/www/html/clash/clashapp/data/patch/"
+folder = "/var/www/html/clash/clashapp/test"
 logger.info("Comparing locale with live patch version") # Comparing locale with live patch version
 with open('/var/www/html/clash/clashapp/data/patch/version.txt', 'r') as v:
     version = v.read()
@@ -58,7 +58,7 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     logger.info("Starting download of database upgrade...")
     start_download = time.time() # Start time calculation of tgz archive download
     url = 'https://ddragon.leagueoflegends.com/cdn/dragontail-' + variables[0] + '.tgz' # Grabpath
-    target_path = '/var/www/html/clash/clashapp/data/patch/' + variables[0] + '.tar.gz' # Extractpath
+    target_path = '/var/www/html/clash/clashapp/test/' + variables[0] + '.tar.gz' # Extractpath
     response = requests.get(url, stream=True)
     if (response.status_code == 200): # If files exist online
         with open(target_path, 'wb') as f:
@@ -71,7 +71,7 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     logger.info("Starting extraction of archives...")
     start_extraction = time.time()
     tar = tarfile.open(target_path, "r:gz")
-    tar.extractall(path='/var/www/html/clash/clashapp/data/patch/')
+    tar.extractall(path='/var/www/html/clash/clashapp/test/')
     tar.close()
     end_extraction = str(round(time.time() - start_extraction, 2))
     logger.info("All files extracted and overwritten. Time elapsed: " + end_extraction + " seconds")
@@ -80,11 +80,13 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     paths = Path('/var/www/html/clash/clashapp/test/').glob("**/*.png")
     for path in paths:
         webp_path = convert_to_webp(path)
+        print(webp_path)
     paths2 = Path('/var/www/html/clash/clashapp/test/').glob("**/*.jpg")
     for path2 in paths2:
         webp_path2 = convert_to_webp(path2)
+        print(webp_path2)
     logger.info("Converted all available .png and .jpg to .webp")
-
+        
     # End of extraction and start of old file deletion
     os.remove(target_path) # Delete tar.gz
     if (os.path.isdir(folder + variables[0])): # If we got new database files
