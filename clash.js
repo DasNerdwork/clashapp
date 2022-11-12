@@ -6,8 +6,8 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
     if (window.location.pathname.match(allClashPages) || window.location.pathname.match(allTeamPages)) {
       document.getElementById("updateBtn").style.display = "initial";
     } else if (window.location.href == "https://clash.dasnerdwork.net/") {
-      footer = document.getElementById("full-footer");
-      footer.style.position = "fixed";
+      footer = document.getElementById("full-footer").style.position = "fixed";
+      document.getElementById("version").style.opacity = "0.3";
       suchfeld = document.getElementById("suchfeld");
       suchfeld.style.position = "absolute";
       suchfeld.style.top = "60%";
@@ -23,7 +23,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       input.style.fontWeight = "400";
       input.style.borderRadius = "30px 0 0 30px";
       input.style.textIndent= "20px";
-      input.placeholder = "Gib einen Beschwörernamen ein";
+      input.placeholder = "Enter a Summoner Name";
       input.style.outlineStyle = "none";
       searchBtn = document.getElementById("submitBtn");
       searchBtn.value = "";
@@ -32,15 +32,17 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       searchBtn.style.padding = "10px 60px 10px 10px";
       searchBtn.style.border = "none";
       searchBtn.style.fontSize = "20px";
-      searchBtn.style.backgroundImage = 'url(/clashapp/data/misc/svg/searchicon.svg)';
+      searchBtn.style.backgroundImage = 'url(/clashapp/data/misc/webp/searchicon.webp)';
       searchBtn.style.backgroundRepeat = "no-repeat";
       searchBtn.style.backgroundPosition = "center";
       searchBtn.style.backgroundSize = "50%";
-      document.body.style.backgroundImage = 'url(/clashapp/data/misc/svg/background.svg)';
+      document.body.style.backgroundImage = 'url(/clashapp/data/misc/webp/background.webp)';
       document.body.style.backgroundRepeat = "no-repeat";
       document.body.style.backgroundPosition = "50% 20%";
       document.body.style.backgroundSize = "40%";
       document.body.style.backgroundColor = "#c6ccd8";
+      // document.body.style.backgroundColor = "#000";
+      document.getElementById("version").style.color = "#000";
     }
 
       // TABLE COLLAPSER
@@ -113,7 +115,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       function selectChampions(){          
         var lanes = document.getElementsByClassName("lane-selector"); // the 5 lane icons as elements in a list
           for (let i = 0; i < lanes.length; i++) { 
-            if(lanes.item(i).style.filter == "brightness(100%)"){ // checks if a lane filter icon is set to active (brightness(100%)) and saves the specific lane name for futher sorting
+            if(lanes.item(i).style.filter == "saturate(0) brightness(200%)"){ // checks if a lane filter icon is set to active (brightness(100%)) and saves the specific lane name for futher sorting
               laneFilter = lanes.item(i).dataset.lane.toUpperCase();
               break;
             } else {
@@ -205,8 +207,8 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
           } else {
             html = '<div class="selected-ban-champion">'+
                         '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
-                          '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + id + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + id + '.png" width="48" loading="lazy">'+
-                          '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.png" width="48"></div>'+
+                          '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + id + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + id + '.webp" width="48" loading="lazy">'+
+                          '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.webp" width="48"></div>'+
                         '<span class="selected-ban-caption" style="display: block;">' + name + '</span>'+
                       '</div>';
             selectedBans.innerHTML += html;
@@ -219,27 +221,29 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       var status = 0;
 
       setInterval(function() {
-        $.ajax({
-          cache: false,
-          url: "https://clash.dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
-          dataType: "json",
-          success: function(data) {
-            if(data["Status"] > status){
-              status = data["Status"];
-              var html ="";
-              for (const element of data["SuggestedBans"]) {
-                html += '<div class="selected-ban-champion">'+
-                          '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
-                            '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.png" width="48" loading="lazy">'+
-                            '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.png" width="48"></div>'+
-                          '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
-                        '</div>';
+        if(!document.hidden){
+          $.ajax({
+            cache: false,
+            url: "https://clash.dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
+            dataType: "json",
+            success: function(data) {
+              if(data["Status"] > status){
+                status = data["Status"];
+                var html ="";
+                for (const element of data["SuggestedBans"]) {
+                  html += '<div class="selected-ban-champion">'+
+                            '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
+                              '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" width="48" loading="lazy">'+
+                              '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.webp" width="48"></div>'+
+                            '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
+                          '</div>';
+                }
+                selectedBans.innerHTML = html;
+                makeDragDroppable();
               }
-              selectedBans.innerHTML = html;
-              makeDragDroppable();
             }
-          }
-        });
+          });
+        }
       }, 500);
     }
 
@@ -340,8 +344,8 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
             for (const element of data["SuggestedBans"]) {
               html += '<div class="selected-ban-champion">'+
                         '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
-                          '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.png" width="48" loading="lazy">'+
-                          '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.png" width="48"></div>'+
+                          '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" width="48" loading="lazy">'+
+                          '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.webp" width="48"></div>'+
                         '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
                       '</div>';
             }
@@ -401,8 +405,8 @@ function selected_ban_champion(el){
 // LANE HIGHLIGHT
 function highlightLaneIcon(laneImg){
   var lanes = document.getElementsByClassName("lane-selector");
-  if (laneImg.style.filter == "brightness(50%)") {
-    laneImg.style.filter = "brightness(100%)";
+  if (laneImg.style.filter == "saturate(0) brightness(50%)") {
+    laneImg.style.filter = "saturate(0) brightness(200%)";
     var championList = document.getElementsByClassName("champ-select-champion");
     var champInput = document.getElementById("champSelector");
     laneFilter = laneImg.dataset.lane.toUpperCase();
@@ -416,13 +420,13 @@ function highlightLaneIcon(laneImg){
     }
     for (let i = 0; i < lanes.length; i++) {
       if(lanes.item(i) != laneImg){
-        lanes.item(i).style.filter = "brightness(50%)";
+        lanes.item(i).style.filter = "saturate(0) brightness(50%)";
       }
     }
   } else {
-    laneImg.style.filter = "brightness(50%)";
+    laneImg.style.filter = "saturate(0) brightness(50%)";
     for (let i = 0; i < lanes.length; i++) {
-      if(lanes.item(i).style.filter == "brightness(100%)"){
+      if(lanes.item(i).style.filter == "saturate(0) brightness(200%)"){
         var activeLane = true;
       } else {
         var activeLane = false;
@@ -674,3 +678,9 @@ $('#updateBtn').click(function() {
       }
   });
 });
+
+var playerDataCalls = 0;
+var masteryScoresCalls = 0;
+var currentRankCalls = 0;
+var matchIdCalls = 0;
+var matchDownloadCalls = 0;

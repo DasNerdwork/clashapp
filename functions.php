@@ -65,6 +65,7 @@ function getPlayerData($type, $id){
     $output = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    echo "<script>playerDataCalls++;</script>";
 
     // 403 Access forbidden -> Outdated API Key
     if($httpCode == "403"){
@@ -80,6 +81,7 @@ function getPlayerData($type, $id){
         $output = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        echo "<script>playerDataCalls++;</script>";
     }
 
     // Collect requested values in returnarray
@@ -121,6 +123,7 @@ function getMasteryScores($sumid){
     $output = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    echo "<script>masteryScoresCalls++;</script>";
 
     // 403 Forbidden
     if($httpCode == "403"){
@@ -136,7 +139,10 @@ function getMasteryScores($sumid){
         $output = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        echo "<script>masteryScoresCalls++;</script>";
     }
+
+    
 
     // Resolving return values
     foreach(json_decode($output, true) as $masteryArray){
@@ -183,6 +189,7 @@ function getCurrentRank($sumid){
     $output = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    echo "<script>currentRankCalls++;</script>";
 
     // 403 Forbidden
     if($httpCode == "403"){
@@ -199,6 +206,7 @@ function getCurrentRank($sumid){
         $output = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        echo "<script>currentRankCalls++;</script>";
     }
 
     // Resolving return values
@@ -249,6 +257,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
         $matchidOutput = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        echo "<script>matchIdCalls++;</script>";
 
         // 429 Too Many Requests
         if($httpCode == "429"){ /** @todo fetch function with switch to handle and log every httpcode error */
@@ -259,6 +268,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
             $matchidOutput = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
+            echo "<script>matchIdCalls++;</script>";
         }
 
         // Add each matchID to return array
@@ -310,6 +320,8 @@ function downloadMatchByID($matchid, $username = null){
         $matchOutput = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        echo "<script>matchDownloadCalls++;</script>";
+
 
         // 429 Too Many Requests
         if($httpCode == "429"){
@@ -323,6 +335,8 @@ function downloadMatchByID($matchid, $username = null){
             $matchOutput = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
+            echo "<script>matchDownloadCalls++;</script>";
+
         }
 
         // Write to log and save the matchid.json, else skip
@@ -375,7 +389,7 @@ function getMatchData($matchIDArray){
         if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
         if(file_exists('/var/www/html/clash/clashapp/data/matches/'.$matchIDJSON.'.json')){
            $matchData[$matchIDJSON] = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/matches/'.$matchIDJSON.'.json')); 
-           unset($matchData[$matchIDJSON]->metadata->dataVersion);
+           unset($matchData[$matchIDJSON]->metadata);
            unset($matchData[$matchIDJSON]->info->gameId);
            unset($matchData[$matchIDJSON]->info->gameMode);
            unset($matchData[$matchIDJSON]->info->gameName);
@@ -452,11 +466,11 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         echo "<td>Champion: ";
                         $champion = $inhalt->info->participants[$in]->championName;
                         if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ, see*/
-                        if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png')){
-                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png" width="32" style="vertical-align:middle" loading="lazy">';
+                        if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
+                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="32" style="vertical-align:middle" loading="lazy">';
                             echo " ".$inhalt->info->participants[$in]->championName . "</td>";
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
                             echo " N/A</td>";
                         }
 
@@ -467,12 +481,12 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         if(file_exists('/var/www/html/clash/clashapp/data/patch/img/'.runeIconFetcher($keyRune))){
                             echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'" width="32" style="vertical-align:middle" loading="lazy">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         if(file_exists('/var/www/html/clash/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune))){
                             echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'" width="16" style="vertical-align:middle" loading="lazy">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo "</td>";
 
@@ -499,14 +513,14 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                             $allItems = "item".$b;
                             $itemId = $inhalt->info->participants[$in]->$allItems;
                             if($itemId == 0){
-                                echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                echo '<img src="/clashapp/data/misc/0.webp" width="32" style="vertical-align:middle" loading="lazy">';
                             } else {
-                                if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.png')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.png" width="32" style="vertical-align:middle" loading="lazy">';
-                                } else if(file_exists('/var/www/html/clash/clashapp/data/misc/'.$itemId.'.png')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
+                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" style="vertical-align:middle" loading="lazy">';
+                                } else if(file_exists('/var/www/html/clash/clashapp/data/misc/'.$itemId.'.webp')){
+                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" style="vertical-align:middle" loading="lazy">';
                                 } else {
-                                    echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                    echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
                                 }
                             }
                         }
@@ -516,13 +530,13 @@ function getMatchDetailsByPUUID($matchIDArray, $puuid){
                         echo '<td>Vision Score: ';
                         echo $inhalt->info->participants[$in]->visionScore . " Wards: ";
                         echo $inhalt->info->participants[$in]->wardsPlaced . "x ";
-                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/3340.png" width="16" style="vertical-align:middle" loading="lazy"> Control Wards: ';
+                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/3340.webp" width="16" style="vertical-align:middle" loading="lazy"> Control Wards: ';
                         if(isset($inhalt->info->participants[$in]->challenges->controlWardsPlaced)){
                             echo $inhalt->info->participants[$in]->challenges->controlWardsPlaced . "x ";
                         } else if(isset($inhalt->info->participants[$in]->visionWardsBoughtInGame)){
                             echo $inhalt->info->participants[$in]->visionWardsBoughtInGame . "x ";
                         }
-                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.png" width="16" style="vertical-align:middle" loading="lazy"></td>';
+                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.webp" width="16" style="vertical-align:middle" loading="lazy"></td>';
 
                         // Display of the Total Values
                         echo "<td>Totals: ";
@@ -695,7 +709,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 echo "</div>";
 
                                 echo '<div class="vision-wards" style="position: relative;">';
-                                echo '<img class="parent-trinket-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.png" width="32" loading="lazy">';
+                                echo '<img class="parent-trinket-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.webp" width="32" loading="lazy">';
                                 echo '<div class="vision-wards-count-icon">'.$inhalt->info->participants[$in]->detectorWardsPlaced.'</div>';
                                 echo "</div>";
 
@@ -715,11 +729,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         if ($inhalt->info->participants[$in])
                         $champion = $inhalt->info->participants[$in]->championName;
                         if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                        if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png')){
-                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.png" width="64" style="vertical-align:middle; position:relative; z-index:1;" loading="lazy">';
-                            echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.png" width="64" style="vertical-align:middle; position:relative; bottom:64px; margin-bottom: -64px; z-index:2;" loading="lazy"></div>';
+                        if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
+                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="64" style="vertical-align:middle; position:relative; z-index:1;" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="64" style="vertical-align:middle; position:relative; bottom:64px; margin-bottom: -64px; z-index:2;" loading="lazy"></div>';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy"></div>';
                         }
 
                         // Display of champion level at end of game
@@ -730,8 +744,8 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         // Display of played Position
                         echo "<div class='champion-lane' style='z-index:3; position:relative; bottom: 32px; left: 23px;'>";
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
-                        if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$matchLane.'.png')){
-                            echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.png" width="14" loading="lazy">';
+                        if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
+                            echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="14" loading="lazy">';
                         }
                         echo "</div></div>";
 
@@ -751,12 +765,12 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo '<div class="summoner-spell-1">';
                         $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
                         $summoner2Id = $inhalt->info->participants[$in]->summoner2Id;
-                        if(file_exists('/var/www/html/clash/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".png")){
-                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.png" width="32" style="vertical-align:middle" loading="lazy">';
+                        if(file_exists('/var/www/html/clash/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".webp")){
+                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.webp" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo '</div><div class="summoner-spell-2">';
-                        if(file_exists('/var/www/html/clash/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".png")){
-                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.png" width="32" style="vertical-align:middle" loading="lazy">';
+                        if(file_exists('/var/www/html/clash/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".webp")){
+                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.webp" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo "</div>";
 
@@ -765,16 +779,16 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo '<div class="rune-1">';
                         $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                         $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
-                        if(file_exists('/var/www/html/clash/clashapp/data/patch/img/'.runeIconFetcher($keyRune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'" width="32" style="vertical-align:middle" loading="lazy">';
+                        if(file_exists('/var/www/html/clash/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp')){
+                            echo '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp" width="32" style="vertical-align:middle" loading="lazy">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo '</div><div class="rune-2">';
-                        if(file_exists('/var/www/html/clash/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'" width="16" style="vertical-align:middle" loading="lazy">';
+                        if(file_exists('/var/www/html/clash/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp')){
+                            echo '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp" width="16" style="vertical-align:middle" loading="lazy">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
                         }
                         echo "</div>";
 
@@ -800,7 +814,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                             if($b == 6){
                                 for($c=0; $c<$noItemCounter; $c++){
                                     echo '<div class="item'.($lastItemSlot+1).'">';
-                                    echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                    echo '<img src="/clashapp/data/misc/0.webp" width="32" style="vertical-align:middle" loading="lazy">';
                                     echo '</div>';
                                     $lastItemSlot++;
                                 }
@@ -809,16 +823,16 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                             $allItems = "item".$b;
                             $itemId = $inhalt->info->participants[$in]->$allItems;
                             if($itemId == 0){
-                                // echo '<img src="/clashapp/data/misc/0.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                // echo '<img src="/clashapp/data/misc/0.webp" width="32" style="vertical-align:middle" loading="lazy">';
                                 $noItemCounter += 1;
                             } else {
                                 echo '<div class="item'.($b - $noItemCounter).'">';
-                                if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.png')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.png" width="32" style="vertical-align:middle" loading="lazy">';
-                                } else if(file_exists('/var/www/html/clash/clashapp/data/misc/'.$itemId.'.png')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
+                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" style="vertical-align:middle" loading="lazy">';
+                                } else if(file_exists('/var/www/html/clash/clashapp/data/misc/'.$itemId.'.webp')){
+                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" style="vertical-align:middle" loading="lazy">';
                                 } else {
-                                    echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy">';
+                                    echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
                                 }
                                 $lastItemSlot = $b;
                                 echo "</div>";
@@ -834,10 +848,10 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     echo '<div class="lane-opponent">vs. ';
                     $enemyChamp = $inhalt->info->participants[$i]->championName;
                     if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                    if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.png')){
-                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
+                    if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp')){
+                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp" width="32" style="vertical-align:middle" loading="lazy"></div>';
                     } else {
-                        echo '<img src="/clashapp/data/misc/na.png" width="32" style="vertical-align:middle" loading="lazy"></div>';
+                        echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy"></div>';
                     }
                     }
                     if ($inhalt->info->participants[$i]->teamId == $teamID){
@@ -876,8 +890,8 @@ function printMasteryInfo($masteryArray, $index){
     global $currentPatch;
 
     // Print image if it exists
-    if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png')){
-        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.png" width="64" loading="lazy"><br>';
+    if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp')){
+        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp" width="64" loading="lazy"><br>';
     }
 
     // Print the additional info
@@ -1687,15 +1701,15 @@ function showBanSelector(){
     foreach($championNamingFile->data as $champData){
         $champName = $champData->name;
         $i++;
-        $imgPath = $champData->image->full;
+        $imgPath = substr($champData->image->full, 0, -4).".webp";
         $dataId = $champData->id;
         if($i<11){
             if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='champ-select-champion'>";
                     echo '<div class="ban-hoverer" onclick="">';
                         echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
-                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.png" width="48" loading="lazy">';
-                        echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
+                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.webp" width="48" loading="lazy">';
+                        echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" width="48" loading="lazy"></div>';
                     echo "<span class='caption' style='display: block;'>".$champName."</span>";
             echo "</div>";
             }
@@ -1704,8 +1718,8 @@ function showBanSelector(){
                 echo "<div class='champ-select-champion'>";
                     echo '<div class="ban-hoverer" onclick="">';
                         echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
-                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.png" width="48" loading="lazy">';
-                        echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.png" width="48" loading="lazy"></div>';
+                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.webp" width="48" loading="lazy">';
+                        echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" width="48" loading="lazy"></div>';
                     echo "<span class='caption' style='display: block;'>".$champName."</span>";
             echo "</div>";
             }
@@ -1964,12 +1978,12 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
         }
     }
 
-    foreach($matchData as $inhalt){
+    foreach($matchData as $mainKey => $inhalt){
         foreach($inhalt->info->participants as $player){
             if(in_array($player->summonerId, $sumidArray)){
                 foreach($sortedMasteryArray as $key => $championData){
                     if($championData["Champion"] == $player->championName){
-                        $sortedMasteryArray[$key]["AverageMatchScore"] = number_format(($sortedMasteryArray[$key]["AverageMatchScore"]+implode("",getMatchRanking(array($inhalt->metadata->matchId), $matchData, $player->summonerId)))/2, 2, '.', '');
+                        $sortedMasteryArray[$key]["AverageMatchScore"] = number_format(($sortedMasteryArray[$key]["AverageMatchScore"]+implode("",getMatchRanking(array($mainKey), $matchData, $player->summonerId)))/2, 2, '.', '');
                     }
                 }
             }
@@ -2033,128 +2047,170 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
 
     return $returnArray; 
 }
-/**:
+
+/** This function the necessary information for a correct profile icon + border display
+ * @param array $rankData A players stored information about his rank, viewable in his sumid.json
  * 
+ * @var int $rankVal The valuater, which saves a score to later determine the highest rank of a player if multiple are present
+ * @var string $highestRank A playeholder variable which will be overwritten if another $rankVal is higher than the previous $rankVel
+ *             This one holds the current highest rank tier, e.g. PLATINUM
+ * @var string $rankNumber The roman form number of a give rank, e.g. IV
+ * @var string $highEloLP Just to store the LP count in case the rank is high elo (Master+)
+ * 
+ * Returnvalue:
+ * @return array The custom return array consists of a type which is either Rank or Level to determine the icon border
+ *              Additionally it receives the necessary level filename or whole ranked data to further do stuff with it -> see team.php
  */
 function getRankOrLevel($rankData){
-        $rankVal = 0; // This score is used to find the highest Rank from both Flex and Solo Queue | Local Variable
-        $highEloLP = ""; // If the user has reached high elo the LP count is important (just for Master, Grandmaster and Challenger)
+    $rankVal = 0; // This score is used to find the highest Rank from both Flex and Solo Queue | Local Variable
+    $highEloLP = ""; // If the user has reached high elo the LP count is important (just for Master, Grandmaster and Challenger)
 
-        foreach($rankData as $rankedQueue){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution) 
-            if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
-                if($rankedQueue["Tier"] == "SILVER" && $rankVal < 3){
-                    $rankVal = 3;
-                    $rankNumber = $rankedQueue["Rank"];
-                    $highestRank = $rankedQueue["Tier"];
-                } else if($rankedQueue["Tier"] == "GOLD" && $rankVal < 4){
-                    $rankVal = 4;
-                    $rankNumber = $rankedQueue["Rank"];
-                    $highestRank = $rankedQueue["Tier"];
-                } else if($rankedQueue["Tier"] == "BRONZE" && $rankVal < 2){
-                    $rankVal = 2;
-                    $rankNumber = $rankedQueue["Rank"];
-                    $highestRank = $rankedQueue["Tier"];
-                } else if($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 5){
-                    $rankVal = 5;
-                    $rankNumber = $rankedQueue["Rank"];
-                    $highestRank = $rankedQueue["Tier"];
-                } else if($rankedQueue["Tier"] == "IRON" && $rankVal < 1){
-                    $rankVal = 1;
-                    $rankNumber = $rankedQueue["Rank"];
-                    $highestRank = $rankedQueue["Tier"];
-                } else if($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 6){
-                    $rankVal = 6;
-                    $rankNumber = $rankedQueue["Rank"];
-                    $highestRank = $rankedQueue["Tier"];
-                } else if($rankedQueue["Tier"] == "MASTER" && $rankVal < 7){
-                    $rankVal = 7;
-                    $rankNumber = "";
-                    $highestRank = $rankedQueue["Tier"];
-                    $highEloLP = $rankedQueue["LP"];
-                } else if($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 8){
-                    $rankVal = 8;
-                    $rankNumber = "";
-                    $highestRank = $rankedQueue["Tier"];
-                    $highEloLP = $rankedQueue["LP"];
-                } else if($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 9){
-                    $rankVal = 9;
-                    $rankNumber = "";
-                    $highestRank = $rankedQueue["Tier"];
-                    $highEloLP = $rankedQueue["LP"];
-                }
+    foreach($rankData as $rankedQueue){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution) 
+        if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
+            if($rankedQueue["Tier"] == "SILVER" && $rankVal < 3){
+                $rankVal = 3;
+                $rankNumber = $rankedQueue["Rank"];
+                $highestRank = $rankedQueue["Tier"];
+            } else if($rankedQueue["Tier"] == "GOLD" && $rankVal < 4){
+                $rankVal = 4;
+                $rankNumber = $rankedQueue["Rank"];
+                $highestRank = $rankedQueue["Tier"];
+            } else if($rankedQueue["Tier"] == "BRONZE" && $rankVal < 2){
+                $rankVal = 2;
+                $rankNumber = $rankedQueue["Rank"];
+                $highestRank = $rankedQueue["Tier"];
+            } else if($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 5){
+                $rankVal = 5;
+                $rankNumber = $rankedQueue["Rank"];
+                $highestRank = $rankedQueue["Tier"];
+            } else if($rankedQueue["Tier"] == "IRON" && $rankVal < 1){
+                $rankVal = 1;
+                $rankNumber = $rankedQueue["Rank"];
+                $highestRank = $rankedQueue["Tier"];
+            } else if($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 6){
+                $rankVal = 6;
+                $rankNumber = $rankedQueue["Rank"];
+                $highestRank = $rankedQueue["Tier"];
+            } else if($rankedQueue["Tier"] == "MASTER" && $rankVal < 7){
+                $rankVal = 7;
+                $rankNumber = "";
+                $highestRank = $rankedQueue["Tier"];
+                $highEloLP = $rankedQueue["LP"];
+            } else if($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 8){
+                $rankVal = 8;
+                $rankNumber = "";
+                $highestRank = $rankedQueue["Tier"];
+                $highEloLP = $rankedQueue["LP"];
+            } else if($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 9){
+                $rankVal = 9;
+                $rankNumber = "";
+                $highestRank = $rankedQueue["Tier"];
+                $highEloLP = $rankedQueue["LP"];
             }
         }
-        if($rankVal != 0){
-            return array("Type" => "Rank", "HighestRank" => $highestRank, "HighEloLP" => $highEloLP, "RankNumber" => $rankNumber);
-        } else {
-            switch ($playerData["Level"]){
-                case ($playerData["Level"] < 30):
-                    $levelFileName = "001";
-                    break;
-                case ($playerData["Level"] < 50):
-                    $levelFileName = "030";
-                    break;
-                case ($playerData["Level"] < 75):
-                    $levelFileName = "050";
-                    break;
-                case ($playerData["Level"] < 100):
-                    $levelFileName = "075";
-                    break;
-                case ($playerData["Level"] < 125):
-                    $levelFileName = "100";
-                    break;
-                case ($playerData["Level"] < 150):
-                    $levelFileName = "125";
-                    break;
-                case ($playerData["Level"] < 175):
-                    $levelFileName = "150";
-                    break;
-                case ($playerData["Level"] < 200):
-                    $levelFileName = "175";
-                    break;
-                case ($playerData["Level"] < 225):
-                    $levelFileName = "200";
-                    break;
-                case ($playerData["Level"] < 250):
-                    $levelFileName = "225";
-                    break;
-                case ($playerData["Level"] < 275):
-                    $levelFileName = "250";
-                    break;
-                case ($playerData["Level"] < 300):
-                    $levelFileName = "275";
-                    break;
-                case ($playerData["Level"] < 325):
-                    $levelFileName = "300";
-                    break;
-                case ($playerData["Level"] < 350):
-                    $levelFileName = "325";
-                    break;
-                case ($playerData["Level"] < 375):
-                    $levelFileName = "350";
-                    break;
-                case ($playerData["Level"] < 400):
-                    $levelFileName = "375";
-                    break;
-                case ($playerData["Level"] < 425):
-                    $levelFileName = "400";
-                    break;
-                case ($playerData["Level"] < 450):
-                    $levelFileName = "425";
-                    break;
-                case ($playerData["Level"] < 475):
-                    $levelFileName = "450";
-                    break;
-                case ($playerData["Level"] < 500):
-                    $levelFileName = "475";
-                    break;
-                case ($playerData["Level"] >= 500):
-                    $levelFileName = "500";
-                    break;
-                }
-            return array("Type" => "Level", "LevelFileName" => $levelFileName);
-        }
     }
+    if($rankVal != 0){
+        return array("Type" => "Rank", "HighestRank" => $highestRank, "HighEloLP" => $highEloLP, "RankNumber" => $rankNumber);
+    } else {
+        if($playerData["Level"] < 30){
+            $levelFileName = "001";
+        } else if($playerData["Level"] < 50){
+            $levelFileName = "030";
+        } else if($playerData["Level"] < 75){
+            $levelFileName = "050";
+        } else if($playerData["Level"] < 100){
+            $levelFileName = "075";
+        } else if($playerData["Level"] < 125){
+            $levelFileName = "100";
+        } else if($playerData["Level"] < 150){
+            $levelFileName = "125";
+        } else if($playerData["Level"] < 175){
+            $levelFileName = "150";
+        } else if($playerData["Level"] < 200){
+            $levelFileName = "175";
+        } else if($playerData["Level"] < 225){
+            $levelFileName = "200";
+        } else if($playerData["Level"] < 250){
+            $levelFileName = "225";
+        } else if($playerData["Level"] < 275){
+            $levelFileName = "250";
+        } else if($playerData["Level"] < 300){
+            $levelFileName = "275";
+        } else if($playerData["Level"] < 325){
+            $levelFileName = "300";
+        } else if($playerData["Level"] < 350){
+            $levelFileName = "325";
+        } else if($playerData["Level"] < 375){
+            $levelFileName = "350";
+        } else if($playerData["Level"] < 400){
+            $levelFileName = "375";
+        } else if($playerData["Level"] < 425){
+            $levelFileName = "400";
+        } else if($playerData["Level"] < 450){
+            $levelFileName = "425";
+        } else if($playerData["Level"] < 475){
+            $levelFileName = "450";
+        } else if($playerData["Level"] < 500){
+            $levelFileName = "475";
+        } else if($playerData["Level"] >= 500){
+            $levelFileName = "500";
+        }
+        return array("Type" => "Level", "LevelFileName" => $levelFileName);
+    }
+}
+
+/** This function simply returns a color code corresponding to a textual rank input, e.g. "PLATINUM"
+ * @param $currentRank The current rank as capslocked string
+ * 
+ * Returnvalue:
+ * @return string A hexadecimal color code
+ */
+function getRankColor($currentRank){
+    switch ($currentRank){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution)
+        case "SILVER":
+            return "99a0b5";
+        case "GOLD":
+            return "d79c5d";
+        case "BRONZE":
+            return "cd8d7f";
+        case "PLATINUM":
+            return "23af88";
+        case "IRON":
+            return "392b28";
+        case "DIAMOND":
+            return "617ecb";
+        case "MASTER":
+            return "b160f3";
+        case "GRANDMASTER":
+            return "cd423a";
+        case "CHALLENGER":
+            return "52cfff";
+    }
+}
+
+/** This function simply returns a color code corresponding to a textual rank input, e.g. "PLATINUM"
+ * @param $currentRank The current rank as capslocked string
+ * 
+ * Returnvalue:
+ * @return string A hexadecimal color code
+ */
+function getMasteryColor($masteryPoints){
+    if ($masteryPoints < 100000){
+        return "DDDDDD";
+    } else if ($masteryPoints >= 100000 && $masteryPoints < 200000){
+        return "E1C1C1";
+    } else if ($masteryPoints >= 200000 && $masteryPoints < 300000){
+        return "EA8A8A";
+    } else if ($masteryPoints >= 300000 && $masteryPoints < 500000){
+        return "F25353";
+    } else if ($masteryPoints >= 500000 && $masteryPoints < 700000){
+        return "F73737";
+    } else if ($masteryPoints >= 700000 && $masteryPoints < 1000000){
+        return "FB1C1C";
+    } else if ($masteryPoints >= 1000000){
+        return "FF0000";
+    }
+}
 
 /** Always active "function" to collect the teamID of a given Summoner Name
  * This function calls an API request as soon as the sumname gets posted from the team.php

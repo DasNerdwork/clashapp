@@ -32,7 +32,7 @@ if(isset($_POST["username"])){
 }
 
 // Fetch all the necessary data for updating or generating a single players player.json, stored in /clashapp/data/player/
-function updateProfile($id, $maxMatchIds, $type="name"){
+function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
     if($id != ""){
         $playerData = getPlayerData($type,$id);
         $playerName = $playerData["Name"];
@@ -40,7 +40,11 @@ function updateProfile($id, $maxMatchIds, $type="name"){
         $puuid = $playerData["PUUID"];
         $masteryData = getMasteryScores($sumid);
         $rankData = getCurrentRank($sumid);
-        $matchIDs = getMatchIDs($puuid, $maxMatchIds);
+        if($tempMatchIDs == null){
+            $matchIDs = getMatchIDs($puuid, 15);
+        } else {
+            $matchIDs = $tempMatchIDs;
+        }
         $jsonArray = array();
         $jsonArray["PlayerData"] = $playerData;
         $jsonArray["RankData"] = $rankData;
@@ -61,7 +65,7 @@ function updateProfile($id, $maxMatchIds, $type="name"){
                 //     return; // Stop this whole process from further actions below
                 // }
                 $return = true;
-                foreach(getMatchIDs($puuid, 15) as $checkSingleMatch){
+                foreach($matchIDs as $checkSingleMatch){
                     if(!in_array($checkSingleMatch, $existingJson["MatchIDs"])){
                         downloadMatchByID($checkSingleMatch, $playerName);
                         $return = false;
