@@ -7,4 +7,14 @@
         <div class="clash-footer">DasNerdwork.net isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties.
         <br>Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.</div>
     </div>
+    <div style="position: relative; bottom: 20px; right: 10px; float: right; opacity: 0.15; font-size: 10px;" id="version">
+        <?php 
+            exec('cd /hdd2/clashapp && git rev-list --all --count', $output); 
+            $createDate = new DateTime("2022-01-28"); // 28.01.2022
+            $today = new DateTime("today");
+            $difference = $createDate->diff($today);
+            echo "v0.".sprintf("%03d", $output[0]).".".($difference->y+1).".".($difference->m+($difference->y*12)).".".sprintf("%04d", $difference->days).
+            "<!-- v0.commitCount.yearsSinceCreate.monthsSinceCreate.daysSinceCreate -->";
+        ?>
+    </div>
 </footer>
