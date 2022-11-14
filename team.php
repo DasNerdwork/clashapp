@@ -358,14 +358,54 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
                             // -------------------------------------------------------------------v- PRINT TAGS  -v------------------------------------------------------------------- //
 
+                            if(!$execOnlyOnce) $startPrintTags = microtime(true);
+                            $memPrintTags = memory_get_usage();
+
                             // TODO: Fetch & Print tags + include premades function
+
+                            echo "
+                            <tr>
+                                <td style='vertical-align: top; text-align: center;'>
+                                    <div class='tag-container'>
+                                        <ul class='player-tags'>
+                                            <li class='tag'>MVP</li>
+                                            <li class='tag'>Dragonkiller</li>
+                                            <li class='tag'>Newly</li>
+                                            <li class='tag'>Invader</li>
+                                            <li class='tag'>Lowbob</li>
+                                            <li class='tag'>Captain</li>
+                                            <li class='tag'>Premate</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                            <li class='tag'>Test</li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>";
 
                             // echo "<pre>";
                             //     print_r($mostPlayedWithArray);
                             // echo "</pre>";
 
-
-
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintTags"]["Time"] = number_format((microtime(true) - $startPrintTags), 2, ',', '.')." s";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintTags"]["Memory"] = number_format((memory_get_usage() - $memPrintTags)/1024, 2, ',', '.')." kB";
 
                             // ----------------------------------------------------------------v- PRINT MATCH HISTORY  -v---------------------------------------------------------------- //
 
