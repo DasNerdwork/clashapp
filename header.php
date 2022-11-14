@@ -6,31 +6,31 @@
 				<img src="/clashapp/data/misc/webp/logo.webp" width="150" alt="CLASH" height="48">
 			</a>
 		</div>
-		<nav>
+		<nav class="header-li">
 			<ul>
 				<li>
-                    <a href="https://clash.dasnerdwork.net/profile/" class="nav-menu-link">
+                    <a href="https://clash.dasnerdwork.net/profile" class="nav-menu-link">
 						<span>Profile</span>
 					</a>
 				</li>
 				<li>
-					<a href="https://clash.dasnerdwork.net/stats/" class="nav-menu-link" onclick="return false;">
+					<a href="https://clash.dasnerdwork.net/stats" class="nav-menu-link" onclick="return false;">
 						<span>Stats</span>
 					</a>
 				</li>
 				<li>
-					<a href="https://clash.dasnerdwork.net/docs/" class="nav-menu-link" onclick="return false;">
+					<a href="https://clash.dasnerdwork.net/docs" class="nav-menu-link" onclick="return false;">
 						<span>Docs</span>
 					</a>
 				</li>
 				<li>
-					<a href="https://clash.dasnerdwork.net/counters/" class="nav-menu-link" onclick="return false;">
+					<a href="https://clash.dasnerdwork.net/counters" class="nav-menu-link" onclick="return false;">
 						<span>Counters</span>
 					</a>
 				</li>
 				<li>
-					<a href="https://clash.dasnerdwork.net/tft/" class="nav-menu-link" onclick="return false;">
-						<span>TFT</span>
+					<a href="https://clash.dasnerdwork.net/team/test" class="nav-menu-link">
+						<span>Test</span>
 					</a>
 				</li>
 			</ul>

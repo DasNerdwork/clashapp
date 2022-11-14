@@ -383,14 +383,18 @@ ul.moveable {
   margin: 0px;
 }
 
-li {
+.header-li li {
   list-style-image: none;
   margin: 10px;
   border: 1px solid #ccc;
   padding: 4px;
   border-radius: 4px;
   color: #666;
-  cursor: move;
+  float: left;
+  border: none;
+  font-size: 18px;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 
@@ -601,13 +605,13 @@ ul {
   padding: 0;
 }
 
-li {
+/* li {
   float: left;
   border: none;
   font-size: 18px;
   margin-right: 5px;
   margin-left: 5px;
-}
+} */
 
 .clickable-logo {
   width: 170px;
@@ -958,7 +962,7 @@ header {
   margin-bottom: 1em;
   line-height: 3em;
   text-align: center;
-  transform: translateY(-40px);
+  /* transform: translateY(-40px); */
 }
 
 .account_status {
@@ -966,7 +970,7 @@ header {
   margin-bottom: 1em;
   line-height: 3em;
   text-align: center;
-  transform: translateY(-40px);
+  /* transform: translateY(-40px); */
 }
 
 .flow-root {
@@ -986,4 +990,28 @@ header {
 
 .lane-icon {
   filter: saturate(0) brightness(1.4);
+}
+
+.player-tags li {
+  list-style-image: none;
+  margin: 6px 4px;
+  border: 1px solid #141624;
+  background-color: #191d3a;
+  padding: 8px 12px;
+  border-radius: 25px;
+  color: #ccc;
+  float: left;
+  /* font-weight: bold; */
+  /* border: none; */
+  /* font-size: 18px; */
+  /* margin-right: 5px;
+  margin-left: 5px; */
+  cursor: help;
+}
+
+.tag-container {
+  max-height: 150px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
