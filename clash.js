@@ -164,7 +164,25 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
 
 
 
-
+    //   function isInViewport(el) {
+    //     const rect = el.getBoundingClientRect();
+    //     return (
+    //         rect.top >= 0 &&
+    //         rect.left >= 0 &&
+    //         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+    //         rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+    
+    //     );
+    // }
+      
+    //   var tags = document.getElementsByClassName("tag");
+    //   for (i = 0; i < tags.length; i++) {
+    //     if(isInViewport(tags[i])){
+    //       console.log(tags[i].id+" is visible.");
+    //     } else {
+    //       console.log(tags[i].id+" is not.");
+    //     }
+    //   }
 
 
 
