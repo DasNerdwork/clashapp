@@ -160,10 +160,6 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
 
 
 
-
-
-
-
     //   function isInViewport(el) {
     //     const rect = el.getBoundingClientRect();
     //     return (
@@ -480,25 +476,48 @@ function disableOthers(funcName){
       connectAccount(false);
       disconnectAccount(false);
       resetPassword(false);
+      add2FA(false);
+      remove2FA(false);
       if(connAccountArea != null) connAccountArea.style.display = "none";
       break;
     case "connectAccount":
       deleteAccount(false);
       disconnectAccount(false);
       resetPassword(false);
+      add2FA(false);
+      remove2FA(false);
       break;
     case "disconnectAccount":
       deleteAccount(false);
       connectAccount(false);
       resetPassword(false);
+      add2FA(false);
+      remove2FA(false);
       if(connAccountArea != null) connAccountArea.style.display = "none";
       break; 
     case "resetPassword":
       deleteAccount(false);
       connectAccount(false);
       disconnectAccount(false);
+      add2FA(false);
+      remove2FA(false);
       if(connAccountArea != null) connAccountArea.style.display = "none";
-      break;  
+      break;
+    case "add2FA":
+      connectAccount(false);
+      disconnectAccount(false);
+      resetPassword(false);
+      deleteAccount(false);
+      remove2FA(false);
+      if(connAccountArea != null) connAccountArea.style.display = "none";
+      break;
+    case "remove2FA":
+      connectAccount(false);
+      disconnectAccount(false);
+      resetPassword(false);
+      add2FA(false);
+      deleteAccount(false);
+      if(connAccountArea != null) connAccountArea.style.display = "none";
     default:
       break;
   }
@@ -513,23 +532,23 @@ function deleteAccount(status){
   let area = document.getElementById("account-delete-area");
   let desc = document.getElementById("delete-desc");
   if(status){
-if(button != null) button.style.display = "none";
-if(cancel != null) cancel.style.display = "unset";
-if(confirm != null) confirm.style.display = "unset";
-if(form != null) form.style.display = "unset";
-if(area != null) area.style.borderTop = "2px dashed #21222c";
-if(area != null) area.style.borderBottom = "2px dashed #21222c";
-if(desc != null) desc.style.display = "unset";
-if(area != null) area.style.paddingTop = "1em";
+    if(button != null) button.style.display = "none";
+    if(cancel != null) cancel.style.display = "unset";
+    if(confirm != null) confirm.style.display = "unset";
+    if(form != null) form.style.display = "unset";
+    if(area != null) area.style.borderTop = "2px dashed #21222c";
+    if(area != null) area.style.borderBottom = "2px dashed #21222c";
+    if(desc != null) desc.style.display = "unset";
+    if(area != null) area.style.paddingTop = "1em";
   } else {
-if(button != null) button.style.display = "unset";
-if(cancel != null) cancel.style.display = "none";
-if(confirm != null) confirm.style.display = "none";
-if(form != null) form.style.display = "none";
-if(area != null) area.style.borderTop = "none";
-if(area != null) area.style.borderBottom = "none";
-if(area != null) area.style.paddingTop = "0";
-if(desc != null) desc.style.display = "none";
+    if(button != null) button.style.display = "unset";
+    if(cancel != null) cancel.style.display = "none";
+    if(confirm != null) confirm.style.display = "none";
+    if(form != null) form.style.display = "none";
+    if(area != null) area.style.borderTop = "none";
+    if(area != null) area.style.borderBottom = "none";
+    if(area != null) area.style.paddingTop = "0";
+    if(desc != null) desc.style.display = "none";
   }
 }
 
@@ -544,27 +563,27 @@ function connectAccount(status){
   let area = document.getElementById("un-link-account-area");
   let deleteBtn = document.getElementById("account-delete-button");
   if(status){
-if(button != null) button.style.display = "none";
-if(cancel != null) cancel.style.display = "unset";
-if(confirm != null) confirm.style.display = "unset";
-if(form != null) form.style.display = "block";
-if(title != null) title.style.display = "block";
-if(desc != null) desc.style.display = "block";
-if(area != null) area.style.borderTop = "2px dashed #21222c";
-if(area != null) area.style.borderBottom = "2px dashed #21222c";
-if(area != null) area.style.padding = "10px 0px 0px 0px";
-if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
+    if(button != null) button.style.display = "none";
+    if(cancel != null) cancel.style.display = "unset";
+    if(confirm != null) confirm.style.display = "unset";
+    if(form != null) form.style.display = "block";
+    if(title != null) title.style.display = "block";
+    if(desc != null) desc.style.display = "block";
+    if(area != null) area.style.borderTop = "2px dashed #21222c";
+    if(area != null) area.style.borderBottom = "2px dashed #21222c";
+    if(area != null) area.style.padding = "10px 0px 0px 0px";
+    if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
   } else {
-if(button != null) button.style.display = "unset";
-if(cancel != null) cancel.style.display = "none";
-if(confirm != null) confirm.style.display = "none";
-if(form != null) form.style.display = "none";
-if(title != null) title.style.display = "none";
-if(desc != null) desc.style.display = "none";
-if(area != null) area.style.borderTop = "none";
-if(area != null) area.style.borderBottom = "none";
-if(area != null) area.style.padding = "0";
-if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
+    if(button != null) button.style.display = "unset";
+    if(cancel != null) cancel.style.display = "none";
+    if(confirm != null) confirm.style.display = "none";
+    if(form != null) form.style.display = "none";
+    if(title != null) title.style.display = "none";
+    if(desc != null) desc.style.display = "none";
+    if(area != null) area.style.borderTop = "none";
+    if(area != null) area.style.borderBottom = "none";
+    if(area != null) area.style.padding = "0";
+    if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
   }
 }
 
@@ -578,31 +597,34 @@ function disconnectAccount(status){
   let title = document.getElementById("unlink-account-title");
   let desc = document.getElementById("unlink-account-desc");
   let linkedTo = document.getElementById("account-link");
-  let deleteBtn = document.getElementById("account-delete-button");
+  let deleteBtn = document.getElementById("2fa-button"); // ignore naming pls ty
+  let removeBtn = document.getElementById("remove-2fa-button");
   if(status){
-if(button != null) button.style.display = "none";
-if(cancel != null) cancel.style.display = "unset";
-if(confirm != null) confirm.style.display = "unset";
-if(form != null) form.style.display = "unset";
-if(area != null) area.style.borderTop = "2px dashed #21222c";
-if(area != null) area.style.borderBottom = "2px dashed #21222c";
-if(area != null) area.style.padding = "12px 0px 0px 0px";
-if(title != null) title.style.display = "block";
-if(desc != null) desc.style.display = "block";
-if(linkedTo != null) linkedTo.style.margin = "1em 0";
-if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
+    if(button != null) button.style.display = "none";
+    if(cancel != null) cancel.style.display = "unset";
+    if(confirm != null) confirm.style.display = "unset";
+    if(form != null) form.style.display = "unset";
+    if(area != null) area.style.borderTop = "2px dashed #21222c";
+    if(area != null) area.style.borderBottom = "2px dashed #21222c";
+    if(area != null) area.style.padding = "12px 0px 0px 0px";
+    if(title != null) title.style.display = "block";
+    if(desc != null) desc.style.display = "block";
+    if(linkedTo != null) linkedTo.style.margin = "1em 0";
+    if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
+    if(removeBtn != null) removeBtn.style.marginTop = "1em";
   } else {
-if(button != null) button.style.display = "unset";
-if(cancel != null) cancel.style.display = "none";
-if(confirm != null) confirm.style.display = "none";
-if(form != null) form.style.display = "none";
-if(area != null) area.style.borderTop = "none";
-if(area != null) area.style.borderBottom = "none";
-if(area != null) area.style.padding = "0";
-if(title != null) title.style.display = "none";
-if(desc != null) desc.style.display = "none";
-if(linkedTo != null) linkedTo.style.margin = "0";
-if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
+    if(button != null) button.style.display = "unset";
+    if(cancel != null) cancel.style.display = "none";
+    if(confirm != null) confirm.style.display = "none";
+    if(form != null) form.style.display = "none";
+    if(area != null) area.style.borderTop = "none";
+    if(area != null) area.style.borderBottom = "none";
+    if(area != null) area.style.padding = "0";
+    if(title != null) title.style.display = "none";
+    if(desc != null) desc.style.display = "none";
+    if(linkedTo != null) linkedTo.style.margin = "0";
+    if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
+    if(removeBtn != null) removeBtn.style.marginTop = "4px";
   }
 }
 
@@ -617,30 +639,119 @@ function resetPassword(status){
   let linkedTo = document.getElementById("account-link");
   let connectButton = document.getElementById("connect-account-button");
   if(status){
-if(button != null) button.style.display = "none";
-if(cancel != null) cancel.style.display = "unset";
-if(confirm != null) confirm.style.display = "unset";
-if(form != null) form.style.display = "unset";
-if(desc != null) desc.style.display = "unset";
-if(area != null) area.style.borderTop = "2px dashed #21222c";
-if(area != null) area.style.borderBottom = "2px dashed #21222c";
-if(area != null) area.style.padding = "12px 0px 0px 0px";
-if(connectButton != null) connectButton.style.marginTop = "1em";
-if(linkedTo != null) linkedTo.style.marginTop = "1em";
+    if(button != null) button.style.display = "none";
+    if(cancel != null) cancel.style.display = "unset";
+    if(confirm != null) confirm.style.display = "unset";
+    if(form != null) form.style.display = "unset";
+    if(desc != null) desc.style.display = "unset";
+    if(area != null) area.style.borderTop = "2px dashed #21222c";
+    if(area != null) area.style.borderBottom = "2px dashed #21222c";
+    if(area != null) area.style.padding = "12px 0px 0px 0px";
+    if(connectButton != null) connectButton.style.marginTop = "1em";
+    if(linkedTo != null) linkedTo.style.marginTop = "1em";
   } else {
-if(button != null) button.style.display = "unset";
-if(cancel != null) cancel.style.display = "none";
-if(confirm != null) confirm.style.display = "none";
-if(form != null) form.style.display = "none";
-if(desc != null) desc.style.display = "none";
-if(area != null) area.style.borderTop = "none";
-if(area != null) area.style.borderBottom = "none";
-if(area != null) area.style.padding = "0";
-if(connectButton != null) connectButton.style.marginTop = "0";
-if(linkedTo != null) linkedTo.style.marginTop = "0";
-
+    if(button != null) button.style.display = "unset";
+    if(cancel != null) cancel.style.display = "none";
+    if(confirm != null) confirm.style.display = "none";
+    if(form != null) form.style.display = "none";
+    if(desc != null) desc.style.display = "none";
+    if(area != null) area.style.borderTop = "none";
+    if(area != null) area.style.borderBottom = "none";
+    if(area != null) area.style.padding = "0";
+    if(connectButton != null) connectButton.style.marginTop = "0";
+    if(linkedTo != null) linkedTo.style.marginTop = "0";
   }
 }
+
+function add2FA(status){  
+  if(status)disableOthers(arguments.callee.name);
+  let button = document.getElementById("2fa-button");
+  let cancel = document.getElementById("2fa-cancel");
+  let desc = document.getElementById("2fa-description");
+  let area = document.getElementById("2fa-area");
+  let form = document.getElementById("set-twofa-form");
+  let authDesc = document.getElementById("auth-desc");
+  let authImg = document.getElementById("auth-images");
+  let delButton = document.getElementById("account-delete-button");
+  if(status){
+    if(button != null) button.style.display = "none";
+    if(cancel != null) cancel.style.display = "unset";
+    if(desc != null) desc.style.display = "unset";
+    if(area != null) area.style.borderTop = "2px dashed #21222c";
+    if(area != null) area.style.borderBottom = "2px dashed #21222c";
+    if(area != null) area.style.padding = "12px 0px 0px 0px";
+    if(form != null) form.style.display = "unset";
+    if(authDesc != null) authDesc.style.display = "inline-block";
+    if(authImg != null) authImg.style.display = "block";
+    if(delButton != null) delButton.style.marginTop = "1em";
+  } else {
+    if(button != null) button.style.display = "unset";
+    if(cancel != null) cancel.style.display = "none";
+    if(desc != null) desc.style.display = "none";
+    if(area != null) area.style.borderTop = "none";
+    if(area != null) area.style.borderBottom = "none";
+    if(area != null) area.style.padding = "0";
+    if(form != null) form.style.display = "none";
+    if(authDesc != null) authDesc.style.display = "none";
+    if(authImg != null) authImg.style.display = "none";
+    if(delButton != null) delButton.style.marginTop = "";
+  }
+}
+
+function remove2FA(status){  
+  if(status)disableOthers(arguments.callee.name);
+  let button = document.getElementById("remove-2fa-button");
+  let cancel = document.getElementById("remove-2fa-cancel");
+  let desc = document.getElementById("remove-2fa-description");
+  let area = document.getElementById("2fa-area");
+  let form = document.getElementById("remove-twofa-form");
+  let notice = document.getElementById("remove-2fa-notice");
+  let delButton = document.getElementById("account-delete-button");
+  if(status){
+    if(button != null) button.style.display = "none";
+    if(cancel != null) cancel.style.display = "unset";
+    if(desc != null) desc.style.display = "block";
+    if(area != null) area.style.borderTop = "2px dashed #21222c";
+    if(area != null) area.style.borderBottom = "2px dashed #21222c";
+    if(area != null) area.style.padding = "12px 0px 0px 0px";
+    if(form != null) form.style.display = "unset";
+    if(notice != null) notice.style.display = "inline-block";
+    if(delButton != null) delButton.style.marginTop = "1em";
+  } else {
+    if(button != null) button.style.display = "unset";
+    if(cancel != null) cancel.style.display = "none";
+    if(desc != null) desc.style.display = "none";
+    if(area != null) area.style.borderTop = "none";
+    if(area != null) area.style.borderBottom = "none";
+    if(area != null) area.style.padding = "0";
+    if(form != null) form.style.display = "none";
+    if(notice != null) notice.style.display = "none";
+    if(delButton != null) delButton.style.marginTop = "";
+  }
+}
+
+function getQRCode(){
+  $.ajax({
+    type: "POST",
+    url: "../qr-codes.php",
+    data: { twofa: 'text' },
+    success: function(data) {
+      let existingQR = document.getElementById("qrcode");
+      if(existingQR == null){
+        let desc = document.getElementById("2fa-desc");
+        let qrcode = document.createElement("img");
+        qrcode.setAttribute("src", "data:image/png;base64,"+data);
+        qrcode.setAttribute("style", "display: block; margin: 12px auto; width: 75%;");
+        qrcode.setAttribute("id", "qrcode");
+        desc.parentNode.appendChild(qrcode);
+        // console.log(data);
+      }
+    }
+  });
+}
+
+
+
 
 function enablePWR(){
   // let pwr = document.getElementById("reset-password-button");
@@ -678,6 +789,22 @@ function setError(message){
   header.parentNode.insertBefore(errorMsg, header.nextElementSibling);
   
 }
+
+// $('document').ready(function() {
+//   if(window.location.href == 'https://clash.dasnerdwork.net/settings?2fa=true'){
+//     let button = document.getElementById("2fa-button");
+//     let cancel = document.getElementById("2fa-cancel");
+//     let desc = document.getElementById("2fa-description");
+//     let area = document.getElementById("2fa-area");
+//     if(button != null) button.style.display = "none";
+//     if(cancel != null) cancel.style.display = "unset";
+//     if(desc != null) desc.style.display = "unset";
+//     if(area != null) area.style.borderTop = "2px dashed #21222c";
+//     if(area != null) area.style.borderBottom = "2px dashed #21222c";
+//     if(area != null) area.style.padding = "12px 0px 0px 0px";
+//   }
+// });
+
 
 $('#updateBtn').click(function() {
   $.ajax({
