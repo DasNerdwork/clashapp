@@ -1,3 +1,6 @@
+<?php
+$currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
+?>
 <div class="wrapper">
 <header>
 	<div class="header-nav-menu">
@@ -11,6 +14,11 @@
 				<li>
                     <a href="https://clash.dasnerdwork.net/profile" class="nav-menu-link">
 						<span>Profile</span>
+					</a>
+				</li>
+                <li>
+                    <a href="https://clash.dasnerdwork.net/patch-notes" class="nav-menu-link">
+						<span>Patch Notes</span>
 					</a>
 				</li>
 				<li>

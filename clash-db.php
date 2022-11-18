@@ -22,9 +22,9 @@ class DB {
   
     public function check_credentials($mailorname = '', $password = '') {
         if(str_contains($mailorname, '@')){
-            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, sumid FROM users WHERE email = ?");
+            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, sumid, 2fa FROM users WHERE email = ?");
         } else {
-            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, sumid FROM users WHERE username = ?");
+            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, sumid, 2fa FROM users WHERE username = ?");
         }
         $sql->bind_param('s', $mailorname);
         $sql->execute();
@@ -33,7 +33,7 @@ class DB {
         if($result->num_rows) {
             
             $row = $result->fetch_assoc(); // Fetch returnvalue to an array ($row) of mysql query above
- 
+
             if ($row['status'] == '1' || $row['status'] == '2') {
                 if (password_verify($password, $row['password'])) {
                     return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'sumid' => $row['sumid']);
@@ -44,6 +44,27 @@ class DB {
             return array('status' => 'error', 'message' => 'Your account was deactivated. If you did not take this action please reach out to an administrator.'); // The Users status is set to 0 (deactivated account)
         }
         return array('status' => 'error', 'message' => 'The given account does not exist.'); // Cannot find email/username in database
+    }
+
+    public function get_credentials_2fa($mailorname = '') {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("SELECT id, region, username, email, status, sumid, 2fa FROM users WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("SELECT id, region, username, email, status, sumid, 2fa FROM users WHERE username = ?");
+        }
+        $sql->bind_param('s', $mailorname);
+        $sql->execute();
+        $result = $sql->get_result();
+        
+        if($result->num_rows) {
+            
+            $row = $result->fetch_assoc(); // Fetch returnvalue to an array ($row) of mysql query above
+ 
+            $twofa = $row['2fa'] != NULL ? $twofa = 'true' : $twofa = 'false';
+
+            return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'sumid' => $row['sumid'], '2fa' => $twofa);
+        }
+        return array('status' => 'error', 'message' => 'Unable to fetch userdata, please contact an administrator.'); // The Password decrypt was unsuccessful
     }
 
     public function account_exists($email = '', $username = '') {
@@ -266,7 +287,59 @@ class DB {
         } else {
             return array('status' => 'error', 'message' => 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.');
         }
-    } 
+    }
+
+    public function set_2fa_code($code, $mailorname) {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("UPDATE users SET 2fa = ? WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("UPDATE users SET 2fa = ? WHERE username = ?");
+        }
+        $sql->bind_param('ss', $code, $mailorname);
+        $sql->execute();
+        $result = $sql->affected_rows;
+
+        if($result > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function get_2fa_code($mailorname) {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("SELECT 2fa FROM users WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("SELECT 2fa FROM users WHERE username = ?");
+        }
+        $sql->bind_param('s', $mailorname);
+        $sql->execute();
+        $result = $sql->get_result();
+
+        if($result->num_rows) {
+            $row = $result->fetch_assoc();
+            return $row['2fa'];
+        } else {
+            return null;
+        }
+    }
+
+    public function remove_2fa_code($mailorname) {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("UPDATE users SET 2fa = NULL WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("UPDATE users SET 2fa = NULL WHERE username = ?");
+        }
+        $sql->bind_param('s', $mailorname);
+        $sql->execute();
+        $result = $sql->affected_rows;
+
+        if($result > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
     /** MySQL Event that runs every 24 hours and deletes any deactivated account (status = 0) which has been deactivated more than 2 days ago (deldate < DATE_SUB(NOW(), INTERVAL 2 DAY))
      *  ==> Accounts stay deactivated min. 48 hours - max. 72 hours
