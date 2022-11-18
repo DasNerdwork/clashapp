@@ -561,7 +561,8 @@ function connectAccount(status){
   let title = document.getElementById("link-account-title");
   let desc = document.getElementById("link-account-desc");
   let area = document.getElementById("un-link-account-area");
-  let deleteBtn = document.getElementById("account-delete-button");
+  let deleteBtn = document.getElementById("2fa-button");
+  let removeBtn = document.getElementById("remove-2fa-button");
   if(status){
     if(button != null) button.style.display = "none";
     if(cancel != null) cancel.style.display = "unset";
@@ -573,6 +574,7 @@ function connectAccount(status){
     if(area != null) area.style.borderBottom = "2px dashed #21222c";
     if(area != null) area.style.padding = "10px 0px 0px 0px";
     if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
+    if(removeBtn != null) removeBtn.style.marginTop = "1em";
   } else {
     if(button != null) button.style.display = "unset";
     if(cancel != null) cancel.style.display = "none";
@@ -584,6 +586,7 @@ function connectAccount(status){
     if(area != null) area.style.borderBottom = "none";
     if(area != null) area.style.padding = "0";
     if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
+    if(removeBtn != null) removeBtn.style.marginTop = "4px";
   }
 }
 
