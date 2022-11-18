@@ -2,6 +2,9 @@
 include('head.php');
 setCodeHeader('Clash', true, true);
 include('header.php');
+include_once 'qr-codes.php';
+
+// verifyEntered2FA("dasnerdwork@gmail.com", "756836");
 
 
 // $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
@@ -56,7 +59,6 @@ include('header.php');
 // echo "<pre>";
 // print_r($timeAndMemoryArray);
 // echo "<pre>";
-
 
 include('footer.php');
 ?>

@@ -77,10 +77,10 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     logger.info("All files extracted and overwritten. Time elapsed: " + end_extraction + " seconds")
 
     # Convert all .png and .jpg to .webp
-    paths = Path('/var/www/html/clash/clashapp/test/').glob("**/*.png")
+    paths = Path('/var/www/html/clash/clashapp/data/patch/').glob("**/*.png")
     for path in paths:
         webp_path = convert_to_webp(path)
-    paths2 = Path('/var/www/html/clash/clashapp/test/').glob("**/*.jpg")
+    paths2 = Path('/var/www/html/clash/clashapp/data/patch/').glob("**/*.jpg")
     for path2 in paths2:
         webp_path2 = convert_to_webp(path2)
     logger.info("Converted all available .png and .jpg to .webp")
