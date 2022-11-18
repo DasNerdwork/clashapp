@@ -1,12 +1,19 @@
 <?php
 session_start();
+
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
  
 if (!isset($_SESSION['user'])) {
     header('Location: login');
 }
 
+// print_r($_SESSION);
+
 require_once 'clash-db.php';
 require_once 'functions.php';
+require_once 'qr-codes.php';
 
 $error_message = array();
 $success_message = array();
@@ -57,7 +64,7 @@ if (isset($_POST['current-password']) && isset($_POST['new-password']) && isset(
     }
 }
 
-if ($_GET['verify']){
+if (isset($_GET['verify'])){
     $sumid = $db->get_sumid($_SESSION['user']['username']);
     if($sumid['status'] == 'success') {
         $_SESSION['user']["sumid"] = $sumid['sumid'];
@@ -65,10 +72,18 @@ if ($_GET['verify']){
     Header('Location: '.$_SERVER['PHP_SELF'].'?verified=true');
 }
 
-if ($_GET['verified'] == "true") {
-    $success_message[] = "Accounts successfully linked!";
-} else if ($_GET['verified'] == "false") {
-    $success_message[] = "Successfully disconnected accounts.";
+if (isset($_GET['verified'])){
+    if($_GET['verified'] == "true") {
+       $success_message[] = "Accounts successfully linked!";
+   } else if ($_GET['verified'] == "false") {
+       $success_message[] = "Successfully disconnected accounts.";
+   }
+}
+
+if (isset($_GET['remove2FA'])){
+    if($_GET['remove2FA']) {
+       $success_message[] = "Successfully removed Two-Factor Authentication.";
+   }
 }
 
 if (isset($_POST['dcpassword'])) {
@@ -85,21 +100,112 @@ if (isset($_POST['dcpassword'])) {
     }
 }
 
+if (isset($_POST['twofa-input'])){
+    echo '<script type="text/javascript">
+        function setError(message, error){
+            document.addEventListener("DOMContentLoaded", function(event){
+                let header = document.getElementsByTagName("header")[0];
+                var errorBanners = document.getElementsByClassName("error");
+                let check = true;
+                let bannerId;
+                if(errorBanners != null){
+                for (let i = 0; i < errorBanners.length; i++) {
+                    const eb = errorBanners[i];
+                    if(eb.firstChild.innerHTML == message){
+                    check = false
+                    break
+                    }
+                }
+                }
+                if(!check) return "error bereits vorhanden";
+                let errorMsg = document.createElement("div");
+                error ? errorMsg.setAttribute("class", "error") : errorMsg.setAttribute("class", "account_status");
+                errorMsg.innerHTML = "<strong>"+message+"</strong>";
+                header.parentNode.insertBefore(errorMsg, header.nextElementSibling);
+            });
+        }
+    </script>';
+    if($_SESSION['user']['secret'] != null){
+        if(verifyLocal2FA($_SESSION['user']['secret'], $_POST['twofa-input'])){
+            $db = new DB();
+            if($db->set_2fa_code($_SESSION['user']['secret'], $_SESSION['user']['email'])){
+                unset($_SESSION['user']['secret']);
+                $_SESSION['user']['2fa'] = "true";
+                echo "<script>setError('Successfully enabled Two-Factor Authentication.', false);</script>";
+            } else {
+                echo "<script>setError('Unable to connect to the database. Please contact an administrator.', true);</script>";
+            }
+        } else {
+            echo "<script>setError('The entered 2FA-Code is either incorrect or expired.', true);</script>";
+        }
+    } else {
+        echo "<script>setError('Unable to set 2FA-Secret. Please contact an administrator.', true);</script>";
+    }
+}
+
+if (isset($_POST['remove-twofa-input'])){
+    echo '<script type="text/javascript">
+    function setError(message, error){
+        document.addEventListener("DOMContentLoaded", function(event){
+            let header = document.getElementsByTagName("header")[0];
+            var errorBanners = document.getElementsByClassName("error");
+            let check = true;
+            let bannerId;
+            if(errorBanners != null){
+            for (let i = 0; i < errorBanners.length; i++) {
+                const eb = errorBanners[i];
+                if(eb.firstChild.innerHTML == message){
+                check = false
+                break
+                }
+            }
+            }
+            if(!check) return "error bereits vorhanden";
+            let errorMsg = document.createElement("div");
+            error ? errorMsg.setAttribute("class", "error") : errorMsg.setAttribute("class", "account_status");
+            errorMsg.innerHTML = "<strong>"+message+"</strong>";
+            header.parentNode.insertBefore(errorMsg, header.nextElementSibling);
+        });
+    }
+    </script>';
+    if (strlen($_POST['remove-twofa-input']) == 6 && is_numeric($_POST['remove-twofa-input'])){
+        if(verifyEntered2FA($_SESSION['user']['email'], $_POST['remove-twofa-input'])){
+            $db = new DB();
+            if($db->remove_2fa_code($_SESSION['user']['email'])){
+                if(isset($_SESSION['user']['2fa'])){
+                    unset($_SESSION['user']['2fa']);
+                }
+                Header('Location: '.$_SERVER['PHP_SELF'].'?remove2FA=true');
+            } else {
+                echo "<script>setError('Unable to connect to the database. Please contact an administrator.', true);</script>";
+            }
+        } else {
+            echo "<script>setError('The entered 2FA-Code is either incorrect or expired.', true);</script>";
+        }
+    } else {
+        echo "<script>setError('Incorrect or forbidden 2FA-Code format.', true);</script>";
+    }
+}
+
 include('head.php');
 setCodeHeader('Settings', true, true);
 include('header.php');
 
 if (!empty($success_message)) { 
     foreach($success_message as $su){
-        echo '<div class="account_status">
-                <strong>'. $su .'</strong>
-              </div>';
+        if($su != ""){
+            echo '<div class="account_status">
+                    <strong>'. $su .'</strong>
+                  </div>';
+        }
     }
 } else if (!empty($error_message)) { 
     foreach($error_message as $er){
-        echo '<div class="error">
-            <strong>'. $er .'</strong>
-        </div>';
+        if($er != ""){
+            echo '<div class="error">
+                <strong>'. $er .'</strong>
+            </div>';
+        }
     }
 } 
 ?>
@@ -148,7 +254,7 @@ if (!empty($success_message)) {
             <?php } else { 
                 $currentPlayerData = getPlayerData("sumid", $_SESSION['user']['sumid']);
                 echo '<div class="account-link" id="account-link">Linked to: 
-                    <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.png" style="vertical-align:middle" width="32" loading="lazy">
+                    <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.webp" style="vertical-align:middle" width="32" loading="lazy">
                     '.$currentPlayerData["Name"].'</div>';
                 ?> 
             <div id="lower-dcform">
@@ -156,7 +262,7 @@ if (!empty($success_message)) {
                 <form method="post" id="disconnect-account-form" style="display: none;">
                     <div><label for="dcpassword">Password: </label></div>
                     <input type="password" name="dcpassword" id="dcpassword" placeholder="Confirm with password" required />
-                    <div style="height: 50px;"><button type="submit" id="disconnect-account-confirm" class="small-button" style="display: none;">Confirm</button>
+                    <div style="height: 50px; margin-top: -10px;"><button type="submit" id="disconnect-account-confirm" class="small-button" style="display: none;">Confirm</button>
                     <button type="button" id="disconnect-account-cancel" class="small-button" style="display: none;" onclick="disconnectAccount(false);">Cancel</button></div>
                 </form>
             </div>
@@ -205,8 +311,8 @@ if (!empty($success_message)) {
                         <div id="connect-account-area">
                             <div class="clash-form-title" style="margin-bottom: 1em;">Found account for: '.$playerDataArray['Name'].'</div>'.'
                             <div class="flow-root">
-                                <img id="current-profile-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerDataArray["Icon"].'.png" style="vertical-align:middle; float: left;" width="84" loading="lazy">
-                                <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$randomIcon.'.png" style="vertical-align:middle; float: right;" width="84" loading="lazy">
+                                <img id="current-profile-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerDataArray["Icon"].'.webp" style="vertical-align:middle; float: left;" width="84" loading="lazy">
+                                <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$randomIcon.'.webp" style="vertical-align:middle; float: right;" width="84" loading="lazy">
                             </div>
                             <div style="margin: -16px 0 3em 0;">&#10148;</div>
                             <div class="descriptive-text account-desc">Temporarily change your summoner icon to the one on the <b>right</b> and click on the connect button to verify your league account.</div>
@@ -253,6 +359,43 @@ if (!empty($success_message)) {
             }
         }
         ?>
+        <div id="2fa-area">
+        <?php if (!isset($_SESSION['user']['2fa'])) { ?> 
+            <button id="2fa-button" onclick="add2FA(true); getQRCode();">Add Two-Factor Authentication</button>
+            <div id="2fa-description" style="display: none;">
+                <div class='clash-form-title'>Add Two-Factor Authentication</div>
+                <span class='descriptive-text' id='2fa-desc'>To enable 2FA for this account scan the QR Code below with your Google Authenticator App and confirm with the in-app code.</span>
+            </div>
+            <form method="post" id="set-twofa-form" style="display: none;">
+                <div><label for='twofa' id='twofa-label'>Two-Factor Authentication Code: </label></div>
+                <div><input type='text' name='twofa-input' id='twofa-input' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
+                <div style="height: 50px;"><button type="submit" name="twofa-confirm" id="twofa-button" class="small-button">Submit</button>
+                <button type="button" id="twofa-cancel" class="small-button" onclick="add2FA(false);">Cancel</button></div>
+            </form>
+            <span class='descriptive-text' id="auth-desc" style="display: none;">By clicking on one of the images below you will be redirected to the Google Authenticator app store page.</span>
+            <div style="margin: 1em; display: none;" id="auth-images">
+                <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" style="text-decoration: none; display: inline-block; margin: auto 6px;">
+                    <img src="/clashapp/data/misc/webp/playstore.webp" width="140">
+                </a>
+                <a href="itms-apps://apps.apple.com/de/app/google-authenticator/id388497605" style="text-decoration: none; display: inline-block; margin: auto 6px;">
+                    <img src="/clashapp/data/misc/webp/appstore.webp" width="140">
+                </a>
+            </div>
+            <?php } else if($_SESSION['user']['2fa']) { ?>
+            <button id="remove-2fa-button" onclick="remove2FA(true);">Remove Two-Factor Auth</button>
+            <div id="remove-2fa-description" style="display: none; margin-bottom: 10px;">
+                <div class='clash-form-title'>Remove Two-Factor Authentication</div>
+                <span class='descriptive-text' id='remove-2fa-desc'>To disable 2FA for this account you have to confirm with the current in-app code of your Authenticator App.</span>
+            </div>
+            <form method="post" id="remove-twofa-form" style="display: none;">
+                <div><label for='remove-twofa' id='remove-twofa-label'>Two-Factor Authentication Code: </label></div>
+                <div><input type='text' name='remove-twofa-input' id='remove-twofa-input' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
+                <div style="height: 50px; margin-top: -10px;"><button type="submit" name="remove-twofa-confirm" id="remove-twofa-button" class="small-button">Submit</button>
+                <button type="button" id="remove-twofa-cancel" class="small-button" onclick="remove2FA(false);">Cancel</button></div>
+            </form>
+            <small id="remove-2fa-notice" style="display: none; margin-bottom: 1em;">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
+            <?php } ?>
+        </div>
         <div id="account-delete-area">
             <div id="delete-desc">
             <div class='clash-form-title'>Delete your account</div>

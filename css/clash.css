@@ -920,7 +920,7 @@ header {
   margin-bottom: 1em;
 }
 
-#reset-password-cancel, #disconnect-account-cancel, #connect-account-cancel, #account-delete-cancel {
+#reset-password-cancel, #disconnect-account-cancel, #connect-account-cancel, #account-delete-cancel, #twofa-cancel, #remove-twofa-cancel, #verifier-cancel {
   float: left;
   margin-left: unset;
 }

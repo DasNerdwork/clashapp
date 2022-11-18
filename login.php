@@ -5,7 +5,6 @@ if (isset($_SESSION['user'])) {
     header('Location: /');
 }
 
-require_once 'clash-db.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -13,6 +12,7 @@ use PHPMailer\PHPMailer\Exception;
 require '/var/www/html/clash/phpmailer/src/Exception.php';
 require '/var/www/html/clash/phpmailer/src/PHPMailer.php';
 require '/var/www/html/clash/phpmailer/src/SMTP.php';
+require_once 'clash-db.php';
  
 $error_message = array();
 $db = new DB();
@@ -28,9 +28,14 @@ if (isset($_POST['submit'])) {
     $response = $db->check_credentials($_POST['mailorname'], $_POST['password']);
 
     if ($response['status'] == 'success') {
-        $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email'], 'sumid' => $response['sumid']);
-        header('Location: /');
-    }
+        if($db->get_2fa_code($_POST['mailorname']) != NULL){
+            $_SESSION['temp'] = array('email' => $_POST['mailorname']);
+            header('Location: verify2fa');
+        } else {
+            $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email'], 'sumid' => $response['sumid']);
+            header('Location: /');
+        }
+       }
  
     if($response['status'] == 'error'){
         $error_message[] = $response['message'].'<script type="text/javascript">enablePWR();</script>';
