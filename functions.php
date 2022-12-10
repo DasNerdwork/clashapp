@@ -640,8 +640,8 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     $count = 0;
 
     // Initiating Matchdetail Table
-    echo "<button type='button' class='collapsible'></button>";
-    echo "<div class='content' style='border-collapse: collapse;'>";
+    echo "<button type='button' class='collapsible bg-[#15182a] cursor-pointer h-6 w-full'>&#11167;</button>";
+    echo "<div class='transition-all duration-300 ease-in-out w-full'>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
         $handle = file_get_contents("/var/www/html/clash/clashapp/data/matches/".$matchIDJSON.".json");
         $inhalt = json_decode($handle);
@@ -651,8 +651,8 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                 for($in = 0; $in < 10; $in++){
                     if($inhalt->info->participants[$in]->puuid == $puuid) {
                         $teamID = $inhalt->info->participants[$in]->teamId;
-                        echo '<div class="match">';
-                            echo '<div class="grid-container">';
+                        echo '<div class="match w-full">';
+                            echo '<div class="grid-container w-full">';
                                 echo '<div class="match-result">';
                                 // Display of W(in) or L(ose)
                                 if($inhalt->info->participants[$in]->win == true) {
@@ -742,7 +742,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo '</div>';
 
                         // Display of played Position
-                        echo "<div class='champion-lane' style='z-index:3; position:relative; bottom: 32px; left: 23px;'>";
+                        echo "<div class='champion-lane' style='z-index:3; position:relative; bottom: 32px; left: 48px;'>";
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
                         if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
                             echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="14" loading="lazy">';
@@ -1705,22 +1705,22 @@ function showBanSelector(){
         $dataId = $champData->id;
         if($i<11){
             if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
-                echo "<div class='champ-select-champion'>";
-                    echo '<div class="ban-hoverer" onclick="">';
-                        echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
-                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.webp" width="48" loading="lazy">';
-                        echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" width="48" loading="lazy"></div>';
-                    echo "<span class='caption' style='display: block;'>".$champName."</span>";
+                echo "<div class='align-top inline-block text-center h-18 w-[4.625rem] champ-select-champion'>";
+                    echo '<div class="ban-hoverer inline-grid" onclick="">';
+                        echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="44" loading="lazy">';
+                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.webp" width="44" loading="lazy">';
+                        echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" width="44" loading="lazy"></div>';
+                    echo "<span class='caption text-ellipsis overflow-hidden whitespace-nowrap' style='display: block;'>".$champName."</span>";
             echo "</div>";
             }
         } else {
             if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
-                echo "<div class='champ-select-champion'>";
-                    echo '<div class="ban-hoverer" onclick="">';
-                        echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="48" loading="lazy">';
-                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.webp" width="48" loading="lazy">';
-                        echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" width="48" loading="lazy"></div>';
-                    echo "<span class='caption' style='display: block;'>".$champName."</span>";
+                echo "<div class='align-top inline-block text-center h-18 w-[4.625rem] champ-select-champion'>";
+                    echo '<div class="ban-hoverer inline-grid" onclick="">';
+                        echo '<img class="champ-select-icon" style="height: auto; z-index: 1;" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" width="44" loading="lazy">';
+                        echo '<img class="ban-overlay" src="/clashapp/data/misc/icon-ban.webp" width="44" loading="lazy">';
+                        echo '<img class="ban-overlay-red" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" width="44" loading="lazy"></div>';
+                    echo "<span class='caption text-ellipsis overflow-hidden whitespace-nowrap' style='display: block;'>".$champName."</span>";
             echo "</div>";
             }
         }
@@ -2061,7 +2061,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
  * @return array The custom return array consists of a type which is either Rank or Level to determine the icon border
  *              Additionally it receives the necessary level filename or whole ranked data to further do stuff with it -> see team.php
  */
-function getRankOrLevel($rankData){
+function getRankOrLevel($rankData, $playerData){
     $rankVal = 0; // This score is used to find the highest Rank from both Flex and Solo Queue | Local Variable
     $highEloLP = ""; // If the user has reached high elo the LP count is important (just for Master, Grandmaster and Challenger)
 
@@ -2164,29 +2164,30 @@ function getRankOrLevel($rankData){
  * 
  * Returnvalue:
  * @return string A hexadecimal color code
+ * 
+ * function getRankColor($currentRank){
+ *     switch ($currentRank){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution)
+ *         case "SILVER":
+ *             return "99a0b5";
+ *         case "GOLD":
+ *             return "d79c5d";
+ *         case "BRONZE":
+ *             return "cd8d7f";
+ *         case "PLATINUM":
+ *             return "23af88";
+ *         case "IRON":
+ *             return "392b28";
+ *         case "DIAMOND":
+ *             return "617ecb";
+ *         case "MASTER":
+ *             return "b160f3";
+ *         case "GRANDMASTER":
+ *             return "cd423a";
+ *         case "CHALLENGER":
+ *             return "52cfff";
+ *     }
+ * }
  */
-function getRankColor($currentRank){
-    switch ($currentRank){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution)
-        case "SILVER":
-            return "99a0b5";
-        case "GOLD":
-            return "d79c5d";
-        case "BRONZE":
-            return "cd8d7f";
-        case "PLATINUM":
-            return "23af88";
-        case "IRON":
-            return "392b28";
-        case "DIAMOND":
-            return "617ecb";
-        case "MASTER":
-            return "b160f3";
-        case "GRANDMASTER":
-            return "cd423a";
-        case "CHALLENGER":
-            return "52cfff";
-    }
-}
 
 /** This function simply returns a color code corresponding to a textual rank input, e.g. "PLATINUM"
  * @param $currentRank The current rank as capslocked string
@@ -2196,19 +2197,19 @@ function getRankColor($currentRank){
  */
 function getMasteryColor($masteryPoints){
     if ($masteryPoints < 100000){
-        return "DDDDDD";
+        return "threat-xxs";
     } else if ($masteryPoints >= 100000 && $masteryPoints < 200000){
-        return "E1C1C1";
+        return "threat-xs";
     } else if ($masteryPoints >= 200000 && $masteryPoints < 300000){
-        return "EA8A8A";
+        return "threat-s";
     } else if ($masteryPoints >= 300000 && $masteryPoints < 500000){
-        return "F25353";
+        return "threat-m";
     } else if ($masteryPoints >= 500000 && $masteryPoints < 700000){
-        return "F73737";
+        return "threat-l";
     } else if ($masteryPoints >= 700000 && $masteryPoints < 1000000){
-        return "FB1C1C";
+        return "threat-xl";
     } else if ($masteryPoints >= 1000000){
-        return "FF0000";
+        return "threat-xxl";
     }
 }
 
