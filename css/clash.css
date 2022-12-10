@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 @font-face {
   font-family:'Montserrat',sans-serif;
   src: url("/clashapp/data/fonts/Montserrat/Montserrat-Regular.ttf") format('truetype');
@@ -5,7 +9,7 @@
   font-style: normal;
 }
 
-.sbl-circ {
+/* .sbl-circ {
     height: 16px;
     width: 16px;
     color: #eee;
@@ -18,7 +22,7 @@
     border-top-color: transparent;
     animation: rotate 1s linear infinite;
     transition: all .2s linear;
-}
+} */
 
 body,
 button,
@@ -42,10 +46,9 @@ body, html {
   min-height: calc(100vh - 90px);
 }
 
-#teamname {
+/* #teamname {
   max-width: 600px;
   /* transform: translateY(-46px); */
-}
 
 input, input:focus, button {
   outline: none;
@@ -67,21 +70,21 @@ input, input:focus, button {
     text-align: center;
 }
 
-#suchfeld {
+/* #suchfeld {
   height: 40px;
   position: absolute;
   left: 50%;
   transform: translate(-50%, 30%);
-}
+} */
 
-#name {
+/* #name {
   font-size: 16px;
   padding-left: 10px;
-}
+} */
 
-#submitBtn, #updateBtn {
+/* #submitBtn, #updateBtn {
   font-size: 16px;
-}
+} */
 
 #stattable td, #stattable th {
     padding: 9px;
@@ -170,12 +173,12 @@ input, input:focus, button {
 }
 
 /* Style the button that is used to open and close the collapsible content */
-.collapsible {
+/* .collapsible {
   background-color: #0e0f18;
   cursor: pointer;
   padding: 8px;
   width: 100%;
-}
+} */
 
 /* Style the collapsible content. Note: hidden by default */
 .content {
@@ -184,13 +187,13 @@ input, input:focus, button {
   transition: all 300ms;
 }
 
-.collapsible:after {
-  content: '\2B9F'; /* Unicode character for "plus" sign (+) */
+/* .collapsible:after {
+  content: '\2B9F'; 
   font-size: 13px;
   color: white;
   float: center;
   font-weight: bold;
-}
+} */
 
 .active:after {
   content: "\2B9D"; /* Unicode character for "minus" sign (-) */
@@ -258,8 +261,8 @@ body {
   margin-bottom: 10px;
   border: 1px white solid;
   overflow: hidden;
-  width: 100%;
-  background-color: #0e0f18;
+  /* width: 100%; */
+  /* background-color: #0e0f18; */
 }
 
 .grid-container > div {
@@ -268,19 +271,19 @@ body {
   padding: 4px 0;
 }
 
-.team-title {
+/* .team-title {
   display: inline;
   vertical-align: middle;
-}
+} */
 
-.team-logo {
+/* .team-logo {
   margin-right: 10px;
   vertical-align: middle;
-}
+} */
 
-.player-name {
+/* .player-name {
   padding-top: 4px;
-}
+} */
 
 .champion-level {
   position: relative;
@@ -289,7 +292,7 @@ body {
 
 .champion-lane {
   position: relative;
-  bottom: 26px;
+  bottom: 48px;
 }
 
 .kda-stats {
@@ -383,7 +386,7 @@ ul.moveable {
   margin: 0px;
 }
 
-.header-li li {
+/* .header-li li {
   list-style-image: none;
   margin: 10px;
   border: 1px solid #ccc;
@@ -395,15 +398,15 @@ ul.moveable {
   font-size: 18px;
   margin-right: 5px;
   margin-left: 5px;
-}
+} */
 
 
-.champ-select-champion, .selected-ban-champion, .suggested-ban-champion {
+.champ-select-champion, .selected-ban-champion {
   vertical-align: top;
   display: inline-block;
   text-align: center;
-  width: 80px;
-  height: 75px;
+  width: 4.5rem;
+  height: 4.625rem;
 }
 
 .champ-select-champion .caption {
@@ -412,9 +415,12 @@ ul.moveable {
   white-space: nowrap;
 }
 
-.suggested-ban-champion {
+/* .suggested-ban-champion {
+  vertical-align: top;
+  display: inline-block;
+  text-align: center;
   visibility: hidden;
-}
+} */
 
 .removal-overlay {
   height: auto;
@@ -454,7 +460,7 @@ ul.moveable {
 }
 
 .suggested-ban-caption {
-  margin-top: 2px;
+  /* margin-top: 2px; */
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -470,11 +476,11 @@ ul.moveable {
   top: 10px;
 }
 
-.ban-hoverer {
+/* .ban-hoverer {
   display: inline-grid;
   position: relative;
   overflow: hidden;
-}
+} */
 
 .ban-overlay, .removal-overlay {
   transition: all .15s ease-out;
@@ -507,32 +513,32 @@ ul.moveable {
   transition: all .15s ease-out;
 }
 
-.lane-selector {
+/* .lane-selector {
   position: relative;
   vertical-align: top;
   float: right;
   right: 6px;
   filter: brightness(50%);
   cursor: pointer;
-}
+} */
 
-.lane-selector + .lane-selector{
+/* .lane-selector + .lane-selector{
   margin-right: 10px;
-}
+} */
 
-#top-ban-bar {
+/* #top-ban-bar {
   height: 34px;
-}
+} */
 
-#selectedBans {
+/* #selectedBans {
   width: 420px;
   height: 159px;
-  overflow: hidden;
-  bottom: 88px;
-  left: 0px;
-}
+  overflow: hidden; */
+  /* bottom: 88px;
+  left: 0px; */
+/* } */
 
-#suggestedBans {
+/* #suggestedBans {
   position: absolute;
   width: 420px;
   height: 159px;
@@ -543,34 +549,34 @@ ul.moveable {
   grid-template: "A A A A A";
   padding-top: 10px;
 
-}
+} */
 
-#suggested-ban-title {
+/* #suggested-ban-title {
   position: absolute;
   overflow: hidden;
   left: 50%;
   transform: translate(-50%, -100px);
-}
+} */
 
-#champSelect {
+/* #champSelect {
   overflow: overlay;
   height: 145px;
-}
+} */
 
-#champSelector {
+/* #champSelector {
   height: 30px;
-}
+} */
 
-#banSearch {
-  float: right;
+/* #banSearch {
+  /* float: right;
   position: relative;
-  right: 50px;
-  width: 420px;
-  left: 422px;
-  top: 88px;
-  height: 175px;
+  right: 50px; */
+  /* width: 420px; */
+  /* left: 422px;
+  top: 88px; */
+  /* height: 175px;
   overflow: hidden;
-}
+*/
 
 .clash-footer {
   font-family:'Montserrat',sans-serif;
@@ -587,23 +593,23 @@ ul.moveable {
   color: #8484b3;
 }
 
-.position-disclaimer {
+/* .position-disclaimer {
   display: inline-flex;
   justify-content: space-between;
   line-height: 32px;
   column-gap: 6px;
   padding-top: 6px;
-}
+} */
 
-.mastery-points {
+/* .mastery-points {
   margin-top: -26px;
-}
+} */
 
-ul {
+/* ul {
   list-style-type: none;
   margin: 0;
   padding: 0;
-}
+} */
 
 /* li {
   float: left;
@@ -632,7 +638,7 @@ ul {
   color: #fff;  
 }
 
-.misc-button {
+/* .misc-button {
   height: 32px;
   width: 100px;
   transform: translateY(50%);
@@ -640,9 +646,13 @@ ul {
   margin-left: 10px;
   font-size: 16px;
   line-height: 1em;
-  /* background-color: #565761;
-  color: #323236; */
+  background-color: #eee;
+  color: #000;
   cursor: pointer;
+} */
+
+@media screen and (max-width: 600px){
+
 }
 
 .settings-button {
@@ -656,34 +666,34 @@ ul {
   transform: translate(-10%, 25%);
 }
 
-.profile-link {
+/* .profile-link {
   color: #ddd;
   text-decoration: none;
-}
+} */
 
 .clash-form a {
   color: #bbb;
 }
  /* LINK COLORING */
-.profile-link-text:hover, .clash-form a:hover {
+.clash-form a:hover {
   color: #fff;
   text-decoration: underline;
 }
 
-.profile-link-text:active, .clash-form a:active{
+.clash-form a:active{
   color: #ddd;
 }
 
-.select-language-button::after {
+/* .select-language-button::after {
   content: '\2B9F';
-}
+} */
 
-.misc-button-menu {
+/* .misc-button-menu {
   position: absolute;
   display: flex;
   right: 0px;
   height: 64px;
-}
+} */
 
 header {
   background-color: #141624;
@@ -738,6 +748,15 @@ header {
   justify-content: center;
   border-radius: 6px;
 }
+
+/* .outer-form {
+  position: relative;
+  justify-content: center;
+  display: flex;
+  border-radius: 6px;
+  height: calc(100vh - 155px);
+  align-items: center;
+} */
 
 .clash-form-title {
   margin-bottom: 10px;
@@ -988,11 +1007,11 @@ header {
   outline: none;
 }
 
-.lane-icon {
+/* .lane-icon {
   filter: saturate(0) brightness(1.4);
-}
+} */
 
-.player-tags li {
+/* .player-tags li {
   list-style-image: none;
   margin: 6px 4px;
   border: 1px solid #141624;
@@ -1001,17 +1020,17 @@ header {
   border-radius: 25px;
   color: #ccc;
   float: left;
-  /* font-weight: bold; */
-  /* border: none; */
-  /* font-size: 18px; */
-  /* margin-right: 5px;
-  margin-left: 5px; */
+  font-weight: bold;
+  border: none;
+  font-size: 18px;
+  margin-right: 5px;
+  margin-left: 5px;
   cursor: help;
-}
+} */
 
-.tag-container {
-  max-height: 150px;
+/* .tag-container {
+  max-height: 6rem;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-}
+} */

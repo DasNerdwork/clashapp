@@ -8,7 +8,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
     } else if (window.location.href == "https://clash.dasnerdwork.net/") {
       footer = document.getElementById("full-footer").style.position = "fixed";
       document.getElementById("version").style.opacity = "0.3";
-      suchfeld = document.getElementById("suchfeld");
+      suchfeld = document.getElementById("search-bar");
       suchfeld.style.position = "absolute";
       suchfeld.style.top = "60%";
       suchfeld.style.left = "50%";
@@ -40,7 +40,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       document.body.style.backgroundRepeat = "no-repeat";
       document.body.style.backgroundPosition = "50% 20%";
       document.body.style.backgroundSize = "40%";
-      document.body.style.backgroundColor = "#c6ccd8";
+      // document.body.style.backgroundColor = "#c6ccd8";
       // document.body.style.backgroundColor = "#000";
       document.getElementById("version").style.color = "#000";
     }
@@ -54,7 +54,11 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
 
       for (i = 0; i < coll.length; i++) {
         coll[i].addEventListener("click", function() {
-          this.classList.toggle("active");
+          if(this.innerText === "⮟"){
+            this.innerText = "⮝";
+          } else {
+            this.innerText = "⮟";
+          }
           var content = this.nextElementSibling;
           if (content.style.maxHeight == "0px" ){
             content.style.maxHeight = content.scrollHeight + "px";
@@ -115,7 +119,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       function selectChampions(){          
         var lanes = document.getElementsByClassName("lane-selector"); // the 5 lane icons as elements in a list
           for (let i = 0; i < lanes.length; i++) { 
-            if(lanes.item(i).style.filter == "saturate(0) brightness(200%)"){ // checks if a lane filter icon is set to active (brightness(100%)) and saves the specific lane name for futher sorting
+            if(lanes.item(i).classList.contains == "brightness-200"){ // checks if a lane filter icon is set to active (brightness(100%)) and saves the specific lane name for futher sorting
               laneFilter = lanes.item(i).dataset.lane.toUpperCase();
               break;
             } else {
@@ -221,8 +225,8 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
           } else {
             html = '<div class="selected-ban-champion">'+
                         '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
-                          '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + id + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + id + '.webp" width="48" loading="lazy">'+
-                          '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.webp" width="48"></div>'+
+                          '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + id + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + id + '.webp" width="44" loading="lazy">'+
+                          '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.webp" width="44"></div>'+
                         '<span class="selected-ban-caption" style="display: block;">' + name + '</span>'+
                       '</div>';
             selectedBans.innerHTML += html;
@@ -247,8 +251,8 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
                 for (const element of data["SuggestedBans"]) {
                   html += '<div class="selected-ban-champion">'+
                             '<div class="hoverer" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
-                              '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" width="48" loading="lazy">'+
-                              '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.webp" width="48"></div>'+
+                              '<img class="selected-ban-icon" style="height: auto; z-index: 1;" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" width="44" loading="lazy">'+
+                              '<img class="removal-overlay" src="/clashapp/data/misc/RemovalOverlay.webp" width="44"></div>'+
                             '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
                           '</div>';
                 }
@@ -334,7 +338,6 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
   $('document').ready(function() {
     var suggestedBans = document.getElementsByClassName("suggested-ban-champion");
     for(var i = 0; i < suggestedBans.length;i++){
-      suggestedBans[i].style.visibility = "visible";
       $("#suggestedBans").append(suggestedBans[i])
     }
 
@@ -392,7 +395,7 @@ function sanitize(text){
   }
 }
 function showLoader(){
-  document.getElementById("loader").style.opacity = 1;
+  document.getElementById("main-search-loading-spinner").style.opacity = 1;
   document.getElementById("name").disabled = true;
   document.getElementById("submitBtn").disabled = true;
 }
@@ -418,8 +421,12 @@ function selected_ban_champion(el){
 
 // LANE HIGHLIGHT
 function highlightLaneIcon(laneImg){
+  console.log("test");
   var lanes = document.getElementsByClassName("lane-selector");
-  if (laneImg.style.filter == "saturate(0) brightness(50%)") {
+  if (laneImg.classList.contains("brightness-50")) {
+    laneImg.classList.remove("brightness-50");
+    laneImg.classList.remove("saturate-0");
+    // laneImg.classList.add("brightness-200"); // not possible due to tailwind
     laneImg.style.filter = "saturate(0) brightness(200%)";
     var championList = document.getElementsByClassName("champ-select-champion");
     var champInput = document.getElementById("champSelector");
@@ -434,11 +441,15 @@ function highlightLaneIcon(laneImg){
     }
     for (let i = 0; i < lanes.length; i++) {
       if(lanes.item(i) != laneImg){
-        lanes.item(i).style.filter = "saturate(0) brightness(50%)";
+        lanes.item(i).style.filter= "";
+        lanes.item(i).classList.add("brightness-50");
+        lanes.item(i).classList.add("saturate-0");
       }
     }
   } else {
-    laneImg.style.filter = "saturate(0) brightness(50%)";
+    laneImg.style.filter = "";
+    laneImg.classList.add("brightness-50");
+    laneImg.classList.add("saturate-0");
     for (let i = 0; i < lanes.length; i++) {
       if(lanes.item(i).style.filter == "saturate(0) brightness(200%)"){
         var activeLane = true;
@@ -743,7 +754,7 @@ function getQRCode(){
       if(existingQR == null){
         let desc = document.getElementById("2fa-desc");
         let qrcode = document.createElement("img");
-        qrcode.setAttribute("src", "data:image/png;base64,"+data);
+        qrcode.setAttribute("src", "data:image/webp;base64,"+data);
         qrcode.setAttribute("style", "display: block; margin: 12px auto; width: 75%;");
         qrcode.setAttribute("id", "qrcode");
         desc.parentNode.appendChild(qrcode);
