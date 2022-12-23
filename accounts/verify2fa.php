@@ -1,12 +1,17 @@
 <?php
-session_start();
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 
-require_once 'qr-codes.php';
-require_once 'clash-db.php';
+if (!isset($_SESSION)) session_start();
+// print_r($_SESSION);
+
+require_once '/hdd2/clashapp/accounts/qr-codes.php';
+require_once '/hdd2/clashapp/clash-db.php';
  
-include('head.php');
+include('/hdd2/clashapp/templates/head.php');
 setCodeHeader('Clash', true, true);
-include('header.php');
+include('/hdd2/clashapp/templates/header.php');
 
 $error_message = array();
 
@@ -22,7 +27,7 @@ if (isset($_POST['submit'])) {
             if($response['status'] == 'success'){
                 $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email'], 'sumid' => $response['sumid'], '2fa' => $response['2fa']);
                 unset($_SESSION['temp']);
-                header('Location: /');
+                echo '<script type="text/javascript">window.location.href="/";</script>';
             } else {
                 $error_message[] = $response['message'];
             }
@@ -54,5 +59,5 @@ if (!empty($error_message)) {
     </form>
 </div>
 <?php 
-include('footer.php');
+include('/hdd2/clashapp/templates/footer.php');
 ?>

@@ -1,9 +1,18 @@
-<?php session_start(); 
+<?php 
+if (!isset($_SESSION)) session_start();
+
+// print_r($_SESSION);
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 $startInitialTime = microtime(true);
 $memInitialTime = memory_get_usage();
-include_once('functions.php');
-include_once('update.php');
-require_once 'clash-db.php';
+include_once('/hdd2/clashapp/functions.php');
+include_once('/hdd2/clashapp/update.php');
+require_once '/hdd2/clashapp/clash-db.php';
 
 /**
  * @author Florian Falk <dasnerdwork@gmail.com>
@@ -27,9 +36,9 @@ if ((isset($_COOKIE['stay-logged-in']))) {
 
 // ----------------------------------------------------------------v- PRINT HEADER -v---------------------------------------------------------------- //
 
-include('head.php');
+include('/hdd2/clashapp/templates/head.php');
 setCodeHeader('Clash', true, true);
-include('header.php');
+include('/hdd2/clashapp/templates/header.php');
 
 // ----------------------------------------------------------------v- INITIALIZER -v---------------------------------------------------------------- //
 
@@ -61,8 +70,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
         $startCheckBanFile = microtime(true);
         $memCheckBanFile = memory_get_usage();
-        if(!file_exists('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json')){
-            $fp = fopen('/var/www/html/clash/clashapp/data/teams/'.$teamID.'.json', 'c');
+        if(!file_exists('/hdd2/clashapp/data/teams/'.$teamID.'.json')){
+            $fp = fopen('/hdd2/clashapp/data/teams/'.$teamID.'.json', 'c');
             $suggestedBanFileContent["SuggestedBans"]=[] ;
             $suggestedBanFileContent["Status"]= 0;
             fwrite($fp, json_encode($suggestedBanFileContent));
@@ -78,44 +87,80 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         $memPageTop = memory_get_usage();
         // echo "TournamentID: ".$teamDataArray["TournamentID"]; // TODO: Add current tournament to view
         echo"
-        <div id='top-part' class='h-96 grid grid-cols-topbar gap-4 mt-4 ml-4 mr-4'>
-            <div id='team-info' class='h-96 row-span-2'>
-                <h1 id='teamname' class='border border-gray-500 h-96'>
-                    <img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64'>
-                    <div id='team-title'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</div>
-                </h1>
-            </div>
-            <div class='row-span-2 h-96 flex items-center justify-center border border-gray-500'>
-                <div class='h-[21rem] w-[17.5rem] bg-black'>
-                    <span class='h-[21rem] flex items-center justify-center'>Advertisement</span>
+        <div id='top-part' class='h-96 grid twok:grid-cols-topbartwok fullhd:grid-cols-topbarfullhd gap-4 mt-4 ml-4 mr-4 z-20 relative'>
+            <div id='team-info' class=' h-96 row-span-2'>
+                <div class='p-4 rounded bg-[#141624] h-96'>
+                    <h1 id='teamname' class='inline-flex items-center gap-4'>
+                        <img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64'>
+                        <span id='team-title' class='text-2xl'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</span>
+                    </h1>
+                    "; /** ($teamDataArray); */ echo "
                 </div>
             </div>
-            <div class='row-span-2 h-96 grid border border-gray-500'>
+            <div class='row-span-2 h-96 flex items-center justify-center rounded bg-[#141624]'>
+                <div class='h-[21rem] w-[17.5rem] bg-black'>
+                    <span class='h-[21rem] flex items-center justify-center'>Advertisement</span> 
+                </div>
+            </div>
+            <div class='row-span-2 h-96 grid rounded bg-[#141624]'>
                 <span class='w-full h-8 flex justify-center items-center'>Suggested Bans:</span>
-                <div id='suggestedBans' class='absolute max-w-[26.25rem] w-full grid grid-cols-[64px_64px_64px_64px_64px] gap-y-4 p-2 justify-evenly border border-gray-500 mt-8'></div>
-                <div class='flex justify-center'>&#9733; &#9733; &#9734; &#9734; &#9734;</div>
+                <div id='suggestedBans' class='w-full grid grid-cols-[64px_64px_64px_64px_64px] gap-y-4 p-2 justify-evenly rounded bg-[#141624] '></div>
+                "; if(isset($_SESSION['user']['email'])){ echo "
+                <div class='flex justify-center text-2xl h-8 mt-4'>
+                    <div x-data=\"{ rating: ".(isset($_COOKIE[$_GET['name']]) ? $_COOKIE[$_GET['name']] : 0) .", hover: 0 }\" x-cloak>
+                        <div class='flex gap-x-0'>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 1 && hover < 1, 'text-yellow-500': rating >= 1, 'text-[#414246]': hover >= 1 && rating < 1 }\" x-on:mouseover=\"hover = 1\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 1 ? 0 : 1, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 2 && hover < 2, 'text-yellow-500': rating >= 2, 'text-[#414246]': hover >= 2 && rating < 2 }\" x-on:mouseover=\"hover = 2\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 2 ? 0 : 2, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 3 && hover < 3, 'text-yellow-500': rating >= 3, 'text-[#414246]': hover >= 3 && rating < 3 }\" x-on:mouseover=\"hover = 3\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 3 ? 0 : 3, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 4 && hover < 4, 'text-yellow-500': rating >= 4, 'text-[#414246]': hover >= 4 && rating < 4 }\" x-on:mouseover=\"hover = 4\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 4 ? 0 : 4, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 5 && hover < 5, 'text-yellow-500': rating >= 5, 'text-[#414246]': hover >= 5 && rating < 5 }\" x-on:mouseover=\"hover = 5\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 5 ? 0 : 5, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                        </div>
+                    </div>
+                </div>"; }  else { echo "
+                    <div class='flex justify-center text-2xl h-8 mt-4'>
+                    <div>
+                        <div class='flex justify-center gap-x-0' x-data=\"{ showNotice: false }\" x-cloak x-on:mouseover='showNotice = true' x-on:mouseout='showNotice = false'>
+                            <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
+                            <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
+                            <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
+                            <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
+                            <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
+                            <span class='text-sm absolute backdrop-blur-xl top-[14.5rem]' x-show='showNotice' x-transition>Voting is only available for <a href='/login' class='underline'>logged-in</a> users</span>
+                        </div>
+                    </div>
+                </div>"; } echo "
+                <div class='flex justify-center items-center'>
+                    <div class='group relative inline-block' x-data='{ tooltip: 0 }' x-cloak>
+                        <button onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-xl p-3 w-fit bg-[#0e0f18] rounded-xl' type='button' x-on:click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'>Click to Copy URL</button>
+                        <div class='w-40 bg-black text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition' x-on:click='tooltip = 0'>
+                            Copied to Clipboard
+                            <svg class='absolute text-black h-2 w-full left-0 top-full' x='0px' y='0px' viewBox='0 0 255 255' xml:space='preserve'><polygon class='fill-current' points='0,0 127.5,127.5 255,0'/></svg>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class='row-span-2 h-96 flex items-center justify-center border border-gray-500'>
+            <div class='row-span-2 h-96 flex items-center justify-center rounded bg-[#141624]'>
                 <div class='h-[21rem] w-[17.5rem] bg-black'>
                     <span class='h-[21rem] flex items-center justify-center'>Advertisement</span>
                 </div>
             </div>
-            <div class='flex justify-center border border-gray-500 overflow-hidden'>
-                <div id='selectedBans' class='max-w-[25rem]'></div>
+            <div class='flex justify-center rounded bg-[#141624] overflow-hidden h-fit fullhd:h-44 twok:h-48'>
+                <div id='selectedBans' class='max-w-[40rem] flex flex-wrap text-center twok:gap-x-4 twok:pl-11 fullhd:pl-[3px] fullhd:gap-x-3'></div>
             </div>
-            <div class='flex justify-center border border-gray-500'>
-                <form id='banSearch' class='max-w-[25rem] m-0' action='' onsubmit='return false;' method='GET' autocomplete='off'>
-                    <div id='top-ban-bar' class='h-10'>
-                        <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8' value='' placeholder='Championname'>
+            <div class='flex justify-center rounded bg-[#141624] fullhd:h-48 twok:h-44'>
+                <form id='banSearch' class='m-0 pb-4 w-full' action='' onsubmit='return false;' method='GET' autocomplete='off'>
+                    <div id='top-ban-bar' class='h-10 text-black'>
+                        <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2' value='' placeholder='Championname'>
                         <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer' src='/clashapp/data/misc/lanes/UTILITY.webp' width='28' onclick='highlightLaneIcon(this);' data-lane='sup'>
                         <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5' src='/clashapp/data/misc/lanes/BOTTOM.webp' width='28' onclick='highlightLaneIcon(this);' data-lane='adc'>
                         <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5' src='/clashapp/data/misc/lanes/MIDDLE.webp' width='28' onclick='highlightLaneIcon(this);' data-lane='mid'>
                         <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5' src='/clashapp/data/misc/lanes/JUNGLE.webp' width='28' onclick='highlightLaneIcon(this);' data-lane='jgl'>
                         <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5' src='/clashapp/data/misc/lanes/TOP.webp' width='28' onclick='highlightLaneIcon(this);' data-lane='top'>
                     </div>
-                    <div id='champSelect' class='overflow-y-scroll h-40'>";
+                    <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] twok:max-h-[7.5rem] fullhd:max-h-[8.5rem] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1'>";
                         showBanSelector(); echo "
                     </div>
+                    <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/4'><img src='/clashapp/data/misc/webp/empty_search.webp' class='w-16'><span>Whoops, did you mistype?</span></div>
                 </form>
             </div>
         </div>";
@@ -127,16 +172,16 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         $startFetchPlayerTotal = microtime(true);
         $memFetchPlayerTotal = memory_get_usage();
         echo "
-        <table class='w-full table-fixed border-separate border-spacing-4 '>
+        <table class='w-full flex table-fixed border-separate border-spacing-4 '>
             <tr>";
             count($teamDataArray["Players"]) == 1 ? $tableWidth = "100%" : $tableWidth = round(100/count($teamDataArray["Players"]));;
-                $playerDataDirectory = new DirectoryIterator('/var/www/html/clash/clashapp/data/player/');
+                $playerDataDirectory = new DirectoryIterator('/hdd2/clashapp/data/player/');
                 foreach($teamDataArray["Players"] as $key => $player){ 
                     $startFetchPlayer[$key] = microtime(true);
                     $memFetchPlayer[$key] = memory_get_usage();
                     echo "
-                    <td>
-                        <table class='border border-gray-500'>
+                    <td class='align-top w-1/5'>
+                        <table class='rounded bg-[#141624]'>
                             <tr>
                                 <td class='w-[var(--playerWidth)] text-center' style='--playerWidth: ".$tableWidth."%'>";
                                     unset($sumid); // necessary for check 22 lines below
@@ -145,7 +190,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
                                             // echo str_replace(".json", "", $playerDataJSONPath) ." - ". $player["summonerId"];
                                             if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
-                                                $playerDataJSON = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                                                $playerDataJSON = json_decode(file_get_contents('/hdd2/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                                                 $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
                                                 if($playerDataJSON["MatchIDs"][0] != $tempMatchIDs[0]){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
                                                     echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Updated.');</script>";
@@ -166,12 +211,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         }
                                     }
                                     if(!isset($sumid) && $player["summonerId"] != "") {
-                                        // updateProfile($player["summonerId"], 15, "sumid", $tempMatchIDs); TODO: COMMENT BACK IN
+                                        updateProfile($player["summonerId"], 15, "sumid", $tempMatchIDs);
                                         foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
                                             $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
                                             if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
                                                 if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
-                                                    $playerDataJSON = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                                                    $playerDataJSON = json_decode(file_get_contents('/hdd2/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                                                     $playerData = $playerDataJSON["PlayerData"];
                                                     $playerName = $playerDataJSON["PlayerData"]["Name"];
                                                     $sumid = $playerDataJSON["PlayerData"]["SumID"];
@@ -194,40 +239,38 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
                                     if(!$execOnlyOnce) $startProfileIconBorders = microtime(true);
                                     $memProfileIconBorders = memory_get_usage();
-                                    echo "
-                                        <div class='relative flex justify-center mb-7'>";
-                                            if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
-                                                echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" class="rounded-full mt-6 z-[-2]" loading="lazy">';
+                                    echo "<div class='h-[9.75rem] mt-4 grid grid-cols-2 gap-4'>
+                                        <div class='relative flex justify-center'>";
+                                            if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
+                                                echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px]" loading="lazy">';
                                             }
 
                                             $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
                                             if($rankOrLevelArray["Type"] === "Rank"){ // If user has a rank
                                                 // Print the profile border image url for current highest rank
-                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/ranks/*'.strtolower($rankOrLevelArray["HighestRank"]).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-                                                $webBorderPath = str_replace("/var/www/html/clash","",$profileBorderPath);
+                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd2/clashapp/data/misc/ranks/*'.strtolower($rankOrLevelArray["HighestRank"]).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+                                                $webBorderPath = str_replace("/hdd2","",$profileBorderPath);
                                                 if(file_exists($profileBorderPath)){
-                                                    echo '<img src="'.$webBorderPath.'" width="384" class="max-w-sm -top-32 absolute z-[-1]" loading="lazy">';
+                                                    echo '<img src="'.$webBorderPath.'" width="384" class="max-h-[384px] max-w-[384px] -top-32 absolute z-10" loading="lazy" style="-webkit-mask-image: radial-gradient(circle at center, white 20%, transparent 33%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);">';
                                                 }
                                                 // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
                                                 if ($rankOrLevelArray["HighEloLP"] != ""){
-                                                    echo "<div class='font-bold color-[#e8dfcc] absolute -mt-1 text-xs z-0'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
+                                                    echo "<div class='font-bold color-[#e8dfcc] absolute -mt-2 text-xs z-20'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
                                                 } else {
-                                                    echo "<div class='font-bold color-[#e8dfcc] absolute mt-[0.85rem] text-xs z-0'>".$rankOrLevelArray["RankNumber"]."</div>";
+                                                    echo "<div class='font-bold color-[#e8dfcc] absolute mt-[0.85rem] text-xs z-20'>".$rankOrLevelArray["RankNumber"]."</div>";
                                                 }
                                                 
-                                                echo "<div class='color-[#e8dfcc] absolute mt-[6.8rem] text-xs z-0'>".$playerData["Level"]."</div>"; // Always current lvl at the bottom
+                                                echo "<div class='color-[#e8dfcc] absolute mt-[6.8rem] text-xs z-20'>".$playerData["Level"]."</div>"; // Always current lvl at the bottom
                                             } else if($rankOrLevelArray["Type"] === "Level") { // Else set to current level border
-                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-                                                $webBorderPath = str_replace("/var/www/html/clash","",$profileBorderPath);
+                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd2/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+                                                $webBorderPath = str_replace("/hdd2","",$profileBorderPath);
                                                 if(file_exists($profileBorderPath)){
-                                                    echo '<img src="'.$webBorderPath.'" width="190" class="absolute -mt-[2.05rem] z-[-1]" loading="lazy">';
+                                                    echo '<img src="'.$webBorderPath.'" width="190" class="max-h-[190px] max-w-[190px] absolute -mt-[2.05rem] z-10" loading="lazy" style="-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);">';
                                                     }
-                                            echo "<div class='absolute text-[#e8dfcc] mt-[6.8rem] text-xs z-0'>".$playerData["Level"]."</div>";
+                                            echo "<div class='absolute text-[#e8dfcc] mt-[6.8rem] text-xs z-20'>".$playerData["Level"]."</div>";
                                             } echo "
-                                        </div>";
-                                    echo "<span>".$playerName."</span>
-                                </td>
-                            </tr>";
+                                  <span class='absolute mt-[8.75rem]'>".$playerName."</span></div>";
+
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
 
@@ -268,32 +311,51 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             $playerLanesTeamArray[$sumid]["Mainrole"] = $playerLanes[0];
                             $playerLanesTeamArray[$sumid]["Secrole"] = $playerLanes[1];
 
-                            echo "
-                            <tr>
-                                <td class='text-center'>
-                                    <div class='inline-flex leading-8 gap-1 pt-2'>Positions: ";
-                                        if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
-                                            echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" loading="lazy">';
-                                        }
-                                        if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
-                                            echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32" loading="lazy">';
-                                        }
-                                        echo " queued as ";
-                                        if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
-                                            echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" loading="lazy">';
-                                        } echo"
+                            echo "<div class='inline-flex leading-8 gap-1'>
+                                    <div class='grid w-11/12 gap-2 h-fit'>
+                                        <div class='flex h-8 items-center justify-between'>
+                                            <span>Queued as:</span>
+                                            <div class='inline-flex w-[4.5rem] justify-center'>";
+                                            if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
+                                                echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" loading="lazy">';
+                                            } echo"</div>
+                                        </div>
+                                        <div class='flex h-8 items-center justify-between'>
+                                            <span>Positions:</span>
+                                            <div class='inline-flex gap-2'>";
+                                            if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
+                                                echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" loading="lazy">';
+                                            }
+                                            if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
+                                                echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32" loading="lazy">';
+                                            }echo "</div>
+                                        </div>";
+                                        if(!$execOnlyOnce) $startPrintAverageMatchscore = microtime(true);
+                                        $memPrintAverageMatchscore = memory_get_usage(); echo "
+                                        <div class='flex h-8 items-center justify-between'>
+                                            <span>Avg. Score:</span>
+                                            <div class='inline-flex w-[4.5rem] justify-center'>
+                                                <span>".number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2)."</span>
+                                            </div>
+                                        </div>";
+                                        if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
+                                        if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Memory"] = number_format((memory_get_usage() - $memPrintAverageMatchscore)/1024, 2, ',', '.')." kB"; echo "
                                     </div>
-                                </td>
-                            </tr>";
+                                </div>
+                            </div>";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
+
+
+
+
 
                             // ------------------------------------------------------------------v- TODO: AGAIN DOWNLOAD? -v------------------------------------------------------------------ //
 
                             if(!$execOnlyOnce) $startAgainDownload = microtime(true);
                             $memAgainDownload = memory_get_usage();
                             foreach($matchids_sliced as $matchid){
-                                if(!file_exists('/var/www/html/clash/clashapp/data/matches/' . $matchid . ".json")){
+                                if(!file_exists('/hdd2/clashapp/data/matches/' . $matchid . ".json")){
                                     downloadMatchByID($matchid, $playerName);
                                 }
                             }
@@ -307,17 +369,17 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             echo "
                             <tr>
                                 <td class='text-center h-28'> 
-                                    <div class='inline-flex'>";
+                                    <div class='inline-flex w-full justify-evenly'>";
                                     if(empty($rankData) || empty(array_intersect(array("RANKED_SOLO_5x5", "RANKED_FLEX_SR"), array_column($rankData,"Queue")))){
-                                        echo "<div class='border border-gray-500 p-2'>Unranked</div>";
+                                        echo "<div class='flex items-center gap-2 rounded bg-[#0e0f18] p-2'><img src='/clashapp/data/misc/webp/unranked_emote.webp' loading='lazy' class='w-16'><span class='w-[4.5rem]'>Unranked</span></div>";
                                     } else {
                                         foreach($rankData as $rankQueue){
                                             if($rankQueue["Queue"] == "RANKED_SOLO_5x5"){ echo "
-                                                <div class='border border-gray-500 my-2.5 mx-5 p-2'>
+                                                <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
                                                 <span class='block text-[0.75rem]'>Ranked Solo/Duo:</span>
                                                     <span class='text-".strtolower($rankQueue["Tier"])."'>".ucfirst(strtolower($rankQueue["Tier"])). " " . $rankQueue["Rank"];
                                             } else if($rankQueue["Queue"] == "RANKED_FLEX_SR"){ echo "
-                                                <div class='border border-gray-500 my-2.5 mx-5 p-2'>
+                                                <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
                                                     <span class='block text-[0.75rem]'>Ranked Flex:</span>
                                                     <span class='block text-".strtolower($rankQueue["Tier"])."'>".ucfirst(strtolower($rankQueue["Tier"])). " " . $rankQueue["Rank"];
                                             } echo " / " . $rankQueue["LP"] . " LP</span><span class='block'>
@@ -341,7 +403,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 <td class='text-center h-32'>
                                     <div class='inline-flex gap-8'>";
                                         for($i=0; $i<3; $i++){
-                                            if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp')){ echo '
+                                            if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp')){ echo '
                                                 <div>
                                                     <img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp" width="64" class="block relative z-0;" loading="lazy">
                                                     <span>'.$masteryData[$i]["Champion"].'</span>
@@ -356,19 +418,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMasteryData"]["Time"] = number_format((microtime(true) - $startPrintMasteryData), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMasteryData"]["Memory"] = number_format((memory_get_usage() - $memPrintMasteryData)/1024, 2, ',', '.')." kB";
                             
-                            // -------------------------------------------------------------v- PRINT AVERAGE MATCHSCORE -v------------------------------------------------------------- //
-
-                            if(!$execOnlyOnce) $startPrintAverageMatchscore = microtime(true);
-                            $memPrintAverageMatchscore = memory_get_usage();
-                            echo "
-                            <tr>
-                                <td class='text-center pb-3'>
-                                    <span>Average Matchscore: ".number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2)."</span>
-                                </td>
-                            </tr>";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Memory"] = number_format((memory_get_usage() - $memPrintAverageMatchscore)/1024, 2, ',', '.')." kB";
-
                             // -------------------------------------------------------------------v- PRINT TAGS  -v------------------------------------------------------------------- //
 
                             if(!$execOnlyOnce) $startPrintTags = microtime(true);
@@ -379,36 +428,34 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             echo "
                             <tr>
                                 <td>
-                                    <div class='max-h-24 text-ellipsis overflow-hidden whitespace-nowrap mb-2'>
-                                        <ul>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>MVP</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Dragonkiller</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Newly</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Invader</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Lowbob</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Captain</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Premate</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                            <li class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#15182a] float-left cursor-help'>Test</li>
-                                        </ul>
+                                    <div class='max-h-[6rem] overflow-hidden mb-2 flex flex-wrap px-4 justify-evenly'>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>MVP</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Dragonkiller</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Newly</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Invader</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Lowbob</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Captain</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Premate</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
                                     </div>
                                 </td>
                             </tr>";
@@ -426,7 +473,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             $memPrintMatchHistory = memory_get_usage();
                             echo "
                             <tr>
-                                <td>";
+                                <td x-data='{ open: true }'>";
                                     printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray);
                                     echo "
                                 </td>
@@ -460,7 +507,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     foreach($suggestedBanArray as $banChampion){
             echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16">
                 <div class="ban-hoverer inline-grid" onclick="">
-                    <img class="suggested-ban-icon" style="height: auto; z-index: 1;" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" width="44" loading="lazy"></div>
+                    <img class="suggested-ban-icon fullhd:w-12 twok:w-14" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" loading="lazy"></div>
                 <span class="suggested-ban-caption w-16 block">' . $banChampion["Champion"] . '</span>
             </div>';
         }
@@ -469,7 +516,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     // ----------------------------------------------------------------------------------------------v- END + FOOTER  -v---------------------------------------------------------------------------------------------- //
 
 }
-include('footer.php');
+include('/hdd2/clashapp/templates/footer.php');
 $timeAndMemoryArray["Total"]["Time"] = number_format((microtime(true) - $startInitialTime), 2, ',', '.')." s";
 $timeAndMemoryArray["Total"]["Memory"] = number_format((memory_get_usage() - $memInitialTime)/1024, 2, ',', '.')." kB";
 
