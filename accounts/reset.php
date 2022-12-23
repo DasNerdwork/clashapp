@@ -1,5 +1,5 @@
 <?php
-session_start();
+if (!isset($_SESSION)) session_start();
  
 if (isset($_SESSION['user'])) {
     header('Location: settings');
@@ -10,9 +10,9 @@ require_once '/hdd2/clashapp/clash-db.php';
 $return_message = '';
 
 if (isset($_GET["code"])) {
-    include('head.php');
+    include('/hdd2/clashapp/templates/head.php');
     setCodeHeader('Reset Password', true, true);
-    include('header.php');
+    include('/hdd2/clashapp/templates/header.php');
 
     $db = new DB();
     $response = $db->check_reset_code($_GET["code"]);
@@ -62,10 +62,10 @@ if (isset($_POST['submit'])) {
         ];
         $reset = $db->reset_password($response['id'], $response['username'], $response['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options));
         if($reset['status'] == 'success'){
-            header('Location: login?password=reset');
+            header('Location: https://clash.dasnerdwork.net/login?password=reset');
         }
     }
 }
-include('footer.php');
+include('/hdd2/clashapp/templates/footer.php');
 ?>
  
