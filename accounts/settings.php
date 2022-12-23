@@ -1,5 +1,5 @@
 <?php
-session_start();
+if (!isset($_SESSION)) session_start();
 
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
@@ -30,7 +30,7 @@ $currentPatch = file_get_contents("/hdd2/clashapp/data/patch/version.txt");
 if (isset($_POST['password'])) {
     $response = $db->delete_account($_SESSION['user']['id'], $_SESSION['user']['username'], $_SESSION['user']['region'], $_SESSION['user']['email'], $_POST['password']);
     if ($response['status'] == 'success') {
-        header('Location: logout?deactivated=true');
+        header('Location: https://clash.dasnerdwork.net/logout?deactivated=true');
     } else {
         $error_message[] = $response['message'];
     }
@@ -69,7 +69,7 @@ if (isset($_GET['verify'])){
     if($sumid['status'] == 'success') {
         $_SESSION['user']["sumid"] = $sumid['sumid'];
     }
-    Header('Location: '.$_SERVER['PHP_SELF'].'?verified=true');
+    Header('Location: https://clash.dasnerdwork.net/settings?verified=true');
 }
 
 if (isset($_GET['verified'])){
@@ -91,12 +91,12 @@ if (isset($_POST['dcpassword'])) {
     if ($response['status'] == 'success') {
         if($db->disconnect_account($_SESSION['user']['username'], $_SESSION['user']["sumid"])){
             unset($_SESSION['user']["sumid"]);
-            Header('Location: '.$_SERVER['PHP_SELF'].'?verified=false');
+            Header('Location: https://clash.dasnerdwork.net/settings?verified=false');
         } else {
-            $error_message[] = "Unable to locally disconnected accounts. Please reach out to an administrator.";
+            echo "<script>setError('Unable to locally disconnected accounts. Please reach out to an administrator.');</script>"; // TODO: Fix error banner display
         }
     } else {
-        $error_message[] = 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.'; // TODO change to password reset mail instead of onclick open
+        echo "<script>setError('Incorrect password. You can try again or <u type=\"button\" onclick=\"resetPassword(true);\" style=\"cursor: pointer;\">reset</u> your password.');</script>"; // TODO change to password reset mail instead of onclick open
     }
 }
 
@@ -175,7 +175,7 @@ if (isset($_POST['remove-twofa-input'])){
                 if(isset($_SESSION['user']['2fa'])){
                     unset($_SESSION['user']['2fa']);
                 }
-                Header('Location: '.$_SERVER['PHP_SELF'].'?remove2FA=true');
+                Header('Location: https://clash.dasnerdwork.net/settings?remove2FA=true');
             } else {
                 echo "<script>setError('Unable to connect to the database. Please contact an administrator.', true);</script>";
             }
@@ -207,15 +207,15 @@ if (!empty($success_message)) {
             </div>';
         }
     }
-} 
+}
 ?>
 <div class="outer-form">
-    <div class="clash-form">
+    <div class="clash-form" x-data="{ resetPassword: false, disconnectLeague: false, connectLeague: false, confirmLeague: true, add2FA: false, remove2FA: false, deleteAccount: false }">
         <div class='clash-form-title'><?php echo 'Welcome, '. $_SESSION['user']['username']; ?></div>
         <div><input type="button" id="setting-logout" onclick="location.href='/logout';" value="&#129044; Log Out    "></button></div>
         <div id="reset-password-area">
-            <button id="reset-password-button" onclick="resetPassword(true);">Reset Password</button>
-            <div id="reset-password-description">
+            <button id="reset-password-button" @click="resetPassword = true, disconnectLeague = false, connectLeague = false, confirmLeague = false ,add2FA = false, remove2FA = false, deleteAccount = false">Reset Password</button>
+            <div id="reset-password-description" x-cloak x-transition x-show="resetPassword">
                 <div class='clash-form-title'>Reset your password</div>
                 <span class='descriptive-text'>The same rules apply as used to register, meaning that the password has to:</span>
                 <ul class='password-conditions'>
@@ -225,45 +225,46 @@ if (!empty($success_message)) {
                     <li>Include at least one special character</li>
                     <li>Be between 8 to 32 characters long</li>
                 </ul>
-                <form method="post" id="reset-password-form" style="display: none;">
+                <form method="post" id="reset-password-form">
                     <div><label for="password">Password: </label></div>
                     <div><input type="password" name="current-password" id="current-password" placeholder="Current Password" required /></div>
                     <div><input type="password" name="new-password" id="new-password" placeholder="New Password" required /></div>
                     <div><input type="password" name="confirm-new-password" id="confirm-new-password" placeholder="Confirm Password" required /></div>
-                    <div class="flow-root"><button type="submit" id="reset-password-confirm" class="small-button" style="display: none;">Confirm</button>
-                    <button type="button" id="reset-password-cancel" class="small-button" style="display: none;" onclick="resetPassword(false);">Cancel</button></div>
+                    <div class="flow-root"><button type="submit" id="reset-password-confirm" class="small-button">Confirm</button>
+                    <button type="button" id="reset-password-cancel" class="small-button" @click="resetPassword = false">Cancel</button></div>
                 </form>
             </div>
         </div>
         <div id="un-link-account-area">
-            <div class='clash-form-title' id="unlink-account-title">Unlink your account</div>
-            <span class='descriptive-text' id='unlink-account-desc'>If you wish to unlink your account please enter your password and press confirm. You can always re-link your account again.</span>
-            <?php if (!isset($_SESSION['user']['sumid'])) { ?> 
-            <div class='clash-form-title' id="link-account-title">Link your account</div>
-            <span class='descriptive-text' id='link-account-desc'>To link your account please enter your League of Legends username.</span>
-            
-            <div>
-                <button id="connect-account-button" onclick="connectAccount(true);">Connect League Account</button>
-                <form method="post" id="connect-account-form" style="display: none;">
+            <div class="unlink-account-area" x-cloak x-transition x-show="disconnectLeague">
+                <div class='clash-form-title' id="unlink-account-title">Unlink your account</div>
+                <span class='descriptive-text' id='unlink-account-desc'>If you wish to unlink your account please enter your password and press confirm. You can always re-link your account again.</span>
+            </div>
+                <?php if (!isset($_SESSION['user']['sumid'])) { ?>
+            <button id="connect-account-button" @click="resetPassword = false, disconnectLeague = false, confirmLeague = false, connectLeague = true, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!connectLeague">Connect League Account</button>
+            <div class="link-account-area" x-cloak x-transition x-show="connectLeague">
+                <div class='clash-form-title' id="link-account-title">Link your account</div>
+                <span class='descriptive-text' id='link-account-desc'>To link your account please enter your League of Legends username.</span>
+                <form method="post" id="connect-account-form">
                     <div><label for="name">Summoner Name: </label></div>
                     <input type="text" name="connectname" id="connectname" maxlength=16 required />
-                    <div class="flow-root"><button type="submit" id="connect-account-confirm" class="small-button" style="display: none;">Connect</button>
-                    <button type="button" id="connect-account-cancel" class="small-button" style="display: none;" onclick="connectAccount(false);">Cancel</button></div>
+                    <div class="flow-root"><button type="submit" id="connect-account-confirm" class="small-button" @click="resetPassword = false, disconnectLeague = false, confirmLeague = true, connectLeague = false, add2FA = false, remove2FA = false, deleteAccount = false">Connect</button>
+                    <button type="button" id="connect-account-cancel" class="small-button" @click="connectLeague = false">Cancel</button></div>
                 </form>
             </div>
             <?php } else { 
                 $currentPlayerData = getPlayerData("sumid", $_SESSION['user']['sumid']);
-                echo '<div class="account-link" id="account-link">Linked to: 
-                    <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.webp" style="vertical-align:middle" width="32" loading="lazy">
+                echo '<div class="account-link" id="account-link"><span class="block">Linked to:</span>
+                    <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.webp" class="m-auto inline-flex justify-center max-w-[32px] max-h-[32px]" width="32" loading="lazy">
                     '.$currentPlayerData["Name"].'</div>';
                 ?> 
             <div id="lower-dcform">
-                <button id="disconnect-account-button" onclick="disconnectAccount(true);">Disconnect League Account</button>
-                <form method="post" id="disconnect-account-form" style="display: none;">
+                <button id="disconnect-account-button" @click="resetPassword = false, disconnectLeague = true, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!disconnectLeague">Disconnect League Account</button>
+                <form method="post" id="disconnect-account-form" x-cloak x-transition x-show="disconnectLeague">
                     <div><label for="dcpassword">Password: </label></div>
                     <input type="password" name="dcpassword" id="dcpassword" placeholder="Confirm with password" required />
-                    <div style="height: 50px; margin-top: -10px;"><button type="submit" id="disconnect-account-confirm" class="small-button" style="display: none;">Confirm</button>
-                    <button type="button" id="disconnect-account-cancel" class="small-button" style="display: none;" onclick="disconnectAccount(false);">Cancel</button></div>
+                    <div style="height: 50px; margin-top: -10px;"><button type="submit" id="disconnect-account-confirm" class="small-button">Confirm</button>
+                    <button type="button" id="disconnect-account-cancel" class="small-button" @click="disconnectLeague = false">Cancel</button></div>
                 </form>
             </div>
             <?php } ?>
@@ -308,13 +309,13 @@ if (!empty($success_message)) {
                     $randomIcon = getRandomIcon($playerDataArray["Icon"]);
                     echo '
                     <div>
-                        <div id="connect-account-area">
+                        <div id="connect-account-area" x-cloak x-transition x-show="confirmLeague">
                             <div class="clash-form-title" style="margin-bottom: 1em;">Found account for: '.$playerDataArray['Name'].'</div>'.'
-                            <div class="flow-root">
+                            <div class="flex justify-center items-center gap-8 mb-4">
                                 <img id="current-profile-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerDataArray["Icon"].'.webp" style="vertical-align:middle; float: left;" width="84" loading="lazy">
+                                <span>&#10148;</span>
                                 <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$randomIcon.'.webp" style="vertical-align:middle; float: right;" width="84" loading="lazy">
                             </div>
-                            <div style="margin: -16px 0 3em 0;">&#10148;</div>
                             <div class="descriptive-text account-desc">Temporarily change your summoner icon to the one on the <b>right</b> and click on the connect button to verify your league account.</div>
                             <div class="descriptive-text account-desc">Note: The temporary icon was given to you right after the account creation. You can find it by clicking on your profile picture, selecting "all" and scrolling completely down to the bottom.</div>
                             <small>If you experience any problems or your account was already claimed please reach out to an administrator.</small>
@@ -326,7 +327,6 @@ if (!empty($success_message)) {
                                     <div></div>
                                     <div></div>
                                 </div>
-                                <div><strong id="icon-error" style="display: none; color: #560909;">Icons stimmen nicht überein.</strong></div>
                             </form>
                         </div>
                     </div>
@@ -347,7 +347,7 @@ if (!empty($success_message)) {
                                 if(data.status == "success"){
                                     location.href = "settings?verify=true";
                                 } else {
-                                    document.getElementById("icon-error").style.display = "unset";
+                                    setError(\'Icons stimmen nicht überein.\');
                                 }
                             }               
                         });
@@ -361,61 +361,61 @@ if (!empty($success_message)) {
         ?>
         <div id="2fa-area">
         <?php if (!isset($_SESSION['user']['2fa'])) { ?> 
-            <button id="2fa-button" onclick="add2FA(true); getQRCode();">Add Two-Factor Authentication</button>
-            <div id="2fa-description" style="display: none;">
+            <button id="2fa-button" @click="getQRCode(),resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = true, remove2FA = false, deleteAccount = false">Add Two-Factor Authentication</button>
+            <div id="2fa-description" x-cloak x-transition x-show="add2FA">
                 <div class='clash-form-title'>Add Two-Factor Authentication</div>
                 <span class='descriptive-text' id='2fa-desc'>To enable 2FA for this account scan the QR Code below with your Google Authenticator App and confirm with the in-app code.</span>
-            </div>
-            <form method="post" id="set-twofa-form" style="display: none;">
-                <div><label for='twofa' id='twofa-label'>Two-Factor Authentication Code: </label></div>
-                <div><input type='text' name='twofa-input' id='twofa-input' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
-                <div style="height: 50px;"><button type="submit" name="twofa-confirm" id="twofa-button" class="small-button">Submit</button>
-                <button type="button" id="twofa-cancel" class="small-button" onclick="add2FA(false);">Cancel</button></div>
-            </form>
-            <span class='descriptive-text' id="auth-desc" style="display: none;">By clicking on one of the images below you will be redirected to the Google Authenticator app store page.</span>
-            <div style="margin: 1em; display: none;" id="auth-images">
-                <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" style="text-decoration: none; display: inline-block; margin: auto 6px;">
-                    <img src="/clashapp/data/misc/webp/playstore.webp" width="140">
-                </a>
-                <a href="itms-apps://apps.apple.com/de/app/google-authenticator/id388497605" style="text-decoration: none; display: inline-block; margin: auto 6px;">
-                    <img src="/clashapp/data/misc/webp/appstore.webp" width="140">
-                </a>
+                <form method="post" id="set-twofa-form">
+                    <div><label for='twofa' id='twofa-label'>Two-Factor Authentication Code: </label></div>
+                    <div><input type='text' name='twofa-input' id='twofa-input' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
+                    <div style="height: 50px;"><button type="submit" name="twofa-confirm" id="twofa-button" class="small-button">Submit</button>
+                    <button type="button" id="twofa-cancel" class="small-button" @click="add2FA = false" >Cancel</button></div>
+                </form>
+                <span class='descriptive-text' id="auth-desc">By clicking on one of the images below you will be redirected to the Google Authenticator app store page.</span>
+                <div style="margin: 1em;" id="auth-images">
+                    <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" style="text-decoration: none; display: inline-block; margin: auto 6px;">
+                        <img src="/clashapp/data/misc/webp/playstore.webp" width="140">
+                    </a>
+                    <a href="itms-apps://apps.apple.com/de/app/google-authenticator/id388497605" style="text-decoration: none; display: inline-block; margin: auto 6px;">
+                        <img src="/clashapp/data/misc/webp/appstore.webp" width="140">
+                    </a>
+                </div>
             </div>
             <?php } else if($_SESSION['user']['2fa']) { ?>
-            <button id="remove-2fa-button" onclick="remove2FA(true);">Remove Two-Factor Auth</button>
-            <div id="remove-2fa-description" style="display: none; margin-bottom: 10px;">
+            <button id="remove-2fa-button" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = true, deleteAccount = false">Remove Two-Factor Auth</button>
+            <div id="remove-2fa-description" style="display: none; margin-bottom: 10px;" x-cloak x-transition x-show="remove2FA">
                 <div class='clash-form-title'>Remove Two-Factor Authentication</div>
                 <span class='descriptive-text' id='remove-2fa-desc'>To disable 2FA for this account you have to confirm with the current in-app code of your Authenticator App.</span>
+                <form method="post" id="remove-twofa-form">
+                    <div><label for='remove-twofa' id='remove-twofa-label'>Two-Factor Authentication Code: </label></div>
+                    <div><input type='text' name='remove-twofa-input' id='remove-twofa-input' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
+                    <div style="height: 50px; margin-top: -10px;"><button type="submit" name="remove-twofa-confirm" id="remove-twofa-button" class="small-button">Submit</button>
+                    <button type="button" id="remove-twofa-cancel" class="small-button"  @click="remove2FA = false">Cancel</button></div>
+                </form>
+                <small id="remove-2fa-notice" style="display: none; margin-bottom: 1em;">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
             </div>
-            <form method="post" id="remove-twofa-form" style="display: none;">
-                <div><label for='remove-twofa' id='remove-twofa-label'>Two-Factor Authentication Code: </label></div>
-                <div><input type='text' name='remove-twofa-input' id='remove-twofa-input' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
-                <div style="height: 50px; margin-top: -10px;"><button type="submit" name="remove-twofa-confirm" id="remove-twofa-button" class="small-button">Submit</button>
-                <button type="button" id="remove-twofa-cancel" class="small-button" onclick="remove2FA(false);">Cancel</button></div>
-            </form>
-            <small id="remove-2fa-notice" style="display: none; margin-bottom: 1em;">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
             <?php } ?>
         </div>
         <div id="account-delete-area">
-            <div id="delete-desc">
-            <div class='clash-form-title'>Delete your account</div>
-            <span class='descriptive-text'>Deleting your account has to be confirmed with your current password. Deleting the account will mean that upon clicking the confirm button:</span>
-            <ul class='password-conditions'>
-                <li>The account will be disabled immediately</li>
-                <li>The account will stay disabled until deletion 2-3 days after</li>
-                <li>All of the data associated with this account will then be deleted from our database too</li>
-                <li>The 2-3 day delay is used to ensure the short-term possibility to restore accounts upon wrongly-submitted deletions.</li>
-            </ul>
-            <small>If you wish to re-create an account associated with your data again you will have to wait the deactivation delay or
-                   reach out to an administrator.</small>
+            <button id="account-delete-button" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = true">Delete Account</button>
+            <div id="delete-desc" x-cloak x-transition x-show="deleteAccount">
+                <div class='clash-form-title'>Delete your account</div>
+                <span class='descriptive-text'>Deleting your account has to be confirmed with your current password. Deleting the account will mean that upon clicking the confirm button:</span>
+                <ul class='password-conditions'>
+                    <li>The account will be disabled immediately</li>
+                    <li>The account will stay disabled until deletion 2-3 days after</li>
+                    <li>All of the data associated with this account will then be deleted from our database too</li>
+                    <li>The 2-3 day delay is used to ensure the short-term possibility to restore accounts upon wrongly-submitted deletions.</li>
+                </ul>
+                <small>If you wish to re-create an account associated with your data again you will have to wait the deactivation delay or
+                    reach out to an administrator.</small>
+                <form method="post" id="account-delete-form">
+                    <div><label for="password">Password: </label></div>
+                    <input type="password" name="password" id="password" placeholder="Confirm with password" required />
+                    <div class="flow-root"><button type="submit" id="account-delete-confirm" class="small-button">Confirm</button>
+                    <button type="button" id="account-delete-cancel" class="small-button" @click="deleteAccount = false">Cancel</button></div>
+                </form>
             </div>
-            <button id="account-delete-button" onclick="deleteAccount(true);">Delete Account</button>
-            <form method="post" id="account-delete-form" style="display: none;">
-                <div><label for="password">Password: </label></div>
-                <input type="password" name="password" id="password" placeholder="Confirm with password" required />
-                <div class="flow-root"><button type="submit" id="account-delete-confirm" class="small-button" style="display: none;">Confirm</button>
-                <button type="button" id="account-delete-cancel" class="small-button" style="display: none;" onclick="deleteAccount(false);">Cancel</button></div>
-            </form>
         </div>
     </div>
 </div>

@@ -4,14 +4,14 @@
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
+if (!isset($_SESSION)) session_start();
+
 require_once '/hdd2/clashapp/vendor/autoload.php';
 use PragmaRX\Google2FA\Google2FA;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
-
-session_start();
 
 require_once '/hdd2/clashapp/clash-db.php';
 
