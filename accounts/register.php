@@ -1,5 +1,5 @@
 <?php
-session_start();
+if (!isset($_SESSION)) session_start();
  
 if (isset($_SESSION['user'])) {
     header('Location: settings');
@@ -14,7 +14,7 @@ require '/hdd2/clashapp/plugins/phpmailer/src/Exception.php';
 require '/hdd2/clashapp/plugins/phpmailer/src/PHPMailer.php';
 require '/hdd2/clashapp/plugins/phpmailer/src/SMTP.php';
 
-// ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL); // TODO rausnehmen
+ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL); // TODO rausnehmen
 
 $db = new DB();
 // $response = $db->account_exists("john.doe@example.com");
@@ -129,9 +129,9 @@ if (isset($_POST['submit'])) {
     }        
 }
 
-include('head.php');
+include('/hdd2/clashapp/templates/head.php');
 setCodeHeader('Register', true, true);
-include('header.php');
+include('/hdd2/clashapp/templates/header.php');
  
 if (!empty($success_message)) { 
     foreach($success_message as $su){
@@ -151,24 +151,24 @@ if (!empty($success_message)) {
     <form method="post" autocomplete="off" class="clash-form register-form">
         <div class="clash-form-title">Register your account</div>
         <div><label for="username">Username: </label></div>
-        <div><input type="text" name="username" id="username" value="<?= $_POST["username"]?>" placeholder="Username" maxlength=16 required /></div>
+        <div><input type="text" name="username" id="username" value="<?= isset($_POST["username"]) ? $_POST["username"] : "" ?>" placeholder="Username" maxlength=16 required /></div>
         <div><label for="region">Region: </label></div>
         <div><select name="region" id="region" placeholder="Europe West" required>
-                <option <?php if ($_POST['region'] == 'EUW') { ?>selected="true" <?php }; ?>value="EUW">Europe West</option>
-                <option <?php if ($_POST['region'] == 'EUN') { ?>selected="true" <?php }; ?>value="EUN">Europe Nordic & East</option>
-                <option <?php if ($_POST['region'] == 'NA') { ?>selected="true" <?php }; ?>value="NA">North America</option>
-                <option <?php if ($_POST['region'] == 'KR') { ?>selected="true" <?php }; ?>value="KR">Korea</option>
-                <option <?php if ($_POST['region'] == 'BR') { ?>selected="true" <?php }; ?>value="BR">Brazil</option>
-                <option <?php if ($_POST['region'] == 'JP') { ?>selected="true" <?php }; ?>value="JP">Japan</option>
-                <option <?php if ($_POST['region'] == 'RU') { ?>selected="true" <?php }; ?>value="RU">Russia</option>
-                <option <?php if ($_POST['region'] == 'OCE') { ?>selected="true" <?php }; ?>value="OCE">Oceania</option>
-                <option <?php if ($_POST['region'] == 'TR') { ?>selected="true" <?php }; ?>value="TR">Turkey</option>
-                <option <?php if ($_POST['region'] == 'LAN') { ?>selected="true" <?php }; ?>value="LAN">Latin America North</option>
-                <option <?php if ($_POST['region'] == 'LAS') { ?>selected="true" <?php }; ?>value="LAS">Latin America South</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'EUW') { ?>selected="true" <?php }; ?>value="EUW">Europe West</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'EUN') { ?>selected="true" <?php }; ?>value="EUN">Europe Nordic & East</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'NA') { ?>selected="true" <?php }; ?>value="NA">North America</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'KR') { ?>selected="true" <?php }; ?>value="KR">Korea</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'BR') { ?>selected="true" <?php }; ?>value="BR">Brazil</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'JP') { ?>selected="true" <?php }; ?>value="JP">Japan</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'RU') { ?>selected="true" <?php }; ?>value="RU">Russia</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'OCE') { ?>selected="true" <?php }; ?>value="OCE">Oceania</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'TR') { ?>selected="true" <?php }; ?>value="TR">Turkey</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'LAN') { ?>selected="true" <?php }; ?>value="LAN">Latin America North</option>
+                <option <?php if (isset($_POST['region']) && $_POST['region'] == 'LAS') { ?>selected="true" <?php }; ?>value="LAS">Latin America South</option>
             </select>
         </div>
         <div><label for="email">Email: </label></div>
-        <div><input type="email" name="email" id="email" value="<?= $_POST["email"] ?>" placeholder="mail@example.com" required /></div>
+        <div><input type="email" name="email" id="email" value="<?= isset($_POST["email"]) ? $_POST["email"] : "" ?>" placeholder="mail@example.com" required /></div>
         <div><label for="password">Password:</label></div>
         <div><input type="password" name="password" id="password" placeholder="Enter Password" maxlength=32 required /></div>
         <div><input type="password" name="confirm-password" id="confirm-password" placeholder="Confirm Password" maxlength=32 required /></div>
@@ -180,5 +180,5 @@ if (!empty($success_message)) {
 </div>
 
 <?php 
-include('footer.php');
+include('/hdd2/clashapp/templates/footer.php');
 ?>
