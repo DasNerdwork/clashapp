@@ -9,20 +9,7 @@
   font-style: normal;
 }
 
-/* .sbl-circ {
-    height: 16px;
-    width: 16px;
-    color: #eee;
-    position: relative;
-    display: inline-block;
-    vertical-align: middle;
-    border: 3px solid;
-    opacity: 0;
-    border-radius: 50%;
-    border-top-color: transparent;
-    animation: rotate 1s linear infinite;
-    transition: all .2s linear;
-} */
+[x-cloak] { display: none; }
 
 body,
 button,
@@ -46,15 +33,10 @@ body, html {
   min-height: calc(100vh - 90px);
 }
 
-/* #teamname {
-  max-width: 600px;
-  /* transform: translateY(-46px); */
-
 input, input:focus, button {
   outline: none;
   border: 0;
   font-size: 14;
-  padding-left: 6px;
 }
 
 @keyframes rotate {
@@ -69,22 +51,6 @@ input, input:focus, button {
     border-collapse: collapse;
     text-align: center;
 }
-
-/* #suchfeld {
-  height: 40px;
-  position: absolute;
-  left: 50%;
-  transform: translate(-50%, 30%);
-} */
-
-/* #name {
-  font-size: 16px;
-  padding-left: 10px;
-} */
-
-/* #submitBtn, #updateBtn {
-  font-size: 16px;
-} */
 
 #stattable td, #stattable th {
     padding: 9px;
@@ -172,28 +138,9 @@ input, input:focus, button {
   color: #b31414;
 }
 
-/* Style the button that is used to open and close the collapsible content */
-/* .collapsible {
-  background-color: #0e0f18;
-  cursor: pointer;
-  padding: 8px;
-  width: 100%;
-} */
-
-/* Style the collapsible content. Note: hidden by default */
-.content {
-  /* padding: 0 18px; */
-  overflow: hidden;
+.smooth-transition {
   transition: all 300ms;
 }
-
-/* .collapsible:after {
-  content: '\2B9F'; 
-  font-size: 13px;
-  color: white;
-  float: center;
-  font-weight: bold;
-} */
 
 .active:after {
   content: "\2B9D"; /* Unicode character for "minus" sign (-) */
@@ -212,99 +159,6 @@ body {
   margin: 0px;
 }
 
-.match-result { grid-area: a; }
-.match-type-and-time { grid-area: b; }
-.match-time-ago { grid-area: c; }
-.champion-icon { grid-area: d; }
-.summoner-spell-1 { grid-area: e; }
-.summoner-spell-2 { grid-area: f; }
-.rune-1 { grid-area: g; }
-.rune-2 { grid-area: h; }
-.champion-level { grid-area: i; }
-.champion-lane { grid-area: j; }
-.lane-opponent { grid-area: k; }
-.matchscore { grid-area: l; }
-.kda-stats { grid-area: m; }
-.kda { grid-area: n; }
-.kill-participation { grid-area: o; }
-.damage-dealt { grid-area: p; }
-.damage-tanked { grid-area: q; }
-.damage-healed-and-shielded { grid-area: r; }
-.damage-to-objectives { grid-area: s; }
-.item0 { grid-area: t0; }
-.item1 { grid-area: t1; }
-.item2 { grid-area: t2; }
-.item3 { grid-area: t3; }
-.item4 { grid-area: t4; }
-.item5 { grid-area: t5; }
-.trinket { grid-area: u; }
-.vision-wards { grid-area: v; }
-.creepscore { grid-area: w; }
-.visionscore { grid-area: x; }
-.collapser { grid-area: y; }
-
-.grid-container {
-  display: grid;
-  grid-template-areas:
-    'a a b b b b c  c  c  c'
-    'd d e g m m t0 t1 t2 u'
-    'd d f h n o t3 t4 t5 v'
-    'i j k k p q w  w  w  v'
-    'l l l l r s x  x  x  v'
-    'y y y y y y y  y  y  y';
-  gap: 0px;
-  max-height: 140px;
-}
-
-.match {
-  display: inline-flex;
-  margin-bottom: 10px;
-  border: 1px white solid;
-  overflow: hidden;
-  /* width: 100%; */
-  /* background-color: #0e0f18; */
-}
-
-.grid-container > div {
-  /* background-color: rgba(10, 10, 10, 0.8); */
-  text-align: center;
-  padding: 4px 0;
-}
-
-/* .team-title {
-  display: inline;
-  vertical-align: middle;
-} */
-
-/* .team-logo {
-  margin-right: 10px;
-  vertical-align: middle;
-} */
-
-/* .player-name {
-  padding-top: 4px;
-} */
-
-.champion-level {
-  position: relative;
-  bottom: 26px;
-}
-
-.champion-lane {
-  position: relative;
-  bottom: 48px;
-}
-
-.kda-stats {
-  font-size: 24px;
-}
-
-.lane-opponent {
-  position: relative;
-  visibility: hidden;
-  right: 35px;
-}
-
 .vision-wards-count-icon {
   position: relative;
   bottom: 18px;
@@ -315,49 +169,8 @@ body {
   height: 18px;
 }
 
-.match-result {
-  position: relative;
-  right: 20px;
-  text-align: center;
-}
-
 .collapser {
   position: relative;
-}
-
-.damage-dealt {
-  visibility: hidden;
-}
-
-.damage-tanked {
-  visibility: hidden;
-}
-
-.damage-healed-and-shielded {
-  visibility: hidden;
-}
-
-.damage-to-objectives {
-  visibility: hidden;
-}
-
-.visionscore {
-  visibility: hidden;
-}
-
-.creepscore {
-  visibility: hidden;
-}
-
-.champion-icon {
-  max-width: 100px;
-}
-
-.matchscore {
-  position: relative;
-  bottom: 61px;
-  right: 30px;
-  font-size: 12px;
 }
 
 .collapser {
@@ -386,61 +199,15 @@ ul.moveable {
   margin: 0px;
 }
 
-/* .header-li li {
-  list-style-image: none;
-  margin: 10px;
-  border: 1px solid #ccc;
-  padding: 4px;
-  border-radius: 4px;
-  color: #666;
-  float: left;
-  border: none;
-  font-size: 18px;
-  margin-right: 5px;
-  margin-left: 5px;
-} */
-
-
-.champ-select-champion, .selected-ban-champion {
-  vertical-align: top;
-  display: inline-block;
-  text-align: center;
-  width: 4.5rem;
-  height: 4.625rem;
-}
-
 .champ-select-champion .caption {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
 
-/* .suggested-ban-champion {
-  vertical-align: top;
-  display: inline-block;
-  text-align: center;
-  visibility: hidden;
-} */
-
 .removal-overlay {
   height: auto;
   z-index: 2;
-  margin-top: -48px;
-  margin-bottom: -48px;
-  opacity: 0;
-}
-
-.ban-overlay {
-  height: auto;
-  z-index: 2;
-  margin-top: -48px;
-  margin-bottom: -48px;
-  opacity: 0;
-}
-
-.ban-overlay-red {
-  height: auto;
-  z-index: 3;
   margin-top: -48px;
   margin-bottom: -48px;
   opacity: 0;
@@ -476,24 +243,9 @@ ul.moveable {
   top: 10px;
 }
 
-/* .ban-hoverer {
-  display: inline-grid;
-  position: relative;
-  overflow: hidden;
-} */
 
 .ban-overlay, .removal-overlay {
   transition: all .15s ease-out;
-}
-
-.ban-hoverer:hover .ban-overlay {
-  opacity: 1;
-  overflow: hidden;
-}
-
-.ban-hoverer:active .ban-overlay-red {
-  opacity: 1;
-  overflow: hidden;
 }
 
 .hoverer:hover, .ban-hoverer:hover {
@@ -513,71 +265,6 @@ ul.moveable {
   transition: all .15s ease-out;
 }
 
-/* .lane-selector {
-  position: relative;
-  vertical-align: top;
-  float: right;
-  right: 6px;
-  filter: brightness(50%);
-  cursor: pointer;
-} */
-
-/* .lane-selector + .lane-selector{
-  margin-right: 10px;
-} */
-
-/* #top-ban-bar {
-  height: 34px;
-} */
-
-/* #selectedBans {
-  width: 420px;
-  height: 159px;
-  overflow: hidden; */
-  /* bottom: 88px;
-  left: 0px; */
-/* } */
-
-/* #suggestedBans {
-  position: absolute;
-  width: 420px;
-  height: 159px;
-  overflow: hidden;
-  left: 50%;
-  transform: translate(-50%, -40%);
-  display: grid;
-  grid-template: "A A A A A";
-  padding-top: 10px;
-
-} */
-
-/* #suggested-ban-title {
-  position: absolute;
-  overflow: hidden;
-  left: 50%;
-  transform: translate(-50%, -100px);
-} */
-
-/* #champSelect {
-  overflow: overlay;
-  height: 145px;
-} */
-
-/* #champSelector {
-  height: 30px;
-} */
-
-/* #banSearch {
-  /* float: right;
-  position: relative;
-  right: 50px; */
-  /* width: 420px; */
-  /* left: 422px;
-  top: 88px; */
-  /* height: 175px;
-  overflow: hidden;
-*/
-
 .clash-footer {
   font-family:'Montserrat',sans-serif;
   font-size: .9rem;
@@ -592,32 +279,6 @@ ul.moveable {
 .clash-footer-link:hover {
   color: #8484b3;
 }
-
-/* .position-disclaimer {
-  display: inline-flex;
-  justify-content: space-between;
-  line-height: 32px;
-  column-gap: 6px;
-  padding-top: 6px;
-} */
-
-/* .mastery-points {
-  margin-top: -26px;
-} */
-
-/* ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-} */
-
-/* li {
-  float: left;
-  border: none;
-  font-size: 18px;
-  margin-right: 5px;
-  margin-left: 5px;
-} */
 
 .clickable-logo {
   width: 170px;
@@ -635,21 +296,8 @@ ul.moveable {
   padding: 8px;
   text-decoration: none;
   color: #000;
-  color: #fff;  
+  color: #fff;
 }
-
-/* .misc-button {
-  height: 32px;
-  width: 100px;
-  transform: translateY(50%);
-  margin-right: 10px;
-  margin-left: 10px;
-  font-size: 16px;
-  line-height: 1em;
-  background-color: #eee;
-  color: #000;
-  cursor: pointer;
-} */
 
 @media screen and (max-width: 600px){
 
@@ -666,11 +314,6 @@ ul.moveable {
   transform: translate(-10%, 25%);
 }
 
-/* .profile-link {
-  color: #ddd;
-  text-decoration: none;
-} */
-
 .clash-form a {
   color: #bbb;
 }
@@ -683,17 +326,6 @@ ul.moveable {
 .clash-form a:active{
   color: #ddd;
 }
-
-/* .select-language-button::after {
-  content: '\2B9F';
-} */
-
-/* .misc-button-menu {
-  position: absolute;
-  display: flex;
-  right: 0px;
-  height: 64px;
-} */
 
 header {
   background-color: #141624;
@@ -748,15 +380,6 @@ header {
   justify-content: center;
   border-radius: 6px;
 }
-
-/* .outer-form {
-  position: relative;
-  justify-content: center;
-  display: flex;
-  border-radius: 6px;
-  height: calc(100vh - 155px);
-  align-items: center;
-} */
 
 .clash-form-title {
   margin-bottom: 10px;
@@ -900,10 +523,6 @@ header {
   color: #353950;
 }
 
-#reset-password-description, #unlink-account-title, #unlink-account-desc , #link-account-title, #link-account-desc {
-  display: none;
-}
-
 #reset-password-popup {
   /* visibility: hidden; */
   background: none;
@@ -962,10 +581,6 @@ header {
   margin-top: 0;
 }
 
-#delete-desc {
-  display: none;
-}
-
 #weird-fix {
   height: 50px;
 }
@@ -1007,30 +622,20 @@ header {
   outline: none;
 }
 
-/* .lane-icon {
-  filter: saturate(0) brightness(1.4);
-} */
+div#champSelect::-webkit-scrollbar-thumb {
+  background-color: #141624;
+  border-radius: 20px;
+  border: 6px solid #0e0f18;
+  background-clip: content-box;
+  height: 48px;
+}
 
-/* .player-tags li {
-  list-style-image: none;
-  margin: 6px 4px;
-  border: 1px solid #141624;
-  background-color: #191d3a;
-  padding: 8px 12px;
+div#champSelect::-webkit-scrollbar {
+  width: 20px;
+}
+
+div#champSelect::-webkit-scrollbar-track {
+  background-color: #0e0f18;
   border-radius: 25px;
-  color: #ccc;
-  float: left;
-  font-weight: bold;
-  border: none;
-  font-size: 18px;
-  margin-right: 5px;
-  margin-left: 5px;
-  cursor: help;
-} */
-
-/* .tag-container {
-  max-height: 6rem;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-} */
+  margin-bottom: 0.5rem;
+}

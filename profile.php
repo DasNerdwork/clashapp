@@ -49,9 +49,10 @@
     }
 </script>
 <?php 
-include('head.php');
+include('/hdd2/clashapp/templates/head.php');
 setCodeHeader('Profile', true, true);
-include('header.php');
+include('/hdd2/clashapp/templates/header.php');
+if (!isset($_SESSION)) session_start();
 ?>
 
 <body style="background-color:#1a1a1a; color:#ddd">
@@ -73,8 +74,8 @@ include('header.php');
 $startWhole = microtime(true);
 $ladezeiten = array();
 
-include_once('functions.php');
-include_once('update.php');
+include_once('/hdd2/clashapp/functions.php');
+include_once('/hdd2/clashapp/update.php');
 
 if (isset($_GET["name"])){
     // Format text field input to swap spaces with '+' for correct api requests
@@ -103,12 +104,12 @@ if (isset($_GET["name"])){
 
 <?php
 $startFetchPlayerData = microtime(true);
-    $playerDataDirectory = new DirectoryIterator('/var/www/html/clash/clashapp/data/player/');
+    $playerDataDirectory = new DirectoryIterator('/hdd2/clashapp/data/player/');
 
     foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
         $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
         if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
-            $playerDataJSON = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+            $playerDataJSON = json_decode(file_get_contents('/hdd2/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
             if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
                 $playerData = $playerDataJSON["PlayerData"];
                 $playerName = $playerDataJSON["PlayerData"]["Name"];
@@ -126,7 +127,7 @@ $startFetchPlayerData = microtime(true);
         foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
             $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
             if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
-                $playerDataJSON = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                $playerDataJSON = json_decode(file_get_contents('/hdd2/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                 if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
                     $playerData = $playerDataJSON["PlayerData"];
                     $playerName = $playerDataJSON["PlayerData"]["Name"];
@@ -146,7 +147,7 @@ $startPrintData = microtime(true);
 if($formattedInput != "") {
 
     echo "<div style='display: flex; justify-content: center; width: 200px; margin-bottom: 24px;'>";
-    if(file_exists('/var/www/html/clash/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
+    if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
         echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" style="border-radius: 100%;margin-top: 25px; z-index: -1;">';
     }
 
@@ -210,8 +211,8 @@ if($formattedInput != "") {
     }
 
     if($rankVal != 0){
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-    $webBorderPath = str_replace("/var/www/html/clash","",$profileBorderPath);
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd2/clashapp/data/misc/ranks/*'.strtolower($highestRank).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $webBorderPath = str_replace("/hdd2/clashapp/","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
         echo '<img src="'.$webBorderPath.'" width="384" style="position: absolute;  top: -80px; z-index: -1;">';
@@ -290,8 +291,8 @@ if($formattedInput != "") {
                 break; 
         }
 
-    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/var/www/html/clash/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-    $webBorderPath = str_replace("/var/www/html/wordpress","",$profileBorderPath);
+    $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd2/clashapp/data/misc/levels/prestige_crest_lvl_'.$levelFileName.'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+    $webBorderPath = str_replace("/hdd2/clashapp/","",$profileBorderPath);
 
     if(file_exists($profileBorderPath)){
         echo '<img src="'.$webBorderPath.'" width="190" style="position: absolute;  top: 14px; z-index: -1;">';
@@ -307,10 +308,10 @@ if($formattedInput != "") {
     $playerMainRole = $playerLanes[0];
     $playerSecondaryRole = $playerLanes[1];
     echo "<div style='display: flex; justify-content: center; width: 200px;'>";
-    if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
+    if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
         echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32">';
     }
-    if(file_exists('/var/www/html/clash/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
+    if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
         echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32"><br>';
     }
     echo "</div>";
@@ -352,7 +353,7 @@ if($formattedInput != "") {
 
 
     $startAverage = microtime(true);
-    $averageAttributes = array_keys(json_decode(file_get_contents('/var/www/html/clash/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
+    $averageAttributes = array_keys(json_decode(file_get_contents('/hdd2/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
     $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
     getAverage($averageAttributes, $matchDaten, $puuid, $playerLane);
     
@@ -395,7 +396,7 @@ if($formattedInput != "") {
     }
 }
 
-include('footer.php');
+include('/hdd2/clashapp/templates/footer.php');
 
 // if (strstr($_SERVER['HTTP_REFERER'],"clash.dasnerdwork.net/clash")) {
 //     if (isset($_POST["load"])) {

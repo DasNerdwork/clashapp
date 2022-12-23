@@ -1,14 +1,15 @@
 <?php session_start(); 
-include('head.php');
+include('/hdd2/clashapp/templates/head.php');
 setCodeHeader('Clash', true, true);
-include('header.php');
+include('/hdd2/clashapp/templates/header.php');
+if (!isset($_SESSION)) session_start();
 
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
-// $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
-// $championJSON = json_decode(file_get_contents("/var/www/html/clash/clashapp/data/patch/".$currentPatch."/data/de_DE/champion.json"), true);
+// $currentPatch = file_get_contents("/hdd2/clashapp/data/patch/version.txt");
+// $championJSON = json_decode(file_get_contents("/hdd2/clashapp/data/patch/".$currentPatch."/data/de_DE/champion.json"), true);
 
 
 // $main = json_decode(file_get_contents("/var/www/html/clash/yoerdle/main.json"), true);
@@ -23,5 +24,5 @@ include('header.php');
 // }
 
 
-include('footer.php');
+include('/hdd2/clashapp/templates/footer.php');
 ?>
