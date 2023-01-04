@@ -1,6 +1,7 @@
 <?php
 $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
 ?>
+<!DOCTYPE html>
 <div class="min-h-[calc(100vh_-_90px)]">
 <header>
 	<div class="flex h-16">

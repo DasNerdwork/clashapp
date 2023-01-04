@@ -41,21 +41,21 @@ if (isset($_POST['submit'])) {
 
 if (!empty($error_message)) { 
     foreach($error_message as $er){
-        echo '<div class="error">
+        echo '<div class="bg-[#ff000040] -mb-12 text-base text-center leading-[3rem]">
             <strong>'. $er .'</strong>
         </div>';
     }
 } 
 ?>
-<div class="outer-form">
-    <form method="post" class="clash-form login-form" style="max-width: 350px;">
-        <div class="clash-form-title" style="margin-bottom: 20px;">Verify with Two-Factor Auth</div>
-        <div><label for='verifier' id='verifier-label'>Two-Factor Authentication Code: </label></div>
-        <div><input type='text' name='verifier' id='verifier' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
-        <div style="height: 50px; margin-top: -10px;"><button type="submit" name="submit" id="verifier-button" class="small-button">Submit</button>
-        <button type="button" id="verifier-cancel" class="small-button" onclick="window.location.pathname = '/login';">Cancel</button></div>
+<div class="h-[calc(100%-5rem)] w-full flex justify-center items-center -mb-16">
+    <form method="post" class="mb-44 max-w-[354px] py-12 px-11 h-fit w-fit bg-dark text-center box-border">
+        <div class="mb-4 text-xl">Verify with Two-Factor Auth</div>
+        <div class="text-left ml-2"><label for='verifier'>Two-Factor Authentication Code: </label></div>
+        <div><input type='text' class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1 focus:text-base placeholder:text-[#353950]" name='verifier' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
+        <div class="h-10 -mt-2"><button type="submit" name="submit" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Submit</button>
+        <button type="button" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" onclick="window.location.pathname = '/login';">Cancel</button></div>
         
-        <small id="verifier-notice" style="display: inline-block; text-align: justify;">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
+        <small class="inline-block text-justify text-[#353950]">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
     </form>
 </div>
 <?php 
