@@ -423,171 +423,6 @@ function getMatchData($matchIDArray){
     return $matchData;
 }
 
-/** Display detailed Information about specific matches via PUUID
- * Prints all locally stored information about all matchIDs stored in the players playerdata.json (also stored locally)
- * But accessed through the players PUUID, hence only PUUID required and no API request necessary
- *
- * @param array $matchIDArray This input parameter array contains all matchIDs of a specific user
- * @param string $puuid The players PUUID
- * @var string $username Is the given username or PUUID
- * @var int $count the countervalue to display the amount of locally stored files in which the player (PUUID) is part of
- *
- * Returnvalue:
- * @return void N/A, displaying on page via table
- */
-function getMatchDetailsByPUUID($matchIDArray, $puuid){
-    global $currentPatch;
-    $count = 0;
-
-    // Initiating Matchdetail Table
-    echo "<table class='table'>";
-    $startFileIterator = microtime(true);
-    foreach ($matchIDArray as $i => $matchIDJSON) {
-        $handle = file_get_contents("/hdd2/clashapp/data/matches/".$matchIDJSON.".json");
-        $inhalt = json_decode($handle);
-        if(isset($inhalt->metadata->participants) && $inhalt->info->gameDuration != 0) {
-            if(in_array($puuid, (array) $inhalt->metadata->participants)){
-                $count++;
-                for($in = 0; $in < 10; $in++){
-                    if($inhalt->info->participants[$in]->puuid == $puuid) {
-                        echo "<tr>";
-
-                        // Display of W(in) or L(ose)
-                        if($inhalt->info->participants[$in]->win == true) {
-                            echo '<td class="online" style="color:#1aa23a"><b>W</b></td>';
-                        } else {
-                            echo '<td class="offline" style="color:#b31414"><b>L</b></td>';
-                        }
-
-                        // Display of the corresponding matchID
-                        echo "<td>ID: ".$inhalt->metadata->matchId;
-
-                        // Display of the played champions icon + name
-                        echo "<td>Champion: ";
-                        $champion = $inhalt->info->participants[$in]->championName;
-                        if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ, see*/
-                        if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
-                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="32" style="vertical-align:middle" loading="lazy">';
-                            echo " ".$inhalt->info->participants[$in]->championName . "</td>";
-                        } else {
-                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
-                            echo " N/A</td>";
-                        }
-
-                        // Display of the equipped keyrune + secondary tree
-                        echo "<td>Runes: ";
-                        $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
-                        $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
-                        if(file_exists('/hdd2/clashapp/data/patch/img/'.runeIconFetcher($keyRune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'" width="32" style="vertical-align:middle" loading="lazy">';
-                        } else {
-                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
-                        }
-                        if(file_exists('/hdd2/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune))){
-                            echo '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'" width="16" style="vertical-align:middle" loading="lazy">';
-                        } else {
-                            echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
-                        }
-                        echo "</td>";
-
-                        // Display of the played position
-                        /** @todo Add individualPosition and role as else-options */
-                        if($inhalt->info->participants[$in]->teamPosition != "") {
-                            if($inhalt->info->participants[$in]->teamPosition == "UTILITY") {
-                                echo "<td>Position: SUPPORT</td>";
-                            } else {
-                                echo "<td>Position: ".$inhalt->info->participants[$in]->teamPosition . "</td>";
-                            }
-                        } else {
-                            echo "<td>Position: N/A</td>";
-                        }
-
-                        // Display of the players Kills/Deaths/Assists
-                        echo "<td>KDA: ".$inhalt->info->participants[$in]->kills . "/";
-                        echo $inhalt->info->participants[$in]->deaths . "/";
-                        echo $inhalt->info->participants[$in]->assists . "</td>";
-
-                        // Display of the last items the user had at the end of the game in his inventory
-                        echo "<td>Items: ";
-                        for($b=0; $b<7; $b++){
-                            $allItems = "item".$b;
-                            $itemId = $inhalt->info->participants[$in]->$allItems;
-                            if($itemId == 0){
-                                echo '<img src="/clashapp/data/misc/0.webp" width="32" style="vertical-align:middle" loading="lazy">';
-                            } else {
-                                if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" style="vertical-align:middle" loading="lazy">';
-                                } else if(file_exists('/hdd2/clashapp/data/misc/'.$itemId.'.webp')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" style="vertical-align:middle" loading="lazy">';
-                                } else {
-                                    echo '<img src="/clashapp/data/misc/na.webp" width="32" style="vertical-align:middle" loading="lazy">';
-                                }
-                            }
-                        }
-                        echo '</td>';
-
-                        // Display of the user Vision and Wardscore
-                        echo '<td>Vision Score: ';
-                        echo $inhalt->info->participants[$in]->visionScore . " Wards: ";
-                        echo $inhalt->info->participants[$in]->wardsPlaced . "x ";
-                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/3340.webp" width="16" style="vertical-align:middle" loading="lazy"> Control Wards: ';
-                        if(isset($inhalt->info->participants[$in]->challenges->controlWardsPlaced)){
-                            echo $inhalt->info->participants[$in]->challenges->controlWardsPlaced . "x ";
-                        } else if(isset($inhalt->info->participants[$in]->visionWardsBoughtInGame)){
-                            echo $inhalt->info->participants[$in]->visionWardsBoughtInGame . "x ";
-                        }
-                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.webp" width="16" style="vertical-align:middle" loading="lazy"></td>';
-
-                        // Display of the Total Values
-                        echo "<td>Totals: ";
-                        echo $inhalt->info->participants[$in]->totalDamageDealt . " Damage, ";
-                        echo $inhalt->info->participants[$in]->totalDamageDealtToChampions . " to Champions";
-                        echo '</td><td>';
-                        echo $inhalt->info->participants[$in]->totalDamageShieldedOnTeammates . " Shielded, ";
-                        echo $inhalt->info->participants[$in]->totalHealsOnTeammates . " Healed";
-                        echo '</td><td>';
-                        echo $inhalt->info->participants[$in]->totalHeal . " Selfhealed, ";
-                        echo $inhalt->info->participants[$in]->totalDamageTaken . " Tanked";
-                        echo '</td><td>';
-                        echo $inhalt->info->participants[$in]->timeCCingOthers . " Time CCing Others, ";
-                        echo $inhalt->info->participants[$in]->totalTimeCCDealt . " Time CC dealt";
-                        echo '</td>';
-
-                        // Display of Date and Time
-                        if(isset($inhalt->info->gameEndTimestamp)) {
-                            $matchdate = date('d.m.Y H:i:s', $inhalt->info->gameEndTimestamp/1000);
-                            echo "<td>Datum: " . $matchdate . "</td>";
-                        } else if(isset($inhalt->info->gameStartTimestamp)) {
-                            $matchdate = date('d.m.Y H:i:s', $inhalt->info->gameStartTimestamp/1000);
-                            echo "<td>Datum: " . $matchdate . "</td>";
-                        } else if(isset($inhalt->info->gameCreation)) {
-                            $matchdate = date('d.m.Y H:i:s', $inhalt->info->gameCreation/1000);
-                            echo "<td>Datum: " . $matchdate . "</td>";
-                        }
-                    }
-                }
-
-                // Display of Ranked Queuetype
-                switch ($inhalt->info->queueId) {
-                    case 420:
-                        $matchType = "Solo/Duo";
-                        break;
-                    case 440:
-                        $matchType = "Flex 5v5";
-                        break;
-                    case 700:
-                        $matchType = "Clash";
-                        break;
-                }
-                echo "<td>Matchtyp: ".$matchType . "</td></tr>";
-            }
-        }
-    }
-
-    echo "</table>";
-    // End of Matchdetail Table & Counttext of local specific amount
-    // echo "<br>Es wurden " . $count ." lokale Matchdaten gefunden<br>";
-}
 /** Function to convert seconds to readable time
  * 
  * @param int $seconds The amount of seconds given that we wan't to convert to human-readable time words
@@ -688,7 +523,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                             echo gmdate("i:s", $inhalt->info->gameDuration)."</span>";
                                             echo "</div>";
                                             
-                                            // echo "<div class='match-id' style='display: none;'>".$matchIDJSON."</div>";
+                                            // echo "<div class='match-id hidden'>".$matchIDJSON."</div>";
                                             
                                             echo '<div id="match-time-ago" class="ml-auto">';
                                             
@@ -788,12 +623,12 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         // Display of the last items the user had at the end of the game in his inventory
                         echo '<div class="items grid grid-rows-2 grid-cols-3 max-w-[96px] min-w-[96px]">';
                         $noItemCounter = 0;
-                        unset($lastItemSlot);
+                        $lastItemSlot = 0;
                         for($b=0; $b<6; $b++){
                             if($b == 6){
                                 for($c=0; $c<$noItemCounter; $c++){
                                     echo '<div class="item'.($lastItemSlot+1).'">';
-                                    echo '<img src="/clashapp/data/misc/0.webp" width="32" style="vertical-align:middle" loading="lazy">';
+                                    echo '<img src="/clashapp/data/misc/0.webp" width="32" loading="lazy">';
                                     echo '</div>';
                                     $lastItemSlot++;
                                 }
@@ -802,16 +637,16 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                             $allItems = "item".$b;
                             $itemId = $inhalt->info->participants[$in]->$allItems;
                             if($itemId == 0){
-                                echo '<img src="/clashapp/data/misc/0.webp" width="32" style="vertical-align:middle" loading="lazy">';
+                                echo '<img src="/clashapp/data/misc/0.webp" width="32" loading="lazy">';
                                 $noItemCounter += 1;
                             } else {
                                 echo '<div class="item'.($b - $noItemCounter).'">';
                                 if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" style="vertical-align:middle" loading="lazy">';
+                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" loading="lazy">';
                                 } else if(file_exists('/hdd2/clashapp/data/misc/'.$itemId.'.webp')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" style="vertical-align:middle" loading="lazy">';
+                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" loading="lazy">';
                                 } else {
-                                    echo '<img src="/clashapp/data/misc/0.webp" width="32" style="vertical-align:middle" loading="lazy">';
+                                    echo '<img src="/clashapp/data/misc/0.webp" width="32" loading="lazy">';
                                 }
                                 $lastItemSlot = $b;
                                 echo "</div>";
@@ -870,8 +705,8 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     echo "</div></div>";
 
                     echo '<div class="additional-info-2 inline-flex h-8 justify-center items-center gap-2 mt-2">';
-                    echo '<div class="vision-wards" style="position: relative;">';
-                    echo '<img class="parent-trinket-icon" style="height: auto;" src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.webp" width="32" loading="lazy">';
+                    echo '<div class="vision-wards">';
+                    echo '<img class="parent-trinket-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.webp" width="32" loading="lazy">';
                     echo '<div class="vision-wards-count-icon">'.$visionWards.'</div>';
                     echo "</div>";
 
@@ -888,7 +723,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     echo "</div></div>";
 
                 echo '</div>';
-                echo '<button type="button" class="collapsible bg-[#0e0f18] cursor-pointer h-4 w-full opacity-50 mt-2" @click="advanced = !advanced" x-text="advanced ? \'&#11167;\' : \'&#11165;\'"></button>';
+                echo '<button type="button" class="collapsible bg-[#0e0f18] cursor-pointer h-4 w-full opacity-50 mt-2" @click="advanced = !advanced" x-text="advanced ? \'&#11165;\' : \'&#11167;\'"></button>';
                 echo '</div>';
                 
                 $totalTeamTakedowns = 0; // Necessary to reset Kill Participation
@@ -1170,36 +1005,36 @@ function getAverage($attributesArray, $matchDataArray, $puuid, $lane){
             }
         }
     }
-    echo '<input type="text" id="statTableSearch" onkeyup="searchStatTable()" placeholder="Statname.." style="margin-left: 55.6em; margin-bottom: 1em; height: 3em; font-size: 1em;">';
+    echo '<input type="text" id="statTableSearch" onkeyup="searchStatTable()" placeholder="Statname..">';
     echo "<table class='table' id='stattable' vertical-align:top;'><tr>";
     echo "<th>Statname</th><th>My Average</th><th>Average in General</th><th>As Bottom</th><th>As Support</th><th>As Middle</th><th>As Jungle</th><th>As Top</th></tr>";
 
     // Count & Round to retrieve printable data
     foreach ($averageArray as $key => $arrayElement){
-        echo "<tr><td style='text-align: center;'>" . $key . ": </td>";
+        echo "<tr><td class='text-center'>" . $key . ": </td>";
         if(($arrayElement / $counterArray[$key]) < 10){
             if(round($arrayElement / $counterArray[$key],2)>$averageStatsJson[$lane][$key]*2){
-                echo "<td style='color:#1aa23a'>";
+                echo "<td class='text-online'>";
             } else if(round($arrayElement / $counterArray[$key],2)!=0&&round($arrayElement / $counterArray[$key],2)<$averageStatsJson[$lane][$key]/2){
-                echo "<td style='color:#b31414'>";
+                echo "<td class='text-offline'>";
             } else {
                 echo "<td>";
             }
             echo $averageArray[$key] = round($arrayElement / $counterArray[$key],2)."</td>";
         } else if(($arrayElement / $counterArray[$key]) < 100){
             if(round($arrayElement / $counterArray[$key],1)>$averageStatsJson[$lane][$key]*2){
-                echo "<td style='color:#1aa23a'>";
+                echo "<td class='text-online'>";
             } else if(round($arrayElement / $counterArray[$key],1)!=0&&round($arrayElement / $counterArray[$key],1)<$averageStatsJson[$lane][$key]/2){
-                echo "<td style='color:#b31414'>";
+                echo "<td class='text-offline'>";
             } else {
                 echo "<td>";
             }
             echo $averageArray[$key] = round($arrayElement / $counterArray[$key],1)."</td>";
         } else {
             if(round($arrayElement / $counterArray[$key])>$averageStatsJson[$lane][$key]*2){
-                echo "<td style='color:#1aa23a'>";
+                echo "<td class='text-online'>";
             } else if(round($arrayElement / $counterArray[$key])!=0&&round($arrayElement / $counterArray[$key])<$averageStatsJson[$lane][$key]/2){
-                echo "<td style='color:#b31414'>";
+                echo "<td class='text-offline'>";
             } else {
                 echo "<td>";
             }
@@ -1313,12 +1148,12 @@ function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, 
 
     // Sort descending, from highest to lowest if first element should be of type "highestWinrate"
     if($type == "highestWinrate"){
-        uasort($champArray, function($a, $b) use($key){
+        uasort($champArray, function($a, $b){
             return $b['winrate'] <=> $a['winrate'];
         });
     // Sort ascending, from lowest to highest if first element should be of type "mostLosses"
     } else if($type == "mostLosses"){
-        uasort($champArray, function($a, $b) use($key){
+        uasort($champArray, function($a, $b){
             return $a['winrate'] <=> $b['winrate'];
         });
     }
@@ -1432,7 +1267,7 @@ function getHighestWinrateWith($lane, $matchDataArray, $puuid){
     $maxCount = floor(reset($maxCountArray)/2); // $maxCount Halve of first element in array
 
     // Sort descending, from highest to lowest if first element should be of type "highestWinrate"
-    uasort($highestWinrateArray, function($a, $b) use($key){
+    uasort($highestWinrateArray, function($a, $b){
         return $b['winrate'] <=> $a['winrate'];
     });
 

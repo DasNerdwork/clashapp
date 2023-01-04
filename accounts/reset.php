@@ -22,7 +22,7 @@ if (isset($_GET["code"])) {
         
 
     if (!empty($return_message)) { ?>
-        <div class="error">
+        <div class="bg-[#ff000040] -mb-12 text-base text-center leading-[3rem]">
             <strong><?php echo $return_message; ?></strong>
         </div>
    <?php 
