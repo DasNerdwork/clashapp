@@ -372,20 +372,26 @@ header {
 
 /* CLASH FORMS */
 
-.outer-form {
+
+/* used */
+/* .outer-form {
   position: fixed;
   top: 50%;
   transform: translate(50%, -50%);
   right: 50%;
   justify-content: center;
   border-radius: 6px;
-}
+} */
 
+
+/* used */
 .clash-form-title {
   margin-bottom: 10px;
   font-size: 20px;
 }
 
+
+/* used */
 .clash-form {
   padding: 42px 48px;
   height: fit-content;
@@ -400,7 +406,7 @@ header {
   margin-bottom: 170px;
 }
 
-.clash-form input:not([type="checkbox"]), .clash-form select, .clash-form button {
+.clash-form input:not([type="checkbox"]), .clash-form select {
   margin-top: 4px;
   margin-bottom: 1em;
   height: 32px;
@@ -418,37 +424,18 @@ header {
   color: #fff;
 }
 
-.login-form input[type="text"], .login-form input[type="password"], textarea {
-  width: 250px;
-}
 
 .register-form input[type="text"], .register-form input[type="password"], .register-form input[type="email"], textarea, .register-form select, .register-form button {
   width: 300px;
-}
-
-.login-form label:not(.stay-logged-in) {
-  margin-left: 8px;
 }
 
 .clash-form input::placeholder {
   color: #353950;
 }
 
-.clash-form label {
+/* .clash-form label {
   text-align: left;
-}
-
-.clash-form .small-button {
-  margin-top: 4px;
-  margin-bottom: 1em;
-  height: 32px;
-  font-size: 16px;
-  width: 100px;
-  float: right;
-  margin-left: 8px;
-  background-color: #2a2d40;
-  color: #fff;
-}
+} */
 
 .clash-form select, .clash-form select:active, .clash-form select:focus {
   border: 0;
@@ -498,16 +485,6 @@ header {
   margin-top: 1em;
 }
 
-.clash-form li {
-    color: #fff;
-    cursor: unset;
-    padding: 0px 0px 0px 10px;
-    font-size: 12px;
-    margin: 6px;
-    text-align: left;
-    float: none;
-}
-
 .clash-form .descriptive-text {
   font-size: 14px;
   text-align: justify;
@@ -519,9 +496,9 @@ header {
   margin-bottom: 1em;
 }
 
-.clash-form small {
+/* .clash-form small {
   color: #353950;
-}
+} */
 
 #reset-password-popup {
   /* visibility: hidden; */
@@ -551,21 +528,9 @@ header {
   margin-bottom: 0;
 }
 
-#connect-account-area {
-  border-top: 2px dashed #21222c;
-  border-bottom: 2px dashed #21222c;
-  padding: 1em 0px 0px 0px;
-  margin-bottom: 1em;
-}
-
-#reset-password-cancel, #disconnect-account-cancel, #connect-account-cancel, #account-delete-cancel, #twofa-cancel, #remove-twofa-cancel, #verifier-cancel {
+#disconnect-account-cancel, #connect-account-cancel, #account-delete-cancel, #twofa-cancel, #remove-twofa-cancel, #verifier-cancel {
   float: left;
   margin-left: unset;
-}
-
-.clash-form ul {
-  list-style-type: "\27A4";
-  padding: 0px 0px 10px 6px;
 }
 
 .clash-form .lower-dcform {
@@ -591,21 +556,21 @@ header {
   display: block;
 }
 
-.error {
+/* .error {
   background-color: rgba(255, 0, 0, 25%);
   margin-bottom: 1em;
   line-height: 3em;
   text-align: center;
-  /* transform: translateY(-40px); */
-}
+} */
 
-.account_status {
+/* .account_status {
   background-color: rgba(0, 255, 0, 25%);
   margin-bottom: 1em;
   line-height: 3em;
   text-align: center;
-  /* transform: translateY(-40px); */
-}
+} */
+
+/* TODO: add css tailwind changes to javascript generated errors or successes */ 
 
 .flow-root {
   display: flow-root;
@@ -614,12 +579,8 @@ header {
   margin-top: -10px;
 }
 
-.clash-form input:-webkit-autofill, .clash-form input:-webkit-autofill:hover, .clash-form input:-webkit-autofill:focus, .clash-form textarea:-webkit-autofill, .clash-form textarea:-webkit-autofill:hover, .clash-form textarea:-webkit-autofill:focus {
-  box-shadow: 0 0 0 50px #0e0f18 inset;
-  -webkit-box-shadow: 0 0 0 50px #0e0f18 inset;
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, textarea:-webkit-autofill:hover, textarea:-webkit-autofill:focus {
   -webkit-text-fill-color: #fff;
-  border: none;
-  outline: none;
 }
 
 div#champSelect::-webkit-scrollbar-thumb {

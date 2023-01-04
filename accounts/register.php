@@ -65,7 +65,7 @@ if (isset($_POST['submit'])) {
     } else if(!(in_array($_POST['region'], array("EUW")))) { // full array: array("EUW", "EUN", "NA", "KR", "BR", "JP", "RU", "OCE", "TR", "LAN", "LAS")
         $error_message[] = 'The selected region is currently not supported.';
     } else if($db->account_exists($_POST['email'], $_POST['username'])) {
-        $error_message[] = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">forgotten your password</u>?'; // TODO change to password reset mail instead of onclick open 
+        $error_message[] = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" class="cursor-pointer">forgotten your password</u>?'; // TODO change to password reset mail instead of onclick open 
     } else {
         $options = [
             'cost' => 11,
@@ -135,19 +135,19 @@ include('/hdd2/clashapp/templates/header.php');
  
 if (!empty($success_message)) { 
     foreach($success_message as $su){
-        echo '<div class="account_status">
+        echo '<div class="bg-[#00ff0040] -mb-12 text-base text-center leading-[3rem]">
                 <strong>'. $su .'</strong>
               </div>';
     }
 } else if (!empty($error_message)) { 
     foreach($error_message as $er){
-        echo '<div class="error">
+        echo '<div class="bg-[#ff000040] -mb-12 text-base text-center leading-[3rem]">
             <strong>'. $er .'</strong>
         </div>';
     }
 } 
 ?>
-<div class="outer-form">
+<div class="h-[calc(100%-5rem)] w-full flex justify-center items-center -mb-16">
     <form method="post" autocomplete="off" class="clash-form register-form">
         <div class="clash-form-title">Register your account</div>
         <div><label for="username">Username: </label></div>
@@ -175,7 +175,7 @@ if (!empty($success_message)) {
         <div class="login-checkbox"><input type="checkbox" id="stay-logged-in" name="stay-logged-in">
         <label for="stay-logged-in" class="stay-logged-in"> Stay logged in for a month</label></div>
         <div><input type="submit" name="submit" value="Register" /></div>
-        <div>Already have an account? <a href="/login">Login</a>.</div>
+        <div>Already have an account? <a class="text-[#bbb] hover:text-white hover:underline" href="/login">Login</a>.</div>
     </form>
 </div>
 
