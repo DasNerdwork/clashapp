@@ -44,6 +44,7 @@ module.exports = {
 	'win': '#003c0f80',
 	'offline': '#b31414',
 	'online': '#1aa23a',
+	'light': '#2a2d40',
 	'dark' : '#141624',
 	'darker': '#0e0f18',
       },
