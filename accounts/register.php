@@ -148,12 +148,12 @@ if (!empty($success_message)) {
 } 
 ?>
 <div class="h-[calc(100%-5rem)] w-full flex justify-center items-center -mb-16">
-    <form method="post" autocomplete="off" class="clash-form register-form">
-        <div class="clash-form-title">Register your account</div>
-        <div><label for="username">Username: </label></div>
-        <div><input type="text" name="username" id="username" value="<?= isset($_POST["username"]) ? $_POST["username"] : "" ?>" placeholder="Username" maxlength=16 required /></div>
-        <div><label for="region">Region: </label></div>
-        <div><select name="region" id="region" placeholder="Europe West" required>
+    <form method="post" autocomplete="off" class="py-10 px-9 h-fit w-fit bg-dark box-border max-w-[22rem] mb-32">
+        <div class="text-center text-xl mb-4">Register your account</div>
+        <div><label for="username" class="block text-xs font-bold text-left ml-1">Username: </label></div>
+        <div><input type="text" name="username" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" value="<?= isset($_POST["username"]) ? $_POST["username"] : "" ?>" placeholder="Username" maxlength=16 required /></div>
+        <div><label for="region" class="block text-xs font-bold text-left ml-1">Region: </label></div>
+        <div><select name="region" class="border-0 outline-none cursor-pointer w-64 h-8 mt-1 mb-4 text-base text-center bg-[#2a2d40] text-white" placeholder="Europe West" required>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'EUW') { ?>selected="true" <?php }; ?>value="EUW">Europe West</option>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'EUN') { ?>selected="true" <?php }; ?>value="EUN">Europe Nordic & East</option>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'NA') { ?>selected="true" <?php }; ?>value="NA">North America</option>
@@ -167,14 +167,14 @@ if (!empty($success_message)) {
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'LAS') { ?>selected="true" <?php }; ?>value="LAS">Latin America South</option>
             </select>
         </div>
-        <div><label for="email">Email: </label></div>
-        <div><input type="email" name="email" id="email" value="<?= isset($_POST["email"]) ? $_POST["email"] : "" ?>" placeholder="mail@example.com" required /></div>
-        <div><label for="password">Password:</label></div>
-        <div><input type="password" name="password" id="password" placeholder="Enter Password" maxlength=32 required /></div>
-        <div><input type="password" name="confirm-password" id="confirm-password" placeholder="Confirm Password" maxlength=32 required /></div>
-        <div class="login-checkbox"><input type="checkbox" id="stay-logged-in" name="stay-logged-in">
+        <div><label for="email" class="block text-xs font-bold text-left ml-1">Email: </label></div>
+        <div><input type="email" name="email" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" value="<?= isset($_POST["email"]) ? $_POST["email"] : "" ?>" placeholder="mail@example.com" required /></div>
+        <div><label for="password" class="block text-xs font-bold text-left ml-1">Password:</label></div>
+        <div><input type="password" name="password" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Enter Password" maxlength=32 required /></div>
+        <div><input type="password" name="confirm-password" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Confirm Password" maxlength=32 required /></div>
+        <div class="cursor-default text-center"><input type="checkbox" class="cursor-pointer accent-[#27358b]" id="stay-logged-in" name="stay-logged-in">
         <label for="stay-logged-in" class="stay-logged-in"> Stay logged in for a month</label></div>
-        <div><input type="submit" name="submit" value="Register" /></div>
+        <div><input type="submit" name="submit" class="float-center ml-0 mt-4 h-8 mb-4 w-64 bg-[#27358b] text-white text-base cursor-pointer focus:text-base hover:brightness-75 active:brightness-75" value="Register" /></div>
         <div>Already have an account? <a class="text-[#bbb] hover:text-white hover:underline" href="/login">Login</a>.</div>
     </form>
 </div>
