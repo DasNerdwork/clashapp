@@ -48,7 +48,7 @@ if (!empty($error_message)) {
 } 
 ?>
 <div class="h-[calc(100%-5rem)] w-full flex justify-center items-center -mb-16">
-    <form method="post" class="mb-44 max-w-[354px] py-12 px-11 h-fit w-fit bg-dark text-center box-border">
+    <form method="post" class="mb-44 max-w-[330px] py-10 px-9 h-fit w-fit bg-dark text-center box-border">
         <div class="mb-4 text-xl">Verify with Two-Factor Auth</div>
         <div class="text-left ml-2"><label for='verifier'>Two-Factor Authentication Code: </label></div>
         <div><input type='text' class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1 focus:text-base placeholder:text-[#353950]" name='verifier' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'></div>
