@@ -799,7 +799,7 @@ function enablePWR(){
 
 function setError(message){
   let header = document.getElementsByTagName("header")[0];
-  var errorBanners = document.getElementsByClassName("error");
+  var errorBanners = document.getElementsByClassName("bg-[#ff000040]");
   let check = true;
   let bannerId;
   if(errorBanners != null){
@@ -814,10 +814,9 @@ function setError(message){
   if(!check) return "error bereits vorhanden";
 
   let errorMsg = document.createElement("div");
-  errorMsg.setAttribute("class", "error");
+  errorMsg.setAttribute("class", "bg-[#ff000040] -mb-12 text-base text-center leading-[3rem]");
   errorMsg.innerHTML = "<strong>"+message+"</strong>";
   header.parentNode.insertBefore(errorMsg, header.nextElementSibling);
-  
 }
 
 // $('document').ready(function() {
