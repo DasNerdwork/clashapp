@@ -119,7 +119,7 @@ if (isset($_POST['twofa-input'])){
                 }
                 if(!check) return "error bereits vorhanden";
                 let errorMsg = document.createElement("div");
-                error ? errorMsg.setAttribute("class", "error") : errorMsg.setAttribute("class", "account_status");
+                error ? errorMsg.setAttribute("class", "bg-[#ff000040] -mb-12 text-base text-center leading-[3rem]") : errorMsg.setAttribute("class", "bg-[#00ff0040] -mb-12 text-base text-center leading-[3rem]");
                 errorMsg.innerHTML = "<strong>"+message+"</strong>";
                 header.parentNode.insertBefore(errorMsg, header.nextElementSibling);
             });
@@ -162,7 +162,7 @@ if (isset($_POST['remove-twofa-input'])){
             }
             if(!check) return "error bereits vorhanden";
             let errorMsg = document.createElement("div");
-            error ? errorMsg.setAttribute("class", "error") : errorMsg.setAttribute("class", "account_status");
+            error ? errorMsg.setAttribute("class", "bg-[#ff000040] -mb-12 text-base text-center leading-[3rem]") : errorMsg.setAttribute("class", "bg-[#00ff0040] -mb-12 text-base text-center leading-[3rem]");
             errorMsg.innerHTML = "<strong>"+message+"</strong>";
             header.parentNode.insertBefore(errorMsg, header.nextElementSibling);
         });
@@ -210,45 +210,43 @@ if (!empty($success_message)) {
 }
 ?>
 <div class="h-[44vw] w-full flex justify-center items-center">
-    <div class="clash-form py-12 px-11 h-fit w-fit bg-dark box-border max-w-md text-center" x-data="{ resetPassword: false, disconnectLeague: false, connectLeague: false, confirmLeague: true, add2FA: false, remove2FA: false, deleteAccount: false }">
+    <div class="py-12 px-11 h-fit w-fit bg-dark box-border max-w-md text-center" x-data="{ resetPassword: false, disconnectLeague: false, connectLeague: false, confirmLeague: true, add2FA: false, remove2FA: false, deleteAccount: false }">
         <div class='text-xl mb-2'><?php echo 'Welcome, '. $_SESSION['user']['username']; ?></div>
         <div><input type="button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" onclick="location.href='/logout';" value="&#129044; Log Out    "></button></div>
-        <div>
-            <button class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = true, disconnectLeague = false, connectLeague = false, confirmLeague = false ,add2FA = false, remove2FA = false, deleteAccount = false">Reset Password</button>
-            <div x-cloak x-transition x-show="resetPassword">
-                <div class='text-xl mb-2'>Reset your password</div>
-                <span class='text-sm text-justify block'>The same rules apply as used to register, meaning that the password has to:</span>
-                <ul class='pt-0 pr-0 pb-3 pl-2 list-["\27A4"]'>
-                    <li class="pl-2 text-white text-xs text-left m-2">Include at least one lowercase letter</li>
-                    <li class="pl-2 text-white text-xs text-left m-2">Include at least one uppercase letter</li>
-                    <li class="pl-2 text-white text-xs text-left m-2">Include at least one number</li>
-                    <li class="pl-2 text-white text-xs text-left m-2">Include at least one special character</li>
-                    <li class="pl-2 text-white text-xs text-left m-2">Be between 8 to 32 characters long</li>
-                </ul>
-                <form method="post">
-                    <div><label for="password">Password: </label></div>
-                    <div><input type="password" class="pl-1" name="current-password" id="current-password" placeholder="Current Password" required /></div>
-                    <div><input type="password" class="pl-1" name="new-password" id="new-password" placeholder="New Password" required /></div>
-                    <div><input type="password" class="pl-1" name="confirm-new-password" id="confirm-new-password" placeholder="Confirm Password" required /></div>
-                    <div class="flow-root"><button type="submit" id="reset-password-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base">Confirm</button>
-                    <button type="button" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="resetPassword = false">Cancel</button></div>
-                </form>
-            </div>
+        <button class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = true, disconnectLeague = false, connectLeague = false, confirmLeague = false ,add2FA = false, remove2FA = false, deleteAccount = false" x-show="!resetPassword">Reset Password</button>
+        <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="resetPassword">
+            <div class='text-xl mb-2'>Reset your password</div>
+            <span class='text-sm text-justify block'>The same rules apply as used to register, meaning that the password has to:</span>
+            <ul class='pt-0 pr-0 pb-3 pl-2 list-["\27A4"]'>
+                <li class="pl-2 text-white text-xs text-left m-2">Include at least one lowercase letter</li>
+                <li class="pl-2 text-white text-xs text-left m-2">Include at least one uppercase letter</li>
+                <li class="pl-2 text-white text-xs text-left m-2">Include at least one number</li>
+                <li class="pl-2 text-white text-xs text-left m-2">Include at least one special character</li>
+                <li class="pl-2 text-white text-xs text-left m-2">Be between 8 to 32 characters long</li>
+            </ul>
+            <form method="post" class="mb-0">
+                <div><label for="password" class="text-xs font-bold block text-left ml-5">Password: </label></div>
+                <div><input type="password" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" name="current-password" id="current-password" placeholder="Current Password" required /></div>
+                <div><input type="password" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" name="new-password" id="new-password" placeholder="New Password" required /></div>
+                <div><input type="password" class="text-base color-white text-left w-80 bg-darker mt-1 mb-2 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" name="confirm-new-password" id="confirm-new-password" placeholder="Confirm Password" required /></div>
+                <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="reset-password-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Confirm</button>
+                <button type="button" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="resetPassword = false">Cancel</button></div>
+            </form>
         </div>
-        <div id="un-link-account-area">
-            <div class="unlink-account-area" x-cloak x-transition x-show="disconnectLeague">
+        <div id="un-link-account-area mt-2">
+            <div class="unlink-account-area border-t-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="disconnectLeague">
                 <div class='text-xl mb-2' id="unlink-account-title">Unlink your account</div>
                 <span class='text-sm text-justify block' id='unlink-account-desc'>If you wish to unlink your account please enter your password and press confirm. You can always re-link your account again.</span>
             </div>
                 <?php if (!isset($_SESSION['user']['sumid'])) { ?>
             <button id="connect-account-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = false, confirmLeague = false, connectLeague = true, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!connectLeague">Connect League Account</button>
-            <div class="link-account-area" x-cloak x-transition x-show="connectLeague">
+            <div class="link-account-area border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="connectLeague">
                 <div class='text-xl mb-2' id="link-account-title">Link your account</div>
                 <span class='text-sm text-justify block' id='link-account-desc'>To link your account please enter your League of Legends username.</span>
                 <form method="post" id="connect-account-form">
-                    <div><label for="name">Summoner Name: </label></div>
-                    <input type="text" name="connectname" id="connectname" maxlength=16 required />
-                    <div class="flow-root"><button type="submit" id="connect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="resetPassword = false, disconnectLeague = false, confirmLeague = true, connectLeague = false, add2FA = false, remove2FA = false, deleteAccount = false">Connect</button>
+                    <div><label for="name" class="text-xs font-bold block text-left ml-5">Summoner Name: </label></div>
+                    <input type="text" name="connectname" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" maxlength=16 required placeholder="Summoner Name" />
+                    <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="connect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base" @click="resetPassword = false, disconnectLeague = false, confirmLeague = true, connectLeague = false, add2FA = false, remove2FA = false, deleteAccount = false">Connect</button>
                     <button type="button" id="connect-account-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="connectLeague = false">Cancel</button></div>
                 </form>
             </div>
@@ -260,10 +258,10 @@ if (!empty($success_message)) {
                 ?> 
             <div id="lower-dcform">
                 <button id="disconnect-account-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = true, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!disconnectLeague">Disconnect League Account</button>
-                <form method="post" id="disconnect-account-form" x-cloak x-transition x-show="disconnectLeague">
-                    <div><label for="dcpassword">Password: </label></div>
-                    <input type="password" name="dcpassword" id="dcpassword" placeholder="Confirm with password" required />
-                    <div class="h-7 -mt-2"><button type="submit" id="disconnect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base">Confirm</button>
+                <form method="post" class="border-b-2 border-[#21222c] border-dashed pt-2 h-[118px] mb-0" x-cloak x-transition x-show="disconnectLeague">
+                    <div><label for="dcpassword" class="text-xs font-bold block text-left ml-5">Password: </label></div>
+                    <input type="password" name="dcpassword" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Confirm with password" required />
+                    <div class="h-7 -mt-2 mx-auto max-w-[320px]"><button type="submit" id="disconnect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Confirm</button>
                     <button type="button" id="disconnect-account-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="disconnectLeague = false">Cancel</button></div>
                 </form>
             </div>
@@ -317,10 +315,10 @@ if (!empty($success_message)) {
                                 <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$randomIcon.'.webp" class="w-20" loading="lazy">
                             </div>
                             <div class="text-sm text-justify block account-desc">Temporarily change your summoner icon to the one on the <b>right</b> and click on the connect button to verify your league account.</div>
-                            <div class="text-sm text-justify block account-desc">Note: The temporary icon was given to you right after the account creation. You can find it by clicking on your profile picture, selecting "all" and scrolling completely down to the bottom.</div>
+                            <div class="text-sm text-justify block account-desc my-4">Note: The temporary icon was given to you right after the account creation. You can find it by clicking on your profile picture, selecting "all" and scrolling completely down to the bottom.</div>
                             <small>If you experience any problems or your account was already claimed please reach out to an administrator.</small>
                             <form method="post" id="connect-final-form" class="flex justify-center mb-0">
-                                <button type="button" name="final" id="connect-final-confirm" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white">Confirm</button>
+                                <button type="button" name="final" id="connect-final-confirm" class="mt-3 mb-3 h-8 text-base w-64 bg-[#27358b] text-white">Confirm</button>
                             </form>
                         </div>
                     </div>
@@ -344,7 +342,7 @@ if (!empty($success_message)) {
                                 if(data.status == "success"){
                                     location.href = "settings?verify=true";
                                 } else {
-                                    setError(\'Icons stimmen nicht überein.\');
+                                    setError(\'Icons do not match. Please make sure to close the profile edit window in league so the icon successfully updates.\');
                                 }
                             }               
                         });
@@ -358,18 +356,18 @@ if (!empty($success_message)) {
         ?>
         <div id="2fa-area">
         <?php if (!isset($_SESSION['user']['2fa'])) { ?> 
-            <button id="2fa-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="getQRCode(),resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = true, remove2FA = false, deleteAccount = false">Add Two-Factor Authentication</button>
-            <div id="2fa-description" x-cloak x-transition x-show="add2FA">
+            <button id="2fa-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="getQRCode(),resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = true, remove2FA = false, deleteAccount = false" x-show="!add2FA">Add Two-Factor Authentication</button>
+            <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="add2FA">
                 <div class='text-xl mb-2'>Add Two-Factor Authentication</div>
                 <span class='text-sm text-justify block' id='2fa-desc'>To enable 2FA for this account scan the QR Code below with your Google Authenticator App and confirm with the in-app code.</span>
                 <form method="post" id="set-twofa-form">
-                    <div><label for='twofa' id='twofa-label'>Two-Factor Authentication Code: </label></div>
-                    <div><input type='text' name='twofa-input' id='twofa-input' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6' class="pl-1"></div>
-                    <div class="h-10"><button type="submit" name="twofa-confirm" id="twofa-button" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base">Submit</button>
+                    <div><label for='twofa' class="text-xs font-bold block text-left ml-5">Two-Factor Authentication Code: </label></div>
+                    <div><input type='text' name='twofa-input' class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6' class="pl-1"></div>
+                    <div class="h-10 mx-auto max-w-[320px]"><button type="submit" name="twofa-confirm" id="twofa-button" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Submit</button>
                     <button type="button" id="twofa-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="add2FA = false" >Cancel</button></div>
                 </form>
                 <span class='text-sm text-justify block' id="auth-desc">By clicking on one of the images below you will be redirected to the Google Authenticator app store page.</span>
-                <div class="m-4" id="auth-images">
+                <div class="mx-4 mt-4 mb-1" id="auth-images">
                     <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" class="no-underline inline-block my-auto mx-1">
                         <img src="/clashapp/data/misc/webp/playstore.webp" width="140">
                     </a>
@@ -379,37 +377,37 @@ if (!empty($success_message)) {
                 </div>
             </div>
             <?php } else if($_SESSION['user']['2fa']) { ?>
-            <button id="remove-2fa-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = true, deleteAccount = false">Remove Two-Factor Auth</button>
-            <div id="remove-2fa-description" x-cloak x-transition x-show="remove2FA">
+            <button id="remove-2fa-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = true, deleteAccount = false" x-show="!remove2FA">Remove Two-Factor Auth</button>
+            <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="remove2FA">
                 <div class='text-xl mb-2'>Remove Two-Factor Authentication</div>
-                <span class='text-sm text-justify block' id='remove-2fa-desc'>To disable 2FA for this account you have to confirm with the current in-app code of your Authenticator App.</span>
+                <span class='text-sm text-justify block mb-4' id='remove-2fa-desc'>To disable 2FA for this account you have to confirm with the current in-app code of your Authenticator App.</span>
                 <form method="post" id="remove-twofa-form">
-                    <div><label for='remove-twofa' id='remove-twofa-label'>Two-Factor Authentication Code: </label></div>
-                    <div><input type='text' name='remove-twofa-input' id='remove-twofa-input' placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6' class="pl-1"></div>
-                    <div class="h-10"><button type="submit" name="remove-twofa-confirm" id="remove-twofa-button" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base">Submit</button>
+                    <div><label for='remove-twofa' class="text-xs font-bold block text-left ml-5">Two-Factor Authentication Code: </label></div>
+                    <input type='text' name='remove-twofa-input' class="text-base color-white text-left w-80 bg-darker mt-1 mb-2 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'>
+                    <div class="h-10 mx-auto max-w-[320px]"><button type="submit" name="remove-twofa-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Submit</button>
                     <button type="button" id="remove-twofa-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base"  @click="remove2FA = false">Cancel</button></div>
                 </form>
-                <small id="remove-2fa-notice">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
+                <small class="block mb-2">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
             </div>
             <?php } ?>
         </div>
         <div id="account-delete-area">
-            <button id="account-delete-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = true">Delete Account</button>
-            <div id="delete-desc" x-cloak x-transition x-show="deleteAccount">
+            <button id="account-delete-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = true" x-show="!deleteAccount">Delete Account</button>
+            <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="deleteAccount">
                 <div class='text-xl mb-2'>Delete your account</div>
                 <span class='text-sm text-justify block'>Deleting your account has to be confirmed with your current password. Deleting the account will mean that upon clicking the confirm button:</span>
-                <ul class='password-conditions'>
-                    <li>The account will be disabled immediately</li>
-                    <li>The account will stay disabled until deletion 2-3 days after</li>
-                    <li>All of the data associated with this account will then be deleted from our database too</li>
-                    <li>The 2-3 day delay is used to ensure the short-term possibility to restore accounts upon wrongly-submitted deletions.</li>
+                <ul class='my-2 pt-0 pr-0 pl-2 list-["\27A4"]'>
+                    <li class="pl-2 text-white text-xs text-left m-2">The account will be disabled immediately</li>
+                    <li class="pl-2 text-white text-xs text-left m-2">The account will stay disabled until deletion 2-3 days after</li>
+                    <li class="pl-2 text-white text-xs text-left m-2">All of the data associated with this account will then be deleted from our database too</li>
+                    <li class="pl-2 text-white text-xs text-left m-2">The 2-3 day delay is used to ensure the short-term possibility to restore accounts upon wrongly-submitted deletions.</li>
                 </ul>
-                <small>If you wish to re-create an account associated with your data again you will have to wait the deactivation delay or
+                <small class="text-[#333344] block mb-2">If you wish to re-create an account associated with your data again you will have to wait the deactivation delay or
                     reach out to an administrator.</small>
-                <form method="post" id="account-delete-form">
-                    <div><label for="password">Password: </label></div>
-                    <input type="password" name="password" id="password" placeholder="Confirm with password" required />
-                    <div class="flow-root"><button type="submit" id="account-delete-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base">Confirm</button>
+                <form method="post" class="mb-0">
+                    <div><label for="password" class="text-xs font-bold block text-left ml-5">Password: </label></div>
+                    <input type="password" name="password" class="text-base color-white text-left w-80 bg-darker mt-1 mb-2 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Confirm with password" required />
+                    <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="account-delete-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Confirm</button>
                     <button type="button" id="account-delete-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="deleteAccount = false">Cancel</button></div>
                 </form>
             </div>
