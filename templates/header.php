@@ -3,7 +3,7 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
 ?>
 <!DOCTYPE html>
 <div class="min-h-[calc(100vh_-_90px)]">
-<header>
+<header class="bg-dark">
 	<div class="flex h-16">
 		<div class="w-44 -mr-2.5 float-left p-2">
 			<a href="/" class="block no-underline text-white align-middle w-full">
