@@ -507,7 +507,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     foreach($suggestedBanArray as $banChampion){
             echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16">
                 <div class="ban-hoverer inline-grid" onclick="">
-                    <img class="suggested-ban-icon fullhd:w-12 twok:w-14" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" loading="lazy"></div>
+                    <img class="cursor-help fullhd:w-12 twok:w-14" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" loading="lazy"></div>
                 <span class="suggested-ban-caption w-16 block">' . $banChampion["Champion"] . '</span>
             </div>';
         }
