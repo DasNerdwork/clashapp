@@ -212,8 +212,8 @@ if (!empty($success_message)) {
 <div class="h-[44vw] w-full flex justify-center items-center">
     <div class="py-12 px-11 h-fit w-fit bg-dark box-border max-w-md text-center" x-data="{ resetPassword: false, disconnectLeague: false, connectLeague: false, confirmLeague: true, add2FA: false, remove2FA: false, deleteAccount: false }">
         <div class='text-xl mb-2'><?php echo 'Welcome, '. $_SESSION['user']['username']; ?></div>
-        <div><input type="button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" onclick="location.href='/logout';" value="&#129044; Log Out    "></button></div>
-        <button class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = true, disconnectLeague = false, connectLeague = false, confirmLeague = false ,add2FA = false, remove2FA = false, deleteAccount = false" x-show="!resetPassword">Reset Password</button>
+        <div><input type="button" class="cursor-pointer focus:text-base hover:brightness-75 active:brightness-50 mt-3 mb-3 h-8 text-base w-64 bg-light text-white" onclick="location.href='/logout';" value="&#129044; Log Out    "></button></div>
+        <button class="mt-3 mb-2 h-8 text-base w-64 bg-light text-white hover:brightness-75 active:brightness-50" @click="resetPassword = true, disconnectLeague = false, connectLeague = false, confirmLeague = false ,add2FA = false, remove2FA = false, deleteAccount = false" x-show="!resetPassword">Reset Password</button>
         <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="resetPassword">
             <div class='text-xl mb-2'>Reset your password</div>
             <span class='text-sm text-justify block'>The same rules apply as used to register, meaning that the password has to:</span>
@@ -229,8 +229,8 @@ if (!empty($success_message)) {
                 <div><input type="password" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" name="current-password" id="current-password" placeholder="Current Password" required /></div>
                 <div><input type="password" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" name="new-password" id="new-password" placeholder="New Password" required /></div>
                 <div><input type="password" class="text-base color-white text-left w-80 bg-darker mt-1 mb-2 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" name="confirm-new-password" id="confirm-new-password" placeholder="Confirm Password" required /></div>
-                <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="reset-password-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Confirm</button>
-                <button type="button" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="resetPassword = false">Cancel</button></div>
+                <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="reset-password-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base hover:brightness-75 active:brightness-50">Confirm</button>
+                <button type="button" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base hover:brightness-75 active:brightness-50" @click="resetPassword = false">Cancel</button></div>
             </form>
         </div>
         <div id="un-link-account-area mt-2">
@@ -239,30 +239,30 @@ if (!empty($success_message)) {
                 <span class='text-sm text-justify block' id='unlink-account-desc'>If you wish to unlink your account please enter your password and press confirm. You can always re-link your account again.</span>
             </div>
                 <?php if (!isset($_SESSION['user']['sumid'])) { ?>
-            <button id="connect-account-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = false, confirmLeague = false, connectLeague = true, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!connectLeague">Connect League Account</button>
+            <button id="connect-account-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = false, confirmLeague = false, connectLeague = true, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!connectLeague">Connect League Account</button>
             <div class="link-account-area border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="connectLeague">
                 <div class='text-xl mb-2' id="link-account-title">Link your account</div>
                 <span class='text-sm text-justify block' id='link-account-desc'>To link your account please enter your League of Legends username.</span>
-                <form method="post" id="connect-account-form">
+                <form method="post" class="mt-2.5">
                     <div><label for="name" class="text-xs font-bold block text-left ml-5">Summoner Name: </label></div>
                     <input type="text" name="connectname" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" maxlength=16 required placeholder="Summoner Name" />
-                    <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="connect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base" @click="resetPassword = false, disconnectLeague = false, confirmLeague = true, connectLeague = false, add2FA = false, remove2FA = false, deleteAccount = false">Connect</button>
-                    <button type="button" id="connect-account-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="connectLeague = false">Cancel</button></div>
+                    <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="connect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = false, confirmLeague = true, connectLeague = false, add2FA = false, remove2FA = false, deleteAccount = false">Connect</button>
+                    <button type="button" id="connect-account-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base hover:brightness-75 active:brightness-50" @click="connectLeague = false">Cancel</button></div>
                 </form>
             </div>
             <?php } else { 
                 $currentPlayerData = getPlayerData("sumid", $_SESSION['user']['sumid']);
-                echo '<div class="account-link" id="account-link"><span class="block">Linked to:</span>
+                echo '<div class="account-link mt-2" id="account-link"><span class="block">Linked to:</span>
                     <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.webp" class="m-auto inline-flex justify-center max-w-[32px] max-h-[32px]" width="32" loading="lazy">
                     '.$currentPlayerData["Name"].'</div>';
                 ?> 
             <div id="lower-dcform">
-                <button id="disconnect-account-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = true, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!disconnectLeague">Disconnect League Account</button>
+                <button id="disconnect-account-button" class="mt-4 mb-3 h-8 text-base w-64 bg-light text-white hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = true, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!disconnectLeague">Disconnect League Account</button>
                 <form method="post" class="border-b-2 border-[#21222c] border-dashed pt-2 h-[118px] mb-0" x-cloak x-transition x-show="disconnectLeague">
                     <div><label for="dcpassword" class="text-xs font-bold block text-left ml-5">Password: </label></div>
                     <input type="password" name="dcpassword" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Confirm with password" required />
-                    <div class="h-7 -mt-2 mx-auto max-w-[320px]"><button type="submit" id="disconnect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Confirm</button>
-                    <button type="button" id="disconnect-account-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="disconnectLeague = false">Cancel</button></div>
+                    <div class="h-7 -mt-2 mx-auto max-w-[320px]"><button type="submit" id="disconnect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base hover:brightness-75 active:brightness-50">Confirm</button>
+                    <button type="button" id="disconnect-account-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base hover:brightness-75 active:brightness-50" @click="disconnectLeague = false">Cancel</button></div>
                 </form>
             </div>
             <?php } ?>
@@ -318,7 +318,7 @@ if (!empty($success_message)) {
                             <div class="text-sm text-justify block account-desc my-4">Note: The temporary icon was given to you right after the account creation. You can find it by clicking on your profile picture, selecting "all" and scrolling completely down to the bottom.</div>
                             <small>If you experience any problems or your account was already claimed please reach out to an administrator.</small>
                             <form method="post" id="connect-final-form" class="flex justify-center mb-0">
-                                <button type="button" name="final" id="connect-final-confirm" class="mt-3 mb-3 h-8 text-base w-64 bg-[#27358b] text-white">Confirm</button>
+                                <button type="button" name="final" id="connect-final-confirm" class="mt-3 mb-3 h-8 text-base w-64 bg-[#27358b] text-white hover:brightness-75 active:brightness-50">Confirm</button>
                             </form>
                         </div>
                     </div>
@@ -356,15 +356,15 @@ if (!empty($success_message)) {
         ?>
         <div id="2fa-area">
         <?php if (!isset($_SESSION['user']['2fa'])) { ?> 
-            <button id="2fa-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="getQRCode(),resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = true, remove2FA = false, deleteAccount = false" x-show="!add2FA">Add Two-Factor Authentication</button>
+            <button id="2fa-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white hover:brightness-75 active:brightness-50" @click="getQRCode(),resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = true, remove2FA = false, deleteAccount = false" x-show="!add2FA">Add Two-Factor Authentication</button>
             <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="add2FA">
                 <div class='text-xl mb-2'>Add Two-Factor Authentication</div>
                 <span class='text-sm text-justify block' id='2fa-desc'>To enable 2FA for this account scan the QR Code below with your Google Authenticator App and confirm with the in-app code.</span>
                 <form method="post" id="set-twofa-form">
                     <div><label for='twofa' class="text-xs font-bold block text-left ml-5">Two-Factor Authentication Code: </label></div>
                     <div><input type='text' name='twofa-input' class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6' class="pl-1"></div>
-                    <div class="h-10 mx-auto max-w-[320px]"><button type="submit" name="twofa-confirm" id="twofa-button" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Submit</button>
-                    <button type="button" id="twofa-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="add2FA = false" >Cancel</button></div>
+                    <div class="h-10 mx-auto max-w-[320px]"><button type="submit" name="twofa-confirm" id="twofa-button" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base hover:brightness-75 active:brightness-50">Submit</button>
+                    <button type="button" id="twofa-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base hover:brightness-75 active:brightness-50" @click="add2FA = false" >Cancel</button></div>
                 </form>
                 <span class='text-sm text-justify block' id="auth-desc">By clicking on one of the images below you will be redirected to the Google Authenticator app store page.</span>
                 <div class="mx-4 mt-4 mb-1" id="auth-images">
@@ -377,22 +377,22 @@ if (!empty($success_message)) {
                 </div>
             </div>
             <?php } else if($_SESSION['user']['2fa']) { ?>
-            <button id="remove-2fa-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = true, deleteAccount = false" x-show="!remove2FA">Remove Two-Factor Auth</button>
+            <button id="remove-2fa-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = true, deleteAccount = false" x-show="!remove2FA">Remove Two-Factor Auth</button>
             <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="remove2FA">
                 <div class='text-xl mb-2'>Remove Two-Factor Authentication</div>
                 <span class='text-sm text-justify block mb-4' id='remove-2fa-desc'>To disable 2FA for this account you have to confirm with the current in-app code of your Authenticator App.</span>
                 <form method="post" id="remove-twofa-form">
                     <div><label for='remove-twofa' class="text-xs font-bold block text-left ml-5">Two-Factor Authentication Code: </label></div>
                     <input type='text' name='remove-twofa-input' class="text-base color-white text-left w-80 bg-darker mt-1 mb-2 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6'>
-                    <div class="h-10 mx-auto max-w-[320px]"><button type="submit" name="remove-twofa-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Submit</button>
-                    <button type="button" id="remove-twofa-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base"  @click="remove2FA = false">Cancel</button></div>
+                    <div class="h-10 mx-auto max-w-[320px]"><button type="submit" name="remove-twofa-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base hover:brightness-75 active:brightness-50">Submit</button>
+                    <button type="button" id="remove-twofa-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base hover:brightness-75 active:brightness-50"  @click="remove2FA = false">Cancel</button></div>
                 </form>
-                <small class="block mb-2">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
+                <small class="text-[#333344] block mb-2">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
             </div>
             <?php } ?>
         </div>
         <div id="account-delete-area">
-            <button id="account-delete-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = true" x-show="!deleteAccount">Delete Account</button>
+            <button class="mt-3 mb-3 h-8 text-base w-64 bg-[#560909] text-white hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = true" x-show="!deleteAccount">Delete Account</button>
             <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="deleteAccount">
                 <div class='text-xl mb-2'>Delete your account</div>
                 <span class='text-sm text-justify block'>Deleting your account has to be confirmed with your current password. Deleting the account will mean that upon clicking the confirm button:</span>
@@ -407,8 +407,8 @@ if (!empty($success_message)) {
                 <form method="post" class="mb-0">
                     <div><label for="password" class="text-xs font-bold block text-left ml-5">Password: </label></div>
                     <input type="password" name="password" class="text-base color-white text-left w-80 bg-darker mt-1 mb-2 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Confirm with password" required />
-                    <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="account-delete-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base">Confirm</button>
-                    <button type="button" id="account-delete-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base" @click="deleteAccount = false">Cancel</button></div>
+                    <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="account-delete-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base hover:brightness-75 active:brightness-50">Confirm</button>
+                    <button type="button" id="account-delete-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base hover:brightness-75 active:brightness-50" @click="deleteAccount = false">Cancel</button></div>
                 </form>
             </div>
         </div>
