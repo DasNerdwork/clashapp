@@ -40,76 +40,11 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       document.body.style.backgroundRepeat = "no-repeat";
       document.body.style.backgroundPosition = "50% 20%";
       document.body.style.backgroundSize = "40%";
-      // document.body.style.backgroundColor = "#c6ccd8";
-      // document.body.style.backgroundColor = "#000";
       document.getElementById("version").style.color = "#000";
     }
 
     if(window.location.pathname.match(allTeamPages)){
 
-      // TABLE COLLAPSER
-
-    //   document.title = document.getElementById("team-title").innerText;
-    //   var coll = document.getElementsByClassName("collapsible");
-    //   var i;
-
-    //   for (i = 0; i < coll.length; i++) {
-    //     coll[i].addEventListener("click", function() {
-    //       if(this.innerText === "⮟"){
-    //         this.innerText = "⮝";
-    //       } else {
-    //         this.innerText = "⮟";
-    //       }
-    //       var content = this.nextElementSibling;
-    //       if (content.style.maxHeight == "0px" ){
-    //         content.style.maxHeight = content.scrollHeight + "px";
-    //       } else {
-    //         content.style.maxHeight = "0px";
-    //       }
-    //     });
-    //   }
-
-    // MATCH COLLAPSER
-
-      // var match = document.getElementsByClassName("match");
-      // var collapser = document.getElementsByClassName("collapser");
-
-      // for (i = 0; i < match.length; i++) {
-      //   collapser[i].addEventListener("click", function() {
-      //     var matchcontent = this.parentNode.parentNode.getElementsByClassName("grid-container")[0];
-      //     if (matchcontent.style.maxHeight == "140px" || matchcontent.style.maxHeight == ""){
-      //     matchcontent.getElementsByClassName("damage-dealt")[0].style.visibility = "visible";
-      //     matchcontent.getElementsByClassName("damage-tanked")[0].style.visibility = "visible";
-      //     matchcontent.getElementsByClassName("damage-healed-and-shielded")[0].style.visibility = "visible";
-      //     matchcontent.getElementsByClassName("damage-to-objectives")[0].style.visibility = "visible";
-      //     matchcontent.getElementsByClassName("visionscore")[0].style.visibility = "visible";
-      //     matchcontent.getElementsByClassName("creepscore")[0].style.visibility = "visible";
-      //     matchcontent.getElementsByClassName("matchscore")[0].style.bottom = "0px";
-      //     matchcontent.getElementsByClassName("matchscore")[0].style.right = "0px";
-      //     matchcontent.getElementsByClassName("matchscore")[0].style.fontSize = "16px";
-      //     matchcontent.getElementsByClassName("lane-opponent")[0].style.visibility = "visible";
-      //     matchcontent.getElementsByClassName("collapser")[0].style.top = "-22px";
-      //     matchcontent.getElementsByClassName("collapser")[0].style.right = "-170px";
-      //     matchcontent.style.maxHeight = matchcontent.scrollHeight + "px";
-      //     this.innerHTML = "&#8963;";
-      //     } else {
-      //     matchcontent.getElementsByClassName("damage-dealt")[0].style.visibility = "hidden";
-      //     matchcontent.getElementsByClassName("damage-tanked")[0].style.visibility = "hidden";
-      //     matchcontent.getElementsByClassName("damage-healed-and-shielded")[0].style.visibility = "hidden";
-      //     matchcontent.getElementsByClassName("damage-to-objectives")[0].style.visibility = "hidden";
-      //     matchcontent.getElementsByClassName("visionscore")[0].style.visibility = "hidden";
-      //     matchcontent.getElementsByClassName("creepscore")[0].style.visibility = "hidden";
-      //     matchcontent.getElementsByClassName("matchscore")[0].style.bottom = "61px";
-      //     matchcontent.getElementsByClassName("matchscore")[0].style.right = "30px";
-      //     matchcontent.getElementsByClassName("matchscore")[0].style.fontSize = "12px";
-      //     matchcontent.getElementsByClassName("lane-opponent")[0].style.visibility = "hidden";
-      //     matchcontent.getElementsByClassName("collapser")[0].style.top = "";
-      //     matchcontent.getElementsByClassName("collapser")[0].style.right = "";
-      //     matchcontent.style.maxHeight = "140px";
-      //     this.innerHTML = "&#8964;";
-      //     }
-      //   });
-      // }
       // CHAMP SELECT
 
       var championList = document.getElementsByClassName("champ-select-champion"); // separate champion icon+name elements in the list
@@ -168,42 +103,6 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
         document.getElementById("language-selector").innerHTML = "English";
       }
       // console.log("Users browser language: "+timezone)
-
-
-
-
-
-
-
-    //   function isInViewport(el) {
-    //     const rect = el.getBoundingClientRect();
-    //     return (
-    //         rect.top >= 0 &&
-    //         rect.left >= 0 &&
-    //         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
-    //         rect.right <= (window.innerWidth || document.documentElement.clientWidth)
-    
-    //     );
-    // }
-      
-    //   var tags = document.getElementsByClassName("tag");
-    //   for (i = 0; i < tags.length; i++) {
-    //     if(isInViewport(tags[i])){
-    //       console.log(tags[i].id+" is visible.");
-    //     } else {
-    //       console.log(tags[i].id+" is not.");
-    //     }
-    //   }
-
-
-
-
-
-
-
-
-
-
 
 
       $(".ban-hoverer").click(function() {
@@ -277,10 +176,6 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
     }
 
     // DROPPABLE
-    
-  // setTimeout(function() {
-  //   makeDragDroppable();
-  // }, 600);
 
   function makeDragDroppable(){
     let draggables = document.getElementsByClassName('hoverer')
@@ -330,7 +225,6 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
           })
       }
     }
-
 
     function dragOver (e) {
       e.dataTransfer.dropEffect = "move";
@@ -489,272 +383,6 @@ function getChildIndex(node) {
   return Array.prototype.indexOf.call(node.parentNode.childNodes, node);
 }
 
-// function disableOthers(funcName){
-//   let connectErrorMsg = document.getElementById("icon-error");
-//   let connAccountArea = document.getElementById("connect-account-area")
-//   if(connectErrorMsg != null) connectErrorMsg.style.display = "none";
-//   switch (funcName) {
-//     case "deleteAccount":
-//       connectAccount(false);
-//       disconnectAccount(false);
-//       resetPassword(false);
-//       add2FA(false);
-//       remove2FA(false);
-//       if(connAccountArea != null) connAccountArea.style.display = "none";
-//       break;
-//     case "connectAccount":
-//       deleteAccount(false);
-//       disconnectAccount(false);
-//       resetPassword(false);
-//       add2FA(false);
-//       remove2FA(false);
-//       break;
-//     case "disconnectAccount":
-//       deleteAccount(false);
-//       connectAccount(false);
-//       resetPassword(false);
-//       add2FA(false);
-//       remove2FA(false);
-//       if(connAccountArea != null) connAccountArea.style.display = "none";
-//       break; 
-//     case "resetPassword":
-//       deleteAccount(false);
-//       connectAccount(false);
-//       disconnectAccount(false);
-//       add2FA(false);
-//       remove2FA(false);
-//       if(connAccountArea != null) connAccountArea.style.display = "none";
-//       break;
-//     case "add2FA":
-//       connectAccount(false);
-//       disconnectAccount(false);
-//       resetPassword(false);
-//       deleteAccount(false);
-//       remove2FA(false);
-//       if(connAccountArea != null) connAccountArea.style.display = "none";
-//       break;
-//     case "remove2FA":
-//       connectAccount(false);
-//       disconnectAccount(false);
-//       resetPassword(false);
-//       add2FA(false);
-//       deleteAccount(false);
-//       if(connAccountArea != null) connAccountArea.style.display = "none";
-//     default:
-//       break;
-//   }
-// }
-
-// function deleteAccount(status){
-//   if(status)disableOthers(arguments.callee.name);
-//   let button = document.getElementById("account-delete-button");
-//   let cancel = document.getElementById("account-delete-cancel");
-//   let confirm = document.getElementById("account-delete-confirm");
-//   let form = document.getElementById("account-delete-form");
-//   let area = document.getElementById("account-delete-area");
-//   let desc = document.getElementById("delete-desc");
-//   if(status){
-//     if(button != null) button.style.display = "none";
-//     if(cancel != null) cancel.style.display = "unset";
-//     if(confirm != null) confirm.style.display = "unset";
-//     if(form != null) form.style.display = "unset";
-//     if(area != null) area.style.borderTop = "2px dashed #21222c";
-//     if(area != null) area.style.borderBottom = "2px dashed #21222c";
-//     if(desc != null) desc.style.display = "unset";
-//     if(area != null) area.style.paddingTop = "1em";
-//   } else {
-//     if(button != null) button.style.display = "unset";
-//     if(cancel != null) cancel.style.display = "none";
-//     if(confirm != null) confirm.style.display = "none";
-//     if(form != null) form.style.display = "none";
-//     if(area != null) area.style.borderTop = "none";
-//     if(area != null) area.style.borderBottom = "none";
-//     if(area != null) area.style.paddingTop = "0";
-//     if(desc != null) desc.style.display = "none";
-//   }
-// }
-
-// function connectAccount(status){
-//   if(status)disableOthers(arguments.callee.name);
-//   let button = document.getElementById("connect-account-button");
-//   let cancel = document.getElementById("connect-account-cancel");
-//   let confirm = document.getElementById("connect-account-confirm");
-//   let form = document.getElementById("connect-account-form");
-//   let title = document.getElementById("link-account-title");
-//   let desc = document.getElementById("link-account-desc");
-//   let area = document.getElementById("un-link-account-area");
-//   let deleteBtn = document.getElementById("2fa-button");
-//   let removeBtn = document.getElementById("remove-2fa-button");
-//   if(status){
-//     if(button != null) button.style.display = "none";
-//     if(cancel != null) cancel.style.display = "unset";
-//     if(confirm != null) confirm.style.display = "unset";
-//     if(form != null) form.style.display = "block";
-//     if(title != null) title.style.display = "block";
-//     if(desc != null) desc.style.display = "block";
-//     if(area != null) area.style.borderTop = "2px dashed #21222c";
-//     if(area != null) area.style.borderBottom = "2px dashed #21222c";
-//     if(area != null) area.style.padding = "10px 0px 0px 0px";
-//     if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
-//     if(removeBtn != null) removeBtn.style.marginTop = "1em";
-//   } else {
-//     if(button != null) button.style.display = "unset";
-//     if(cancel != null) cancel.style.display = "none";
-//     if(confirm != null) confirm.style.display = "none";
-//     if(form != null) form.style.display = "none";
-//     if(title != null) title.style.display = "none";
-//     if(desc != null) desc.style.display = "none";
-//     if(area != null) area.style.borderTop = "none";
-//     if(area != null) area.style.borderBottom = "none";
-//     if(area != null) area.style.padding = "0";
-//     if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
-//     if(removeBtn != null) removeBtn.style.marginTop = "4px";
-//   }
-// }
-
-// function disconnectAccount(status){
-//   if(status)disableOthers(arguments.callee.name);
-//   let button = document.getElementById("disconnect-account-button");
-//   let cancel = document.getElementById("disconnect-account-cancel");
-//   let confirm = document.getElementById("disconnect-account-confirm");
-//   let form = document.getElementById("disconnect-account-form");
-//   let area = document.getElementById("un-link-account-area");
-//   let title = document.getElementById("unlink-account-title");
-//   let desc = document.getElementById("unlink-account-desc");
-//   let linkedTo = document.getElementById("account-link");
-//   let deleteBtn = document.getElementById("2fa-button"); // ignore naming pls ty
-//   let removeBtn = document.getElementById("remove-2fa-button");
-//   if(status){
-//     if(button != null) button.style.display = "none";
-//     if(cancel != null) cancel.style.display = "unset";
-//     if(confirm != null) confirm.style.display = "unset";
-//     if(form != null) form.style.display = "unset";
-//     if(area != null) area.style.borderTop = "2px dashed #21222c";
-//     if(area != null) area.style.borderBottom = "2px dashed #21222c";
-//     if(area != null) area.style.padding = "12px 0px 0px 0px";
-//     if(title != null) title.style.display = "block";
-//     if(desc != null) desc.style.display = "block";
-//     if(linkedTo != null) linkedTo.style.margin = "1em 0";
-//     if(deleteBtn != null) deleteBtn.style.marginTop = "1em";
-//     if(removeBtn != null) removeBtn.style.marginTop = "1em";
-//   } else {
-//     if(button != null) button.style.display = "unset";
-//     if(cancel != null) cancel.style.display = "none";
-//     if(confirm != null) confirm.style.display = "none";
-//     if(form != null) form.style.display = "none";
-//     if(area != null) area.style.borderTop = "none";
-//     if(area != null) area.style.borderBottom = "none";
-//     if(area != null) area.style.padding = "0";
-//     if(title != null) title.style.display = "none";
-//     if(desc != null) desc.style.display = "none";
-//     if(linkedTo != null) linkedTo.style.margin = "0";
-//     if(deleteBtn != null) deleteBtn.style.marginTop = "4px";
-//     if(removeBtn != null) removeBtn.style.marginTop = "4px";
-//   }
-// }
-
-// function resetPassword(status){
-//   if(status)disableOthers(arguments.callee.name);
-//   let button = document.getElementById("reset-password-button");
-//   let cancel = document.getElementById("reset-password-cancel");
-//   let confirm = document.getElementById("reset-password-confirm");
-//   let form = document.getElementById("reset-password-form");
-//   let desc = document.getElementById("reset-password-description");
-//   let area = document.getElementById("reset-password-area");
-//   let linkedTo = document.getElementById("account-link");
-//   let connectButton = document.getElementById("connect-account-button");
-//   if(status){
-//     if(button != null) button.style.display = "none";
-//     if(cancel != null) cancel.style.display = "unset";
-//     if(confirm != null) confirm.style.display = "unset";
-//     if(form != null) form.style.display = "unset";
-//     if(desc != null) desc.style.display = "unset";
-//     if(area != null) area.style.borderTop = "2px dashed #21222c";
-//     if(area != null) area.style.borderBottom = "2px dashed #21222c";
-//     if(area != null) area.style.padding = "12px 0px 0px 0px";
-//     if(connectButton != null) connectButton.style.marginTop = "1em";
-//     if(linkedTo != null) linkedTo.style.marginTop = "1em";
-//   } else {
-//     if(button != null) button.style.display = "unset";
-//     if(cancel != null) cancel.style.display = "none";
-//     if(confirm != null) confirm.style.display = "none";
-//     if(form != null) form.style.display = "none";
-//     if(desc != null) desc.style.display = "none";
-//     if(area != null) area.style.borderTop = "none";
-//     if(area != null) area.style.borderBottom = "none";
-//     if(area != null) area.style.padding = "0";
-//     if(connectButton != null) connectButton.style.marginTop = "0";
-//     if(linkedTo != null) linkedTo.style.marginTop = "0";
-//   }
-// }
-
-// function add2FA(status){  
-//   if(status)disableOthers(arguments.callee.name);
-//   let button = document.getElementById("2fa-button");
-//   let cancel = document.getElementById("2fa-cancel");
-//   let desc = document.getElementById("2fa-description");
-//   let area = document.getElementById("2fa-area");
-//   let form = document.getElementById("set-twofa-form");
-//   let authDesc = document.getElementById("auth-desc");
-//   let authImg = document.getElementById("auth-images");
-//   let delButton = document.getElementById("account-delete-button");
-//   if(status){
-//     if(button != null) button.style.display = "none";
-//     if(cancel != null) cancel.style.display = "unset";
-//     if(desc != null) desc.style.display = "unset";
-//     if(area != null) area.style.borderTop = "2px dashed #21222c";
-//     if(area != null) area.style.borderBottom = "2px dashed #21222c";
-//     if(area != null) area.style.padding = "12px 0px 0px 0px";
-//     if(form != null) form.style.display = "unset";
-//     if(authDesc != null) authDesc.style.display = "inline-block";
-//     if(authImg != null) authImg.style.display = "block";
-//     if(delButton != null) delButton.style.marginTop = "1em";
-//   } else {
-//     if(button != null) button.style.display = "unset";
-//     if(cancel != null) cancel.style.display = "none";
-//     if(desc != null) desc.style.display = "none";
-//     if(area != null) area.style.borderTop = "none";
-//     if(area != null) area.style.borderBottom = "none";
-//     if(area != null) area.style.padding = "0";
-//     if(form != null) form.style.display = "none";
-//     if(authDesc != null) authDesc.style.display = "none";
-//     if(authImg != null) authImg.style.display = "none";
-//     if(delButton != null) delButton.style.marginTop = "";
-//   }
-// }
-
-// function remove2FA(status){  
-//   if(status)disableOthers(arguments.callee.name);
-//   let button = document.getElementById("remove-2fa-button");
-//   let cancel = document.getElementById("remove-2fa-cancel");
-//   let desc = document.getElementById("remove-2fa-description");
-//   let area = document.getElementById("2fa-area");
-//   let form = document.getElementById("remove-twofa-form");
-//   let notice = document.getElementById("remove-2fa-notice");
-//   let delButton = document.getElementById("account-delete-button");
-//   if(status){
-//     if(button != null) button.style.display = "none";
-//     if(cancel != null) cancel.style.display = "unset";
-//     if(desc != null) desc.style.display = "block";
-//     if(area != null) area.style.borderTop = "2px dashed #21222c";
-//     if(area != null) area.style.borderBottom = "2px dashed #21222c";
-//     if(area != null) area.style.padding = "12px 0px 0px 0px";
-//     if(form != null) form.style.display = "unset";
-//     if(notice != null) notice.style.display = "inline-block";
-//     if(delButton != null) delButton.style.marginTop = "1em";
-//   } else {
-//     if(button != null) button.style.display = "unset";
-//     if(cancel != null) cancel.style.display = "none";
-//     if(desc != null) desc.style.display = "none";
-//     if(area != null) area.style.borderTop = "none";
-//     if(area != null) area.style.borderBottom = "none";
-//     if(area != null) area.style.padding = "0";
-//     if(form != null) form.style.display = "none";
-//     if(notice != null) notice.style.display = "none";
-//     if(delButton != null) delButton.style.marginTop = "";
-//   }
-// }
-
 function getQRCode(){
   $.ajax({
     type: "POST",
@@ -772,11 +400,6 @@ function getQRCode(){
             // console.log(data);
         }
     }
-    // ,
-    // error: function (xhr, ajaxOptions, thrownError) {
-    // alert(xhr.status);
-    // alert(thrownError);
-    // }
   });
 }
 
@@ -784,8 +407,6 @@ function getQRCode(){
 
 
 function enablePWR(){
-  // let pwr = document.getElementById("reset-password-button");
-  // pwr.style.visibility = "visible";
   $('document').ready(function() {
     let password = document.getElementById("password-label");
     let pwrbutton = document.createElement("input");
@@ -818,22 +439,6 @@ function setError(message){
   errorMsg.innerHTML = "<strong>"+message+"</strong>";
   header.parentNode.insertBefore(errorMsg, header.nextElementSibling);
 }
-
-// $('document').ready(function() {
-//   if(window.location.href == 'https://clash.dasnerdwork.net/settings?2fa=true'){
-//     let button = document.getElementById("2fa-button");
-//     let cancel = document.getElementById("2fa-cancel");
-//     let desc = document.getElementById("2fa-description");
-//     let area = document.getElementById("2fa-area");
-//     if(button != null) button.style.display = "none";
-//     if(cancel != null) cancel.style.display = "unset";
-//     if(desc != null) desc.style.display = "unset";
-//     if(area != null) area.style.borderTop = "2px dashed #21222c";
-//     if(area != null) area.style.borderBottom = "2px dashed #21222c";
-//     if(area != null) area.style.padding = "12px 0px 0px 0px";
-//   }
-// });
-
 
 // $('#updateBtn').click(function() {
 //   $.ajax({
