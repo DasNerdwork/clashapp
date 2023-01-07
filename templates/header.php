@@ -44,14 +44,25 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
 				</li>
 			</ul>
 		</nav>
-        <form id="search-bar" class="h-10 flex absolute left-2/4 -translate-x-2/4 translate-y-1/4" action="" onsubmit="return false;" method="GET" autocomplete="off">
-            <input type="text" name="name" id="name" class="pl-2.5 text-base text-black focus:pl-2.5 focus:text-base" value="" placeholder="Summonername">
-            <input type="submit" name="submitBtn" id="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="Search" onclick="sanitize(this.form.name.value);">
-            <?php // <button type="button" id="updateBtn" class="w-20 text-base bg-white text-black hidden cursor-pointer focus:text-base active:bg-[#ccc]" onclick="showLoader();" disabled>Update</button> ?>
-            <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
+        <?php if($_SERVER['REQUEST_URI'] == "/"){ echo '
+            <form class="h-10 w-[800px] flex absolute left-2/4 -translate-x-2/4 -translate-y-2/4 top-[60%]" action="" onsubmit="return false;" method="GET" autocomplete="off">
+                <input type="text" name="name" class="h-16 w-full py-2.5 pl-2.5 pr-16 text-xl border-none text-black font-normal rounded-l-full indent-5 outline-none focus:pl-2.5 focus:text-xl" value="" placeholder="Enter a Summoner Name">
+                <input type="submit" name="submitBtn" class=\'h-16 w-20 py-2.5 pl-2.5 pr-16 text-xl border-none bg-white text-black cursor-pointer rounded-r-full bg-[length:50%] bg-[url("/clashapp/data/misc/webp/searchicon.webp")] bg-no-repeat bg-center focus:text-xl active:bg-[#ccc]\' value="" onclick="sanitize(this.form.name.value);">
+                <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
                 <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
-            </div>
-        </form>
+                </div>
+            </form>';
+        } else { echo '
+            <form class="h-10 flex absolute left-2/4 -translate-x-2/4 translate-y-1/4" action="" onsubmit="return false;" method="GET" autocomplete="off">
+                <input type="text" name="name" class="pl-2.5 text-base text-black focus:pl-2.5 focus:text-base" value="" placeholder="Summonername">
+                <input type="submit" name="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="Search" onclick="sanitize(this.form.name.value);">
+                <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
+                <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
+                </div>
+            </form>';
+        } 
+        // TODO: Design and find usage for update button and/or remove: <button type="button" id="updateBtn" class="w-20 text-base bg-white text-black hidden cursor-pointer focus:text-base active:bg-[#ccc]" onclick="showLoader();" disabled>Update</button>
+        ?>
         <div class="absolute right-0 flex h-16">
             <?php if(isset($_SESSION['user']['sumid'])){ // If there is currently a user logged in && the user has a connected league account
                 if(file_exists('/var/www/html/clash/clashapp/data/player/'.$_SESSION['user']['sumid'].'.json')){
