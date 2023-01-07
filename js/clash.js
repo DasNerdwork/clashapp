@@ -1,48 +1,8 @@
 $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
   const currentpatch = data;
   $('document').ready(function() {
-    var allClashPages = RegExp("(\/clash\/).+$");
+    // var allClashPages = RegExp("(\/clash\/).+$");
     var allTeamPages = RegExp("(\/team\/).+$");
-    if (window.location.pathname.match(allClashPages) || window.location.pathname.match(allTeamPages)) {
-      // document.getElementById("updateBtn").style.display = "initial";
-    } else if (window.location.href == "https://clash.dasnerdwork.net/") {
-      footer = document.getElementById("full-footer").style.position = "fixed";
-      document.getElementById("version").style.opacity = "0.3";
-      suchfeld = document.getElementById("search-bar");
-      suchfeld.style.position = "absolute";
-      suchfeld.style.top = "60%";
-      suchfeld.style.left = "50%";
-      suchfeld.style.transform = "translate(-50%,-50%)";
-      suchfeld.style.width = "800px";
-      input = document.getElementById("name");
-      input.style.height = "60px";
-      input.style.width = "100%";
-      input.style.padding = "10px 60px 10px 10px";
-      input.style.border = "none";
-      input.style.fontSize = "20px";
-      input.style.fontWeight = "400";
-      input.style.borderRadius = "30px 0 0 30px";
-      input.style.textIndent= "20px";
-      input.placeholder = "Enter a Summoner Name";
-      input.style.outlineStyle = "none";
-      searchBtn = document.getElementById("submitBtn");
-      searchBtn.value = "";
-      searchBtn.style.borderRadius = "0 30px 30px 0";
-      searchBtn.style.height = "60px";
-      searchBtn.style.padding = "10px 60px 10px 10px";
-      searchBtn.style.border = "none";
-      searchBtn.style.fontSize = "20px";
-      searchBtn.style.backgroundImage = 'url(/clashapp/data/misc/webp/searchicon.webp)';
-      searchBtn.style.backgroundRepeat = "no-repeat";
-      searchBtn.style.backgroundPosition = "center";
-      searchBtn.style.backgroundSize = "50%";
-      document.body.style.backgroundImage = 'url(/clashapp/data/misc/webp/background.webp)';
-      document.body.style.backgroundRepeat = "no-repeat";
-      document.body.style.backgroundPosition = "50% 20%";
-      document.body.style.backgroundSize = "40%";
-      document.getElementById("version").style.color = "#000";
-    }
-
     if(window.location.pathname.match(allTeamPages)){
 
       // CHAMP SELECT
@@ -177,69 +137,69 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
 
     // DROPPABLE
 
-  function makeDragDroppable(){
-    let draggables = document.getElementsByClassName('hoverer')
-    
-    for (i = 0; i < draggables.length; i++) {
-      draggables[i].addEventListener('dragstart', dragStart)
-      draggables[i].addEventListener('drop', dropped)
-      draggables[i].addEventListener('dragenter', cancelDefault)
-      draggables[i].addEventListener('dragover', dragOver)
-    }
-
-    function dragStart (e) {
-      e.dataTransfer.setData('fromName', e.srcElement.previousSibling.dataset.id);
-      e.dataTransfer.setData('isDraggable', e.srcElement.parentElement.classList); // set event data "isDraggable" to the class name "hoverer" of the parent element
-      e.dataTransfer.setDragImage(e.srcElement.previousSibling, 24, 24);
-      return oldIndex = getChildIndex(e.srcElement.parentElement.parentElement); // returning so function dropped is able to acces the old index variable
-    }
-
-    function dropped (e) {
-      var fromName = e.dataTransfer.getData('fromName');
-      var toName = e.srcElement.previousSibling.dataset.id;
-      cancelDefault(e);
-
-      // get new and old index from dragStart return
-      // var newIndex = getChildIndex(e.toElement.parentElement.parentElement) // Javascript swap of elements -> not necessary due to ajax
-      // get parent as variable
-      // var selectedBans = e.toElement.parentElement.parentElement.parentElement; // Javascript swap of elements -> not necessary due to ajax
-
-      if(e.dataTransfer.getData('isDraggable') != "hoverer"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
-        cancelDefault(e);
-      } else {
-        // console.log("Moving index "+oldIndex+" to "+newIndex);
-        // insert the dropped item at new place
-        // if (newIndex < oldIndex) {
-        //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex]);
-        // } else {
-        //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex].nextElementSibling);
-        // }
-        $.ajax({
-          type: "POST",
-          url: "../clashapp/swapInFile.php",
-          data: {
-            fromName: fromName,
-            toName: toName,
-            teamid: window.location.pathname.split("/team/")[1]
-            }
-          })
+    function makeDragDroppable(){
+      let draggables = document.getElementsByClassName('hoverer')
+      
+      for (i = 0; i < draggables.length; i++) {
+        draggables[i].addEventListener('dragstart', dragStart)
+        draggables[i].addEventListener('drop', dropped)
+        draggables[i].addEventListener('dragenter', cancelDefault)
+        draggables[i].addEventListener('dragover', dragOver)
       }
-    }
 
-    function dragOver (e) {
-      e.dataTransfer.dropEffect = "move";
-      cancelDefault(e);
-    }
+      function dragStart (e) {
+        e.dataTransfer.setData('fromName', e.srcElement.previousSibling.dataset.id);
+        e.dataTransfer.setData('isDraggable', e.srcElement.parentElement.classList); // set event data "isDraggable" to the class name "hoverer" of the parent element
+        e.dataTransfer.setDragImage(e.srcElement.previousSibling, 24, 24);
+        return oldIndex = getChildIndex(e.srcElement.parentElement.parentElement); // returning so function dropped is able to acces the old index variable
+      }
 
-    function cancelDefault (e) {
-      e.preventDefault()
-      e.stopPropagation()
-      return false
-    }
-  }
-    // END DROPPABLE
+      function dropped (e) {
+        var fromName = e.dataTransfer.getData('fromName');
+        var toName = e.srcElement.previousSibling.dataset.id;
+        cancelDefault(e);
 
-  });
+        // get new and old index from dragStart return
+        // var newIndex = getChildIndex(e.toElement.parentElement.parentElement) // Javascript swap of elements -> not necessary due to ajax
+        // get parent as variable
+        // var selectedBans = e.toElement.parentElement.parentElement.parentElement; // Javascript swap of elements -> not necessary due to ajax
+
+        if(e.dataTransfer.getData('isDraggable') != "hoverer"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
+          cancelDefault(e);
+        } else {
+          // console.log("Moving index "+oldIndex+" to "+newIndex);
+          // insert the dropped item at new place
+          // if (newIndex < oldIndex) {
+          //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex]);
+          // } else {
+          //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex].nextElementSibling);
+          // }
+          $.ajax({
+            type: "POST",
+            url: "../clashapp/swapInFile.php",
+            data: {
+              fromName: fromName,
+              toName: toName,
+              teamid: window.location.pathname.split("/team/")[1]
+              }
+            });
+          }
+        }
+
+        function dragOver (e) {
+          e.dataTransfer.dropEffect = "move";
+          cancelDefault(e);
+        }
+
+        function cancelDefault (e) {
+          e.preventDefault()
+          e.stopPropagation()
+          return false
+        }
+      }
+      // END DROPPABLE
+
+    });
 
   $('document').ready(function() {
     var suggestedBans = document.getElementsByClassName("suggested-ban-champion");

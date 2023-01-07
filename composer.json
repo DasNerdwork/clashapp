@@ -1,8 +1,14 @@
 {
+    "autoload": {
+      "psr-4": {
+        "MyApp\\": "app"
+      }
+    },
     "require": {
         "pragmarx/google2fa": "^8.0",
         "bacon/bacon-qr-code": "^2.0",
-	"phpspec/prophecy": "1.15.0"
+	"phpspec/prophecy": "1.15.0",
+        "cboden/ratchet": "^0.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^9.5"
