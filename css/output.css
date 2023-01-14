@@ -541,8 +541,8 @@ video {
   bottom: 33px;
 }
 
-.-right-\[62px\] {
-  right: -62px;
+.-right-\[66px\] {
+  right: -66px;
 }
 
 .top-\[14\.5rem\] {
@@ -593,16 +593,16 @@ video {
   left: 50%;
 }
 
+.top-\[60\%\] {
+  top: 60%;
+}
+
 .-right-10 {
   right: -2.5rem;
 }
 
 .right-0 {
   right: 0px;
-}
-
-.top-\[60\%\] {
-  top: 60%;
 }
 
 .z-0 {
@@ -915,8 +915,8 @@ video {
   height: 1.5rem;
 }
 
-.h-16 {
-  height: 4rem;
+.h-\[68px\] {
+  height: 68px;
 }
 
 .h-4 {
@@ -962,6 +962,10 @@ video {
 
 .h-32 {
   height: 8rem;
+}
+
+.h-16 {
+  height: 4rem;
 }
 
 .h-\[calc\(100\%-5rem\)\] {
@@ -1012,12 +1016,12 @@ video {
   width: 1rem;
 }
 
-.w-\[17\.5rem\] {
-  width: 17.5rem;
-}
-
 .w-8 {
   width: 2rem;
+}
+
+.w-\[17\.5rem\] {
+  width: 17.5rem;
 }
 
 .w-fit {
@@ -1069,6 +1073,10 @@ video {
   width: 11rem;
 }
 
+.w-\[800px\] {
+  width: 800px;
+}
+
 .w-10 {
   width: 2.5rem;
 }
@@ -1081,12 +1089,8 @@ video {
   width: 7rem;
 }
 
-.w-\[800px\] {
-  width: 800px;
-}
-
-.min-w-\[64px\] {
-  min-width: 64px;
+.min-w-\[68px\] {
+  min-width: 68px;
 }
 
 .min-w-\[16px\] {
@@ -1101,12 +1105,12 @@ video {
   min-width: 22px;
 }
 
-.min-w-\[96px\] {
-  min-width: 96px;
+.min-w-\[104px\] {
+  min-width: 104px;
 }
 
-.max-w-\[64px\] {
-  max-width: 64px;
+.max-w-\[68px\] {
+  max-width: 68px;
 }
 
 .max-w-\[16px\] {
@@ -1121,8 +1125,8 @@ video {
   max-width: 22px;
 }
 
-.max-w-\[96px\] {
-  max-width: 96px;
+.max-w-\[104px\] {
+  max-width: 104px;
 }
 
 .max-w-\[40rem\] {
@@ -1176,6 +1180,11 @@ video {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
+.-translate-y-2\/4 {
+  --tw-translate-y: -50%;
+  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
 .translate-y-1\/4 {
   --tw-translate-y: 25%;
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
@@ -1183,15 +1192,6 @@ video {
 
 .translate-y-2\/4 {
   --tw-translate-y: 50%;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.-translate-y-2\/4 {
-  --tw-translate-y: -50%;
-  transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-}
-
-.transform {
   transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
 }
 
@@ -1348,26 +1348,6 @@ video {
   border-bottom-right-radius: 9999px;
 }
 
-.rounded-l {
-  border-top-left-radius: 0.25rem;
-  border-bottom-left-radius: 0.25rem;
-}
-
-.rounded-r {
-  border-top-right-radius: 0.25rem;
-  border-bottom-right-radius: 0.25rem;
-}
-
-.rounded-l-xl {
-  border-top-left-radius: 0.75rem;
-  border-bottom-left-radius: 0.75rem;
-}
-
-.rounded-r-xl {
-  border-top-right-radius: 0.75rem;
-  border-bottom-right-radius: 0.75rem;
-}
-
 .border-\[4px\] {
   border-width: 4px;
 }
@@ -1445,6 +1425,11 @@ video {
   background-color: #003c0f80;
 }
 
+.bg-dark {
+  --tw-bg-opacity: 1;
+  background-color: rgb(20 22 36 / var(--tw-bg-opacity));
+}
+
 .bg-\[\#141624\] {
   --tw-bg-opacity: 1;
   background-color: rgb(20 22 36 / var(--tw-bg-opacity));
@@ -1461,11 +1446,6 @@ video {
 
 .bg-\[\#ff000040\] {
   background-color: #ff000040;
-}
-
-.bg-dark {
-  --tw-bg-opacity: 1;
-  background-color: rgb(20 22 36 / var(--tw-bg-opacity));
 }
 
 .bg-darker {
@@ -1501,10 +1481,6 @@ video {
 .bg-\[\#eee\] {
   --tw-bg-opacity: 1;
   background-color: rgb(238 238 238 / var(--tw-bg-opacity));
-}
-
-.bg-\[url\(\\\'\/clashapp\/data\/misc\/webp\/searchicon\.webp\\\'\)\] {
-  background-image: url(\'/clashapp/data/misc/webp/searchicon.webp\');
 }
 
 .bg-\[url\(\"\/clashapp\/data\/misc\/webp\/searchicon\.webp\"\)\] {
@@ -2874,6 +2850,10 @@ video {
 
 .accent-\[\#27358b\] {
   accent-color: #27358b;
+}
+
+.opacity-40 {
+  opacity: 0.4;
 }
 
 .opacity-50 {
