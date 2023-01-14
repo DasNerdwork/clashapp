@@ -10,7 +10,7 @@ require_once '/hdd2/clashapp/accounts/qr-codes.php';
 require_once '/hdd2/clashapp/clash-db.php';
  
 include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Clash', true, true);
+setCodeHeader('Clash', true, true, false);
 include('/hdd2/clashapp/templates/header.php');
 
 $error_message = array();

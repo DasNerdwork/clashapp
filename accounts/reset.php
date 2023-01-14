@@ -11,7 +11,7 @@ $return_message = '';
 
 if (isset($_GET["code"])) {
     include('/hdd2/clashapp/templates/head.php');
-    setCodeHeader('Reset Password', true, true);
+    setCodeHeader('Reset Password', true, true, false);
     include('/hdd2/clashapp/templates/header.php');
 
     $db = new DB();

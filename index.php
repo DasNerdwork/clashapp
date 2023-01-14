@@ -1,6 +1,6 @@
 <?php session_start(); 
 include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Clash', true, true);
+setCodeHeader('Clash', true, true, false);
 include('/hdd2/clashapp/templates/header.php');
 
 if (!isset($_SESSION)) session_start();
@@ -13,7 +13,6 @@ document.body.style.backgroundSize = "40%";
 </script>
 ';
 ?>
-<script src="../clashapp/websocket.js"></script>
 
 
 

@@ -188,7 +188,7 @@ if (isset($_POST['remove-twofa-input'])){
 }
 
 include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Settings', true, true);
+setCodeHeader('Settings', true, true, false);
 include('/hdd2/clashapp/templates/header.php');
 
 if (!empty($success_message)) { 
