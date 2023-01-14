@@ -50,7 +50,7 @@
 </script>
 <?php 
 include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Profile', true, true);
+setCodeHeader('Profile', true, true, false);
 include('/hdd2/clashapp/templates/header.php');
 if (!isset($_SESSION)) session_start();
 ?>
@@ -387,7 +387,7 @@ if($formattedInput != "") {
     getHighestWinrateWith("UTILITY", $matchDaten, $puuid);
     $ladezeiten["HighestWInrateWith"] = number_format(microtime(true) - $startHighestWinrateWith, 4);
     $startMatchDetailList = microtime(true);
-    getMatchDetailsByPUUID($matchids, $puuid);
+    // getMatchDetailsByPUUID($matchids, $puuid);
     $ladezeiten["MatchDetailsList"] = number_format(microtime(true) - $startMatchDetailList, 4);
     $ladezeiten["whole"] = number_format(microtime(true) - $startWhole, 4);
     echo "<pre>";

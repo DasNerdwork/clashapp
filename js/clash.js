@@ -104,100 +104,99 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       //   });
       // });
 
-      var selectedBans = document.getElementById("selectedBans");
-      var teamid = window.location.pathname.split("/team/")[1];
-      var status = 0;
+      // var selectedBans = document.getElementById("selectedBans");
+      // var status = 0;
 
-      setInterval(function() {
-        if(!document.hidden){
-          $.ajax({
-            cache: false,
-            url: "https://clash.dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
-            dataType: "json",
-            success: function(data) {
-              if(data["Status"] > status){
-                status = data["Status"];
-                var html ="";
-                for (const element of data["SuggestedBans"]) {
-                  html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24">'+
-                            '<div class="hoverer group" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
-                              '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" loading="lazy">'+
-                              '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
-                            '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
-                          '</div>';
-                }
-                selectedBans.innerHTML = html;
-                makeDragDroppable();
-              }
-            }
-          });
-        }
-      }, 500);
+      // setInterval(function() {
+      //   if(!document.hidden){
+      //     $.ajax({
+      //       cache: false,
+      //       url: "https://clash.dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
+      //       dataType: "json",
+      //       success: function(data) {
+      //         if(data["Status"] > status){
+      //           status = data["Status"];
+      //           var html ="";
+      //           for (const element of data["SuggestedBans"]) {
+      //             html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24">'+
+      //                       '<div class="hoverer group" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
+      //                         '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" loading="lazy">'+
+      //                         '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
+      //                       '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
+      //                     '</div>';
+      //           }
+      //           selectedBans.innerHTML = html;
+      //           makeDragDroppable();
+      //         }
+      //       }
+      //     });
+      //   }
+      // }, 500);
     }
 
-    // DROPPABLE
+    // // DROPPABLE
 
-    function makeDragDroppable(){
-      let draggables = document.getElementsByClassName('hoverer')
+    // function makeDragDroppable(){
+    //   let draggables = document.getElementsByClassName('hoverer')
       
-      for (i = 0; i < draggables.length; i++) {
-        draggables[i].addEventListener('dragstart', dragStart)
-        draggables[i].addEventListener('drop', dropped)
-        draggables[i].addEventListener('dragenter', cancelDefault)
-        draggables[i].addEventListener('dragover', dragOver)
-      }
+    //   for (i = 0; i < draggables.length; i++) {
+    //     draggables[i].addEventListener('dragstart', dragStart)
+    //     draggables[i].addEventListener('drop', dropped)
+    //     draggables[i].addEventListener('dragenter', cancelDefault)
+    //     draggables[i].addEventListener('dragover', dragOver)
+    //   }
 
-      function dragStart (e) {
-        e.dataTransfer.setData('fromName', e.srcElement.previousSibling.dataset.id);
-        e.dataTransfer.setData('isDraggable', e.srcElement.parentElement.classList); // set event data "isDraggable" to the class name "hoverer" of the parent element
-        e.dataTransfer.setDragImage(e.srcElement.previousSibling, 24, 24);
-        return oldIndex = getChildIndex(e.srcElement.parentElement.parentElement); // returning so function dropped is able to acces the old index variable
-      }
+    //   function dragStart (e) {
+    //     e.dataTransfer.setData('fromName', e.srcElement.previousSibling.dataset.id);
+    //     e.dataTransfer.setData('isDraggable', e.srcElement.parentElement.classList); // set event data "isDraggable" to the class name "hoverer" of the parent element
+    //     e.dataTransfer.setDragImage(e.srcElement.previousSibling, 24, 24);
+    //     return oldIndex = getChildIndex(e.srcElement.parentElement.parentElement); // returning so function dropped is able to acces the old index variable
+    //   }
 
-      function dropped (e) {
-        var fromName = e.dataTransfer.getData('fromName');
-        var toName = e.srcElement.previousSibling.dataset.id;
-        cancelDefault(e);
+    //   function dropped (e) {
+    //     var fromName = e.dataTransfer.getData('fromName');
+    //     var toName = e.srcElement.previousSibling.dataset.id;
+    //     cancelDefault(e);
 
-        // get new and old index from dragStart return
-        // var newIndex = getChildIndex(e.toElement.parentElement.parentElement) // Javascript swap of elements -> not necessary due to ajax
-        // get parent as variable
-        // var selectedBans = e.toElement.parentElement.parentElement.parentElement; // Javascript swap of elements -> not necessary due to ajax
+    //     // get new and old index from dragStart return
+    //     // var newIndex = getChildIndex(e.toElement.parentElement.parentElement) // Javascript swap of elements -> not necessary due to ajax
+    //     // get parent as variable
+    //     // var selectedBans = e.toElement.parentElement.parentElement.parentElement; // Javascript swap of elements -> not necessary due to ajax
 
-        if(e.dataTransfer.getData('isDraggable') != "hoverer"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
-          cancelDefault(e);
-        } else {
-          // console.log("Moving index "+oldIndex+" to "+newIndex);
-          // insert the dropped item at new place
-          // if (newIndex < oldIndex) {
-          //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex]);
-          // } else {
-          //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex].nextElementSibling);
-          // }
-          $.ajax({
-            type: "POST",
-            url: "../clashapp/swapInFile.php",
-            data: {
-              fromName: fromName,
-              toName: toName,
-              teamid: window.location.pathname.split("/team/")[1]
-              }
-            });
-          }
-        }
+    //     if(e.dataTransfer.getData('isDraggable') != "hoverer"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
+    //       cancelDefault(e);
+    //     } else {
+    //       // console.log("Moving index "+oldIndex+" to "+newIndex);
+    //       // insert the dropped item at new place
+    //       // if (newIndex < oldIndex) {
+    //       //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex]);
+    //       // } else {
+    //       //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex].nextElementSibling);
+    //       // }
+    //       $.ajax({
+    //         type: "POST",
+    //         url: "../clashapp/swapInFile.php",
+    //         data: {
+    //           fromName: fromName,
+    //           toName: toName,
+    //           teamid: window.location.pathname.split("/team/")[1]
+    //           }
+    //         });
+    //       }
+    //     }
 
-        function dragOver (e) {
-          e.dataTransfer.dropEffect = "move";
-          cancelDefault(e);
-        }
+    //     function dragOver (e) {
+    //       e.dataTransfer.dropEffect = "move";
+    //       cancelDefault(e);
+    //     }
 
-        function cancelDefault (e) {
-          e.preventDefault()
-          e.stopPropagation()
-          return false
-        }
-      }
-      // END DROPPABLE
+    //     function cancelDefault (e) {
+    //       e.preventDefault()
+    //       e.stopPropagation()
+    //       return false
+    //     }
+    //   }
+    //   // END DROPPABLE
 
     });
 
@@ -211,32 +210,32 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
       const currentpatch = data;
     });
     var allTeamPages = RegExp("(\/team\/).+$");
-    if(window.location.pathname.match(allTeamPages)){
-      var selectedBans = document.getElementById("selectedBans");
-      var teamid = window.location.pathname.split("/team/")[1];
-      var status = 0;
+    // if(window.location.pathname.match(allTeamPages)){
+    //   var selectedBans = document.getElementById("selectedBans");
+    //   var teamid = window.location.pathname.split("/team/")[1];
+    //   var status = 0;
 
-      $.ajax({
-        cache: false,
-        url: "https://clash.dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
-        dataType: "json",
-        success: function(data) {
-          if(data["Status"] > status){
-            status = data["Status"];
-            var html ="";
-            for (const element of data["SuggestedBans"]) {
-              html += '<div class="selected-ban-champion">'+
-                        '<div class="hoverer group" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
-                          '<img class="selected-ban-icon fullhd:w-12 twok:w-14" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" loading="lazy">'+
-                          '<img class="removal-overlay fullhd:w-12 twok:w-14 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
-                        '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
-                      '</div>';
-            }
-            selectedBans.innerHTML = html;
-          }
-        }
-      });
-    }
+    //   $.ajax({
+    //     cache: false,
+    //     url: "https://clash.dasnerdwork.net/clashapp/data/teams/"+teamid+".json",
+    //     dataType: "json",
+    //     success: function(data) {
+    //       if(data["Status"] > status){
+    //         status = data["Status"];
+    //         var html ="";
+    //         for (const element of data["SuggestedBans"]) {
+    //           html += '<div class="selected-ban-champion">'+
+    //                     '<div class="hoverer group" draggable="true" onclick="selected_ban_champion(this.parentElement)">'+
+    //                       '<img class="selected-ban-icon fullhd:w-12 twok:w-14" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" loading="lazy">'+
+    //                       '<img class="removal-overlay fullhd:w-12 twok:w-14 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
+    //                     '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
+    //                   '</div>';
+    //         }
+    //         selectedBans.innerHTML = html;
+    //       }
+    //     }
+    //   });
+    // }
   });
 });
 
@@ -268,22 +267,21 @@ function showLoader(){
 
 // END FROM MAINPAGE
 
-function selected_ban_champion(el){
-  el.style.opacity = '0';
-  clickableHoverers = document.getElementsByClassName("hoverer");
-  for (h = 0; h < clickableHoverers.length; h++) {
-    clickableHoverers[h].style.pointerEvents = "none";
-  }
-    $.ajax({
-    type: "POST",
-    url: "../clashapp/removeFromFile.php",
-    data: {
-      champid: el.getElementsByTagName("img")[0].dataset.id,
-      teamid: window.location.pathname.split("/team/")[1]
-      }
-    })
-  // }, 50);
-}
+// function selected_ban_champion(el){
+//   el.style.opacity = '0';
+//   clickableHoverers = document.getElementsByClassName("hoverer");
+//   for (h = 0; h < clickableHoverers.length; h++) {
+//     clickableHoverers[h].style.pointerEvents = "none";
+//   }
+//     $.ajax({
+//     type: "POST",
+//     url: "../clashapp/removeFromFile.php",
+//     data: {
+//       champid: el.getElementsByTagName("img")[0].dataset.id,
+//       teamid: window.location.pathname.split("/team/")[1]
+//       }
+//     })
+// }
 
 // LANE HIGHLIGHT
 function highlightLaneIcon(laneImg){

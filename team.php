@@ -37,7 +37,7 @@ if ((isset($_COOKIE['stay-logged-in']))) {
 // ----------------------------------------------------------------v- PRINT HEADER -v---------------------------------------------------------------- //
 
 include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Clash', true, true);
+setCodeHeader('Clash', true, true, true);
 include('/hdd2/clashapp/templates/header.php');
 
 // ----------------------------------------------------------------v- INITIALIZER -v---------------------------------------------------------------- //

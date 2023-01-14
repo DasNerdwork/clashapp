@@ -15,11 +15,13 @@ var lastClient = "";
 wss.on('connection', function connection(ws) {
   console.log('WS-Server: Client websocket connection initiated from %s:%d on %s', ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length), ws._socket.remotePort, new Date().toLocaleString());
   console.log("WS-Server: Total clients connected: %d", wss.clients.size);
+  // ws.location 
+  // console.log(msg);
 
   ws.on('message', function message(data) {
     let newClient = ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length) + ':' + ws._socket.remotePort
     let dataAsString = data.toString();
-    if(Array.from(dataAsString)[0] == "{"){ // If data is an [Object object]
+    if(Array.from(dataAsString)[0] == "{"){        // If data is an [Object object]
       var dataAsJSON = JSON.parse(dataAsString);
       if(newClient == lastClient){ // If the same client is still sending data no "Received following data from" text is necessary
         console.log('WS-Client: %s', JSON.stringify(dataAsJSON));
@@ -28,9 +30,9 @@ wss.on('connection', function connection(ws) {
         lastClient = newClient;
       }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////// ADD TO FILE ///////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////// ADD TO FILE ///////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       if(dataAsJSON.request == "add"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
@@ -81,6 +83,7 @@ wss.on('connection', function connection(ws) {
                   // console.log(dataFromFile);
                   fs.writeFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(dataFromFile));
                   console.log("WS-Server: Successfully added %s to %s.json", dataAsJSON.champname, dataAsJSON.teamid);
+                  broadcastUpdate(dataAsJSON.teamid);
                   ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
                 }
               }
@@ -101,15 +104,76 @@ wss.on('connection', function connection(ws) {
             }
           }
         }
+
+       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       ///////////////////////////////////////////// REMOVE FROM FILE //////////////////////////////////////////////////
+       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      } else if(dataAsJSON.request == "remove"){
+        if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
+          console.log("WS-Server: Forbidden teamid provided");
+          ws.send('{"status":"InvalidTeamID"}');
+          // throw new Error("Invalid TeamID");
+        } else {
+          var checkForInjection = true;
+          for (var champ in validChamps) { // loop through every current local champ
+            if (validChamps.hasOwnProperty(champ)) { // necessary js stuff
+              if(dataAsJSON.champid == validChamps[champ].id && dataAsJSON.champname == validChamps[champ].name){
+                checkForInjection = false;
+                break; // stop looping through file
+              }
+            }
+          }
+          if(checkForInjection){ // if the var is still true (shouldn't be if id AND name found in champion.json)
+            console.log("WS-Server: Code Injection Deteced, either champname or champid is invalid -> Logging IP"); // TODO: Log and Save IP adress of attacker
+            ws.send('{"status":"CodeInjectionDetected"}');
+          } else {       
+            if (fs.existsSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
+              var dataFromFile = fs.readFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
+              var localDataAsJson = JSON.parse(dataFromFile)["SuggestedBans"];
+              var elementInArray = false;
+              for (var key in localDataAsJson) { // loop through every current local champ
+                if (localDataAsJson.hasOwnProperty(key)) { // necessary js stuff
+                  if(dataAsJSON.champid == localDataAsJson[key].id){
+                    elementInArray = true;
+                    break;
+                  }
+                }
+              }
+              if(!elementInArray){
+                console.log("WS-Server: Provided element does not exists in local file -> skipping");
+                ws.send('{"status":"ElementNotInArray"}');
+              } else {
+                let newData = JSON.parse(dataFromFile);
+                let elementIndex = 0;
+                newData.SuggestedBans.forEach(element => { // Find object element in array
+                    if(element.id == dataAsJSON.champid){
+                      elementIndex = newData.SuggestedBans.indexOf(element);
+                    }
+                  });
+                newData.SuggestedBans.splice(elementIndex, 1); // remove object from array
+                newData.Status++;
+                fs.writeFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
+                console.log("WS-Server: Successfully removed %s to %s.json", dataAsJSON.champname, dataAsJSON.teamid);
+                broadcastUpdate(dataAsJSON.teamid);
+                ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
+              }
+            }
+          }
+        }
+
+       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+       ////////////////////////////////////////////////// UPDATE REQUESTS ///////////////////////////////////////////////
+       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      } else if(dataAsJSON.request == "firstConnect"){
+        ws.location = dataAsJSON.teamid;
+        broadcastUpdate(dataAsJSON.teamid);
+        // sendUpdate(dataAsJSON.teamid);
+      } else if(dataAsJSON.request == "update"){
+        sendUpdate(dataAsJSON.teamid);
       }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////// REMOVE FROM FILE //////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-      if(dataAsJSON.request == "add"){
-
-      }
 
 
 
@@ -122,13 +186,9 @@ wss.on('connection', function connection(ws) {
 
 
 
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////// ON TEXT MESSAGE ///////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ////////////////////////////////////////////////// ON TEXT MESSAGE ///////////////////////////////////////////////////
+     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     } else {
       if(newClient == lastClient){ // If the same client is still sending data no "Received following data from" text is necessary
@@ -144,27 +204,22 @@ wss.on('connection', function connection(ws) {
 
   ws.on('close', function close() {
     console.log('WS-Server: Connection of client closed from %s:%d on %s', ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length), ws._socket.remotePort, new Date().toLocaleString());
+    console.log("WS-Server: Total clients connected: %d", wss.clients.size);
     // clearInterval(interval);
   });
 });
 
 
-
-
-
-
-
-
-
-// Function to detect and automatically close "broken" connections TODO: check if this even works correctly
-// const interval = setInterval(function ping() {
-//   wss.clients.forEach(function each(ws) {
-//     if (ws.isAlive === false) return ws.terminate();
-
-//     ws.isAlive = false;
-//     ws.ping();
-//   });
-// }, 30000);
+// This function broadcasts new teamdata to any client currently connected to the teams page 
+// (E.g. Client 1 and 2 are connected to /123456 and Client 3 ist connected to /666666 -> Only Client 1 and 2 will receive new data)
+function broadcastUpdate(clientsTeamID){ 
+  wss.clients.forEach(function each(client) {
+    if(client.location == clientsTeamID){
+      let localTeamData = fs.readFileSync('/hdd2/clashapp/data/teams/' + clientsTeamID + '.json', 'utf-8'); // read local file
+      client.send(localTeamData);
+    }
+  });
+}
 
  
 
