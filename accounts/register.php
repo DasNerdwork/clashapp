@@ -130,7 +130,7 @@ if (isset($_POST['submit'])) {
 }
 
 include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Register', true, true);
+setCodeHeader('Register', true, true, false);
 include('/hdd2/clashapp/templates/header.php');
  
 if (!empty($success_message)) { 

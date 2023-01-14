@@ -513,6 +513,14 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.pointer-events-auto {
+  pointer-events: auto;
+}
+
+.\!pointer-events-auto {
+  pointer-events: auto !important;
+}
+
 .fixed {
   position: fixed;
 }

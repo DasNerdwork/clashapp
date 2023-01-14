@@ -941,7 +941,7 @@ function getMostCommon($attributesArray, $matchDataArray, $puuid, $counter){
  * Returnvalue:
  * @return array $laneReturnArray An array containing the two most-played lanes
  */
-function getLanePercentages($matchDaten, $puuid){
+function getLanePercentages($matchDaten, $puuid){ // TODO: Remove UNKNOWN an make only 1 Icon then
     $laneReturnArray = array();
     $laneCountArray = getMostCommon(array("teamPosition"), $matchDaten, $puuid, 4)['teamPosition'];
     $matchCount = array_sum($laneCountArray);
@@ -950,10 +950,10 @@ function getLanePercentages($matchDaten, $puuid){
     }
     if (array_values($laneCountArray)[0] >= 90){
         $mainLane = array_keys($laneCountArray)[0];
-        $secondaryLane = "UNKNOWN";
+        $secondaryLane = "";
     } else if (array_values($laneCountArray)[0] <= 40){
         $mainLane = "FILL";
-        $secondaryLane = "UNKNOWN";
+        $secondaryLane = "";
     } else if (array_values($laneCountArray)[1] <= 20){
         $mainLane = array_keys($laneCountArray)[0];
         $secondaryLane = "FILL";

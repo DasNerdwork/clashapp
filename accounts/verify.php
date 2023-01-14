@@ -15,7 +15,7 @@ if (isset($_GET["account"])) {
 }
 
 include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Verify', true, false);
+setCodeHeader('Verify', true, false, false);
 include('/hdd2/clashapp/templates/header.php');
 ?>
  
