@@ -72,13 +72,13 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             <div class="flex justify-center items-center px-4">
                 <?php echo '<a href="https://clash.dasnerdwork.net/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'">';
                       echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" class="align-middle mr-2.5 no-underline inline-flex" width="32" loading="lazy">';
-                      echo '<span class="hover:text-[#fff] hover:underline active:text-[#ddd]">'.$headerJson["PlayerData"]["Name"].'</span></a>'; ?>
+                      echo '<span id="highlighter" class="hover:text-[#fff] hover:underline active:text-[#ddd]">'.$headerJson["PlayerData"]["Name"].'</span></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="flex justify-center items-center px-4">
                 <a href="https://clash.dasnerdwork.net/settings">
                     <img src="/clashapp/data/misc/profile-icon.webp" class="align-middle mr-2.5 no-underline inline-flex" width="32" loading="lazy">
-                    <?php echo '<span class="hover:text-[#fff] hover:underline active:text-[#ddd]">'.$_SESSION['user']['username'].'</span></a>'; ?> 
+                    <?php echo '<span id="highlighter" class="hover:text-[#fff] hover:underline active:text-[#ddd]">'.$_SESSION['user']['username'].'</span></a>'; ?> 
             </div>
             <?php } ?>
             <div>
