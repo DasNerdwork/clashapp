@@ -83,6 +83,11 @@ wss.on('connection', function connection(ws) {
                   console.log("WS-Server: Successfully added %s to %s.json", dataAsJSON.champname, dataAsJSON.teamid);
                   broadcastUpdate(dataAsJSON.teamid);
                   ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
+                  wss.clients.forEach(function each(client) {
+                    if(client.location == dataAsJSON.teamid && client != ws){
+                      client.send(ws.name+' added '+dataAsJSON.champname);
+                    }
+                  });
                 }
               }
             } else {
@@ -154,6 +159,11 @@ wss.on('connection', function connection(ws) {
                 console.log("WS-Server: Successfully removed %s from %s.json", dataAsJSON.champname, dataAsJSON.teamid);
                 broadcastUpdate(dataAsJSON.teamid);
                 ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
+                wss.clients.forEach(function each(client) {
+                  if(client.location == dataAsJSON.teamid && client != ws){
+                    client.send(ws.name+' removed '+dataAsJSON.champname);
+                  }
+                });
               }
             }
           }
@@ -188,6 +198,11 @@ wss.on('connection', function connection(ws) {
             console.log("WS-Server: Successfully swapped %s with %s in %s.json", dataAsJSON.fromName, dataAsJSON.toName, dataAsJSON.teamid);
             broadcastUpdate(dataAsJSON.teamid);
             ws.send('{"status":"Success"}'); // TODO: Websocket sometimes not working in firefox or other browser? 
+            wss.clients.forEach(function each(client) {
+              if(client.location == dataAsJSON.teamid && client != ws){
+                client.send(ws.name+' swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName);
+              }
+            });
           }
         }
         
@@ -222,6 +237,29 @@ wss.on('connection', function connection(ws) {
 
       } else if(dataAsJSON.request == "firstConnect"){
         ws.location = dataAsJSON.teamid;
+        if(dataAsJSON.name == ""){
+          var possibleNames = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
+          // console.log(possibleNames[Math.floor(Math.random()*possibleNames.length)]);
+          wss.clients.forEach(function each(client) {
+            if(client.location == dataAsJSON.teamid){
+              if(possibleNames.includes(client.name)){
+                var index = possibleNames.indexOf(client.name);
+                if (index > -1) { // only splice array when item is found
+                  possibleNames.splice(index, 1); // 2nd parameter means remove one item only
+                }
+              }
+            }
+          });
+          if(possibleNames.length >= 1){
+            ws.name = possibleNames[Math.floor(Math.random()*possibleNames.length)];
+            console.log("beep "+ws.name);
+          } else {
+            const nameList = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
+            ws.name = nameList[Math.floor(Math.random()*nameList.length)];
+          }
+        } else {
+          ws.name = dataAsJSON.name;
+        }
         broadcastUpdate(dataAsJSON.teamid);
       } 
 
