@@ -22,13 +22,14 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
                     var html = "";
                     for (const element of messageAsJson["SuggestedBans"]) {
                     html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24">'+
-                                '<div class="hoverer group !pointer-events-auto" draggable="true" onclick="removeFromFile(this.parentElement);">'+
+                                '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
                                 '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" loading="lazy">'+
                                 '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
                                 '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
                             '</div>';
                     }
                     selectedBans.innerHTML = html;
+                    // console.log(html)
                     makeDragDroppable();
                 }
             } else {
@@ -103,7 +104,20 @@ function removeFromFile(el){
     ws.send(JSON.stringify(sendInfo))
 }
 
-
+function modifyTeamRating(rating, hash){
+    const d = new Date();
+    d.setDate(d.getDate() + 365);
+    let expires = "expires="+ d.toUTCString();
+    let teamid = window.location.pathname.split("/team/")[1]
+    document.cookie = teamid+"="+rating + ";" + expires + ";";
+    let sendInfo =  {
+        hash: hash,
+        rating: rating,
+        teamid: teamid,
+        request: "rate"
+    };
+    ws.send(JSON.stringify(sendInfo))
+  }
 
 
 
@@ -150,17 +164,17 @@ function makeDragDroppable(){
     }
 
     function dropped (e) {
-      var fromName = e.dataTransfer.getData('fromName');
-      var toName = e.srcElement.previousSibling.dataset.id;
-      cancelDefault(e);
-
-      // get new and old index from dragStart return
-      // var newIndex = getChildIndex(e.toElement.parentElement.parentElement) // Javascript swap of elements -> not necessary due to ajax
-      // get parent as variable
-      // var selectedBans = e.toElement.parentElement.parentElement.parentElement; // Javascript swap of elements -> not necessary due to ajax
-
-      if(e.dataTransfer.getData('isDraggable') != "hoverer"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
+        var fromName = e.dataTransfer.getData('fromName');
+        var toName = e.srcElement.previousSibling.dataset.id;
         cancelDefault(e);
+        
+        // get new and old index from dragStart return
+        // var newIndex = getChildIndex(e.toElement.parentElement.parentElement) // Javascript swap of elements -> not necessary due to ajax
+        // get parent as variable
+        // var selectedBans = e.toElement.parentElement.parentElement.parentElement; // Javascript swap of elements -> not necessary due to ajax
+        
+        if(e.dataTransfer.getData('isDraggable') != "hoverer group"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
+            cancelDefault(e);
       } else {
         // console.log("Moving index "+oldIndex+" to "+newIndex);
         // insert the dropped item at new place
@@ -169,27 +183,25 @@ function makeDragDroppable(){
         // } else {
         //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex].nextElementSibling);
         // }
-        $.ajax({
-          type: "POST",
-          url: "../clashapp/swapInFile.php",
-          data: {
+        let sendInfo =  {
             fromName: fromName,
             toName: toName,
-            teamid: window.location.pathname.split("/team/")[1]
-            }
-          });
+            teamid: window.location.pathname.split("/team/")[1],
+            request: "swap"
+        };
+        ws.send(JSON.stringify(sendInfo));
         }
-      }
+    }
 
-      function dragOver (e) {
+    function dragOver (e) {
         e.dataTransfer.dropEffect = "move";
         cancelDefault(e);
-      }
+    }
 
-      function cancelDefault (e) {
+    function cancelDefault (e) {
         e.preventDefault()
         e.stopPropagation()
         return false
-      }
     }
+}
 // END DROPPABLE
