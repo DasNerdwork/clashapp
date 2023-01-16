@@ -3,8 +3,15 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
   var currentpatch = data;
   
     ws.onopen = (event) => { // Do this on client opening the webpage
+        if (document.getElementById("highlighter") != null) {
+            var name = document.getElementById("highlighter").innerText
+        } else {
+            //not logged in #huanson
+            var name = "";
+        }
         let sendInfo =  {
             teamid: window.location.pathname.split("/team/")[1],
+            name: name,
             request: "firstConnect"
         };
         ws.send(JSON.stringify(sendInfo))
@@ -16,7 +23,7 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
             var selectedBans = document.getElementById("selectedBans");
             if(messageAsJson.hasOwnProperty("SuggestedBans")){
                 var status = 0;
-                console.log(messageAsJson);
+                // console.log(messageAsJson);
                 if(messageAsJson["Status"] > status){
                     status = messageAsJson["Status"];
                     var html = "";
