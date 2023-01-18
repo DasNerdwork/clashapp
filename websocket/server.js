@@ -85,7 +85,8 @@ wss.on('connection', function connection(ws) {
                   ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
                   wss.clients.forEach(function each(client) {
                     if(client.location == dataAsJSON.teamid && client != ws){
-                      client.send(ws.name+' added '+dataAsJSON.champname);
+                      // client.send(ws.name+' added '+dataAsJSON.champname);
+                      client.send('{"status":"Message","message":"added '+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
                     }
                   });
                 }
@@ -161,7 +162,8 @@ wss.on('connection', function connection(ws) {
                 ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
                 wss.clients.forEach(function each(client) {
                   if(client.location == dataAsJSON.teamid && client != ws){
-                    client.send(ws.name+' removed '+dataAsJSON.champname);
+                    // client.send(ws.name+' removed '+dataAsJSON.champname);
+                    client.send('{"status":"Message","message":"removed '+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
                   }
                 });
               }
@@ -200,7 +202,8 @@ wss.on('connection', function connection(ws) {
             ws.send('{"status":"Success"}'); // TODO: Websocket sometimes not working in firefox or other browser? 
             wss.clients.forEach(function each(client) {
               if(client.location == dataAsJSON.teamid && client != ws){
-                client.send(ws.name+' swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName);
+                // client.send(ws.name+' swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName);
+                client.send('{"status":"Message","message":"swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
               }
             });
           }
@@ -237,12 +240,27 @@ wss.on('connection', function connection(ws) {
 
       } else if(dataAsJSON.request == "firstConnect"){
         ws.location = dataAsJSON.teamid;
+        var possibleColors = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
+        wss.clients.forEach(function each(client) {              
+          if(possibleColors.includes(client.color)){ // This removes every "already used" color from the array above
+            var colorIndex = possibleColors.indexOf(client.color);
+            if (colorIndex > -1) { // only splice array when item is found
+              possibleColors.splice(colorIndex, 1); // 2nd parameter means remove one item only
+            }
+          }
+        });
+        if(possibleColors.length >= 1){
+          ws.color = possibleColors[Math.floor(Math.random()*possibleColors.length)];
+        } else {
+          const colorList = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
+          ws.color = colorList[Math.floor(Math.random()*colorList.length)];
+        }
         if(dataAsJSON.name == ""){
           var possibleNames = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
           // console.log(possibleNames[Math.floor(Math.random()*possibleNames.length)]);
           wss.clients.forEach(function each(client) {
             if(client.location == dataAsJSON.teamid){
-              if(possibleNames.includes(client.name)){
+              if(possibleNames.includes(client.name)){ // This removes every "already used" name from the array above
                 var index = possibleNames.indexOf(client.name);
                 if (index > -1) { // only splice array when item is found
                   possibleNames.splice(index, 1); // 2nd parameter means remove one item only
@@ -252,7 +270,6 @@ wss.on('connection', function connection(ws) {
           });
           if(possibleNames.length >= 1){
             ws.name = possibleNames[Math.floor(Math.random()*possibleNames.length)];
-            console.log("beep "+ws.name);
           } else {
             const nameList = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
             ws.name = nameList[Math.floor(Math.random()*nameList.length)];
@@ -260,7 +277,13 @@ wss.on('connection', function connection(ws) {
         } else {
           ws.name = dataAsJSON.name;
         }
+        ws.send('{"status":"FirstConnect","name":"'+ws.name+'","color":"'+ws.color+'"}');
         broadcastUpdate(dataAsJSON.teamid);
+        wss.clients.forEach(function each(client) {
+          if(client.location == dataAsJSON.teamid && client != ws){
+            client.send('{"status":"Message","message":"joined the session","name":"'+ws.name+'","color":"'+ws.color+'"}');
+          }
+        });
       } 
 
      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -277,7 +300,7 @@ wss.on('connection', function connection(ws) {
     }
   });
 
-  ws.send('Handshake successful: Server received client request and answered. (R: Hello there. A: General Kenobi!)');
+  ws.send('Handshake successful: Server received client request and answered.');
 
   ws.on('close', function close() {
     console.log('WS-Server: Connection of client closed from %s:%d on %s', ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length), ws._socket.remotePort, new Date().toLocaleString());
