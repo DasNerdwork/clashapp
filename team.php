@@ -94,6 +94,11 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64'>
                         <span id='team-title' class='text-2xl'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</span>
                     </h1>
+                    <div class='h-full w-full flex -mt-16 flex-col justify-end'>
+                    <span class='ml-1 mb-0.5 text-base font-bold'>History</span>
+                        <div id='historyContainer' class='bg-darker w-full h-32 p-2 flex flex-col-reverse overflow-auto'>
+                        </div>
+                    </div>
                     "; /** ($teamDataArray); */ echo "
                 </div>
             </div>
@@ -132,7 +137,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <div class='flex justify-center items-center'>
                     <div class='group relative inline-block' x-data='{ tooltip: 0 }' x-cloak>
                         <button onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-xl p-3 w-fit bg-[#0e0f18] rounded-xl' type='button' x-on:click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'>Click to Copy URL</button>
-                        <div class='w-40 bg-black text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition' x-on:click='tooltip = 0'>
+                        <div class='w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition' x-on:click='tooltip = 0'>
                             Copied to Clipboard
                             <svg class='absolute text-black h-2 w-full left-0 top-full' x='0px' y='0px' viewBox='0 0 255 255' xml:space='preserve'><polygon class='fill-current' points='0,0 127.5,127.5 255,0'/></svg>
                         </div>
@@ -315,14 +320,23 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                     <div class='grid w-11/12 gap-2 h-fit'>
                                         <div class='flex h-8 items-center justify-between'>
                                             <span>Queued as:</span>
-                                            <div class='inline-flex w-[4.5rem] justify-center'>";
+                                            <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
                                             if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
-                                                echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" loading="lazy">';
+                                                if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
+                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" loading="lazy">
+                                                          <span class="text-yellow-400 absolute z-20 text-xl -mr-12 font-bold mt-0.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
+                                                          <div class="w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 ml-[84px] -mt-[54px]" x-show="exclamation" x-transition x-cloak>
+                                                            This player did not queue on their main position
+                                                            <svg class="absolute text-black h-2 w-full left-0 -ml-[1.2rem] top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                                          </div>';
+                                                } else {
+                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" loading="lazy">';
+                                                }
                                             } echo"</div>
                                         </div>
                                         <div class='flex h-8 items-center justify-between'>
-                                            <span>Positions:</span>
-                                            <div class='inline-flex gap-2'>";
+                                            <span>Position(s):</span>
+                                            <div class='inline-flex gap-2 w-[72px] justify-center'>";
                                             if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
                                                 echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" loading="lazy">';
                                             }
