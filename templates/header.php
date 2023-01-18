@@ -69,19 +69,23 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
                 $headerJson = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$_SESSION['user']['sumid'].'.json'), true);
                 }
             ?>
-            <div class="flex justify-center items-center px-4">
+            <div class="flex justify-center items-center px-4 mt-[3px]">
                 <?php echo '<a href="https://clash.dasnerdwork.net/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'">';
                       echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" class="align-middle mr-2.5 no-underline inline-flex" width="32" loading="lazy">';
-                      echo '<span id="highlighter" class="hover:text-[#fff] hover:underline active:text-[#ddd]">'.$headerJson["PlayerData"]["Name"].'</span></a>'; ?>
+                      echo '<span id="highlighter" class="hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;">'.$headerJson["PlayerData"]["Name"].'</span></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
-            <div class="flex justify-center items-center px-4">
+            <div class="flex justify-center items-center px-4 mt-[3px]">
                 <a href="https://clash.dasnerdwork.net/settings">
                     <img src="/clashapp/data/misc/profile-icon.webp" class="align-middle mr-2.5 no-underline inline-flex" width="32" loading="lazy">
-                    <?php echo '<span id="highlighter" class="hover:text-[#fff] hover:underline active:text-[#ddd]">'.$_SESSION['user']['username'].'</span></a>'; ?> 
+                    <?php echo '<span id="highlighter" class="hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;">'.$_SESSION['user']['username'].'</span></a>'; ?> 
             </div>
             <?php } ?>
-            <div>
+            <div class="w-40 bg-black/75 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 -ml-[116px] mt-[56px] transition-opacity opacity-0" id="identityNotice">
+                This is your current identity and color for others. To customize it please <a href='/login' class='underline'>login</a>.
+                <svg class="absolute text-black h-4 w-full left-0 top-full -mt-24 rotate-180" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
+            </div>
+            <div id="highlighterAfter">
                 <button type="button" class="after:content-['\2B9F'] h-8 w-28 align-middle mr-2.5 ml-2.5 text-base translate-y-2/4 bg-[#eee] text-black active:bg-[#ccc]">
                     <span id="language-selector">English</span>
                 </button>
