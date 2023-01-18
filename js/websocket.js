@@ -6,7 +6,6 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
         if (document.getElementById("highlighter") != null) {
             var name = document.getElementById("highlighter").innerText
         } else {
-            //not logged in #huanson
             var name = "";
         }
         let sendInfo =  {
@@ -58,10 +57,52 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
                     // if successful
                 } else if (messageAsJson.status == "Update") {
                     // if update
+                } else if (messageAsJson.status == "FirstConnect") {
+                    if (document.getElementById("highlighter") != null) {
+                        let nameElement = document.getElementById("highlighter");
+                        nameElement.classList.add("underline","decoration-"+messageAsJson.color);
+                        // document.getElementById("highlighterAfter") <- // insert before this element
+                    } else {
+                        const newParentDiv = document.createElement("div");
+                        const newImg = document.createElement("img");
+                        const newSpan = document.createElement("span");
+                        // newParentDiv.classList.add("flex","justify-center","items-center","px-4");
+                        newParentDiv.style.marginTop = "-13px";
+                        switch (messageAsJson.name){
+                            case "Krug": case "Wolf":
+                                newParentDiv.style.marginLeft = "-5.75rem";
+                                break;
+                            case "Nashor": case "Herald": case "Minion": case "Raptor": case "Gromp":
+                                newParentDiv.style.marginLeft = "-6.75rem";
+                                break;
+                            case "Sentinel": case "Scuttler":
+                                newParentDiv.style.marginLeft = "-7rem";
+                                break;
+                            case "Brambleback":
+                                newParentDiv.style.marginLeft = "-9rem";
+                                break;
+                            default:
+                                newParentDiv.style.marginLeft = "-9rem";
+                        }
+                        newParentDiv.setAttribute("onmouseover", "showIdentityNotice(true)");
+                        newParentDiv.setAttribute("onmouseout", "showIdentityNotice(false)");
+                        newImg.src="/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp"
+                        newImg.width = "32";
+                        newImg.classList.add("align-middle","mr-2.5","no-underline","inline-flex");
+                        newSpan.id = "highlighter";
+                        newSpan.classList.add("underline","decoration-2","decoration-"+messageAsJson.color);
+                        newSpan.style.textDecorationSkipInk = "none";
+                        newSpan.innerText = messageAsJson.name;
+                        newParentDiv.appendChild(newImg);
+                        newParentDiv.appendChild(newSpan);
+                        document.getElementById("highlighterAfter").insertBefore(newParentDiv, null);
+                    }
+                } else if (messageAsJson.status == "Message"){
+                    addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color);
                 }
             }
         } else {
-            console.log(event.data);
+            addHistoryMessage(event.data);
         }
     }
 
@@ -126,12 +167,29 @@ function modifyTeamRating(rating, hash){
     ws.send(JSON.stringify(sendInfo))
   }
 
+function showIdentityNotice(boolean){
+    if(boolean){
+        document.getElementById("identityNotice").classList.replace("opacity-0","opacity-100");
+    } else {
+        document.getElementById("identityNotice").classList.replace("opacity-100","opacity-0");
+    }
+}
 
+function addHistoryMessage(message){
+    const historyContainer = document.getElementById("historyContainer");
+    const textMessage = document.createElement("span");
+    textMessage.innerText = message;
+    textMessage.classList.add("text-[#333344]");
+    historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);
+}
 
-
-
-
-
+function addCustomHistoryMessage(message, name, color){
+const historyContainer = document.getElementById("historyContainer");
+    const textMessage = document.createElement("span");
+    // const highlighterColor = document.getElementById("highlighter").classList.split('decoration-')[2];
+    textMessage.innerHTML = "<span class='text-"+color+"'>"+name+"</span> "+message;
+    historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);
+}
 
 
 
@@ -190,7 +248,7 @@ function makeDragDroppable(){
         // } else {
         //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex].nextElementSibling);
         // }
-        let sendInfo =  {
+        let sendInfo =  { //TODO: Add change fromName and toName to fromID and toID + add catch for champ names instead of IDs for return message
             fromName: fromName,
             toName: toName,
             teamid: window.location.pathname.split("/team/")[1],
