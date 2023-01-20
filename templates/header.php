@@ -7,7 +7,7 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
 	<div class="flex h-16">
 		<div class="w-44 -mr-2.5 float-left p-2">
 			<a href="/" class="block no-underline text-white align-middle w-full">
-				<img src="/clashapp/data/misc/webp/logo.webp" alt="CLASH" height="48">
+				<img src="/clashapp/data/misc/webp/logo.webp" alt="The main logo of the website" width="160" height="44">
 			</a>
 		</div>
 		<nav class="m-2.5 p-1">
@@ -71,17 +71,17 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
                 <?php echo '<a href="https://clash.dasnerdwork.net/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'">';
-                      echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" class="align-middle mr-2.5 no-underline inline-flex" width="32" loading="lazy">';
+                      echo '<img width="32" height="32" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" class="align-middle mr-2.5 no-underline inline-flex" alt="A custom profile icon of a player">';
                       echo '<span id="highlighter" class="hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;">'.$headerJson["PlayerData"]["Name"].'</span></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
                 <a href="https://clash.dasnerdwork.net/settings">
-                    <img src="/clashapp/data/misc/profile-icon.webp" class="align-middle mr-2.5 no-underline inline-flex" width="32" loading="lazy">
+                    <img width="32" height="32" src="/clashapp/data/misc/profile-icon.webp" class="align-middle mr-2.5 no-underline inline-flex" alt="The sandard profile icon if no league of legends account is connected">
                     <?php echo '<span id="highlighter" class="hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;">'.$_SESSION['user']['username'].'</span></a>'; ?> 
             </div>
             <?php } ?>
-            <div class="w-40 bg-black/75 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 -ml-[116px] mt-[56px] transition-opacity opacity-0" id="identityNotice">
+            <div class="w-40 bg-black/75 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 -ml-[116px] mt-[56px] transition-opacity opacity-0 -z-10" id="identityNotice">
                 This is your current identity and color for others. To customize it please <a href='/login' class='underline'>login</a>.
                 <svg class="absolute text-black h-4 w-full left-0 top-full -mt-24 rotate-180" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
             </div>
@@ -109,7 +109,7 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             <?php } ?>
             <div id="settings-button" class="flex items-center ml-2 mr-4">
                 <a href="/settings">
-                    <img src="/clashapp/data/misc/settings-wheel.webp" width="20" height="20"></img>
+                    <img src="/clashapp/data/misc/settings-wheel.webp" width="20" height="20" alt="A settings wheel icon which looks like a gear"></img>
                 </a>
             </div>
         </div>

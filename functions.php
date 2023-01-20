@@ -479,7 +479,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     echo "<button type='button' class='collapsible bg-[#0e0f18] cursor-pointer h-6 w-full' 
             @click='open = !open' 
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
-    echo "<div class='smooth-transition w-full overflow-hidden' x-show='open' x-transition>";
+    echo "<div class='smooth-transition w-full overflow-hidden' x-show='open' x-transition x-cloak>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
         $handle = file_get_contents("/hdd2/clashapp/data/matches/".$matchIDJSON.".json");
         $inhalt = json_decode($handle);
@@ -537,10 +537,10 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 $champion = $inhalt->info->participants[$in]->championName;
                                 if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** TODO: One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
                                 if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" class="max-w-[68px] min-w-[68px] flex align-middle relative z-0 rounded" loading="lazy">';
-                                    echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" class="max-w-[68px] min-w-[68px] flex align-middle relative bottom-16 -mb-16 z-10 rounded" loading="lazy">';
+                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                    echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative bottom-16 -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
                                 } else {
-                                    echo '<img src="/clashapp/data/misc/na.webp" class="align-middle max-w-[68px] min-w-[68px] rounded" loading="lazy">';
+                                    echo '<img src="/clashapp/data/misc/na.webp" width="68" height="68" class="align-middle max-w-[68px] min-w-[68px] rounded" loading="lazy" alt="This icon represents a value not being available">';
                                 }
                                 
                                 // Save values dealt for later print below
@@ -561,7 +561,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo "<div class='champion-lane flex relative w-4 h-4 max-w-[16px] min-w-[16px] z-20 -ml-4 bottom-[33px] -right-[66px] text-[13px] justify-center items-center'>";
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
                         if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
-                            echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0 brightness-150">';
+                            echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" height="16"  loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0 brightness-150" alt="Icon of a league of legends position for '.$matchLane.'">';
                         }
                         echo "</div>";
                         echo "</div>";
@@ -571,10 +571,10 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
                         $summoner2Id = $inhalt->info->participants[$in]->summoner2Id;
                         if(file_exists('/hdd2/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".webp")){
-                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.webp" class="max-w-[32px] min-w-[32px] rounded" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.webp" width="32" height="32" class="rounded" loading="lazy" alt="Icon of a players first selected summoner spell">';
                         }
                         if(file_exists('/hdd2/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".webp")){
-                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.webp" class="max-w-[32px] min-w-[32px] rounded" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.webp" width="32" height="32" class="rounded" loading="lazy" alt="Icon of a players second selected summoner spell">';
                         }
                         echo "</div>";
 
@@ -583,14 +583,14 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                         $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
                         if(file_exists('/hdd2/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp')){
-                            echo '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp" class="max-w-[32px] min-w-[32px]" loading="lazy">';
+                            echo '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.webp" width="32" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available">';
                         }
                         if(file_exists('/hdd2/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp')){
-                            echo '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp" class="max-w-[22px] min-w-[22px] m-auto" loading="lazy">';
+                            echo '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp" class="max-w-[22px] min-w-[22px] m-auto" loading="lazy" alt="Icon of a players second selected rune">';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.webp" width="32" loading="lazy">';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available">';
                         }
                         echo "</div></div>";
                         
@@ -641,11 +641,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                             } else {
                                 echo '<div class="item'.($b - $noItemCounter).'">';
                                 if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" loading="lazy" class="rounded">';
+                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon represents an equipped item at the end of a game">';
                                 } else if(file_exists('/hdd2/clashapp/data/misc/'.$itemId.'.webp')){
-                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" loading="lazy" class="rounded">';
+                                    echo '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon represents an equipped special ornn item at the end of the game or other exceptions">';
                                 } else {
-                                    echo '<img src="/clashapp/data/misc/0.webp" width="32" loading="lazy" class="rounded">';
+                                    echo '<img src="/clashapp/data/misc/0.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon will only be visible of neither the data dragon nor the local files contain the corresponding image">';
                                 }
                                 // $lastItemSlot = $b;
                                 echo "</div>";
@@ -671,9 +671,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $enemyChamp = $inhalt->info->participants[$i]->championName;
                         if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
                         if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp')){
-                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp" class="max-w-[32px] min-w-[32px]" loading="lazy"></div>';
+                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp" width="32" height="32" class="max-w-[32px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
                         } else {
-                            echo '<img src="/clashapp/data/misc/na.webp" class="max-w-[32px] min-w-[32px]" loading="lazy"></div>';
+                            echo '<img src="/clashapp/data/misc/na.webp" width="32" height="32" class="max-w-[32px]" loading="lazy" alt="This icon represents a value not being available"></div>';
                         }
                         }
                         if ($inhalt->info->participants[$i]->teamId == $teamID){
@@ -707,7 +707,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
                     echo '<div class="additional-info-2 inline-flex h-8 justify-center items-center gap-2 mt-2">';
                     echo '<div class="vision-wards">';
-                    echo '<img class="parent-trinket-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.webp" width="32" loading="lazy">';
+                    echo '<img class="parent-trinket-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/item/2055.webp" width="32" height="32" loading="lazy" class="rounded" alt="A red vision/control ward/trinket icon">';
                     echo '<div class="vision-wards-count-icon">'.$visionWards.'</div>';
                     echo "</div>";
 
@@ -724,7 +724,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     echo "</div></div>";
 
                 echo '</div>';
-                echo '<button type="button" class="collapsible bg-[#0e0f18] cursor-pointer h-4 w-full opacity-50 mt-2" @click="advanced = !advanced" x-text="advanced ? \'&#11165;\' : \'&#11167;\'"></button>';
+                echo '<button type="button" class="collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4" @click="advanced = !advanced" x-text="advanced ? \'&#11165;\' : \'&#11167;\'"></button>';
                 echo '</div>';
                 
                 $totalTeamTakedowns = 0; // Necessary to reset Kill Participation
@@ -751,7 +751,7 @@ function printMasteryInfo($masteryArray, $index){
 
     // Print image if it exists
     if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp')){
-        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp" width="64" loading="lazy"><br>';
+        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp" width="64" height="64" alt="A league of legends champion icon of '.$masteryArray[$index]["Filename"].'"><br>';
     }
 
     // Print the additional info
@@ -1564,13 +1564,14 @@ function showBanSelector(){
         $i++;
         $imgPath = substr($champData->image->full, 0, -4).".webp";
         $dataId = $champData->id;
-        if($i<11){
+        if($i<15){
             if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion'>";
                     echo '<div class="ban-hoverer inline-grid group" onclick="">';
-                        echo '<img class="champ-select-icon twok:max-h-14 fullhd:max-h-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" loading="lazy">';
-                        echo '<img class="ban-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp" loading="lazy">';
-                        echo '<img class="ban-overlay-red twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" loading="lazy"></div>';
+                        echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'"
+                        alt="A league of legends champion icon of '.$imgPath.'">';
+                        echo '<img width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp" alt="Prohibition overlay icon in grey">';
+                        echo '<img width="56" height="56" class="min-h-8 ban-overlay-red twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" alt="Prohibition overlay icon in red"></div>';
                     echo "<span class='caption text-ellipsis overflow-hidden whitespace-nowrap block'>".$champName."</span>";
             echo "</div>";
             }
@@ -1578,9 +1579,10 @@ function showBanSelector(){
             if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion'>";
                     echo '<div class="ban-hoverer inline-grid group" onclick="">';
-                        echo '<img class="champ-select-icon twok:max-h-14 fullhd:max-h-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'" loading="lazy">';
-                        echo '<img class="ban-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp" loading="lazy">';
-                        echo '<img class="ban-overlay-red twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" loading="lazy"></div>';
+                        echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:h-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'"
+                        alt="A league of legends champion icon of '.$imgPath.'" loading="lazy">';
+                        echo '<img width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp" loading="lazy" alt="Prohibition overlay icon in grey">';
+                        echo '<img width="56" height="56" class="min-h-8 ban-overlay-red twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" loading="lazy" alt="Prohibition overlay icon in red"></div>';
                     echo "<span class='caption text-ellipsis overflow-hidden whitespace-nowrap block'>".$champName."</span>";
             echo "</div>";
             }
