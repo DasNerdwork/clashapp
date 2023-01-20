@@ -1,6 +1,7 @@
 const ws = new WebSocket('wss://dasnerdwork.net:8081/');
 $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
   var currentpatch = data;
+  var executeOnlyOnce = true;
   
     ws.onopen = (event) => { // Do this on client opening the webpage
         if (document.getElementById("highlighter") != null) {
@@ -26,14 +27,27 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
                 if(messageAsJson["Status"] > status){
                     status = messageAsJson["Status"];
                     var html = "";
+                    let animateTimer = 0;
                     for (const element of messageAsJson["SuggestedBans"]) {
-                    html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24">'+
-                                '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
-                                '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" loading="lazy">'+
-                                '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
-                                '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
-                            '</div>';
+                        if(executeOnlyOnce){
+                            html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
+                                    '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
+                                    '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
+                                    '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
+                                    '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
+                                    '</div>';
+                            animateTimer += 0.1;
+                            
+                        } else {
+                            html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24">'+
+                                    '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
+                                    '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
+                                    '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
+                                    '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
+                                    '</div>';
+                        }
                     }
+                    executeOnlyOnce = false;
                     selectedBans.innerHTML = html;
                     // console.log(html)
                     makeDragDroppable();
