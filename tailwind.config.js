@@ -58,6 +58,20 @@ module.exports = {
         'topbartwok': '25% 328px auto 328px 25%',
         'topbarfullhd': 'calc((100vw - 1172px)/2) 328px 420px 328px calc((100vw - 1172px)/2)',
       },
+      keyframes: {
+        slideAndFadeIn: {
+          '0%': { transform: 'translateY(-1rem)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      animation: {
+        'slideAndFadeIn': '.5s ease-in-out 0s 1 slideAndFadeIn',
+        'fadeIn': '.5s ease-in-out 0s 1 fadeIn',
+      },
     },
     screens: {
       'hd': '721px',
