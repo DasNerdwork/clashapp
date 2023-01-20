@@ -190,12 +190,6 @@ ul.moveable {
   white-space: nowrap;
 }
 
-.selected-ban-champion {
-  opacity: 1;
-  -webkit-transition: opacity 100ms linear;
-  transition: opacity 100ms linear;
-}
-
 .suggested-ban-caption {
   /* margin-top: 2px; */
   text-overflow: ellipsis;
@@ -277,4 +271,24 @@ div#champSelect::-webkit-scrollbar-track {
   background-color: #0e0f18;
   border-radius: 25px;
   margin-bottom: 0.5rem;
+}
+
+@keyframes slideAndFadeIn {
+  0% {
+    transform: translateY(-5%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
