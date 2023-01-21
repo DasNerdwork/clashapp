@@ -1,7 +1,18 @@
+function ready(fn) {
+    if (document.readyState !== 'loading') {
+      fn();
+      return;
+    }
+    document.addEventListener('DOMContentLoaded', fn);
+  }
+  
 const ws = new WebSocket('wss://dasnerdwork.net:8081/');
-$.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function( data ) {
-  var currentpatch = data;
-  var executeOnlyOnce = true;
+
+
+fetch("https://clash.dasnerdwork.net/clashapp/data/patch/version.txt")
+.then(response => { return response.text();
+}).then(currentpatch => {
+    var executeOnlyOnce = true;
   
     ws.onopen = (event) => { // Do this on client opening the webpage
         if (document.getElementById("highlighter") != null) {
@@ -31,25 +42,30 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
                     for (const element of messageAsJson["SuggestedBans"]) {
                         if(executeOnlyOnce){
                             html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
-                                    '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
-                                    '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
-                                    '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
-                                    '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
+                                        '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
+                                            '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
+                                            '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp">'+
+                                        '</div>'+
+                                    '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
                                     '</div>';
                             animateTimer += 0.1;
                             
                         } else {
-                            html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24">'+
-                                    '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
-                                    '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
-                                    '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp"></div>'+
-                                    '<span class="selected-ban-caption" style="display: block;">' + element["name"] + '</span>'+
-                                    '</div>';
+                            if(!(selectedBans.innerHTML.includes("/champion/" + element["id"] + ".webp"))){
+                                html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24" style="animation: .1s ease-in-out 0s 1 slideIn; animation-fill-mode: forwards;">';  
+                            } else {
+                                html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24">';
+                            }
+                            html += '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
+                                        '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
+                                        '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp">'+
+                                    '</div>'+
+                                '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
+                                '</div>';
                         }
                     }
                     executeOnlyOnce = false;
                     selectedBans.innerHTML = html;
-                    // console.log(html)
                     makeDragDroppable();
                 }
             } else {
@@ -100,16 +116,22 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
                         }
                         newParentDiv.setAttribute("onmouseover", "showIdentityNotice(true)");
                         newParentDiv.setAttribute("onmouseout", "showIdentityNotice(false)");
+                        newSpan.setAttribute("onmouseover", "showIdentityNotice(true)");
+                        newSpan.setAttribute("onmouseout", "showIdentityNotice(false)");
+                        newParentDiv.classList.add("z-20","w-36","h-8");
                         newImg.src="/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp"
                         newImg.width = "32";
                         newImg.classList.add("align-middle","mr-2.5","no-underline","inline-flex");
                         newSpan.id = "highlighter";
-                        newSpan.classList.add("underline","decoration-2","decoration-"+messageAsJson.color);
+                        newSpan.classList.add("underline","decoration-2","decoration-"+messageAsJson.color+"/100");
                         newSpan.style.textDecorationSkipInk = "none";
                         newSpan.innerText = messageAsJson.name;
                         newParentDiv.appendChild(newImg);
                         newParentDiv.appendChild(newSpan);
                         document.getElementById("highlighterAfter").insertBefore(newParentDiv, null);
+                        const identityNotice = document.getElementById("identityNotice");
+                        identityNotice.setAttribute("onmouseover", "showIdentityNotice(true)");
+                        identityNotice.setAttribute("onmouseout", "showIdentityNotice(false)");
                     }
                 } else if (messageAsJson.status == "Message"){
                     addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color);
@@ -125,34 +147,18 @@ $.get( "https://clash.dasnerdwork.net/clashapp/data/patch/version.txt", function
     }
 
 
-    $('document').ready(function() { 
-        $(".ban-hoverer").click(function() {
-            var name = this.parentElement.getElementsByTagName("span")[0].innerText;
-            var id = this.parentElement.getElementsByTagName("img")[0].dataset.id;
-            let sendInfo =  {
-                champname: name,
-                champid: id,
-                teamid: window.location.pathname.split("/team/")[1],
-                request: "add"
-            };
-            ws.send(JSON.stringify(sendInfo))
-        });
-    });
 });
-
-$('document').ready(function() { 
-    $(".hoverer").click(function() {
-        var name = this.parentElement.getElementsByTagName("span")[0].innerText;
-        var id = this.parentElement.getElementsByTagName("img")[0].dataset.id;
-        let sendInfo =  {
-            champname: name,
-            champid: id,
-            teamid: window.location.pathname.split("/team/")[1],
-            request: "remove"
-        };
-        ws.send(JSON.stringify(sendInfo))
-    });
-});
+function addToFile(el){
+    var name = el.getElementsByTagName("span")[0].innerText;
+    var id = el.getElementsByTagName("img")[0].dataset.id;
+    let sendInfo =  {
+        champname: name,
+        champid: id,
+        teamid: window.location.pathname.split("/team/")[1],
+        request: "add"
+    };
+    ws.send(JSON.stringify(sendInfo))
+}
 
 function removeFromFile(el){
     var name = el.getElementsByTagName("span")[0].innerText;
@@ -163,7 +169,7 @@ function removeFromFile(el){
         teamid: window.location.pathname.split("/team/")[1],
         request: "remove"
     };
-    ws.send(JSON.stringify(sendInfo))
+    ws.send(JSON.stringify(sendInfo));
 }
 
 function modifyTeamRating(rating, hash){
@@ -183,9 +189,9 @@ function modifyTeamRating(rating, hash){
 
 function showIdentityNotice(boolean){
     if(boolean){
-        document.getElementById("identityNotice").classList.replace("opacity-0","opacity-100");
+        document.getElementById("identityNotice").classList.replace("hidden","block");
     } else {
-        document.getElementById("identityNotice").classList.replace("opacity-100","opacity-0");
+        document.getElementById("identityNotice").classList.replace("block","hidden");
     }
 }
 
@@ -201,7 +207,7 @@ function addCustomHistoryMessage(message, name, color){
 const historyContainer = document.getElementById("historyContainer");
     const textMessage = document.createElement("span");
     // const highlighterColor = document.getElementById("highlighter").classList.split('decoration-')[2];
-    textMessage.innerHTML = "<span class='text-"+color+"'>"+name+"</span> "+message;
+    textMessage.innerHTML = "<span class='text-"+color+"/100'>"+name+"</span> "+message;
     historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);
 }
 

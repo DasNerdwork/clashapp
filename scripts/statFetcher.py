@@ -15,7 +15,7 @@ start_fetcher = time.time()
 logger = logging.getLogger('statFetcher.py')
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter("[%(asctime)s] [%(name)s - %(levelname)s]: %(message)s", "%d.%m.%Y %H:%M:%S")
-logHandler = handlers.RotatingFileHandler('/hdd2/clashapp/data/logs/statFetcher.log', maxBytes=10000000, backupCount=2)
+logHandler = handlers.RotatingFileHandler('/hdd1/clashapp/data/logs/statFetcher.log', maxBytes=10000000, backupCount=2)
 logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
@@ -57,9 +57,9 @@ championStatNameArray = [
     'trueDamageDealtToChampions', 'trueDamageTaken', 'turretKills', 'turretTakedowns', 'turretsLost']
 championDict = {}
 sortedChampionDict = {}
-matchesPath = '/hdd2/clashapp/data/matches/'
-currentPatch = Path('/hdd2/clashapp/data/patch/version.txt').read_text()
-championJsonPath = '/hdd2/clashapp/data/patch/' + currentPatch + '/data/de_DE/champion.json'
+matchesPath = '/hdd1/clashapp/data/matches/'
+currentPatch = Path('/hdd1/clashapp/data/patch/version.txt').read_text()
+championJsonPath = '/hdd1/clashapp/data/patch/' + currentPatch + '/data/de_DE/champion.json'
 counter = 1
 
 # Stat iterator function to run over every match and collect every "challenge" or "stat" info of every player in "lane", then get average of it
@@ -143,13 +143,13 @@ def championStatIterator():
         # Sort return array alphabetically
         for key in sorted(championDict[championName]):
             sortedChampionDict[championName][key] = championDict[championName][key]
-    logger.info("Saving averageChampionStats.json in hdd2/clashapp/data/misc")
+    logger.info("Saving averageChampionStats.json in hdd1/clashapp/data/misc")
     return sortedChampionDict
 
 start_champ = time.time() 
-with open('/hdd2/clashapp/data/misc/averageChampionStats.json', 'w') as location:
+with open('/hdd1/clashapp/data/misc/averageChampionStats.json', 'w') as location:
     json.dump(championStatIterator(), location)
-champ_filesize = str(os.path.getsize('/hdd2/clashapp/data/misc/averageChampionStats.json')/1024).split('.', 1)[0] # Get kB size of downloaded file
+champ_filesize = str(os.path.getsize('/hdd1/clashapp/data/misc/averageChampionStats.json')/1024).split('.', 1)[0] # Get kB size of downloaded file
 end_champ = str(round(time.time() - start_champ, 2))
 logger.info("Successfully fetched champion averages. Time elapsed: " + end_champ + " seconds for " + champ_filesize + " kB")
  
@@ -159,11 +159,11 @@ for key in averageJsonDict:
 
     counter+=1
 
-logger.info("Saving averageStats.json in hdd2/clashapp/data/misc")
-with open('/hdd2/clashapp/data/misc/averageStats.json', 'w') as location:
+logger.info("Saving averageStats.json in hdd1/clashapp/data/misc")
+with open('/hdd1/clashapp/data/misc/averageStats.json', 'w') as location:
     json.dump(averageJsonDict, location)
 
-filesize = str(os.path.getsize('/hdd2/clashapp/data/misc/averageStats.json')/1024).split('.', 1)[0] # Get kB size of downloaded file
+filesize = str(os.path.getsize('/hdd1/clashapp/data/misc/averageStats.json')/1024).split('.', 1)[0] # Get kB size of downloaded file
 end_fetcher = str(round(time.time() - start_fetcher, 2))
 logger.info("Successfully fetched average data. Time elapsed: " + end_fetcher + " seconds for " + filesize + " kB")
 logger.info("---------------------------------------------------------------------------")

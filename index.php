@@ -1,7 +1,10 @@
 <?php session_start(); 
-include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Clash', true, true, false);
-include('/hdd2/clashapp/templates/header.php');
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+include('/hdd1/clashapp/templates/head.php');
+setCodeHeader('Clash', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
+include('/hdd1/clashapp/templates/header.php');
 
 if (!isset($_SESSION)) session_start();
 echo '
@@ -17,5 +20,5 @@ document.body.style.backgroundSize = "40%";
 
 
 <?php
-include('/hdd2/clashapp/templates/footer.php');
+include('/hdd1/clashapp/templates/footer.php');
 ?>

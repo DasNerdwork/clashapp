@@ -81,7 +81,7 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
                     <?php echo '<span id="highlighter" class="hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;">'.$_SESSION['user']['username'].'</span></a>'; ?> 
             </div>
             <?php } ?>
-            <div class="w-40 bg-black/75 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 -ml-[116px] mt-[56px] transition-opacity opacity-0 -z-10" id="identityNotice">
+            <div class="w-40 bg-black/75 text-white text-center text-xs rounded-lg py-2 absolute px-3 -ml-[116px] mt-[56px] transition-opacity hidden z-30" id="identityNotice">
                 This is your current identity and color for others. To customize it please <a href='/login' class='underline'>login</a>.
                 <svg class="absolute text-black h-4 w-full left-0 top-full -mt-24 rotate-180" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
             </div>
