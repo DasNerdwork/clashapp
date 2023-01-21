@@ -36,7 +36,7 @@ start_patcher = time.time()
 logger = logging.getLogger('Patcher.py')
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter("[%(asctime)s] [%(name)s - %(levelname)s]: %(message)s", "%d.%m.%Y %H:%M:%S")
-logHandler = handlers.RotatingFileHandler('/hdd2/clashapp/data/logs/patcher.log', maxBytes=10000000, backupCount=2)
+logHandler = handlers.RotatingFileHandler('/hdd1/clashapp/data/logs/patcher.log', maxBytes=10000000, backupCount=2)
 logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
@@ -46,9 +46,9 @@ url = "http://ddragon.leagueoflegends.com/api/versions.json"
 json_file = urlopen(url)
 variables = json.load(json_file)
 json_file.close()
-folder = "/hdd2/clashapp/data/patch/"
+folder = "/hdd1/clashapp/data/patch/"
 logger.info("Comparing locale with live patch version") # Comparing locale with live patch version
-with open('/hdd2/clashapp/data/patch/version.txt', 'r') as v:
+with open('/hdd1/clashapp/data/patch/version.txt', 'r') as v:
     version = v.read()
 
 if (version == variables[0]): # If locale version equals live version
@@ -58,7 +58,7 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     logger.info("Starting download of database upgrade...")
     start_download = time.time() # Start time calculation of tgz archive download
     url = 'https://ddragon.leagueoflegends.com/cdn/dragontail-' + variables[0] + '.tgz' # Grabpath
-    target_path = '/hdd2/clashapp/data/patch/' + variables[0] + '.tar.gz' # Extractpath
+    target_path = '/hdd1/clashapp/data/patch/' + variables[0] + '.tar.gz' # Extractpath
     response = requests.get(url, stream=True)
     if (response.status_code == 200): # If files exist online
         with open(target_path, 'wb') as f:
@@ -71,16 +71,16 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     logger.info("Starting extraction of archives...")
     start_extraction = time.time()
     tar = tarfile.open(target_path, "r:gz")
-    tar.extractall(path='/hdd2/clashapp/data/patch/')
+    tar.extractall(path='/hdd1/clashapp/data/patch/')
     tar.close()
     end_extraction = str(round(time.time() - start_extraction, 2))
     logger.info("All files extracted and overwritten. Time elapsed: " + end_extraction + " seconds")
 
     # Convert all .png and .jpg to .webp
-    paths = Path('/hdd2/clashapp/data/patch/').glob("**/*.png")
+    paths = Path('/hdd1/clashapp/data/patch/').glob("**/*.png")
     for path in paths:
         webp_path = convert_to_webp(path)
-    paths2 = Path('/hdd2/clashapp/data/patch/').glob("**/*.jpg")
+    paths2 = Path('/hdd1/clashapp/data/patch/').glob("**/*.jpg")
     for path2 in paths2:
         webp_path2 = convert_to_webp(path2)
     logger.info("Converted all available .png and .jpg to .webp")
@@ -95,13 +95,13 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
 
     # End of old file deletion, update version.txt with newest patch
     logger.info("Updating version.txt to current live patch")
-    with open('/hdd2/clashapp/data/patch/version.txt', 'w') as f:
+    with open('/hdd1/clashapp/data/patch/version.txt', 'w') as f:
         f.write(variables[0])
 else:
     # Only update version.txt with newest patch
     logger.info("Outdated version.txt although database up-to-date")
     logger.info("Updating version.txt to current live patch")
-    with open('/hdd2/clashapp/data/patch/version.txt', 'w') as f:
+    with open('/hdd1/clashapp/data/patch/version.txt', 'w') as f:
         f.write(variables[0])
     # End Patcher and calculate runtime
 endpatcher = str(round(time.time() - start_patcher, 2))

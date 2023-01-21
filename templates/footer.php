@@ -13,7 +13,7 @@
     </div>
     <div class="relative bottom-5 right-2.5 float-right text-[#8984a5] text-xs" id="version">
         <?php 
-            exec('cd /hdd2/clashapp && git rev-list --all --count', $output); 
+            exec('cd /hdd1/clashapp && git rev-list --all --count', $output); 
             $createDate = new DateTime("2022-01-28"); // 28.01.2022
             $today = new DateTime("today");
             $difference = $createDate->diff($today);

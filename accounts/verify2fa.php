@@ -6,12 +6,12 @@
 if (!isset($_SESSION)) session_start();
 // print_r($_SESSION);
 
-require_once '/hdd2/clashapp/accounts/qr-codes.php';
-require_once '/hdd2/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/accounts/qr-codes.php';
+require_once '/hdd1/clashapp/clash-db.php';
  
-include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Clash', true, true, false);
-include('/hdd2/clashapp/templates/header.php');
+include('/hdd1/clashapp/templates/head.php');
+setCodeHeader('Register', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
+include('/hdd1/clashapp/templates/header.php');
 
 $error_message = array();
 
@@ -47,7 +47,7 @@ if (!empty($error_message)) {
     }
 } 
 ?>
-<div class="h-[calc(100%-5rem)] w-full flex justify-center items-center -mb-16">
+<div class="h-[calc(100vh-5rem)] w-full flex justify-center items-center -mb-16">
     <form method="post" class="mb-44 max-w-[330px] py-10 px-9 h-fit w-fit bg-dark text-center box-border">
         <div class="mb-4 text-xl">Verify with Two-Factor Auth</div>
         <div class="text-left ml-2"><label for='verifier'>Two-Factor Authentication Code: </label></div>
@@ -59,5 +59,5 @@ if (!empty($error_message)) {
     </form>
 </div>
 <?php 
-include('/hdd2/clashapp/templates/footer.php');
+include('/hdd1/clashapp/templates/footer.php');
 ?>
