@@ -1,6 +1,6 @@
 <?php
-include_once('/hdd2/clashapp/functions.php');
-require_once '/hdd2/clashapp/clash-db.php';
+include_once('/hdd1/clashapp/functions.php');
+require_once '/hdd1/clashapp/clash-db.php';
 
 if (isset($_SESSION['user'])) {
     header('Location: /');

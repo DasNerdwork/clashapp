@@ -5,7 +5,7 @@ if (isset($_SESSION['user'])) {
     header('Location: /');
 }
 
-require_once '/hdd2/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/clash-db.php';
  
 $return_message = '';
 if (isset($_GET["account"])) {
@@ -14,9 +14,9 @@ if (isset($_GET["account"])) {
     $return_message = $response['message'];
 }
 
-include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Verify', true, false, false);
-include('/hdd2/clashapp/templates/header.php');
+include('/hdd1/clashapp/templates/head.php');
+setCodeHeader('Verify', $css = true, $javascript = false, $alpinejs = false, $websocket = false);
+include('/hdd1/clashapp/templates/header.php');
 ?>
  
 <?php if (!empty($return_message)) { ?>
@@ -24,5 +24,5 @@ include('/hdd2/clashapp/templates/header.php');
         <strong><?php echo $return_message; ?></strong>
     </div>
 <?php } 
-include('/hdd2/clashapp/templates/footer.php');
+include('/hdd1/clashapp/templates/footer.php');
 ?>

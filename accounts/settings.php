@@ -11,9 +11,9 @@ if (!isset($_SESSION['user'])) {
 
 // print_r($_SESSION);
 
-require_once '/hdd2/clashapp/clash-db.php';
-require_once '/hdd2/clashapp/functions.php';
-require_once '/hdd2/clashapp/accounts/qr-codes.php';
+require_once '/hdd1/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/functions.php';
+require_once '/hdd1/clashapp/accounts/qr-codes.php';
 
 $error_message = array();
 $success_message = array();
@@ -25,7 +25,7 @@ if($account_status['status'] == "error"){
 } else if($account_status['status'] == "success"){
     $success_message[] = $account_status['message'];
 }
-$currentPatch = file_get_contents("/hdd2/clashapp/data/patch/version.txt");
+$currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 
 if (isset($_POST['password'])) {
     $response = $db->delete_account($_SESSION['user']['id'], $_SESSION['user']['username'], $_SESSION['user']['region'], $_SESSION['user']['email'], $_POST['password']);
@@ -187,9 +187,9 @@ if (isset($_POST['remove-twofa-input'])){
     }
 }
 
-include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Settings', true, true, false);
-include('/hdd2/clashapp/templates/header.php');
+include('/hdd1/clashapp/templates/head.php');
+setCodeHeader('Settings', $css = true, $javascript = true, $alpinejs = true, $websocket = false);
+include('/hdd1/clashapp/templates/header.php');
 
 if (!empty($success_message)) { 
     foreach($success_message as $su){
@@ -416,5 +416,5 @@ if (!empty($success_message)) {
 </div>
 
 <?php 
-include('/hdd2/clashapp/templates/footer.php');
+include('/hdd1/clashapp/templates/footer.php');
 ?>

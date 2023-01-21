@@ -1,1 +1,1 @@
-cd .. && screen -AmdS tailwindWatcher npx tailwindcss -i /hdd2/clashapp/css/clash.css -o /hdd2/clashapp/css/output.css --watch
+cd .. && screen -AmdS tailwindWatcher npx tailwindcss -i /hdd1/clashapp/css/clash.css -o /hdd1/clashapp/css/output.css --minify --watch

@@ -5,14 +5,14 @@ if (isset($_SESSION['user'])) {
     header('Location: settings');
 }
 
-require_once '/hdd2/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/clash-db.php';
  
 $return_message = '';
 
 if (isset($_GET["code"])) {
-    include('/hdd2/clashapp/templates/head.php');
-    setCodeHeader('Reset Password', true, true, false);
-    include('/hdd2/clashapp/templates/header.php');
+    include('/hdd1/clashapp/templates/head.php');
+    setCodeHeader('Reset Password', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
+    include('/hdd1/clashapp/templates/header.php');
 
     $db = new DB();
     $response = $db->check_reset_code($_GET["code"]);
@@ -66,6 +66,6 @@ if (isset($_POST['submit'])) {
         }
     }
 }
-include('/hdd2/clashapp/templates/footer.php');
+include('/hdd1/clashapp/templates/footer.php');
 ?>
  

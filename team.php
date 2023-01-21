@@ -10,9 +10,9 @@ if (!isset($_SESSION)) session_start();
 
 $startInitialTime = microtime(true);
 $memInitialTime = memory_get_usage();
-include_once('/hdd2/clashapp/functions.php');
-include_once('/hdd2/clashapp/update.php');
-require_once '/hdd2/clashapp/clash-db.php';
+include_once('/hdd1/clashapp/functions.php');
+include_once('/hdd1/clashapp/update.php');
+require_once '/hdd1/clashapp/clash-db.php';
 
 /**
  * @author Florian Falk <dasnerdwork@gmail.com>
@@ -36,9 +36,9 @@ if ((isset($_COOKIE['stay-logged-in']))) {
 
 // ----------------------------------------------------------------v- PRINT HEADER -v---------------------------------------------------------------- //
 
-include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Clash', true, true, true);
-include('/hdd2/clashapp/templates/header.php');
+include('/hdd1/clashapp/templates/head.php');
+setCodeHeader('Clash', $css = true, $javascript = true, $alpinejs = true, $websocket = true);
+include('/hdd1/clashapp/templates/header.php');
 
 // ----------------------------------------------------------------v- INITIALIZER -v---------------------------------------------------------------- //
 
@@ -71,8 +71,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
         $startCheckBanFile = microtime(true);
         $memCheckBanFile = memory_get_usage();
-        if(!file_exists('/hdd2/clashapp/data/teams/'.$teamID.'.json')){
-            $fp = fopen('/hdd2/clashapp/data/teams/'.$teamID.'.json', 'c');
+        if(!file_exists('/hdd1/clashapp/data/teams/'.$teamID.'.json')){
+            $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'c');
             $suggestedBanFileContent["SuggestedBans"]=[] ;
             $suggestedBanFileContent["Status"]= 0;
             fwrite($fp, json_encode($suggestedBanFileContent));
@@ -115,16 +115,16 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <div class='flex justify-center text-2xl h-8 mt-4'>
                     <div x-data=\"{ rating: ".(isset($_COOKIE[$_GET['name']]) ? $_COOKIE[$_GET['name']] : 0) .", hover: 0 }\" class='opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
                         <div class='flex gap-x-0'>
-                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 1 && hover < 1, 'text-yellow-500': rating >= 1, 'text-[#414246]': hover >= 1 && rating < 1 }\" x-on:mouseover=\"hover = 1\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 1 ? 0 : 1, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
-                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 2 && hover < 2, 'text-yellow-500': rating >= 2, 'text-[#414246]': hover >= 2 && rating < 2 }\" x-on:mouseover=\"hover = 2\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 2 ? 0 : 2, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
-                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 3 && hover < 3, 'text-yellow-500': rating >= 3, 'text-[#414246]': hover >= 3 && rating < 3 }\" x-on:mouseover=\"hover = 3\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 3 ? 0 : 3, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
-                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 4 && hover < 4, 'text-yellow-500': rating >= 4, 'text-[#414246]': hover >= 4 && rating < 4 }\" x-on:mouseover=\"hover = 4\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 4 ? 0 : 4, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
-                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 5 && hover < 5, 'text-yellow-500': rating >= 5, 'text-[#414246]': hover >= 5 && rating < 5 }\" x-on:mouseover=\"hover = 5\" x-on:mouseout=\"hover = 0\" x-on:click=\"rating = rating == 5 ? 0 : 5, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 1 && hover < 1, 'text-yellow-500': rating >= 1, 'text-[#414246]': hover >= 1 && rating < 1 }\" @mouseover=\"hover = 1\" @mouseout=\"hover = 0\" @click=\"rating = rating == 1 ? 0 : 1, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 2 && hover < 2, 'text-yellow-500': rating >= 2, 'text-[#414246]': hover >= 2 && rating < 2 }\" @mouseover=\"hover = 2\" @mouseout=\"hover = 0\" @click=\"rating = rating == 2 ? 0 : 2, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 3 && hover < 3, 'text-yellow-500': rating >= 3, 'text-[#414246]': hover >= 3 && rating < 3 }\" @mouseover=\"hover = 3\" @mouseout=\"hover = 0\" @click=\"rating = rating == 3 ? 0 : 3, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 4 && hover < 4, 'text-yellow-500': rating >= 4, 'text-[#414246]': hover >= 4 && rating < 4 }\" @mouseover=\"hover = 4\" @mouseout=\"hover = 0\" @click=\"rating = rating == 4 ? 0 : 4, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
+                            <button type=\"button\" class=\"text-3xl p-0 w-8\" x-bind:class=\"{ 'text-[#0e0f18]' : rating < 5 && hover < 5, 'text-yellow-500': rating >= 5, 'text-[#414246]': hover >= 5 && rating < 5 }\" @mouseover=\"hover = 5\" @mouseout=\"hover = 0\" @click=\"rating = rating == 5 ? 0 : 5, modifyTeamRating(rating,'".hash("md5", $_SESSION['user']['id'])."')\">★</button>
                         </div>
                     </div>
                 </div>"; }  else { echo "
-                    <div class='flex justify-center text-2xl h-8 mt-4 opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
-                        <div class='flex justify-center gap-x-0' x-data=\"{ showNotice: false }\" x-cloak x-on:mouseover='showNotice = true' x-on:mouseout='showNotice = false'>
+                    <div class='flex justify-center text-2xl h-8 mt-4 opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;' x-data=\"{ showNotice: false }\" x-cloak @mouseover='showNotice = true' @mouseout='showNotice = false'>
+                        <div class='flex justify-center gap-x-0'>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
@@ -135,8 +135,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     </div>"; } echo "
                     <div class='flex justify-center items-center opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
                         <div class='group relative inline-block' x-data='{ tooltip: 0 }' x-cloak>
-                            <button onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-xl p-3 w-fit bg-[#0e0f18] rounded-xl' type='button' x-on:click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'>Click to Copy URL</button>
-                            <div class='w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition' x-on:click='tooltip = 0'>
+                            <button onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-xl p-3 w-fit bg-[#0e0f18] rounded-xl' type='button' @click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'>Click to Copy URL</button>
+                            <div class='w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition' @click='tooltip = 0'>
                                 Copied to Clipboard
                                 <svg class='absolute text-black h-2 w-full left-0 top-full' x='0px' y='0px' viewBox='0 0 255 255' xml:space='preserve'><polygon class='fill-current' points='0,0 127.5,127.5 255,0'/></svg>
                             </div>
@@ -179,7 +179,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         <table class='w-full flex table-fixed border-separate border-spacing-4 '>
             <tr>";
             // count($teamDataArray["Players"]) == 1 ? $tableWidth = "100%" : $tableWidth = round(100/count($teamDataArray["Players"]));          // disabled due to cumulative layout shift
-                $playerDataDirectory = new DirectoryIterator('/hdd2/clashapp/data/player/');
+                $playerDataDirectory = new DirectoryIterator('/hdd1/clashapp/data/player/');
                 $playerSpawnDelay = 0;
                 foreach($teamDataArray["Players"] as $key => $player){ 
                     $startFetchPlayer[$key] = microtime(true);
@@ -196,7 +196,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
                                             // echo str_replace(".json", "", $playerDataJSONPath) ." - ". $player["summonerId"];
                                             if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
-                                                $playerDataJSON = json_decode(file_get_contents('/hdd2/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                                                $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                                                 $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
                                                 if($playerDataJSON["MatchIDs"][0] != $tempMatchIDs[0]){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
                                                     echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Updated.');</script>";
@@ -222,7 +222,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
                                             if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
                                                 if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
-                                                    $playerDataJSON = json_decode(file_get_contents('/hdd2/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                                                    $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                                                     $playerData = $playerDataJSON["PlayerData"];
                                                     $playerName = $playerDataJSON["PlayerData"]["Name"];
                                                     $sumid = $playerDataJSON["PlayerData"]["SumID"];
@@ -247,15 +247,15 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                     $memProfileIconBorders = memory_get_usage();
                                     echo "<div class='h-[9.75rem] mt-4 grid grid-cols-2 gap-4'>
                                         <div class='relative flex justify-center'>";
-                                            if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
+                                            if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
                                                 echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" height="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px]" alt="The custom profile icon of a player">';
                                             }
 
                                             $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
                                             if($rankOrLevelArray["Type"] === "Rank"){ // If user has a rank
                                                 // Print the profile border image url for current highest rank
-                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd2/clashapp/data/misc/ranks/*'.strtolower($rankOrLevelArray["HighestRank"]).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-                                                $webBorderPath = str_replace("/hdd2","",$profileBorderPath);
+                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/*'.strtolower($rankOrLevelArray["HighestRank"]).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+                                                $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
                                                 if(file_exists($profileBorderPath)){
                                                     echo '<img src="'.$webBorderPath.'" width="384" height="384" class="max-w-[384px] -top-32 absolute z-10" style="-webkit-mask-image: radial-gradient(circle at center, white 20%, transparent 33%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
                                                 }
@@ -268,8 +268,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 
                                                 echo "<div class='color-[#e8dfcc] absolute mt-[6.8rem] text-xs z-20'>".$playerData["Level"]."</div>"; // Always current lvl at the bottom
                                             } else if($rankOrLevelArray["Type"] === "Level") { // Else set to current level border
-                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd2/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-                                                $webBorderPath = str_replace("/hdd2","",$profileBorderPath);
+                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+                                                $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
                                                 if(file_exists($profileBorderPath)){
                                                     echo '<img src="'.$webBorderPath.'" width="190" height="190" class="absolute -mt-[2.05rem] z-10" style="-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);" alt="The profile border corresponding to a players level">';
                                                     }
@@ -322,7 +322,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         <div class='flex h-8 items-center justify-between'>
                                             <span>Queued as:</span>
                                             <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
-                                            if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
+                                            if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
                                                 if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
                                                     echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">
                                                           <span class="text-yellow-400 absolute z-20 text-xl -mr-12 font-bold mt-0.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
@@ -338,10 +338,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         <div class='flex h-8 items-center justify-between'>
                                             <span>Position(s):</span>
                                             <div class='inline-flex gap-2 w-[72px] justify-center'>";
-                                            if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
+                                            if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
                                                 echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
                                             }
-                                            if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
+                                            if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
                                                 echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players secondary position">';
                                             }echo "</div>
                                         </div>";
@@ -370,7 +370,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             if(!$execOnlyOnce) $startAgainDownload = microtime(true);
                             $memAgainDownload = memory_get_usage();
                             foreach($matchids_sliced as $matchid){
-                                if(!file_exists('/hdd2/clashapp/data/matches/' . $matchid . ".json")){
+                                if(!file_exists('/hdd1/clashapp/data/matches/' . $matchid . ".json")){
                                     downloadMatchByID($matchid, $playerName);
                                 }
                             }
@@ -392,11 +392,11 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             if($rankQueue["Queue"] == "RANKED_SOLO_5x5"){ echo "
                                                 <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
                                                 <span class='block text-[0.75rem]'>Ranked Solo/Duo:</span>
-                                                    <span class='text-".strtolower($rankQueue["Tier"])."'>".ucfirst(strtolower($rankQueue["Tier"])). " " . $rankQueue["Rank"];
+                                                    <span class='text-".strtolower($rankQueue["Tier"])."/100'>".ucfirst(strtolower($rankQueue["Tier"])). " " . $rankQueue["Rank"];
                                             } else if($rankQueue["Queue"] == "RANKED_FLEX_SR"){ echo "
                                                 <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
                                                     <span class='block text-[0.75rem]'>Ranked Flex:</span>
-                                                    <span class='block text-".strtolower($rankQueue["Tier"])."'>".ucfirst(strtolower($rankQueue["Tier"])). " " . $rankQueue["Rank"];
+                                                    <span class='block text-".strtolower($rankQueue["Tier"])."/100'>".ucfirst(strtolower($rankQueue["Tier"])). " " . $rankQueue["Rank"];
                                             } echo " / " . $rankQueue["LP"] . " LP</span><span class='block'>
                                                     WR: " . round((($rankQueue["Wins"]/($rankQueue["Wins"]+$rankQueue["Losses"]))*100),2) . "%</span>
                                                     <span class='text-[0.75rem]'>(".$rankQueue["Wins"]+$rankQueue["Losses"]." Games)</span>
@@ -418,12 +418,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 <td class='text-center h-32'>
                                     <div class='inline-flex gap-8'>";
                                         for($i=0; $i<3; $i++){
-                                            if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp')){ echo '
+                                            if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp')){ echo '
                                                 <div>
                                                     <img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp" width="64" height="64" class="block relative z-0;" alt="A champion icon of the league of legends champion '.$masteryData[$i]["Champion"].'">
                                                     <span>'.$masteryData[$i]["Champion"].'</span>
                                                     <img src="/clashapp/data/misc/mastery-'.$masteryData[$i]["Lvl"].'.webp" width="32" height="32" class="relative -top-[5.75rem] -right-11 z-10" alt="A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher">'.
-                                                    "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."'>".explode(",",$masteryData[$i]["Points"])[0]."k</div>
+                                                    "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".explode(",",$masteryData[$i]["Points"])[0]."k</div>
                                                 </div>";
                                             }
                                         } echo "
@@ -523,7 +523,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     $timer = 0;
     foreach($suggestedBanArray as $banChampion){
             echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards;">
-                <div class="ban-hoverer inline-grid" onclick="">
+                <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);">
                     <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" alt="A league of legends champion icon of '.$banChampion["Champion"].'"></div>
                 <span class="suggested-ban-caption w-16 block">' . $banChampion["Champion"] . '</span>
             </div>';
@@ -534,7 +534,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     // ----------------------------------------------------------------------------------------------v- END + FOOTER  -v---------------------------------------------------------------------------------------------- //
 
 }
-include('/hdd2/clashapp/templates/footer.php');
+include('/hdd1/clashapp/templates/footer.php');
 $timeAndMemoryArray["Total"]["Time"] = number_format((microtime(true) - $startInitialTime), 2, ',', '.')." s";
 $timeAndMemoryArray["Total"]["Memory"] = number_format((memory_get_usage() - $memInitialTime)/1024, 2, ',', '.')." kB";
 
