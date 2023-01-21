@@ -8,8 +8,8 @@ const server = createServer({
   key: readFileSync('/etc/letsencrypt/live/dasnerdwork.net/privkey.pem')
 }).listen(8081);
 const wss = new WebSocketServer({ server });
-const currentPatch = fs.readFileSync('/hdd2/clashapp/data/patch/version.txt', 'utf-8');
-const validChamps = JSON.parse(fs.readFileSync('/hdd2/clashapp/data/patch/'+currentPatch+'/data/de_DE/champion.json', 'utf-8'))["data"];
+const currentPatch = fs.readFileSync('/hdd1/clashapp/data/patch/version.txt', 'utf-8');
+const validChamps = JSON.parse(fs.readFileSync('/hdd1/clashapp/data/patch/'+currentPatch+'/data/de_DE/champion.json', 'utf-8'))["data"];
 var lastClient = "";
 
 wss.on('connection', function connection(ws) {
@@ -51,8 +51,8 @@ wss.on('connection', function connection(ws) {
             console.log("WS-Server: Code Injection Deteced, either champname or champid is invalid -> Logging IP"); // TODO: Log and Save IP adress of attacker
             ws.send('{"status":"CodeInjectionDetected"}');
           } else {       
-            if (fs.existsSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-              var dataFromFile = fs.readFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
+            if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
+              var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
               var localDataAsJson = JSON.parse(dataFromFile)["SuggestedBans"];
               var elementInArray = false;
               for (var key in localDataAsJson) { // loop through every current local champ
@@ -79,7 +79,7 @@ wss.on('connection', function connection(ws) {
                   dataFromFile.SuggestedBans.push(newChamp);
                   dataFromFile.Status++;
                   // console.log(dataFromFile);
-                  fs.writeFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(dataFromFile));
+                  fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(dataFromFile));
                   console.log("WS-Server: Successfully added %s to %s.json", dataAsJSON.champname, dataAsJSON.teamid);
                   broadcastUpdate(dataAsJSON.teamid);
                   ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
@@ -101,7 +101,7 @@ wss.on('connection', function connection(ws) {
                 ],
                 Status: 1
               }
-              fs.writeFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(fileContent), function() {
+              fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(fileContent), function() {
                 console.log("WS-Server: File did not exists -> created %s.json", dataAsJSON.teamid);
                 ws.send('{"status":"FileDidNotExist"}');
               });
@@ -131,8 +131,8 @@ wss.on('connection', function connection(ws) {
             console.log("WS-Server: Code Injection Deteced, either champname or champid is invalid -> Logging IP"); // TODO: Log and Save IP adress of attacker
             ws.send('{"status":"CodeInjectionDetected"}');
           } else {       
-            if (fs.existsSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-              var dataFromFile = fs.readFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
+            if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
+              var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
               var localDataAsJson = JSON.parse(dataFromFile)["SuggestedBans"];
               var elementInArray = false;
               for (var key in localDataAsJson) { // loop through every current local champ
@@ -156,7 +156,7 @@ wss.on('connection', function connection(ws) {
                   });
                 newData.SuggestedBans.splice(elementIndex, 1); // remove object from array
                 newData.Status++;
-                fs.writeFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
+                fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
                 console.log("WS-Server: Successfully removed %s from %s.json", dataAsJSON.champname, dataAsJSON.teamid);
                 broadcastUpdate(dataAsJSON.teamid);
                 ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
@@ -180,8 +180,8 @@ wss.on('connection', function connection(ws) {
           console.log("WS-Server: Forbidden teamid provided");
           ws.send('{"status":"InvalidTeamID"}');
         } else {
-          if (fs.existsSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-            var dataFromFile = fs.readFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
+          if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
+            var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
             var localDataSuggestedBanArray = JSON.parse(dataFromFile);
             let fromId = 0;
             let toId= 0;
@@ -196,7 +196,7 @@ wss.on('connection', function connection(ws) {
             localDataSuggestedBanArray.SuggestedBans[fromId] = localDataSuggestedBanArray.SuggestedBans[toId];
             localDataSuggestedBanArray.SuggestedBans[toId] = temp;
             localDataSuggestedBanArray.Status++;
-            fs.writeFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(localDataSuggestedBanArray));
+            fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(localDataSuggestedBanArray));
             console.log("WS-Server: Successfully swapped %s with %s in %s.json", dataAsJSON.fromName, dataAsJSON.toName, dataAsJSON.teamid);
             broadcastUpdate(dataAsJSON.teamid);
             ws.send('{"status":"Success"}'); // TODO: Websocket sometimes not working in firefox or other browser? 
@@ -218,8 +218,8 @@ wss.on('connection', function connection(ws) {
           console.log("WS-Server: Forbidden teamid provided");
           ws.send('{"status":"InvalidTeamID"}');
         } else {
-          if (fs.existsSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-            var dataFromFile = fs.readFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
+          if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
+            var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
             var newData = JSON.parse(dataFromFile);
             if(dataAsJSON.rating == 0){
               console.log("WS-Server: Client removed rating score of %d from %s.json", newData.Rating[String(dataAsJSON.hash)], dataAsJSON.teamid);
@@ -228,7 +228,7 @@ wss.on('connection', function connection(ws) {
               newData.Rating[String(dataAsJSON.hash)] = dataAsJSON.rating;
               console.log("WS-Server: Client rated %s.json with a score of %d", dataAsJSON.teamid, dataAsJSON.rating);
             }
-            fs.writeFileSync('/hdd2/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
+            fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
             broadcastUpdate(dataAsJSON.teamid);
             ws.send('{"status":"Success"}');
           }
@@ -314,7 +314,7 @@ wss.on('connection', function connection(ws) {
 function broadcastUpdate(clientsTeamID){ 
   wss.clients.forEach(function each(client) {
     if(client.location == clientsTeamID){
-      let localTeamData = fs.readFileSync('/hdd2/clashapp/data/teams/' + clientsTeamID + '.json', 'utf-8'); // read local file
+      let localTeamData = fs.readFileSync('/hdd1/clashapp/data/teams/' + clientsTeamID + '.json', 'utf-8'); // read local file
       client.send(localTeamData);
     }
   });
