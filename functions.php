@@ -13,7 +13,7 @@
  * @global int $currenttimestam The current time stamp usable as a global variable
  */
 $apiKey = getenv('API_KEY');
-$currentPatch = file_get_contents("/hdd2/clashapp/data/patch/version.txt");
+$currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
 $headers = array(
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
@@ -42,7 +42,7 @@ $headers = array(
  * @return array $playerDataArray with keys "Icon", "Name", "Level", "PUUID", "SumID", "AccountID" and "LastChange" of the summoners profile
  */
 function getPlayerData($type, $id){
-    global $currentPatch, $headers;
+    global $headers;
     $playerDataArray = array();
 
     switch ($type) {
@@ -65,7 +65,7 @@ function getPlayerData($type, $id){
     $output = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    // echo "<script>playerDataCalls++;</script>";
+    echo "<script>playerDataCalls++;</script>";
 
     // 403 Access forbidden -> Outdated API Key
     if($httpCode == "403"){
@@ -81,7 +81,7 @@ function getPlayerData($type, $id){
         $output = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        // echo "<script>playerDataCalls++;</script>";
+        echo "<script>playerDataCalls++;</script>";
     }
 
     // Collect requested values in returnarray
@@ -295,7 +295,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
  */
 function downloadMatchByID($matchid, $username = null){
     global $headers, $counter;
-    $logPath = '/hdd2/clashapp/data/logs/matchDownloader.log';
+    $logPath = '/hdd1/clashapp/data/logs/matchDownloader.log';
     $errorFile = null;
 
     // Halving of matchDownloader.log in case the logfile exceeds 10 MB
@@ -312,7 +312,7 @@ function downloadMatchByID($matchid, $username = null){
     }
 
     // Only download if file doesn't exist yet
-    if(!file_exists('/hdd2/clashapp/data/matches/' . $matchid . ".json")){
+    if(!file_exists('/hdd1/clashapp/data/matches/' . $matchid . ".json")){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -346,7 +346,7 @@ function downloadMatchByID($matchid, $username = null){
         file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
         if($httpCode == "200"){
             // if(($matchOutput->info->gameDuration != "0")){ // && (isset($matchOutput->info->participants[0]->killParticipation)
-                $fp = fopen('/hdd2/clashapp/data/matches/' . $matchid . '.json', 'w');
+                $fp = fopen('/hdd1/clashapp/data/matches/' . $matchid . '.json', 'w');
                 fwrite($fp, $matchOutput);
                 fclose($fp);
             // } else {
@@ -387,8 +387,8 @@ function getMatchData($matchIDArray){
     // Loop through each matchID.json
     foreach ($matchIDArray as $key => $matchIDJSON) {
         if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
-        if(file_exists('/hdd2/clashapp/data/matches/'.$matchIDJSON.'.json')){
-           $matchData[$matchIDJSON] = json_decode(file_get_contents('/hdd2/clashapp/data/matches/'.$matchIDJSON.'.json')); 
+        if(file_exists('/hdd1/clashapp/data/matches/'.$matchIDJSON.'.json')){
+           $matchData[$matchIDJSON] = json_decode(file_get_contents('/hdd1/clashapp/data/matches/'.$matchIDJSON.'.json')); 
            unset($matchData[$matchIDJSON]->metadata);
            unset($matchData[$matchIDJSON]->info->gameId);
            unset($matchData[$matchIDJSON]->info->gameMode);
@@ -481,7 +481,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
     echo "<div class='smooth-transition w-full overflow-hidden' x-show='open' x-transition x-cloak>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
-        $handle = file_get_contents("/hdd2/clashapp/data/matches/".$matchIDJSON.".json");
+        $handle = file_get_contents("/hdd1/clashapp/data/matches/".$matchIDJSON.".json");
         $inhalt = json_decode($handle);
         if(isset($inhalt->metadata->participants) && $inhalt->info->gameDuration != 0) {
             if(in_array($puuid, (array) $inhalt->metadata->participants)){
@@ -490,9 +490,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     if($inhalt->info->participants[$in]->puuid == $puuid) {
                         $teamID = $inhalt->info->participants[$in]->teamId;
                         if($inhalt->info->participants[$in]->win == false){
-                            echo '<div class="w-full bg-lose border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }">';
+                            echo '<div class="w-full bg-lose border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }" style="content-visibility: auto;">';
                         } else {
-                            echo '<div class="w-full bg-win border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }">';
+                            echo '<div class="w-full bg-win border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }" style="content-visibility: auto;">';
                         }
                             echo '<div id="match-header" class="inline-flex w-full gap-2 pt-2 px-2">';
                                 echo '<div class="match-result mb-2">';
@@ -536,7 +536,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 if ($inhalt->info->participants[$in])
                                 $champion = $inhalt->info->participants[$in]->championName;
                                 if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** TODO: One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                                if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
+                                if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
                                     echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
                                     echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative bottom-16 -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
                                 } else {
@@ -560,7 +560,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         // Display of played Position
                         echo "<div class='champion-lane flex relative w-4 h-4 max-w-[16px] min-w-[16px] z-20 -ml-4 bottom-[33px] -right-[66px] text-[13px] justify-center items-center'>";
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
-                        if(file_exists('/hdd2/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
+                        if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
                             echo '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" height="16"  loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0 brightness-150" alt="Icon of a league of legends position for '.$matchLane.'">';
                         }
                         echo "</div>";
@@ -570,10 +570,10 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo '<div class="summoner-spells grid grid-rows-2 gap-1">';
                         $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
                         $summoner2Id = $inhalt->info->participants[$in]->summoner2Id;
-                        if(file_exists('/hdd2/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".webp")){
+                        if(file_exists('/hdd1/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".webp")){
                             echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.webp" width="32" height="32" class="rounded" loading="lazy" alt="Icon of a players first selected summoner spell">';
                         }
-                        if(file_exists('/hdd2/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".webp")){
+                        if(file_exists('/hdd1/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".webp")){
                             echo '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.webp" width="32" height="32" class="rounded" loading="lazy" alt="Icon of a players second selected summoner spell">';
                         }
                         echo "</div>";
@@ -582,12 +582,12 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo '<div class="rune-1 grid grid-rows-2 gap-1">';
                         $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                         $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
-                        if(file_exists('/hdd2/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp')){
+                        if(file_exists('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp')){
                             echo '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune">';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available">';
                         }
-                        if(file_exists('/hdd2/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp')){
+                        if(file_exists('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp')){
                             echo '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp" class="max-w-[22px] min-w-[22px] m-auto" loading="lazy" alt="Icon of a players second selected rune">';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available">';
@@ -640,9 +640,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 $noItemCounter += 1;
                             } else {
                                 echo '<div class="item'.($b - $noItemCounter).'">';
-                                if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
+                                if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
                                     echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon represents an equipped item at the end of a game">';
-                                } else if(file_exists('/hdd2/clashapp/data/misc/'.$itemId.'.webp')){
+                                } else if(file_exists('/hdd1/clashapp/data/misc/'.$itemId.'.webp')){
                                     echo '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon represents an equipped special ornn item at the end of the game or other exceptions">';
                                 } else {
                                     echo '<img src="/clashapp/data/misc/0.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon will only be visible of neither the data dragon nor the local files contain the corresponding image">';
@@ -670,7 +670,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo '<div class="lane-opponent h-8 flex justify-center items-center gap-2"><span>vs. </span>';
                         $enemyChamp = $inhalt->info->participants[$i]->championName;
                         if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                        if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp')){
+                        if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp')){
                             echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp" width="32" height="32" class="max-w-[32px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
                         } else {
                             echo '<img src="/clashapp/data/misc/na.webp" width="32" height="32" class="max-w-[32px]" loading="lazy" alt="This icon represents a value not being available"></div>';
@@ -750,7 +750,7 @@ function printMasteryInfo($masteryArray, $index){
     global $currentPatch;
 
     // Print image if it exists
-    if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp')){
+    if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp')){
         echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp" width="64" height="64" alt="A league of legends champion icon of '.$masteryArray[$index]["Filename"].'"><br>';
     }
 
@@ -772,7 +772,7 @@ function printMasteryInfo($masteryArray, $index){
  */
 function runeIconFetcher($id){
     global $currentPatch;
-    $data = file_get_contents('/hdd2/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json');
+    $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json');
     $json = json_decode($data);
     foreach($json as $runetree){
         foreach($runetree->slots as $keyRunes){
@@ -817,7 +817,7 @@ function getRandomIcon($currentIconID){
  */
 function summonerSpellFetcher($id){
     global $currentPatch;
-    $data = file_get_contents('/hdd2/clashapp/data/patch/'.$currentPatch.'/data/de_DE/summoner.json');
+    $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/summoner.json');
     $json = json_decode($data);
     foreach($json->data as $summoner){
         if($id == $summoner->key){
@@ -837,7 +837,7 @@ function summonerSpellFetcher($id){
  */
 function runeTreeIconFetcher($id){
     global $currentPatch;
-    $data = file_get_contents('/hdd2/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json');
+    $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json');
     $json = json_decode($data);
     foreach($json as $runetree){
         if($id == $runetree->id){
@@ -857,7 +857,7 @@ function runeTreeIconFetcher($id){
  */
 function championIdToName($id){
     global $currentPatch;
-    $data = file_get_contents('/hdd2/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
+    $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
     $json = json_decode($data);
     foreach($json->data as $champion){
         if($id == $champion->key){
@@ -877,7 +877,7 @@ function championIdToName($id){
  */
 function championIdToFilename($id){
     global $currentPatch;
-    $data = file_get_contents('/hdd2/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
+    $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
     $json = json_decode($data);
     foreach($json->data as $champion){
         if($id == $champion->key){
@@ -986,7 +986,7 @@ function getLanePercentages($matchDaten, $puuid){ // TODO: Remove UNKNOWN an mak
 function getAverage($attributesArray, $matchDataArray, $puuid, $lane){
     $averageArray = array();
     $counterArray = array();
-    $averageStatsJson = json_decode(file_get_contents('/hdd2/clashapp/data/misc/averageStats.json'), true);
+    $averageStatsJson = json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true);
 
     // Store all values into separate array corresponding to each attribute
     foreach ($matchDataArray as $matchData) {
@@ -1482,7 +1482,7 @@ function getTeamByTeamID($teamID){
     if($teamID != "test"){
         global $headers;
         $teamDataArray = array();
-        $logPath = '/hdd2/clashapp/data/logs/teamDownloader.log';
+        $logPath = '/hdd1/clashapp/data/logs/teamDownloader.log';
         
         // Curl API request block
         $ch = curl_init();
@@ -1511,7 +1511,7 @@ function getTeamByTeamID($teamID){
     } else {
         // Test Team Change
         $httpCode = "200";
-        $teamOutput = file_get_contents('/hdd2/clashapp/data/misc/test.json');
+        $teamOutput = file_get_contents('/hdd1/clashapp/data/misc/test.json');
     }
     
     // Collect requested values in returnarray
@@ -1557,7 +1557,7 @@ function unique_multidim_array($array, $key) {
 function showBanSelector(){
     global $currentPatch;
     $i=0;
-    $championNamingData = file_get_contents('/hdd2/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
+    $championNamingData = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json');
     $championNamingFile = json_decode($championNamingData);
     foreach($championNamingFile->data as $champData){
         $champName = $champData->name;
@@ -1565,9 +1565,9 @@ function showBanSelector(){
         $imgPath = substr($champData->image->full, 0, -4).".webp";
         $dataId = $champData->id;
         if($i<15){
-            if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
-                echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion'>";
-                    echo '<div class="ban-hoverer inline-grid group" onclick="">';
+            if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
+                echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion' style='content-visibility: auto;'>";
+                    echo '<div class="ban-hoverer inline-grid group" onclick="addToFile(this.parentElement);">';
                         echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'"
                         alt="A league of legends champion icon of '.$imgPath.'">';
                         echo '<img width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp" alt="Prohibition overlay icon in grey">';
@@ -1576,13 +1576,13 @@ function showBanSelector(){
             echo "</div>";
             }
         } else {
-            if(file_exists('/hdd2/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
-                echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion'>";
-                    echo '<div class="ban-hoverer inline-grid group" onclick="">';
-                        echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:h-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'"
+            if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
+                echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion' style='content-visibility: auto;'>";
+                    echo '<div class="ban-hoverer inline-grid group" onclick="addToFile(this.parentElement);">';
+                        echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'"
                         alt="A league of legends champion icon of '.$imgPath.'" loading="lazy">';
-                        echo '<img width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp" loading="lazy" alt="Prohibition overlay icon in grey">';
-                        echo '<img width="56" height="56" class="min-h-8 ban-overlay-red twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" loading="lazy" alt="Prohibition overlay icon in red"></div>';
+                        echo '<img width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp" loading="lazy" alt="Prohibition overlay icon in grey">';
+                        echo '<img width="56" height="56" class="min-h-8 ban-overlay-red twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp" loading="lazy" alt="Prohibition overlay icon in red"></div>';
                     echo "<span class='caption text-ellipsis overflow-hidden whitespace-nowrap block'>".$champName."</span>";
             echo "</div>";
             }
@@ -1602,7 +1602,7 @@ function showBanSelector(){
  * @return string $abbreviations is the return string that will get split by "," separator and added into the data-abbr attribute in the html code above
  */
 function abbreviationFetcher($champName){
-    $abbrArray = json_decode(file_get_contents('/hdd2/clashapp/data/misc/abbreviations.json'));
+    $abbrArray = json_decode(file_get_contents('/hdd1/clashapp/data/misc/abbreviations.json'));
     foreach($abbrArray as $champFileName => $element){
         if($champFileName === $champName){
             $abbreviations = str_replace('_', ' ', str_replace(' ', '', $element->abbr));

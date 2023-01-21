@@ -5,14 +5,14 @@ if (isset($_SESSION['user'])) {
     header('Location: settings');
 }
 
-require_once '/hdd2/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/clash-db.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require '/hdd2/clashapp/plugins/phpmailer/src/Exception.php';
-require '/hdd2/clashapp/plugins/phpmailer/src/PHPMailer.php';
-require '/hdd2/clashapp/plugins/phpmailer/src/SMTP.php';
+require '/hdd1/clashapp/plugins/phpmailer/src/Exception.php';
+require '/hdd1/clashapp/plugins/phpmailer/src/PHPMailer.php';
+require '/hdd1/clashapp/plugins/phpmailer/src/SMTP.php';
 
 ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL); // TODO rausnehmen
 
@@ -129,9 +129,9 @@ if (isset($_POST['submit'])) {
     }        
 }
 
-include('/hdd2/clashapp/templates/head.php');
-setCodeHeader('Register', true, true, false);
-include('/hdd2/clashapp/templates/header.php');
+include('/hdd1/clashapp/templates/head.php');
+setCodeHeader('Register', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
+include('/hdd1/clashapp/templates/header.php');
  
 if (!empty($success_message)) { 
     foreach($success_message as $su){
@@ -147,7 +147,7 @@ if (!empty($success_message)) {
     }
 } 
 ?>
-<div class="h-[calc(100%-5rem)] w-full flex justify-center items-center -mb-16">
+<div class="h-[calc(100vh-5rem)] w-full flex justify-center items-center -mb-16">
     <form method="post" autocomplete="off" class="py-10 px-9 h-fit w-fit bg-dark box-border max-w-[22rem] mb-32">
         <div class="text-center text-xl mb-4">Register your account</div>
         <div><label for="username" class="block text-xs font-bold text-left ml-1">Username: </label></div>
@@ -180,5 +180,5 @@ if (!empty($success_message)) {
 </div>
 
 <?php 
-include('/hdd2/clashapp/templates/footer.php');
+include('/hdd1/clashapp/templates/footer.php');
 ?>
