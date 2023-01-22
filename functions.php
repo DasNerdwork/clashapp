@@ -65,7 +65,7 @@ function getPlayerData($type, $id){
     $output = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    echo "<script>playerDataCalls++;</script>";
+    // echo "<script>playerDataCalls++;</script>";
 
     // 403 Access forbidden -> Outdated API Key
     if($httpCode == "403"){
@@ -81,7 +81,7 @@ function getPlayerData($type, $id){
         $output = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        echo "<script>playerDataCalls++;</script>";
+        // echo "<script>playerDataCalls++;</script>";
     }
 
     // Collect requested values in returnarray
