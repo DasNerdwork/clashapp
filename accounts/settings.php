@@ -188,7 +188,7 @@ if (isset($_POST['remove-twofa-input'])){
 }
 
 include('/hdd1/clashapp/templates/head.php');
-setCodeHeader('Settings', $css = true, $javascript = "qr", $alpinejs = true, $websocket = false);
+setCodeHeader('Settings', $css = true, "qr", $alpinejs = true, $websocket = false);
 include('/hdd1/clashapp/templates/header.php');
 
 if (!empty($success_message)) { 
@@ -318,35 +318,27 @@ if (!empty($success_message)) {
                             <div class="text-sm text-justify block account-desc my-4">Note: The temporary icon was given to you right after the account creation. You can find it by clicking on your profile picture, selecting "all" and scrolling completely down to the bottom.</div>
                             <small>If you experience any problems or your account was already claimed please reach out to an administrator.</small>
                             <form method="post" id="connect-final-form" class="flex justify-center mb-0">
-                                <button type="button" name="final" id="connect-final-confirm" class="mt-3 mb-3 h-8 text-base w-64 bg-[#27358b] text-white hover:brightness-75 active:brightness-50">Confirm</button>
+                                <button type="button" name="final" id="connect-final-confirm" class="mt-3 mb-3 h-8 text-base w-64 bg-[#27358b] text-white hover:brightness-75 active:brightness-50" onclick="connectFinalConfirm();">Confirm</button>
                             </form>
                         </div>
                     </div>
                     <script>
-                    $("#connect-final-confirm").click(function() {
-                        $("#connect-final-confirm").prop("disabled", true);
+                    function connectFinalConfirm(){
+                        let button = document.getElementById("connect-final-confirm");
+                        button.disabled = true;
                         setTimeout(
                             function() {
-                                $("#connect-final-confirm").prop("disabled", false);
+                                button.disabled = false;
                             }, 3000);
-                        $.ajax({
-                            url: "connect.php",
-                            type: "POST",
-                            data: {
-                                icon: "'.$randomIcon.'",
-                                name: "'.$playerDataArray['Name'].'",
-                                sessionUsername: "'.$_SESSION['user']['username'].'"
-                            },
-                            success: function(data) {
+                        postAjax("connect.php", { icon: "'.$randomIcon.'", name: "'.$playerDataArray['Name'].'", sessionUsername: "'.$_SESSION['user']['username'].'" }, function(data){
                                 data = JSON.parse(data);
                                 if(data.status == "success"){
                                     location.href = "settings?verify=true";
                                 } else {
                                     setError(\'Icons do not match. Please make sure to close the profile edit window in league so the icon successfully updates.\');
-                                }
-                            }               
+                                }          
                         });
-                    });
+                    }
                     </script>'; 
                 } else {
                     echo '<script>setError("Could not find an active league of legends account for '.$_POST['connectname'].'.");</script>';
