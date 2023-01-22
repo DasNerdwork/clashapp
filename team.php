@@ -541,12 +541,12 @@ $timeAndMemoryArray["Total"]["Memory"] = number_format((memory_get_usage() - $me
     // --------------------------------------------------------------------------------------------------v- DEBUG  -v-------------------------------------------------------------------------------------------------- //
 
 echo "
-<script>console.log('INFO: Time and Memory Array generated:'); console.log(".json_encode($timeAndMemoryArray).");</script>
-<script>console.log('INFO: PlayerData calls: '+playerDataCalls);</script>
-<script>console.log('INFO: MasteryScore calls: '+masteryScoresCalls);</script>
-<script>console.log('INFO: CurrentRank calls: '+currentRankCalls);</script>
-<script>console.log('INFO: MatchIDs calls: '+matchIdCalls);</script>
-<script>console.log('INFO: MatchDownload calls: '+matchDownloadCalls);</script>
-<script>let full = playerDataCalls+masteryScoresCalls+currentRankCalls+matchIdCalls+matchDownloadCalls; console.log('INFO: Total calls: '+full);</script>";
-
+<script>console.log(".json_encode($timeAndMemoryArray).");
+console.log({
+    PlayerData: playerDataCalls,
+    MasteryScore: masteryScoresCalls,
+    CurrentRank: currentRankCalls,
+    MatchIDs: matchIdCalls,
+    MatchDownload: matchDownloadCalls,
+    TotalCalls: playerDataCalls+masteryScoresCalls+currentRankCalls+matchIdCalls+matchDownloadCalls});</script>";
 ?>
