@@ -14,7 +14,7 @@ require '/hdd1/clashapp/plugins/phpmailer/src/Exception.php';
 require '/hdd1/clashapp/plugins/phpmailer/src/PHPMailer.php';
 require '/hdd1/clashapp/plugins/phpmailer/src/SMTP.php';
 
-ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL); // TODO rausnehmen
+// ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL); // TODO rausnehmen
 
 $db = new DB();
 // $response = $db->account_exists("john.doe@example.com");
