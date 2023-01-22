@@ -188,7 +188,7 @@ if (isset($_POST['remove-twofa-input'])){
 }
 
 include('/hdd1/clashapp/templates/head.php');
-setCodeHeader('Settings', $css = true, $javascript = true, $alpinejs = true, $websocket = false);
+setCodeHeader('Settings', $css = true, $javascript = "qr", $alpinejs = true, $websocket = false);
 include('/hdd1/clashapp/templates/header.php');
 
 if (!empty($success_message)) { 
@@ -360,7 +360,7 @@ if (!empty($success_message)) {
             <div class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="add2FA">
                 <div class='text-xl mb-2'>Add Two-Factor Authentication</div>
                 <span class='text-sm text-justify block' id='2fa-desc'>To enable 2FA for this account scan the QR Code below with your Google Authenticator App and confirm with the in-app code.</span>
-                <form method="post" id="set-twofa-form">
+                <form method="post" id="set-twofa-form" class="mb-3">
                     <div><label for='twofa' class="text-xs font-bold block text-left ml-5">Two-Factor Authentication Code: </label></div>
                     <div><input type='text' name='twofa-input' class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder='Enter 2FA Code' required oninput="this.value = this.value.replace(/[^0-9]/g, '').replace(/(\..*)\./g, '$1');" maxlength='6' class="pl-1"></div>
                     <div class="h-10 mx-auto max-w-[320px]"><button type="submit" name="twofa-confirm" id="twofa-button" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base hover:brightness-75 active:brightness-50">Submit</button>
