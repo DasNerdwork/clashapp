@@ -21,7 +21,7 @@ module.exports = {
       pattern: /text-(threat-xxs|threat-xs|threat-s|threat-m|threat-l|threat-xl|threat-xxl)\/100/,
     },
     {
-      pattern: /decoration-(red-700|green-800|blue-800|pink-700|lime-500|cyan-600|amber-600|yellow-400|purple-700|rose-400)\/100/,
+      pattern: /decoration-(red-700|green-800|blue-800|pink-700|lime-500|cyan-600|amber-600|yellow-400|purple-700|rose-400)/,
     },
     {
       pattern: /text-(red-700|green-800|blue-800|pink-700|lime-500|cyan-600|amber-600|yellow-400|purple-700|rose-400)\/100/,
