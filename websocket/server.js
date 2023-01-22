@@ -277,7 +277,8 @@ wss.on('connection', function connection(ws) {
           ws.name = dataAsJSON.name;
         }
         ws.send('{"status":"FirstConnect","name":"'+ws.name+'","color":"'+ws.color+'"}');
-        broadcastUpdate(dataAsJSON.teamid);
+        let localTeamData = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local teamdata and send to client
+        ws.send(localTeamData);
         wss.clients.forEach(function each(client) {
           if(client.location == dataAsJSON.teamid && client != ws){
             client.send('{"status":"Message","message":"joined the session","name":"'+ws.name+'","color":"'+ws.color+'"}');

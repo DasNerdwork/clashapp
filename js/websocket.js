@@ -1,5 +1,5 @@
 // This file contains every necessary websocket, ban element, drag & drop function and more for the team pages to work properly
-
+var executeOnlyOnce = true;
 function ready(fn) {
     if (document.readyState !== 'loading') {
       fn();
@@ -8,7 +8,7 @@ function ready(fn) {
     document.addEventListener('DOMContentLoaded', fn);
   }
   
-const ws = new WebSocket('wss://dasnerdwork.net:8081/');
+const ws = new WebSocket('wss://websocket.dasnerdwork.net/');
 
 ws.onopen = (event) => { // Do this on client opening the webpage
     if (document.getElementById("highlighter") != null) {
@@ -24,23 +24,21 @@ ws.onopen = (event) => { // Do this on client opening the webpage
     ws.send(JSON.stringify(sendInfo))
 };
 
-fetch("https://clash.dasnerdwork.net/clashapp/data/patch/version.txt")
-.then(response => { return response.text();
-}).then(currentpatch => {
-    var executeOnlyOnce = true;
-  
-
-    ws.onmessage = (event) => { // Do this when the WS-Server sends a message to client
-        if(Array.from(event.data)[0] == "{"){
-            var messageAsJson = JSON.parse(event.data);
-            var selectedBans = document.getElementById("selectedBans");
-            if(messageAsJson.hasOwnProperty("SuggestedBans")){
-                var status = 0;
-                // console.log(messageAsJson);
-                if(messageAsJson["Status"] > status){
-                    status = messageAsJson["Status"];
-                    var html = "";
-                    let animateTimer = 0;
+ws.onmessage = (event) => { // Do this when the WS-Server sends a message to client
+    if(Array.from(event.data)[0] == "{"){
+        var messageAsJson = JSON.parse(event.data);
+        var selectedBans = document.getElementById("selectedBans");
+        if(messageAsJson.hasOwnProperty("SuggestedBans")){
+            var status = 0;
+            // console.log(messageAsJson);
+            if(messageAsJson["Status"] > status){
+                status = messageAsJson["Status"];
+                var html = "";
+                let animateTimer = 0;
+                fetch("https://clash.dasnerdwork.net/clashapp/data/patch/version.txt")
+                .then(response => { return response.text();
+                }).then(currentpatch => {
+                    
                     for (const element of messageAsJson["SuggestedBans"]) {
                         if(executeOnlyOnce){
                             html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
@@ -69,87 +67,86 @@ fetch("https://clash.dasnerdwork.net/clashapp/data/patch/version.txt")
                     executeOnlyOnce = false;
                     selectedBans.innerHTML = html;
                     makeDragDroppable();
-                }
-            } else {
-                if(messageAsJson.status == "ElementAlreadyInArray"){
-                    var d = new Date();
-                    alert("[" + d.toLocaleTimeString() + "] Dieser Champion wurde bereits ausgewählt.\n");
-                } else if(messageAsJson.status == "MaximumElementsExceeded"){
-                    var d = new Date();
-                    alert("[" + d.toLocaleTimeString() + "] Die maximale Anzahl an ausgewählten Champions wurde erreicht.\n");
-                } else if(messageAsJson.status == "CodeInjectionDetected"){
-                    var d = new Date();
-                    alert("[" + d.toLocaleTimeString() + "] WARNUNG: Dieser Code Injection Versuch wurde geloggt und dem Administrator mitgeteilt.\n");
-                } else if(messageAsJson.status == "InvalidTeamID"){
-                    var d = new Date();
-                    alert("[" + d.toLocaleTimeString() + "] Die Anfrage für diese Team ID ist nicht gültig.\n");
-                } else if (messageAsJson.status == "FileDidNotExist") {
-                    window.location.reload();
-                } else if (messageAsJson.status == "Success") {
-                    // if successful
-                } else if (messageAsJson.status == "Update") {
-                    // if update
-                } else if (messageAsJson.status == "FirstConnect") {
-                    if (document.getElementById("highlighter") != null) {
-                        let nameElement = document.getElementById("highlighter");
-                        nameElement.classList.add("underline","decoration-"+messageAsJson.color);
-                        // document.getElementById("highlighterAfter") <- // insert before this element
-                    } else {
-                        const newParentDiv = document.createElement("div");
-                        const newImg = document.createElement("img");
-                        const newSpan = document.createElement("span");
-                        // newParentDiv.classList.add("flex","justify-center","items-center","px-4");
-                        newParentDiv.style.marginTop = "-13px";
-                        switch (messageAsJson.name){
-                            case "Krug": case "Wolf":
-                                newParentDiv.style.marginLeft = "-5.75rem";
-                                break;
-                            case "Nashor": case "Herald": case "Minion": case "Raptor": case "Gromp":
-                                newParentDiv.style.marginLeft = "-6.75rem";
-                                break;
-                            case "Sentinel": case "Scuttler":
-                                newParentDiv.style.marginLeft = "-7rem";
-                                break;
-                            case "Brambleback":
-                                newParentDiv.style.marginLeft = "-9rem";
-                                break;
-                            default:
-                                newParentDiv.style.marginLeft = "-9rem";
-                        }
-                        newParentDiv.setAttribute("onmouseover", "showIdentityNotice(true)");
-                        newParentDiv.setAttribute("onmouseout", "showIdentityNotice(false)");
-                        newSpan.setAttribute("onmouseover", "showIdentityNotice(true)");
-                        newSpan.setAttribute("onmouseout", "showIdentityNotice(false)");
-                        newParentDiv.classList.add("z-20","w-36","h-8");
-                        newImg.src="/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp"
-                        newImg.width = "32";
-                        newImg.classList.add("align-middle","mr-2.5","no-underline","inline-flex");
-                        newSpan.id = "highlighter";
-                        newSpan.classList.add("underline","decoration-2","decoration-"+messageAsJson.color+"/100");
-                        newSpan.style.textDecorationSkipInk = "none";
-                        newSpan.innerText = messageAsJson.name;
-                        newParentDiv.appendChild(newImg);
-                        newParentDiv.appendChild(newSpan);
-                        document.getElementById("highlighterAfter").insertBefore(newParentDiv, null);
-                        const identityNotice = document.getElementById("identityNotice");
-                        identityNotice.setAttribute("onmouseover", "showIdentityNotice(true)");
-                        identityNotice.setAttribute("onmouseout", "showIdentityNotice(false)");
-                    }
-                } else if (messageAsJson.status == "Message"){
-                    addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color);
-                }
+                });
             }
         } else {
-            addHistoryMessage(event.data);
+            if(messageAsJson.status == "ElementAlreadyInArray"){
+                var d = new Date();
+                alert("[" + d.toLocaleTimeString() + "] Dieser Champion wurde bereits ausgewählt.\n");
+            } else if(messageAsJson.status == "MaximumElementsExceeded"){
+                var d = new Date();
+                alert("[" + d.toLocaleTimeString() + "] Die maximale Anzahl an ausgewählten Champions wurde erreicht.\n");
+            } else if(messageAsJson.status == "CodeInjectionDetected"){
+                var d = new Date();
+                alert("[" + d.toLocaleTimeString() + "] WARNUNG: Dieser Code Injection Versuch wurde geloggt und dem Administrator mitgeteilt.\n");
+            } else if(messageAsJson.status == "InvalidTeamID"){
+                var d = new Date();
+                alert("[" + d.toLocaleTimeString() + "] Die Anfrage für diese Team ID ist nicht gültig.\n");
+            } else if (messageAsJson.status == "FileDidNotExist") {
+                window.location.reload();
+            } else if (messageAsJson.status == "Success") {
+                // if successful
+            } else if (messageAsJson.status == "Update") {
+                // if update
+            } else if (messageAsJson.status == "FirstConnect") {
+                if (document.getElementById("highlighter") != null) {
+                    let nameElement = document.getElementById("highlighter");
+                    nameElement.classList.add("underline","decoration-"+messageAsJson.color);
+                    // document.getElementById("highlighterAfter") <- // insert before this element
+                } else {
+                    const newParentDiv = document.createElement("div");
+                    const newImg = document.createElement("img");
+                    const newSpan = document.createElement("span");
+                    // newParentDiv.classList.add("flex","justify-center","items-center","px-4");
+                    newParentDiv.style.marginTop = "-13px";
+                    switch (messageAsJson.name){
+                        case "Krug": case "Wolf":
+                            newParentDiv.style.marginLeft = "-5.75rem";
+                            break;
+                        case "Nashor": case "Herald": case "Minion": case "Raptor": case "Gromp":
+                            newParentDiv.style.marginLeft = "-6.75rem";
+                            break;
+                        case "Sentinel": case "Scuttler":
+                            newParentDiv.style.marginLeft = "-7rem";
+                            break;
+                        case "Brambleback":
+                            newParentDiv.style.marginLeft = "-9rem";
+                            break;
+                        default:
+                            newParentDiv.style.marginLeft = "-9rem";
+                    }
+                    newParentDiv.setAttribute("onmouseover", "showIdentityNotice(true)");
+                    newParentDiv.setAttribute("onmouseout", "showIdentityNotice(false)");
+                    newSpan.setAttribute("onmouseover", "showIdentityNotice(true)");
+                    newSpan.setAttribute("onmouseout", "showIdentityNotice(false)");
+                    newParentDiv.classList.add("z-20","w-36","h-8");
+                    newImg.src="/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp"
+                    newImg.width = "32";
+                    newImg.classList.add("align-middle","mr-2.5","no-underline","inline-flex");
+                    newSpan.id = "highlighter";
+                    newSpan.classList.add("underline","decoration-2","decoration-"+messageAsJson.color+"/100");
+                    newSpan.style.textDecorationSkipInk = "none";
+                    newSpan.innerText = messageAsJson.name;
+                    newParentDiv.appendChild(newImg);
+                    newParentDiv.appendChild(newSpan);
+                    document.getElementById("highlighterAfter").insertBefore(newParentDiv, null);
+                    const identityNotice = document.getElementById("identityNotice");
+                    identityNotice.setAttribute("onmouseover", "showIdentityNotice(true)");
+                    identityNotice.setAttribute("onmouseout", "showIdentityNotice(false)");
+                }
+            } else if (messageAsJson.status == "Message"){
+                addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color);
+            }
         }
+    } else {
+        addHistoryMessage(event.data);
     }
+}
 
-    ws.onclose = (event) => { // Do this when the WS-Server stops
-        clearTimeout(this.pingTimeout);
-    }
+ws.onclose = (event) => { // Do this when the WS-Server stops
+    clearTimeout(this.pingTimeout);
+}
 
-
-});
 function addToFile(el){
     var name = el.getElementsByTagName("span")[0].innerText;
     var id = el.getElementsByTagName("img")[0].dataset.id;
