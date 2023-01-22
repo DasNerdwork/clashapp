@@ -1,3 +1,5 @@
+// This file contains every necessary websocket, ban element, drag & drop function and more for the team pages to work properly
+
 function ready(fn) {
     if (document.readyState !== 'loading') {
       fn();
@@ -8,25 +10,25 @@ function ready(fn) {
   
 const ws = new WebSocket('wss://dasnerdwork.net:8081/');
 
+ws.onopen = (event) => { // Do this on client opening the webpage
+    if (document.getElementById("highlighter") != null) {
+        var name = document.getElementById("highlighter").innerText
+    } else {
+        var name = "";
+    }
+    let sendInfo =  {
+        teamid: window.location.pathname.split("/team/")[1],
+        name: name,
+        request: "firstConnect"
+    };
+    ws.send(JSON.stringify(sendInfo))
+};
 
 fetch("https://clash.dasnerdwork.net/clashapp/data/patch/version.txt")
 .then(response => { return response.text();
 }).then(currentpatch => {
     var executeOnlyOnce = true;
   
-    ws.onopen = (event) => { // Do this on client opening the webpage
-        if (document.getElementById("highlighter") != null) {
-            var name = document.getElementById("highlighter").innerText
-        } else {
-            var name = "";
-        }
-        let sendInfo =  {
-            teamid: window.location.pathname.split("/team/")[1],
-            name: name,
-            request: "firstConnect"
-        };
-        ws.send(JSON.stringify(sendInfo))
-    };
 
     ws.onmessage = (event) => { // Do this when the WS-Server sends a message to client
         if(Array.from(event.data)[0] == "{"){
@@ -211,24 +213,6 @@ const historyContainer = document.getElementById("historyContainer");
     historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // DROPPABLE
 
 function makeDragDroppable(){
@@ -242,35 +226,28 @@ function makeDragDroppable(){
     }
 
     function dragStart (e) {
-      e.dataTransfer.setData('fromName', e.srcElement.previousSibling.dataset.id);
+      e.dataTransfer.setData('fromID', e.srcElement.previousSibling.dataset.id);
+      e.dataTransfer.setData('fromName', e.srcElement.parentElement.parentElement.getElementsByTagName("span")[0].innerText);
       e.dataTransfer.setData('isDraggable', e.srcElement.parentElement.classList); // set event data "isDraggable" to the class name "hoverer" of the parent element
       e.dataTransfer.setDragImage(e.srcElement.previousSibling, 24, 24);
       return oldIndex = getChildIndex(e.srcElement.parentElement.parentElement); // returning so function dropped is able to acces the old index variable
     }
 
     function dropped (e) {
+        var fromID = e.dataTransfer.getData('fromID');
         var fromName = e.dataTransfer.getData('fromName');
-        var toName = e.srcElement.previousSibling.dataset.id;
+        var toID = e.srcElement.previousSibling.dataset.id;
+        var toName = e.srcElement.parentElement.parentElement.getElementsByTagName("span")[0].innerText;
         cancelDefault(e);
-        
-        // get new and old index from dragStart return
-        // var newIndex = getChildIndex(e.toElement.parentElement.parentElement) // Javascript swap of elements -> not necessary due to ajax
-        // get parent as variable
-        // var selectedBans = e.toElement.parentElement.parentElement.parentElement; // Javascript swap of elements -> not necessary due to ajax
-        
+                
         if(e.dataTransfer.getData('isDraggable') != "hoverer group"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
             cancelDefault(e);
       } else {
-        // console.log("Moving index "+oldIndex+" to "+newIndex);
-        // insert the dropped item at new place
-        // if (newIndex < oldIndex) {
-        //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex]);
-        // } else {
-        //   selectedBans.insertBefore(selectedBans.children[oldIndex], selectedBans.children[newIndex].nextElementSibling);
-        // }
         let sendInfo =  { //TODO: Add change fromName and toName to fromID and toID + add catch for champ names instead of IDs for return message
             fromName: fromName,
+            fromID: fromID,
             toName: toName,
+            toID: toID,
             teamid: window.location.pathname.split("/team/")[1],
             request: "swap"
         };
@@ -289,4 +266,3 @@ function makeDragDroppable(){
         return false
     }
 }
-// END DROPPABLE
