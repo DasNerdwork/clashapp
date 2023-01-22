@@ -36,7 +36,6 @@ wss.on('connection', function connection(ws) {
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
           console.log("WS-Server: Forbidden teamid provided");
           ws.send('{"status":"InvalidTeamID"}');
-          // throw new Error("Invalid TeamID");
         } else {
           var checkForInjection = true;
           for (var champ in validChamps) { // loop through every current local champ
@@ -186,9 +185,9 @@ wss.on('connection', function connection(ws) {
             let fromId = 0;
             let toId= 0;
             localDataSuggestedBanArray.SuggestedBans.forEach(element => { // Find object element in array
-              if(element.id == dataAsJSON.fromName){
+              if(element.id == dataAsJSON.fromID){
                 fromId = localDataSuggestedBanArray.SuggestedBans.indexOf(element);
-              } else if(element.id == dataAsJSON.toName){
+              } else if(element.id == dataAsJSON.toID){
                 toId = localDataSuggestedBanArray.SuggestedBans.indexOf(element);
               }
             });
