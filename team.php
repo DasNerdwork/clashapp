@@ -43,7 +43,6 @@ include('/hdd1/clashapp/templates/header.php');
 // ----------------------------------------------------------------v- INITIALIZER -v---------------------------------------------------------------- //
 
 // These arrays are necessary and used for the getSuggestedBans function as parameters to retrieve the most accurate suggested ban data efficiently
-// $playerNameTeamArray = array(); // collects all 5 player names TODO: currently no use for, remove or useful?
 $playerSumidTeamArray = array(); // collects all 5 sumids
 $playerLanesTeamArray = array(); // collects all main and secondary roles per ["sumid"]
 $masteryDataTeamArray = array(); // collects mastery data per ["sumid"] to have them combined in a single array
@@ -123,14 +122,14 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         </div>
                     </div>
                 </div>"; }  else { echo "
-                    <div class='flex justify-center text-2xl h-8 mt-4 opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;' x-data=\"{ showNotice: false }\" x-cloak @mouseover='showNotice = true' @mouseout='showNotice = false'>
-                        <div class='flex justify-center gap-x-0'>
+                    <div class='flex justify-center text-2xl h-8 mt-4 opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
+                        <div class='flex justify-center gap-x-0' x-data=\"{ showNotice: false }\" x-cloak @mouseover='showNotice = true' @mouseout='showNotice = false'>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
-                            <span class='text-sm absolute backdrop-blur-xl top-[14.5rem]' x-show='showNotice' x-transition>Voting is only available for <a href='/login' class='underline'>logged-in</a> users</span>
+                            <span class='text-sm absolute top-[14.5rem]' x-show='showNotice' x-transition>Voting is only available for users</span>
                         </div>
                     </div>"; } echo "
                     <div class='flex justify-center items-center opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
@@ -235,7 +234,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             }
                                         }
                                     }
-                                    // $playerNameTeamArray[] = $playerName; // TODO: currently no use for, remove or useful?
                                     $playerSumidTeamArray[] = $sumid;
                                     $masteryDataTeamArray[$sumid] = $masteryData;
                                     if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["FetchPlayerData"]["Time"] = number_format((microtime(true) - $startFetchPlayer[$key]), 2, ',', '.')." s";
@@ -365,7 +363,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
 
 
-                            // ------------------------------------------------------------------v- TODO: AGAIN DOWNLOAD? -v------------------------------------------------------------------ //
+                            // ------------------------------------------------------------------v- AGAIN DOWNLOAD? -v------------------------------------------------------------------ //
 
                             if(!$execOnlyOnce) $startAgainDownload = microtime(true);
                             $memAgainDownload = memory_get_usage();
