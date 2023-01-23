@@ -240,7 +240,7 @@ function makeDragDroppable(){
         if(e.dataTransfer.getData('isDraggable') != "hoverer group"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
             cancelDefault(e);
       } else {
-        let sendInfo =  { //TODO: Add change fromName and toName to fromID and toID + add catch for champ names instead of IDs for return message
+        let sendInfo =  {
             fromName: fromName,
             fromID: fromID,
             toName: toName,

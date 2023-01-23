@@ -15,5 +15,5 @@ function setCodeHeader($title, $css, $javascript, $alpinejs, $websocket, $favico
         if($javascript === "qr"){ echo '<script type="text/javascript" src="../clashapp/qr-codes.min.js"></script>'; }
         if($websocket){ echo '<script type="text/javascript" src="../clashapp/websocket.js"></script>'; }
     echo '</head>';
-} // TODO: Websocket nur auf Team ID seiten aktivieren bzw. nur bestimmte websocket funktionalitäten
+}
 ?>
