@@ -96,7 +96,7 @@ if (isset($_POST['dcpassword'])) {
             echo "<script>setError('Unable to locally disconnected accounts. Please reach out to an administrator.');</script>"; // TODO: Fix error banner display
         }
     } else {
-        echo "<script>setError('Incorrect password. You can try again or <u type=\"button\" onclick=\"resetPassword(true);\" class=\"cursor-pointer\">reset</u> your password.');</script>"; // TODO change to password reset mail instead of onclick open
+        echo "<script>setError('Incorrect password. You can try again or <u type=\"button\" onclick=\"resetPassword(true);\" class=\"cursor-pointer\">reset</u> your password.');</script>"; // TODO: change to password reset mail instead of onclick open
     }
 }
 
