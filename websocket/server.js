@@ -85,7 +85,7 @@ wss.on('connection', function connection(ws) {
                   wss.clients.forEach(function each(client) {
                     if(client.location == dataAsJSON.teamid && client != ws){
                       // client.send(ws.name+' added '+dataAsJSON.champname);
-                      client.send('{"status":"Message","message":"added '+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
+                      client.send('{"status":"Message","message":"added '+dataAsJSON.champname+'.","name":"'+ws.name+'","color":"'+ws.color+'"}');
                     }
                   });
                 }
@@ -162,7 +162,7 @@ wss.on('connection', function connection(ws) {
                 wss.clients.forEach(function each(client) {
                   if(client.location == dataAsJSON.teamid && client != ws){
                     // client.send(ws.name+' removed '+dataAsJSON.champname);
-                    client.send('{"status":"Message","message":"removed '+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
+                    client.send('{"status":"Message","message":"removed '+dataAsJSON.champname+'.","name":"'+ws.name+'","color":"'+ws.color+'"}');
                   }
                 });
               }
@@ -198,11 +198,11 @@ wss.on('connection', function connection(ws) {
             fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(localDataSuggestedBanArray));
             console.log("WS-Server: Successfully swapped %s with %s in %s.json", dataAsJSON.fromName, dataAsJSON.toName, dataAsJSON.teamid);
             broadcastUpdate(dataAsJSON.teamid);
-            ws.send('{"status":"Success"}'); // TODO: Websocket sometimes not working in firefox or other browser? 
+            ws.send('{"status":"Success"}');
             wss.clients.forEach(function each(client) {
               if(client.location == dataAsJSON.teamid && client != ws){
                 // client.send(ws.name+' swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName);
-                client.send('{"status":"Message","message":"swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
+                client.send('{"status":"Message","message":"swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName+'.","name":"'+ws.name+'","color":"'+ws.color+'"}');
               }
             });
           }
@@ -281,7 +281,7 @@ wss.on('connection', function connection(ws) {
         ws.send(localTeamData);
         wss.clients.forEach(function each(client) {
           if(client.location == dataAsJSON.teamid && client != ws){
-            client.send('{"status":"Message","message":"joined the session","name":"'+ws.name+'","color":"'+ws.color+'"}');
+            client.send('{"status":"Message","message":"joined the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
           }
         });
       } 
@@ -305,6 +305,11 @@ wss.on('connection', function connection(ws) {
   ws.on('close', function close() {
     console.log('WS-Server: Connection of client closed from %s:%d on %s', ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length), ws._socket.remotePort, new Date().toLocaleString());
     console.log("WS-Server: Total clients connected: %d", wss.clients.size);
+    wss.clients.forEach(function each(client) {
+      if(client.location == ws.location && client != ws){
+        client.send('{"status":"Message","message":"left the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+      }
+    });
   });
 });
 
