@@ -1,7 +1,7 @@
 <?php
 $langArray = array(
 
-"profiles" => "Profile",
+"profiles" => "Profile", 
 
 );
 ?>
