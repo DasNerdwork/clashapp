@@ -315,7 +315,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             $playerLanesTeamArray[$sumid]["Mainrole"] = $playerLanes[0];
                             $playerLanesTeamArray[$sumid]["Secrole"] = $playerLanes[1];
 
-                            echo "<div class='inline-flex leading-8 gap-1'>
+                            echo "<div class='inline-flex leading-8 gap-1 z-20'>
                                     <div class='grid w-11/12 gap-2 h-fit'>
                                         <div class='flex h-8 items-center justify-between'>
                                             <span>Queued as:</span>
@@ -528,6 +528,23 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             $timer += 0.1;
         }
     }
+
+    // ------------------------------------------------------------------------------------------v- BOTTOM AD BANNERS  -v------------------------------------------------------------------------------------------- //
+
+    echo "
+    <div class='flex items-center justify-center gap-x-56 mb-6 mt-2'>
+        <div class='rounded bg-[#141624] p-4'>
+            <div class='w-[970px] h-[90px] bg-black'>
+                <span class='h-full flex items-center justify-center'>Advertisement</span> 
+            </div>
+        </div>
+        <div class='rounded bg-[#141624] p-4'>
+            <div class='w-[970px] h-[90px] bg-black'>
+                <span class='h-full flex items-center justify-center'>Advertisement</span> 
+            </div>
+        </div>
+    </div>
+    ";
     
     // ----------------------------------------------------------------------------------------------v- END + FOOTER  -v---------------------------------------------------------------------------------------------- //
 
