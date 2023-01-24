@@ -549,7 +549,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 $shealed = number_format($inhalt->info->participants[$in]->challenges->effectiveHealAndShielding, 0);
                                 $objs = number_format($inhalt->info->participants[$in]->damageDealtToObjectives, 0);
                                 $visionWards = $inhalt->info->participants[$in]->detectorWardsPlaced;
-                                $creepScore = $inhalt->info->participants[$in]->totalMinionsKilled;
+                                $creepScore = $inhalt->info->participants[$in]->totalMinionsKilled+$inhalt->info->participants[$in]->neutralMinionsKilled;
                                 $visionScore = $inhalt->info->participants[$in]->visionScore;
 
                         // Display of champion level at end of game

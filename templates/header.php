@@ -72,7 +72,7 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             <div class="flex justify-center items-center px-4 mt-[3px]">
                 <?php echo '<a href="https://clash.dasnerdwork.net/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'">';
                       echo '<img width="32" height="32" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" class="align-middle mr-2.5 no-underline inline-flex" alt="A custom profile icon of a player">';
-                      echo '<span id="highlighter" class="hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;">'.$headerJson["PlayerData"]["Name"].'</span></a>'; ?>
+                      echo '<p id="highlighter" class="inline hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;"><span class="text-white">'.$headerJson["PlayerData"]["Name"].'</span></p></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
