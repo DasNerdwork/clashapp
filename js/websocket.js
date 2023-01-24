@@ -91,12 +91,13 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
             } else if (messageAsJson.status == "FirstConnect") {
                 if (document.getElementById("highlighter") != null) {
                     let nameElement = document.getElementById("highlighter");
-                    nameElement.classList.add("underline","decoration-"+messageAsJson.color);
+                    nameElement.classList.add("underline","text-"+messageAsJson.color+"/100");
                     // document.getElementById("highlighterAfter") <- // insert before this element
                 } else {
                     const newParentDiv = document.createElement("div");
                     const newImg = document.createElement("img");
                     const newSpan = document.createElement("span");
+                    const newP = document.createElement("p");
                     // newParentDiv.classList.add("flex","justify-center","items-center","px-4");
                     newParentDiv.style.marginTop = "-13px";
                     switch (messageAsJson.name){
@@ -123,12 +124,14 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                     newImg.src="/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp"
                     newImg.width = "32";
                     newImg.classList.add("align-middle","mr-2.5","no-underline","inline-flex");
-                    newSpan.id = "highlighter";
-                    newSpan.classList.add("underline","decoration-2","decoration-"+messageAsJson.color+"/100");
-                    newSpan.style.textDecorationSkipInk = "none";
+                    newP.id = "highlighter";
+                    newP.classList.add("inline", "underline","decoration-2","text-"+messageAsJson.color+"/100");
+                    newP.style.textDecorationSkipInk = "none";
+                    newSpan.classList.add("text-white");
                     newSpan.innerText = messageAsJson.name;
+                    newP.appendChild(newSpan);
                     newParentDiv.appendChild(newImg);
-                    newParentDiv.appendChild(newSpan);
+                    newParentDiv.appendChild(newP);
                     document.getElementById("highlighterAfter").insertBefore(newParentDiv, null);
                     const identityNotice = document.getElementById("identityNotice");
                     identityNotice.setAttribute("onmouseover", "showIdentityNotice(true)");
