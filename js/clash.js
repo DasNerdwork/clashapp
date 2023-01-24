@@ -62,12 +62,12 @@ ready(function() {
 
     // GET TIME ZONE
 
-    let timezone = Intl.DateTimeFormat().resolvedOptions().locale;
-    if (timezone == "de" || timezone == "de-DE") {
-      document.getElementById("language-selector").innerHTML = "Deutsch";
-    } else {
-      document.getElementById("language-selector").innerHTML = "English";
-    }
+    // let timezone = Intl.DateTimeFormat().resolvedOptions().locale;
+    // if (timezone == "de" || timezone == "de-DE") {
+    //   document.getElementById("language-selector").innerHTML = "Deutsch";
+    // } else {
+    //   document.getElementById("language-selector").innerHTML = "English";
+    // }
     // console.log("Users browser language: "+timezone)
 
   }
