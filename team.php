@@ -51,7 +51,7 @@ $timeAndMemoryArray = array(); // saves the speed of every function and its  mem
 $timeAndMemoryArray["InitializingAndHeader"]["Time"] = number_format((microtime(true) - $startInitialTime), 2, ',', '.')." s";
 $timeAndMemoryArray["InitializingAndHeader"]["Memory"] = number_format((memory_get_usage() - $memInitialTime)/1024, 2, ',', '.')." kB";
 $execOnlyOnce = false;
-$matchAlpineCounter = 500;
+$matchAlpineCounter = 0;
 
 // -----------------------------------------------------------v- SANITIZE & CHECK TEAM ID -v----------------------------------------------------------- //
 
@@ -175,7 +175,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         $startFetchPlayerTotal = microtime(true);
         $memFetchPlayerTotal = memory_get_usage();
         echo "
-        <table class='w-full flex table-fixed border-separate border-spacing-4 '>
+        <table class='w-full flex table-fixed border-separate border-spacing-4 min-h-[2300px]'>
             <tr>";
             // count($teamDataArray["Players"]) == 1 ? $tableWidth = "100%" : $tableWidth = round(100/count($teamDataArray["Players"]));          // disabled due to cumulative layout shift
                 $playerDataDirectory = new DirectoryIterator('/hdd1/clashapp/data/player/');
@@ -532,7 +532,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     // ------------------------------------------------------------------------------------------v- BOTTOM AD BANNERS  -v------------------------------------------------------------------------------------------- //
 
     echo "
-    <div class='flex items-center justify-center gap-x-56 mb-6 mt-2'>
+    <div class='flex items-center justify-center gap-x-56 mb-6 mt-2' style='content-visibility: auto;'>
         <div class='rounded bg-[#141624] p-4'>
             <div class='w-[970px] h-[90px] bg-black'>
                 <span class='h-full flex items-center justify-center'>Advertisement</span> 

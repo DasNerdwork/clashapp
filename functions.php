@@ -479,7 +479,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     echo "<button type='button' class='collapsible bg-[#0e0f18] cursor-pointer h-6 w-full' 
             @click='open = !open' 
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
-    echo "<div class='smooth-transition w-full overflow-hidden' x-show='open' x-transition x-cloak>";
+    echo "<div class='smooth-transition w-full overflow-hidden h-[2300px]' x-show='open' x-transition x-cloak>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
         $handle = file_get_contents("/hdd1/clashapp/data/matches/".$matchIDJSON.".json");
         $inhalt = json_decode($handle);
