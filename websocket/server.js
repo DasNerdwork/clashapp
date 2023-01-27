@@ -3,6 +3,8 @@ import { readFileSync } from 'fs';
 import { WebSocketServer } from 'ws';
 import fs from 'fs';
 
+// console.log("\x1b[1mBright\x1b[2mUnderscore\x1b[4m\x1b[5mBlink\x1b[7mReverse\x1b[8mHidden");
+
 const server = createServer({
   cert: readFileSync('/etc/letsencrypt/live/dasnerdwork.net/fullchain.pem'),
   key: readFileSync('/etc/letsencrypt/live/dasnerdwork.net/privkey.pem')
@@ -12,19 +14,39 @@ const currentPatch = fs.readFileSync('/hdd1/clashapp/data/patch/version.txt', 'u
 const validChamps = JSON.parse(fs.readFileSync('/hdd1/clashapp/data/patch/'+currentPatch+'/data/de_DE/champion.json', 'utf-8'))["data"];
 var lastClient = "";
 
-wss.on('connection', function connection(ws) {
-  console.log('WS-Server: Client websocket connection initiated from %s:%d on %s', ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length), ws._socket.remotePort, new Date().toLocaleString());
-  console.log("WS-Server: Total clients connected: %d", wss.clients.size);
+wss.on('connection', function connection(ws, req) {
+  let d = new Date();
+  console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Client websocket connection initiated from \x1b[4m%s\x1b[0m:%d on %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, d.getDate()+"/"+d.getMonth()+1+"/"+d.getFullYear() % 100);
+  console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Total clients connected: %d", new Date().toLocaleTimeString(), wss.clients.size);
 
   ws.on('message', function message(data) {
-    let newClient = ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length) + ':' + ws._socket.remotePort
+    let newClient = req.headers['x-forwarded-for'].split(/\s*,\s*/)[0] + ':' + req.socket.remotePort;
     let dataAsString = data.toString();
     if(Array.from(dataAsString)[0] == "{"){        // If data is an [Object object]
       var dataAsJSON = JSON.parse(dataAsString);
+      let requestMessage = "";
+      switch (dataAsJSON.request) {
+        case "firstConnect":
+          requestMessage = "\x1b[36mfirstConnect\x1b[0m";
+          break;
+        case "add":
+          requestMessage = "\x1b[32madd\x1b[0m";
+          break;
+        case "remove":
+          requestMessage = "\x1b[31mremove\x1b[0m";
+          break;
+        case "rate":
+          requestMessage = "\x1b[33mrate\x1b[0m";
+          break;
+        case "swap":
+          requestMessage = "\x1b[35mswap\x1b[0m";
+          break;
+      }
+      let message = '{"teamid":"'+dataAsJSON.teamid+'","name":"'+dataAsJSON.name+'","request":"'+requestMessage+'"}';
       if(newClient == lastClient){ // If the same client is still sending data no "Received following data from" text is necessary
-        console.log('WS-Client: Data: %s', JSON.stringify(dataAsJSON));
+        console.log('\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: %s', new Date().toLocaleTimeString(), message);
       } else {
-        console.log('WS-Server: Received following data from %s\nWS-Client: %s', newClient, JSON.stringify(dataAsJSON));
+        console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Received following data from %s\n\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: %s', new Date().toLocaleTimeString(), newClient, new Date().toLocaleTimeString(), message);
         lastClient = newClient;
       }
 
@@ -34,7 +56,7 @@ wss.on('connection', function connection(ws) {
 
       if(dataAsJSON.request == "add"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
-          console.log("WS-Server: Forbidden teamid provided");
+          console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Forbidden teamid provided", new Date().toLocaleTimeString());
           ws.send('{"status":"InvalidTeamID"}');
         } else {
           var checkForInjection = true;
@@ -47,7 +69,7 @@ wss.on('connection', function connection(ws) {
             }
           }
           if(checkForInjection){ // if the var is still true (shouldn't be if id AND name found in champion.json)
-            console.log("WS-Server: Code Injection Deteced, either champname or champid is invalid -> Logging IP"); // TODO: Log and Save IP adress of attacker
+            console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Code Injection Deteced, either champname or champid is invalid -> Logging IP (%s)", new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]); // TODO: Log and Save IP adress of attacker
             ws.send('{"status":"CodeInjectionDetected"}');
           } else {       
             if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
@@ -63,11 +85,11 @@ wss.on('connection', function connection(ws) {
                 }
               }
               if(elementInArray){
-                console.log("WS-Server: Provided element already exists in local file -> skipping");
+                console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Provided element already exists in local file -> skipping", new Date().toLocaleTimeString());
                 ws.send('{"status":"ElementAlreadyInArray"}');
               } else {
                 if(Object.keys(localDataAsJson).length >= 10){
-                  console.log("WS-Server: Maximum elements exceeded -> skipping");
+                  console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Maximum elements exceeded -> skipping", new Date().toLocaleTimeString());
                   ws.send('{"status":"MaximumElementsExceeded"}');
                 } else {
                   var newChamp = {
@@ -79,7 +101,7 @@ wss.on('connection', function connection(ws) {
                   dataFromFile.Status++;
                   // console.log(dataFromFile);
                   fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(dataFromFile));
-                  console.log("WS-Server: Successfully added %s to %s.json", dataAsJSON.champname, dataAsJSON.teamid);
+                  console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully added %s to %s.json", new Date().toLocaleTimeString(), dataAsJSON.champname, dataAsJSON.teamid);
                   broadcastUpdate(dataAsJSON.teamid);
                   ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
                   wss.clients.forEach(function each(client) {
@@ -101,7 +123,7 @@ wss.on('connection', function connection(ws) {
                 Status: 1
               }
               fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(fileContent), function() {
-                console.log("WS-Server: File did not exists -> created %s.json", dataAsJSON.teamid);
+                console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: File did not exists -> created %s.json", new Date().toLocaleTimeString(), dataAsJSON.teamid);
                 ws.send('{"status":"FileDidNotExist"}');
               });
             }
@@ -114,7 +136,7 @@ wss.on('connection', function connection(ws) {
 
       } else if(dataAsJSON.request == "remove"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
-          console.log("WS-Server: Forbidden teamid provided");
+          console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Forbidden teamid provided", new Date().toLocaleTimeString());
           ws.send('{"status":"InvalidTeamID"}');
         } else {
           var checkForInjection = true;
@@ -127,7 +149,7 @@ wss.on('connection', function connection(ws) {
             }
           }
           if(checkForInjection){ // if the var is still true (shouldn't be if id AND name found in champion.json)
-            console.log("WS-Server: Code Injection Deteced, either champname or champid is invalid -> Logging IP"); // TODO: Log and Save IP adress of attacker
+            console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Code Injection Deteced, either champname or champid is invalid -> Logging IP (%s)", new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]); // TODO: Log and Save IP adress of attacker
             ws.send('{"status":"CodeInjectionDetected"}');
           } else {       
             if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
@@ -143,7 +165,7 @@ wss.on('connection', function connection(ws) {
                 }
               }
               if(!elementInArray){
-                console.log("WS-Server: Provided element does not exists in local file -> skipping");
+                console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Provided element does not exists in local file -> skipping", new Date().toLocaleTimeString());
                 ws.send('{"status":"ElementNotInArray"}');
               } else {
                 let newData = JSON.parse(dataFromFile);
@@ -156,7 +178,7 @@ wss.on('connection', function connection(ws) {
                 newData.SuggestedBans.splice(elementIndex, 1); // remove object from array
                 newData.Status++;
                 fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
-                console.log("WS-Server: Successfully removed %s from %s.json", dataAsJSON.champname, dataAsJSON.teamid);
+                console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully removed %s from %s.json", new Date().toLocaleTimeString(), dataAsJSON.champname, dataAsJSON.teamid);
                 broadcastUpdate(dataAsJSON.teamid);
                 ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
                 wss.clients.forEach(function each(client) {
@@ -176,7 +198,7 @@ wss.on('connection', function connection(ws) {
 
       } else if(dataAsJSON.request == "swap"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
-          console.log("WS-Server: Forbidden teamid provided");
+          console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Forbidden teamid provided", new Date().toLocaleTimeString());
           ws.send('{"status":"InvalidTeamID"}');
         } else {
           if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
@@ -196,7 +218,7 @@ wss.on('connection', function connection(ws) {
             localDataSuggestedBanArray.SuggestedBans[toId] = temp;
             localDataSuggestedBanArray.Status++;
             fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(localDataSuggestedBanArray));
-            console.log("WS-Server: Successfully swapped %s with %s in %s.json", dataAsJSON.fromName, dataAsJSON.toName, dataAsJSON.teamid);
+            console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully swapped %s with %s in %s.json", new Date().toLocaleTimeString(), dataAsJSON.fromName, dataAsJSON.toName, dataAsJSON.teamid);
             broadcastUpdate(dataAsJSON.teamid);
             ws.send('{"status":"Success"}');
             wss.clients.forEach(function each(client) {
@@ -214,18 +236,18 @@ wss.on('connection', function connection(ws) {
 
       } else if(dataAsJSON.request == "rate"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
-          console.log("WS-Server: Forbidden teamid provided");
+          console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Forbidden teamid provided", new Date().toLocaleTimeString());
           ws.send('{"status":"InvalidTeamID"}');
         } else {
           if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
             var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
             var newData = JSON.parse(dataFromFile);
             if(dataAsJSON.rating == 0){
-              console.log("WS-Server: Client removed rating score of %d from %s.json", newData.Rating[String(dataAsJSON.hash)], dataAsJSON.teamid);
+              console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Client removed rating score of %d from %s.json", new Date().toLocaleTimeString(), newData.Rating[String(dataAsJSON.hash)], dataAsJSON.teamid);
               delete newData.Rating[String(dataAsJSON.hash)];
             } else {
               newData.Rating[String(dataAsJSON.hash)] = dataAsJSON.rating;
-              console.log("WS-Server: Client rated %s.json with a score of %d", dataAsJSON.teamid, dataAsJSON.rating);
+              console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Client rated %s.json with a score of %d", new Date().toLocaleTimeString(), dataAsJSON.teamid, dataAsJSON.rating);
             }
             fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
             broadcastUpdate(dataAsJSON.teamid);
@@ -292,9 +314,9 @@ wss.on('connection', function connection(ws) {
 
     } else {
       if(newClient == lastClient){ // If the same client is still sending data no "Received following data from" text is necessary
-        console.log('WS-Client: Data: %s', data.toString());
+        console.log('\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: Data: %s', new Date().toLocaleTimeString(), data.toString());
       } else {
-        console.log('WS-Server: Received following data from %s:%d\nWS-Client: %s', ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length), ws._socket.remotePort, data.toString());
+        console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Received following data from %s:%d\n\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, new Date().toLocaleTimeString(), data.toString());
         lastClient = newClient;
       }
     }
@@ -303,8 +325,8 @@ wss.on('connection', function connection(ws) {
   ws.send('Handshake successful: Server received client request and answered.');
 
   ws.on('close', function close() {
-    console.log('WS-Server: Connection of client closed from %s:%d on %s', ws._socket.remoteAddress.substring(7, ws._socket.remoteAddress.length), ws._socket.remotePort, new Date().toLocaleString());
-    console.log("WS-Server: Total clients connected: %d", wss.clients.size);
+    console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Connection of client closed from %s:%d on %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, d.getDate()+"/"+d.getMonth()+1+"/"+d.getFullYear() % 100);
+    console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Total clients connected: %d", new Date().toLocaleTimeString(), wss.clients.size);
     wss.clients.forEach(function each(client) {
       if(client.location == ws.location && client != ws){
         client.send('{"status":"Message","message":"left the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
