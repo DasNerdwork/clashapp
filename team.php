@@ -290,6 +290,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             if(!$execOnlyOnce) $startGetMatchRanking = microtime(true);
                             $memGetMatchRanking = memory_get_usage();
                             $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE"
+                            // print_r($matchRankingArray["Reasons"]); // TODO: Implement Reasons array to tell player what they could've done to improve (Where rank 1-2 was good, where rank 9-10 should improve)
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchRanking"]["Time"] = number_format((microtime(true) - $startGetMatchRanking), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchRanking"]["Memory"] = number_format((memory_get_usage() - $memGetMatchRanking)/1024, 2, ',', '.')." kB";
                             if(!$execOnlyOnce) $startGetLanePercentages = microtime(true);
@@ -348,7 +349,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         <div class='flex h-8 items-center justify-between'>
                                             <span>Avg. Score:</span>
                                             <div class='inline-flex w-[4.5rem] justify-center'>
-                                                <span>".number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2)."</span>
+                                                <span>".number_format((array_sum($matchRankingArray["Scores"])/count($matchRankingArray["Scores"])), 2)."</span>
                                             </div>
                                         </div>";
                                         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
@@ -487,7 +488,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             echo "
                             <tr>
                                 <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")'>";
-                                    printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray);
+                                    printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray["Scores"]);
                                     echo "
                                 </td>
                             </tr>
