@@ -1,4 +1,9 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 /** Main functions.php containing overall used functions throughout different php files
  * @author Florian Falk <dasnerdwork@gmail.com>
  * @author Pascal Gnadt <p.gnadt@gmx.de>
@@ -479,7 +484,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     echo "<button type='button' class='collapsible bg-[#0e0f18] cursor-pointer h-6 w-full' 
             @click='open = !open' 
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
-    echo "<div class='smooth-transition w-full overflow-hidden h-[2300px]' x-show='open' x-transition x-cloak>";
+    echo "<div class='smooth-transition w-full overflow-hidden min-h-[2300px]' x-show='open' x-transition x-cloak>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
         $handle = file_get_contents("/hdd1/clashapp/data/matches/".$matchIDJSON.".json");
         $inhalt = json_decode($handle);
@@ -1785,92 +1790,144 @@ function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
 function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, $matchIDArray, $matchData){
     $sortedMasteryArray = array();
     $countArray = array();
+    $returnAndExplainArray = array();
+    $banExplainArray = array();
 
+    // Merge single player masteries together to create combined team mastery data array
     foreach($masterDataArray as $singleMasteryData){
         $sortedMasteryArray = array_merge($sortedMasteryArray, $singleMasteryData);
     }
 
-    
+    // Sort this combined team mastery data array
     usort($sortedMasteryArray, function($a, $b){
         $a["Points"] = str_replace(',', '', $a["Points"]);
         $b["Points"] = str_replace(',', '', $b["Points"]);
         return $b["Points"] <=> $a["Points"];
     });
     
-    print_r($sortedMasteryArray);
-
-    foreach($masterDataArray as $sumid => $playersMasteryData){
-        foreach($playersMasteryData as $data){
-            $countArray[$data["Champion"]][] = $sumid;
+    // Remove any duplicates and always choose the highest one (select combined data and remove single data from array)
+    foreach($sortedMasteryArray as $key1 => $champData1){ // Total Teampoints = Grouped mastery points of specific champion for the whole team e.g. two people play one champion -> mastery scores combined for that champ
+        $sortedMasteryArray[$key1]["TotalTeamPoints"] = 0;
+        $banExplainArray[$champData1["Champion"]]["TotalTeamPoints"]["Value"] = 0;
+        foreach($sortedMasteryArray as $key2 => $champData2){
+            if(($champData1 != $champData2) && ($champData1["Champion"] == $champData2["Champion"])){ 
+                $sortedMasteryArray[$key1]["TotalTeamPoints"] += str_replace(',', '.', $champData2["Points"]);
+                $banExplainArray[$champData1["Champion"]]["TotalTeamPoints"]["Value"] += str_replace(',', '.', $champData2["Points"]);
+            }
         }
     }
-
+    
+    // Delete unnecessary information from remaining array
+    foreach(array_keys($sortedMasteryArray) as $championData){
+        unset($sortedMasteryArray[$championData]["Lvl"]); 
+        unset($sortedMasteryArray[$championData]["LvlUpTokens"]); 
+        $sortedMasteryArray[$championData]["MatchingLanersPrio"] = 0;
+    }
+    // print_r($sortedMasteryArray); // This is now the sorted team mastery data array
+    
+    // Count how many people play a champion by adding their sumid if they have at least 20k mastery points on a champ (eq. to average understanding and not just played once)
+    foreach($masterDataArray as $sumid => $playersMasteryData){
+        foreach($playersMasteryData as $data){
+            $points = str_replace(',', '', $data["Points"]);
+            if($points >= 20000){
+                $countArray[$data["Champion"]][] = $sumid;
+            }
+        }
+    }
+    
+    // Remove all if a champ only got played by one person -> useless info
     foreach($countArray as $champion => $players){
         if(count($players)<2){
             unset($countArray[$champion]);
         }
     }
-
+    
+    // Sort the array of how many people played what champion from 5per champ highest to 2per champ lowest
     uasort($countArray, function($a, $b){
         return count($b) <=> count($a);
     });
-
-    foreach($sortedMasteryArray as $key1 => $champData1){ // Total Teampoints = Grouped mastery points of specific champion for the whole team e.g. two people play one champion -> mastery scores combined for that champ
-        foreach($sortedMasteryArray as $key2 => $champData2){
-            if(($champData1 != $champData2) && ($champData1["Champion"] == $champData2["Champion"])){ 
-                $sortedMasteryArray[$key1]["TotalTeamPoints"] = number_format(str_replace(',', '', $champData1["Points"])+str_replace(',', '', $champData2["Points"]));
-            }
-        }
-    }
-
-    foreach(array_keys($sortedMasteryArray) as $championData){ // Remove unnecessary information
-        // unset($sortedMasteryArray[$championData]["Filename"]); 
-        unset($sortedMasteryArray[$championData]["Lvl"]); 
-        unset($sortedMasteryArray[$championData]["LvlUpTokens"]); 
-        $sortedMasteryArray[$championData]["MatchingLanersPrio"] = 0;
-    }
-
-    foreach($countArray as $champion => $players){
-        foreach($players as $comparePlayer1){
-            foreach($players as $comparePlayer2){
-                if($comparePlayer1 != $comparePlayer2){
-                    if($playerLanesTeamArray[$comparePlayer1]["Mainrole"] != "UNKNOWN"){
+    // print_r($countArray); // This is now an array of total player capable to play a champion
+    
+    foreach($countArray as $champion => $players){ // For every champion that is played by more than 2 people with each more than 20k mastery
+        foreach($players as $comparePlayer1){ // Take comparePlayer1
+            foreach($players as $comparePlayer2){ // And comparePlayer 2
+                if($comparePlayer1 != $comparePlayer2){ // If those two are two different people
+                    if($playerLanesTeamArray[$comparePlayer1]["Mainrole"] != "UNKNOWN" && $playerLanesTeamArray[$comparePlayer1]["Mainrole"] != ""){ // And if comparePlayer1's lanes are known
                         if(($playerLanesTeamArray[$comparePlayer1]["Mainrole"] == $playerLanesTeamArray[$comparePlayer2]["Mainrole"]) || ($playerLanesTeamArray[$comparePlayer1]["Mainrole"] == $playerLanesTeamArray[$comparePlayer2]["Secrole"])){
-                            if($playerLanesTeamArray[$comparePlayer1]["Mainrole"] != "UNKNOWN"){
-                                if($playerLanesTeamArray[$comparePlayer1]["Mainrole"] == "FILL"){
-                                    foreach($sortedMasteryArray as $key => $championData){
-                                        if($championData["Champion"] == $champion){
-                                            $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
+                            // If the mainrole of Player1 is the same of Player2 or the same as Player2s Secondary, e.g. Player1 (JGL|MID) Player2 (MID) -> true
+                            if($playerLanesTeamArray[$comparePlayer1]["Mainrole"] == "FILL"){
+                                foreach($sortedMasteryArray as $key => $championData){
+                                    if($championData["Champion"] == $champion){
+                                        $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = [];
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1][] = "Main: FILL";
+                                        if(isset($banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                                            if(!in_array("FILL", $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                                                $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = "FILL";
+                                            }
+                                        } else {
+                                            $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = "FILL";
                                         }
+                                        break;
                                     }
-                                    // echo "Low Prio Match found: ".$playerLanesTeamArray[$comparePlayer1]["Mainrole"]." to ".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
-                                } else {
-                                    foreach($sortedMasteryArray as $key => $championData){
-                                        if($championData["Champion"] == $champion){
-                                            $sortedMasteryArray[$key]["MatchingLanersPrio"]++;
-                                        }
-                                    }
-                                    // echo "High Prio Match found: ".$playerLanesTeamArray[$comparePlayer1]["Mainrole"]." to ".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
                                 }
+                                // echo "Low Prio Match found: M-".$playerLanesTeamArray[$comparePlayer1]["Mainrole"]." to M-".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/S-".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
+                            } else {
+                                foreach($sortedMasteryArray as $key => $championData){
+                                    if($championData["Champion"] == $champion){
+                                        $sortedMasteryArray[$key]["MatchingLanersPrio"]++;
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = [];
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = "Main: ".$playerLanesTeamArray[$comparePlayer1]["Mainrole"];
+                                        if(isset($banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                                            if(!in_array($playerLanesTeamArray[$comparePlayer1]["Mainrole"], $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                                                $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = $playerLanesTeamArray[$comparePlayer1]["Mainrole"];
+                                            }
+                                        } else {
+                                            $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = $playerLanesTeamArray[$comparePlayer1]["Mainrole"];
+                                        }
+                                        break;
+                                    }
+                                }
+                                // echo "High Prio Match found: M-".$playerLanesTeamArray[$comparePlayer1]["Mainrole"]." to M-".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/S-".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
                             }
                         }
                     }
-                    if($playerLanesTeamArray[$comparePlayer1]["Secrole"] != "UNKNOWN"){
+                    if($playerLanesTeamArray[$comparePlayer1]["Secrole"] != "UNKNOWN" && $playerLanesTeamArray[$comparePlayer1]["Secrole"] != ""){
                         if(($playerLanesTeamArray[$comparePlayer1]["Secrole"] == $playerLanesTeamArray[$comparePlayer2]["Mainrole"]) || ($playerLanesTeamArray[$comparePlayer1]["Secrole"] == $playerLanesTeamArray[$comparePlayer2]["Secrole"])){
                             if($playerLanesTeamArray[$comparePlayer1]["Secrole"] == "FILL"){
                                 foreach($sortedMasteryArray as $key => $championData){
                                     if($championData["Champion"] == $champion){
                                         $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = [];
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][ $comparePlayer1] = "Sec: FILL";
+                                        if(isset($banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                                            if(!in_array("FILL", $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                                                $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = "FILL";
+                                            }
+                                        } else {
+                                            $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = "FILL";
+                                        }
+                                        break;
                                     }
                                 }
-                                // echo "Low Prio Match found: ".$playerLanesTeamArray[$comparePlayer1]["Secrole"]." to ".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
+                                // echo "Low Prio Match found: S-".$playerLanesTeamArray[$comparePlayer1]["Secrole"]." to M-".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/S-".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
                             } else {
                                 foreach($sortedMasteryArray as $key => $championData){
                                     if($championData["Champion"] == $champion){
-                                        $sortedMasteryArray[$key]["MatchingLanersPrio"]++;
+                                        $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = [];
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = "Sec: ".$playerLanesTeamArray[$comparePlayer1]["Secrole"];
+                                        if(isset($banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                                            if(!in_array($playerLanesTeamArray[$comparePlayer1]["Secrole"], $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                                                $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = $playerLanesTeamArray[$comparePlayer1]["Secrole"];
+                                            }
+                                        } else {
+                                            $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = $playerLanesTeamArray[$comparePlayer1]["Secrole"];
+                                        }
+                                        break;
                                     }
                                 }
-                                // echo "High Prio Match found: ".$playerLanesTeamArray[$comparePlayer1]["Secrole"]." to ".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
+                                // echo "High Prio Match found: S-".$playerLanesTeamArray[$comparePlayer1]["Secrole"]." to M-".$playerLanesTeamArray[$comparePlayer2]["Mainrole"]."/S-".$playerLanesTeamArray[$comparePlayer2]["Secrole"]." on ".$champion."<br>";
                             }
                         }
                     }
@@ -1878,7 +1935,17 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
             }
         }
     }
-
+    // print_r($sortedMasteryArray); // This array now contains under "MatchingLanersPrio" how many laners are capable to play the champion on the same lane (E.g. if two players can play Kayn JGL -> Score of 2)
+    /** The score also increases if the champion can be played on multiple lanes
+     * TOP + JGLTOP + JGL all play Kayn                                         SUPP + MIDSUPP play Leona
+     * Mainrole TOP eq. Secrole JGLTOP +1                                       Mainrole SUPP eq. Secrole MIDSUPP +1
+     * Mainrole JGLTOP eq. Mainrole JGL +1                                      Secrole MIDSUPP eq. Mainrole SUPP +0.5
+     * Mainrole JGL eq. Mainrole JGLTOP +1                                      ---------------------------------> 1.5
+     * Secrole JGLTOP eq. Mainrole TOP +0.5                                     
+     * ---------------------------------> 3.5
+     */ 
+    
+    // Count how many players have +20k Mastery on a champion without any matching lanes (Everyone could play some games Leona, but that doesnt mean it's as important as 2x supp mains on leona)
     $playerCountOfChampionArray = array_count_values(array_column($sortedMasteryArray, "Champion"));
     foreach($sortedMasteryArray as $key => $championData){
         foreach($playerCountOfChampionArray as $championName => $countData){
@@ -1887,105 +1954,172 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
             }
         }
     }
+    // print_r($sortedMasteryArray); // Array now contains information about how many players of the team can play a specific champion (not as important as when they match with their lanes as 3+ twitch players on random roles != 3+ twitch jgl) 
 
-    // echo "<pre>";
-    // print_r($countArray); 
-    // echo "</pre>";
-
-    // echo "<pre>";
-    // print_r($playerLanesTeamArray); 
-    // echo "</pre>";
-
+    // Calculate the occurences of a champion in the last fetched games (E.g. Viktor played in 7 of 15 games is important information, many points on irelia too, but 0 occurences in 15 last games of that player less important)
     foreach($matchIDArray as $matchID){
         foreach($matchData[$matchID]->info->participants as $player){
-            foreach($sumidArray as $sumid){
-                if($player->summonerId == $sumid){
-                    foreach($sortedMasteryArray as $key => $championData){
-                        if($championData["Champion"] == $player->championName){
-                            if(!isset($sortedMasteryArray[$key]["OccurencesInLastGames"])) $sortedMasteryArray[$key]["OccurencesInLastGames"] = 0;
-                            $sortedMasteryArray[$key]["OccurencesInLastGames"]++;
-                        }
+            if(in_array($player->summonerId, $sumidArray)){
+                foreach($sortedMasteryArray as $key => $championData){
+                    if($championData["Champion"] == $player->championName){
+                        if(!isset($sortedMasteryArray[$key]["OccurencesInLastGames"])) $sortedMasteryArray[$key]["OccurencesInLastGames"] = 0;
+                        if(!isset($banExplainArray[$championData["Champion"]]["OccurencesInLastGames"]["Count"])) $banExplainArray[$championData["Champion"]]["OccurencesInLastGames"]["Count"] = 0;
+                        $sortedMasteryArray[$key]["OccurencesInLastGames"]++;
+                        $banExplainArray[$championData["Champion"]]["OccurencesInLastGames"]["Count"]++;
+                        break; // Break to prevent unnecessary loops
                     }
                 }
             }
         }
     }
-
+    
+    // This block saves all matchscores achieved per champion per match if there were occurences in the last games. E.g. Kayn was played 3 times with scores [0] => 5.23, [1] => 6.77 [2] => 4.34
     foreach($matchData as $mainKey => $inhalt){
         foreach($inhalt->info->participants as $player){
             if(in_array($player->summonerId, $sumidArray)){
                 foreach($sortedMasteryArray as $key => $championData){
                     if($championData["Champion"] == $player->championName){
-                        if(!isset($sortedMasteryArray[$key]["AverageMatchScore"])) $sortedMasteryArray[$key]["AverageMatchScore"] = 0;
-                        $sortedMasteryArray[$key]["AverageMatchScore"] = number_format(($sortedMasteryArray[$key]["AverageMatchScore"]+implode("",getMatchRanking(array($mainKey), $matchData, $player->summonerId)["Scores"]))/2, 2, '.', '');
+                        if(!isset($sortedMasteryArray[$key]["AverageMatchScore"])) $sortedMasteryArray[$key]["AverageMatchScore"] = [];
+                        $sortedMasteryArray[$key]["AverageMatchScore"][] = implode("",getMatchRanking(array($mainKey), $matchData, $player->summonerId)["Scores"]);
+                        break; // Break to prevent unnecessary loops
                     }
                 }
             }
         }
     }
-
+    // Additionally this block sums the single matchscores together. E.g. from the values in the comment above -> (5.23 + 6.77 + 4.34) / 3 == 5.44
     foreach($sortedMasteryArray as $key => $championData){
-        $sortedMasteryArray[$key]["FinalScore"] = number_format((float)str_replace(',', '', $championData["Points"])/100000,2,'.',''); // MAX: Unlimited, e.g. 100k mastery -> 1, bei 1mio mastery -> 10, usw.                                                  => 367,165 Points   -> FinalScore: 3.67
-        $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["CapablePlayers"]*0.15; // MAX: 5 capable Players -> add 1 to final score                                                                                                          => 3 Capable Player -> Finalscore: +0.45
-        $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["MatchingLanersPrio"]*0.4; // MAX: 5 matching laners -> add 2 to final score                                                                                                       => 4 Matching Laners-> Finalscore: +1.6
-        if(isset($sortedMasteryArray[$key]["TotalTeamPoints"])) $sortedMasteryArray[$key]["FinalScore"] += number_format((float)str_replace(',', '', $sortedMasteryArray[$key]["TotalTeamPoints"])/400000,2,'.',''); // MAX: Unlimited, e.g. 800k mastery -> 2  => 521,734 Total    -> Finalscore: +1.3
-        switch ($sortedMasteryArray[$key]["LastPlayed"]){                                                                  // MAX: 1, e.g. Yesterday played                                                                                                     => 3 weeks ago      -> Finalscore: +0.9
+        if(isset($sortedMasteryArray[$key]["AverageMatchScore"])){
+            $sortedMasteryArray[$key]["AverageMatchScore"] = number_format(array_sum($sortedMasteryArray[$key]["AverageMatchScore"])/count($sortedMasteryArray[$key]["AverageMatchScore"]), 2, ".", "");
+        }
+    }
+    // print_r($sortedMasteryArray); // Array now contains the average matchscore on a champion if there were occurences in the last games
+
+    $sortedMasteryArray = unique_multidim_array($sortedMasteryArray, "Champion");
+    
+    foreach($sortedMasteryArray as $key => $championData){
+        if(!isset($sortedMasteryArray[$key]["OccurencesInLastGames"])) $sortedMasteryArray[$key]["OccurencesInLastGames"] = 0; // Handle empty occurences
+        if(!isset($sortedMasteryArray[$key]["AverageMatchScore"])) $sortedMasteryArray[$key]["AverageMatchScore"] = 0; // Handle empty Scores
+        $sortedMasteryArray[$key]["FinalScore"] = number_format((str_replace(',', '', $championData["Points"])**1.1)/(398107*1.25),2,'.','');
+        $banExplainArray[$championData["Champion"]]["Points"]["Add"] = number_format((str_replace(',', '', $championData["Points"])**1.1)/(398107*1.25),2,'.','');
+        $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["CapablePlayers"]*0.15;
+        $banExplainArray[$championData["Champion"]]["CapablePlayers"]["Add"] = $sortedMasteryArray[$key]["CapablePlayers"]*0.15;
+        $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["MatchingLanersPrio"]*0.4;
+        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Add"] = $sortedMasteryArray[$key]["MatchingLanersPrio"]*0.4;
+        if(isset($sortedMasteryArray[$key]["TotalTeamPoints"])){
+            $sortedMasteryArray[$key]["FinalScore"] += number_format((str_replace('.', '', $sortedMasteryArray[$key]["TotalTeamPoints"])**1.1)/(398107/(0.02*$sortedMasteryArray[$key]["CapablePlayers"])),2,'.','');
+            $banExplainArray[$championData["Champion"]]["TotalTeamPoints"]["Add"] = number_format((str_replace('.', '', $sortedMasteryArray[$key]["TotalTeamPoints"])**1.1)/(398107/(0.02*$sortedMasteryArray[$key]["CapablePlayers"])),2,'.','');
+        }    
+        
+        switch ($sortedMasteryArray[$key]["LastPlayed"]){
             case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-1 year"): // Über ein Jahr her
-                $sortedMasteryArray[$key]["FinalScore"] += 0.1;
+                $sortedMasteryArray[$key]["FinalScore"] += 0.16;
+                $banExplainArray[$championData["Champion"]]["LastPlayed"]["Add"] = 0.16;
                 break;
             case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-6 months"): // Über 6 Monate unter 1 Jahr
-                $sortedMasteryArray[$key]["FinalScore"] += 0.3;
+                $sortedMasteryArray[$key]["FinalScore"] += 0.33;
+                $banExplainArray[$championData["Champion"]]["LastPlayed"]["Add"] = 0.33;
                 break;
             case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-3 months"): // Über 3 Monate unter 6 Monate
                 $sortedMasteryArray[$key]["FinalScore"] += 0.5;
+                $banExplainArray[$championData["Champion"]]["LastPlayed"]["Add"] = 0.5;
                 break;
             case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-1 months"): // Über einen Monat unter 3 Monate
-                $sortedMasteryArray[$key]["FinalScore"] += 0.7;
+                $sortedMasteryArray[$key]["FinalScore"] += 0.66;
+                $banExplainArray[$championData["Champion"]]["LastPlayed"]["Add"] = 0.66;
                 break;
             case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-2 weeks"): // Über zwei Wochen unter 1 Monat
-                $sortedMasteryArray[$key]["FinalScore"] += 0.9;
+                $sortedMasteryArray[$key]["FinalScore"] += 0.83;
+                $banExplainArray[$championData["Champion"]]["LastPlayed"]["Add"] = 0.83;
                 break;
             case $sortedMasteryArray[$key]["LastPlayed"] > strtotime("-2 weeks"): // Unter zwei Wochen her
                 $sortedMasteryArray[$key]["FinalScore"] += 1;
+                $banExplainArray[$championData["Champion"]]["LastPlayed"]["Add"] = 1;
                 break;
         }
 
-        if(!isset($sortedMasteryArray[$key]["OccurencesInLastGames"])) $sortedMasteryArray[$key]["OccurencesInLastGames"] = 0; // Bug fix lol
-
-        if($sortedMasteryArray[$key]["OccurencesInLastGames"] > 0 && $sortedMasteryArray[$key]["OccurencesInLastGames"] < 5){
-            $sortedMasteryArray[$key]["FinalScore"] += 0.2;
-        } else if($sortedMasteryArray[$key]["OccurencesInLastGames"] >= 5 && $sortedMasteryArray[$key]["OccurencesInLastGames"] < 10){
-            $sortedMasteryArray[$key]["FinalScore"] += 0.4;
-        } else if($sortedMasteryArray[$key]["OccurencesInLastGames"] >= 10 && $sortedMasteryArray[$key]["OccurencesInLastGames"] < 15){
-            $sortedMasteryArray[$key]["FinalScore"] += 0.6;
-        } else if($sortedMasteryArray[$key]["OccurencesInLastGames"] >= 15 && $sortedMasteryArray[$key]["OccurencesInLastGames"] < 20){
-            $sortedMasteryArray[$key]["FinalScore"] += 0.8;
-        } else if($sortedMasteryArray[$key]["OccurencesInLastGames"] >= 20){
-            $sortedMasteryArray[$key]["FinalScore"] += 1;
+        if($sortedMasteryArray[$key]["OccurencesInLastGames"] > 0){
+            $sortedMasteryArray[$key]["FinalScore"] += number_format(($sortedMasteryArray[$key]["OccurencesInLastGames"]**0.7)/4.07090,2,'.',''); // Exponential Function
+            $banExplainArray[$championData["Champion"]]["OccurencesInLastGames"]["Add"] = number_format(($sortedMasteryArray[$key]["OccurencesInLastGames"]**0.7)/4.070905,2,'.','');
         }
 
-        if(!isset($sortedMasteryArray[$key]["AverageMatchScore"])) $sortedMasteryArray[$key]["AverageMatchScore"] = 0; // Bug fix lol
+        /**
+         * Exponentiell:
+         * 1  -> 0.24
+         * 2  -> 0.39
+         * 3  -> 0.53
+         * 5  -> 0.75
+         * 10 -> 1.23
+         * 15 -> 1.63
+         * 20 -> 2.00
+         * 
+         */
 
-        if($sortedMasteryArray[$key]["AverageMatchScore"] > 0 && $sortedMasteryArray[$key]["AverageMatchScore"] < 3){
-            $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["AverageMatchScore"]*0.15;
-        } else if($sortedMasteryArray[$key]["AverageMatchScore"] >= 3 && $sortedMasteryArray[$key]["AverageMatchScore"] < 5){
-            $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["AverageMatchScore"]*0.2; 
-        } else if($sortedMasteryArray[$key]["AverageMatchScore"] >= 5 && $sortedMasteryArray[$key]["AverageMatchScore"] < 7){
-            $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["AverageMatchScore"]*0.25; 
-        } else if($sortedMasteryArray[$key]["AverageMatchScore"] >= 7){
-            $sortedMasteryArray[$key]["FinalScore"] += $sortedMasteryArray[$key]["AverageMatchScore"]*0.3; 
+
+        if($sortedMasteryArray[$key]["AverageMatchScore"] > 0){
+            $sortedMasteryArray[$key]["FinalScore"] += number_format(($sortedMasteryArray[$key]["AverageMatchScore"]**1.75)/18.75,2,'.',''); // Exponential Function
+            $banExplainArray[$championData["Champion"]]["AverageMatchScore"]["Add"] = number_format(($sortedMasteryArray[$key]["AverageMatchScore"]**1.75)/18.75,2,'.','');
         }
+
+        /**
+         * Linear:          Exponentiell:
+         * 1  -> 0.30       1  -> 0.05      
+         * 2  -> 0.60       2  -> 0.17      
+         * 3  -> 0.90       3  -> 0.36      
+         * 4  -> 1.20       4  -> 0.60      
+         * 5  -> 1.50       5  -> 0.89      
+         * 6  -> 1.80       6  -> 1.22      
+         * 7  -> 2.10       7  -> 1.60      
+         * 8  -> 2.40       8  -> 2.02      
+         * 9  -> 2.70       9  -> 2.49      
+         * 10 -> 3.00       10 -> 2.99      
+         * 
+         */
+
+         $sortedMasteryArray[$key]["FinalScore"] = number_format($sortedMasteryArray[$key]["FinalScore"],2 ,".", "");
     }
 
-    $returnArray = unique_multidim_array($sortedMasteryArray, "Champion");
-
+    
+    $returnArray = $sortedMasteryArray;
+    
     usort($returnArray, function($a, $b){
         return $b["FinalScore"] <=> $a["FinalScore"];
     });
-
+    
     $returnArray = array_slice($returnArray, 0, 10);
 
-    return $returnArray; 
+    // Fetch which player contributes most to single mastery points
+    foreach($returnArray as $suggestedBan){
+        foreach($masterDataArray as $sumid => $data){
+            foreach($data as $singleChamp){
+                if($singleChamp["Points"] == $suggestedBan["Points"]){
+                    $banExplainArray[$suggestedBan["Champion"]]["Points"]["Value"] = $suggestedBan["Points"];
+                    $banExplainArray[$suggestedBan["Champion"]]["Points"]["Cause"] = $sumid;
+                    $banExplainArray[$suggestedBan["Champion"]]["CapablePlayers"]["Value"] = $suggestedBan["CapablePlayers"];
+                    $banExplainArray[$suggestedBan["Champion"]]["MatchingLanersPrio"]["Value"] = $suggestedBan["MatchingLanersPrio"];
+                    $banExplainArray[$suggestedBan["Champion"]]["LastPlayed"]["Value"] = $suggestedBan["LastPlayed"]; // Also includes last time played in normals
+                    if(isset($banExplainArray[$suggestedBan["Champion"]]["OccurencesInLastGames"]["Add"])){
+                        $banExplainArray[$suggestedBan["Champion"]]["OccurencesInLastGames"]["Games"] = count($matchIDArray);
+                    }
+                    $banExplainArray[$suggestedBan["Champion"]]["AverageMatchScore"]["Value"] = $suggestedBan["AverageMatchScore"];
+                    $banExplainArray[$suggestedBan["Champion"]]["FinalScore"] = $suggestedBan["FinalScore"];
+                }
+            }
+        }
+    }
+
+    // Remove any entries from the banExplainArray if they are not necessary information
+    foreach($banExplainArray as $championName => $data){
+        if(!in_array($championName, array_column($returnArray, "Champion"))){
+            unset($banExplainArray[$championName]);
+        }
+    }
+
+
+    $returnAndExplainArray["Return"] = $returnArray;
+    $returnAndExplainArray["Explain"] = $banExplainArray;
+    
+    return $returnAndExplainArray; 
 }
 
 /** This function the necessary information for a correct profile icon + border display
