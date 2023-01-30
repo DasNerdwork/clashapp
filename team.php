@@ -520,11 +520,14 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     $suggestedBanMatchData = getMatchData($matchIDTeamArray);
     $suggestedBanArray = getSuggestedBans($playerSumidTeamArray, $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
     $timer = 0;
-    foreach($suggestedBanArray as $banChampion){
+    foreach($suggestedBanArray["Return"] as $banChampion){
             echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards;">
                 <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);">
                     <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" alt="A league of legends champion icon of '.$banChampion["Champion"].'"></div>
                 <span class="suggested-ban-caption w-16 block">' . $banChampion["Champion"] . '</span>
+                <span>';
+                // print_r($suggestedBanArray["Explain"][$banChampion["Champion"]]);
+            echo '</span>
             </div>';
             $timer += 0.1;
         }
