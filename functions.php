@@ -1687,6 +1687,29 @@ function abbreviationFetcher($champName){
   return $abbreviations;
 }
 
+function timeDiffToText($timestamp){
+    switch ($timestamp){
+        case $timestamp < strtotime("-1 year"): // Über ein Jahr her
+            return "over a year ago";
+            break;
+        case $timestamp < strtotime("-6 months"): // Über 6 Monate unter 1 Jahr
+            return "over 6 months ago";
+            break;
+        case $timestamp < strtotime("-3 months"): // Über 3 Monate unter 6 Monate
+            return "over 3 months ago";
+            break;
+        case $timestamp < strtotime("-1 months"): // Über einen Monat unter 3 Monate
+            return "over a month ago";
+            break;
+        case $timestamp < strtotime("-2 weeks"): // Über zwei Wochen unter 1 Monat
+            return "over two weeks ago";
+            break;
+        case $timestamp > strtotime("-2 weeks"): // Unter zwei Wochen her
+            return "under two weeks ago";
+            break;
+    }
+}
+
 /** Function that generates the teams win, lose and winrate stats, recommended picks against aswell as discommended picks against them
  *
  * @param array $sumidArray This array contains all 5 summonerIDs of each team member, which is later used to identifiy if one of them played and won/lost a game
@@ -1859,8 +1882,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
                                 foreach($sortedMasteryArray as $key => $championData){
                                     if($championData["Champion"] == $champion){
                                         $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
-                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = [];
-                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1][] = "Main: FILL";
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][] =$comparePlayer1;
                                         if(isset($banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
                                             if(!in_array("FILL", $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
                                                 $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = "FILL";
@@ -1876,8 +1898,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
                                 foreach($sortedMasteryArray as $key => $championData){
                                     if($championData["Champion"] == $champion){
                                         $sortedMasteryArray[$key]["MatchingLanersPrio"]++;
-                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = [];
-                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = "Main: ".$playerLanesTeamArray[$comparePlayer1]["Mainrole"];
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][] = $comparePlayer1;
                                         if(isset($banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
                                             if(!in_array($playerLanesTeamArray[$comparePlayer1]["Mainrole"], $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
                                                 $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = $playerLanesTeamArray[$comparePlayer1]["Mainrole"];
@@ -1898,8 +1919,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
                                 foreach($sortedMasteryArray as $key => $championData){
                                     if($championData["Champion"] == $champion){
                                         $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
-                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = [];
-                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][ $comparePlayer1] = "Sec: FILL";
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][] = $comparePlayer1;
                                         if(isset($banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
                                             if(!in_array("FILL", $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
                                                 $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = "FILL";
@@ -1915,8 +1935,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
                                 foreach($sortedMasteryArray as $key => $championData){
                                     if($championData["Champion"] == $champion){
                                         $sortedMasteryArray[$key]["MatchingLanersPrio"] += 0.5;
-                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = [];
-                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][$comparePlayer1] = "Sec: ".$playerLanesTeamArray[$comparePlayer1]["Secrole"];
+                                        $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Cause"][] = $comparePlayer1;
                                         if(isset($banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
                                             if(!in_array($playerLanesTeamArray[$comparePlayer1]["Secrole"], $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"])){
                                                 $banExplainArray[$championData["Champion"]]["MatchingLanersPrio"]["Lanes"][] = $playerLanesTeamArray[$comparePlayer1]["Secrole"];

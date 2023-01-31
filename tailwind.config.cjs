@@ -14,6 +14,10 @@ module.exports = {
     'text-yellow-400',
     'text-darker',
     'text-dark',
+    'z-[9]',
+    'z-[8]',
+    'z-[7]',
+    'z-[6]',
     {
       pattern: /text-(silver|gold|bronze|platinum|iron|diamond|master|grandmaster|challenger)\/100/,
     },
