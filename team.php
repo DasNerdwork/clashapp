@@ -135,7 +135,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     <div class='flex justify-center items-center opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
                         <div class='group relative inline-block' x-data='{ tooltip: 0 }' x-cloak>
                             <button onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-xl p-3 w-fit bg-[#0e0f18] rounded-xl' type='button' @click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'>Click to Copy URL</button>
-                            <div class='w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition' @click='tooltip = 0'>
+                            <div class='w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition @click='tooltip = 0'>
                                 Copied to Clipboard
                                 <svg class='absolute text-black h-2 w-full left-0 top-full' x='0px' y='0px' viewBox='0 0 255 255' xml:space='preserve'><polygon class='fill-current' points='0,0 127.5,127.5 255,0'/></svg>
                             </div>
@@ -234,7 +234,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             }
                                         }
                                     }
-                                    $playerSumidTeamArray[] = $sumid;
+                                    $playerSumidTeamArray[$sumid] = $playerName;
                                     $masteryDataTeamArray[$sumid] = $masteryData;
                                     if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["FetchPlayerData"]["Time"] = number_format((microtime(true) - $startFetchPlayer[$key]), 2, ',', '.')." s";
                                     if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["FetchPlayerData"]["Memory"] = number_format((memory_get_usage() - $memFetchPlayer[$key])/1024, 2, ',', '.')." kB";
@@ -518,18 +518,65 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     // -------------------------------------------------------------------------------v- CALCULATE & PRINT SUGGESTED BAN DATA  -v------------------------------------------------------------------------------- //
 
     $suggestedBanMatchData = getMatchData($matchIDTeamArray);
-    $suggestedBanArray = getSuggestedBans($playerSumidTeamArray, $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
+    $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
     $timer = 0;
+    $zIndex = 10;
     foreach($suggestedBanArray["Return"] as $banChampion){
-            echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards;">
-                <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);">
+            echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0 relative" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards; z-index: '.$zIndex.';" x-data="{ showExplanation: false }">
+                <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);" @mouseover="showExplanation=true" @mouseout="showExplanation=false">
                     <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" alt="A league of legends champion icon of '.$banChampion["Champion"].'"></div>
                 <span class="suggested-ban-caption w-16 block">' . $banChampion["Champion"] . '</span>
-                <span>';
-                // print_r($suggestedBanArray["Explain"][$banChampion["Champion"]]);
-            echo '</span>
-            </div>';
+                <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3" x-show="showExplanation" x-transition x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
+                <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark">Category</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">Addition</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">Explanation</div>';
+                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["Points"]["Value"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Highest Mastery:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["Points"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$playerSumidTeamArray[$suggestedBanArray["Explain"][$banChampion["Champion"]]["Points"]["Cause"]].' achieved a mastery score of '.$suggestedBanArray["Explain"][$banChampion["Champion"]]["Points"]["Value"].' on '.$banChampion["Champion"].'.</div>';
+                }
+                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["TotalTeamPoints"]["Value"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Total Team Mastery:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["TotalTeamPoints"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">This team has a combined mastery score of '.str_replace(".", ",", $suggestedBanArray["Explain"][$banChampion["Champion"]]["TotalTeamPoints"]["Value"]).' on '.$banChampion["Champion"].'.</div>';
+                }
+                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Value"])){
+                    if($suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Value"] > 1){
+                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Capable Player:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Value"].' summoners of this team are able to play '.$banChampion["Champion"].'.</div>';
+                    } else {
+                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Capable Player:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Value"].' summoner of this team is able to play '.$banChampion["Champion"].'.</div>';
+                    }
+                }
+                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Cause"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Matching Laners:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">';
+                foreach($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Cause"] as $laner){
+                    if($laner == reset($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Cause"])){
+                        echo $playerSumidTeamArray[$laner];
+                    } else if($laner == end($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Cause"])){
+                        echo " & ".$playerSumidTeamArray[$laner];
+                    } else {
+                        echo ", ".$playerSumidTeamArray[$laner];
+                    }
+                } echo ' are able to perform with '.$banChampion["Champion"].' '; 
+                foreach($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Lanes"] as $lane){
+                    if($lane == reset($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                        echo ucfirst(strtolower($lane));
+                    } else if($laner == end($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                        echo " & ".ucfirst(strtolower($lane));
+                    } else {
+                        echo ", ".ucfirst(strtolower($lane));
+                    }
+                } echo'.</div>  '; } echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Last Played:</div>
+                <div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["LastPlayed"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">The last time someone played '.$banChampion["Champion"].' was '.timeDiffToText($suggestedBanArray["Explain"][$banChampion["Champion"]]["LastPlayed"]["Value"]).'.</div>';
+                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Count"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Occurences:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$banChampion["Champion"].' was played ';
+                    echo $suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Count"] > 1 ? $suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Count"].' times ' : ' once ';
+                    echo 'in the teams '.$suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Games"].' unique fetched Flex or Clash games.</div>';
+                } 
+                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["AverageMatchScore"]["Add"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-dark">Average Matchscore:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["AverageMatchScore"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left">The average matchscore achieved on '.$banChampion["Champion"].' is '.$suggestedBanArray["Explain"][$banChampion["Champion"]]["AverageMatchScore"]["Value"].'.</div>';
+                } echo '
+                <div class="py-3 px-2 flex justify-end items-center font-bold border-solid border-r-2 border-t-2 border-dark">Finalscore:</div><div class="py-3 px-2 flex justify-center items-center underline decoration-double font-bold border-solid border-r-2 border-t-2 border-dark text-base underline-offset-2">'.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["FinalScore"],2,'.','').'</div><div class="flex justify-end items-end text-gray-600 border-solid border-t-2 border-dark"><a href="/docs" onclick="return false;">&#187; Graphs & Formulas</a></div>
+                <svg class="absolute text-black/90 h-4 -ml-4 mt-5 rotate-90" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
+                </div>';
+            echo '</div>';
             $timer += 0.1;
+            $zIndex--;
+            if($zIndex == 5) $zIndex = 10;
         }
     }
 
