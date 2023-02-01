@@ -51,6 +51,8 @@ $timeAndMemoryArray = array(); // saves the speed of every function and its  mem
 $timeAndMemoryArray["InitializingAndHeader"]["Time"] = number_format((microtime(true) - $startInitialTime), 2, ',', '.')." s";
 $timeAndMemoryArray["InitializingAndHeader"]["Memory"] = number_format((memory_get_usage() - $memInitialTime)/1024, 2, ',', '.')." kB";
 $execOnlyOnce = false;
+$newMatchesDownloaded = false;
+$recalculateSuggestedBanData = false;
 $matchAlpineCounter = 0;
 
 // -----------------------------------------------------------v- SANITIZE & CHECK TEAM ID -v----------------------------------------------------------- //
@@ -74,9 +76,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'c');
             $suggestedBanFileContent["SuggestedBans"]=[] ;
             $suggestedBanFileContent["Status"]= 0;
+            $suggestedBanFileContent["Rating"]=[];
             fwrite($fp, json_encode($suggestedBanFileContent));
             fclose($fp);
-        } // no need to load the select bans file content in else block as setInterval in javascript immediately loads it anyways
+        } 
         $timeAndMemoryArray["CheckBanFile"]["Time"] = number_format((microtime(true) - $startCheckBanFile), 2, ',', '.')." s";
         $timeAndMemoryArray["CheckBanFile"]["Memory"] = number_format((memory_get_usage() - $memCheckBanFile)/1024, 2, ',', '.')." kB";
 
@@ -199,6 +202,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
                                                 if($playerDataJSON["MatchIDs"][0] != $tempMatchIDs[0]){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
                                                     echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Updated.');</script>";
+                                                    $newMatchesDownloaded = true;
                                                     break;
                                                 } else {
                                                     $playerData = $playerDataJSON["PlayerData"];
@@ -232,6 +236,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                     break;
                                                 }
                                             }
+                                        }
+                                    }
+
+                                    if($teamDataArray["Players"][$key] == end($teamDataArray["Players"])){ // If we are at the last player (all possible downloads would be ready at this point)
+                                        if($newMatchesDownloaded){
+                                            $recalculateSuggestedBanData = true;
                                         }
                                     }
                                     $playerSumidTeamArray[$sumid] = $playerName;
@@ -517,8 +527,21 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
     // -------------------------------------------------------------------------------v- CALCULATE & PRINT SUGGESTED BAN DATA  -v------------------------------------------------------------------------------- //
 
-    $suggestedBanMatchData = getMatchData($matchIDTeamArray);
-    $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
+    // Check if suggested ban data is already locally stored
+    $currentTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
+    if(!isset($currentTeamJSON["SuggestedBanData"]) || $recalculateSuggestedBanData){
+        // If not or new matches of any player downloaded -> calculate new and write to team.json file
+        $suggestedBanMatchData = getMatchData($matchIDTeamArray);
+        $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
+        $currentTeamJSON["SuggestedBanData"] = $suggestedBanArray;
+        $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'r+');
+        fwrite($fp, json_encode($currentTeamJSON));
+        fclose($fp);
+    } else {
+        // else -> fetch as variable
+        $suggestedBanArray = $currentTeamJSON["SuggestedBanData"];
+    }
+
     $timer = 0;
     $zIndex = 10;
     foreach($suggestedBanArray["Return"] as $banChampion){
