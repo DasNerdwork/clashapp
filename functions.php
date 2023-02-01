@@ -694,6 +694,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     echo '</div>';
 
                     echo '<div class="damage-dealt">';
+                    echo '<img src="/clashapp/data/misc/icons/DamageDealt.webp" width="16" height="16" loading="lazy" alt="An icon of a sword clashing through a bone">';
                     echo 'Dealt: '.$dealt;
                     echo '</div>';
 
