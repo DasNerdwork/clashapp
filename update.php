@@ -49,7 +49,9 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
         $jsonArray["PlayerData"] = $playerData;
         $jsonArray["RankData"] = $rankData;
         $jsonArray["MasteryData"] = $masteryData;
-        $jsonArray["MatchIDs"] = $matchIDs;
+        for ($i=0; $i < count($matchIDs); $i++) { 
+            $jsonArray["MatchIDs"][$matchIDs[$i]] = "";
+        }
         $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 
         /**
@@ -94,11 +96,11 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
              * STEP 3: Fetch all given matchIDs and download each match via downloadMatchByID
              */
             $playerDataArray = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
-            foreach($playerDataArray["MatchIDs"] as $match){
+            foreach(array_keys($playerDataArray["MatchIDs"]) as $match){
                 if(!file_exists('/var/www/html/clash/clashapp/data/matches/'.$match.'.json')){
                     $downloadReturn = downloadMatchByID($match, $playerName);
                     if(($downloadReturn["Status"] == "Success") && ($downloadReturn["ErrorFile"] != null)){
-                        if(($found = array_search($downloadReturn["ErrorFile"], $jsonArray["MatchIDs"])) !== false){
+                        if(($found = array_search($downloadReturn["ErrorFile"], array_keys($jsonArray["MatchIDs"]))) !== false){
                             unset($jsonArray["MatchIDs"][$found]);
                             $fp = fopen('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json', 'w');
                             fwrite($fp, json_encode($jsonArray));
