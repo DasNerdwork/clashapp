@@ -200,7 +200,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
                                                 $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                                                 $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
-                                                if($playerDataJSON["MatchIDs"][0] != $tempMatchIDs[0]){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
+                                                if(array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
                                                     echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Updated.');</script>";
                                                     $newMatchesDownloaded = true;
                                                     break;
@@ -211,7 +211,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                     $puuid = $playerDataJSON["PlayerData"]["PUUID"];
                                                     $rankData = $playerDataJSON["RankData"];
                                                     $masteryData = $playerDataJSON["MasteryData"];
-                                                    $matchids = $playerDataJSON["MatchIDs"];
+                                                    $matchids = array_keys($playerDataJSON["MatchIDs"]);
                                                     break;
                                                 }  
                                             } else {
@@ -232,7 +232,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                     $puuid = $playerDataJSON["PlayerData"]["PUUID"];
                                                     $rankData = $playerDataJSON["RankData"];
                                                     $masteryData = $playerDataJSON["MasteryData"];
-                                                    $matchids = $playerDataJSON["MatchIDs"];
+                                                    $matchids = array_keys($playerDataJSON["MatchIDs"]);
                                                     break;
                                                 }
                                             }
@@ -257,6 +257,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         <div class='relative flex justify-center'>";
                                             if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
                                                 echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" height="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px]" alt="The custom profile icon of a player">';
+                                            } else {
+                                                echo "huh";
                                             }
 
                                             $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
@@ -293,24 +295,87 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             if(!$execOnlyOnce) $startGetMatchData = microtime(true);
                             $memGetMatchData = memory_get_usage();
                             $matchids_sliced = array_slice($matchids, 0, 15); // Select first 15 MatchIDs of current player
-                            $matchDaten = getMatchData($matchids_sliced); // Get the opened & combined data of all of them
-                            // if(!$execOnlyOnce) echo "<pre>"; print_r($matchDaten); echo "</pre>";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchData"]["Time"] = number_format((microtime(true) - $startGetMatchData), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchData"]["Memory"] = number_format((memory_get_usage() - $memGetMatchData)/1024, 2, ',', '.')." kB";
-                            if(!$execOnlyOnce) $startGetMatchRanking = microtime(true);
-                            $memGetMatchRanking = memory_get_usage();
-                            $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE"
-                            // print_r($matchRankingArray["Reasons"]); // TODO: Implement Reasons array to tell player what they could've done to improve (Where rank 1-2 was good, where rank 9-10 should improve)
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchRanking"]["Time"] = number_format((microtime(true) - $startGetMatchRanking), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchRanking"]["Memory"] = number_format((memory_get_usage() - $memGetMatchRanking)/1024, 2, ',', '.')." kB";
+                            $slicedPlayerDataMatchIDs = array_slice($playerDataJSON["MatchIDs"], 0, 15);
+                            $recalculateMatchIDs = false;
+                            $recalculatePlayerLanes = false;
+                            foreach($slicedPlayerDataMatchIDs as $singleMatchID => $score){
+                                if($score == ""){
+                                    $recalculateMatchIDs = true;
+                                    break;
+                                } else {
+                                    $matchRankingArray = $playerDataJSON["MatchIDs"];
+                                    break;
+                                }
+                            }
+
+                            if(!isset($playerDataJSON["LanePercentages"])){
+                                $recalculatePlayerLanes = true;
+                            } else {
+                                $playerLanes = $playerDataJSON["LanePercentages"];
+                            }
+
+                            if($recalculateMatchIDs || $recalculatePlayerLanes){ $matchDaten = getMatchData($matchids_sliced); } // Get the opened & combined data of all of them
+                            //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchData"]["Time"] = number_format((microtime(true) - $startGetMatchData), 2, ',', '.')." s";
+                            //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchData"]["Memory"] = number_format((memory_get_usage() - $memGetMatchData)/1024, 2, ',', '.')." kB";
+                            
+                            if($recalculatePlayerLanes || $recalculateMatchIDs){
+                                $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get CURRENT filecontent
+                                $playerLanes = getLanePercentages($matchDaten, $puuid); // Retrieves the two most played lanes of the give puuid
+                                $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
+                                $playerDataJSON["LanePercentages"] = $playerLanes;
+                                fwrite($fp, json_encode($playerDataJSON));
+                                fclose($fp);
+                            } else {
+                                $playerLanes = $playerDataJSON["LanePercentages"];
+                            }
+
+                            if($recalculateMatchIDs){
+                                $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid)["Scores"]; // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE"
+                                foreach($slicedPlayerDataMatchIDs as $singleMatchID => $score){
+                                    foreach($matchRankingArray as $matchRankingID => $matchRankingScore){
+                                        if($matchRankingID == $singleMatchID){
+                                            $recalculatedMatchIDsArray[$singleMatchID] = $matchRankingScore;
+                                        }
+                                    }
+                                }
+                                $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get CURRENT filecontent
+                                $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
+                                $playerDataJSON["MatchIDs"] = $recalculatedMatchIDsArray;
+                                fwrite($fp, json_encode($playerDataJSON));
+                                fclose($fp);
+                            }
+
+                            // if(!isset($matchRankingArray)) $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE" // FIXME: Temp fix for testing
+                            // print_r($matchRankingArray["Scores"]);
+
+                            // print_r($matchRankingArray);
+                            //         if(!$execOnlyOnce) $startGetMatchRanking = microtime(true);
+                            //         $memGetMatchRanking = memory_get_usage();
+                            //         foreach($matchRankingArray as $matchRankingID => $matchScore){
+                            //             if($matchRankingID == $id){
+                            //                 $newMatchIDsData[$id] = $matchScore;
+                            //             }
+                            //         }
+                            //         // print_r($matchRankingArray["Reasons"]); // TODO: Implement Reasons array to tell player what they could've done to improve (Where rank 1-2 was good, where rank 9-10 should improve)
+                            //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchRanking"]["Time"] = number_format((microtime(true) - $startGetMatchRanking), 2, ',', '.')." s";
+                            //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchRanking"]["Memory"] = number_format((memory_get_usage() - $memGetMatchRanking)/1024, 2, ',', '.')." kB";
+
+                            //         $playerDataJSON["MatchIDs"] = $newMatchIDsData;
+
+                            //         $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
+                            //         fwrite($fp, json_encode($playerDataJSON));
+                            //         fclose($fp);
+                            //     }
+                            // }
                             if(!$execOnlyOnce) $startGetLanePercentages = microtime(true);
                             $memGetLanePercentages = memory_get_usage();
-                            $playerLanes = getLanePercentages($matchDaten, $puuid); // Retrieves the two most played lanes of the give puuid
+                            // print_r($playerLanes);
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetLanePercentages"]["Time"] = number_format((microtime(true) - $startGetLanePercentages), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetLanePercentages"]["Memory"] = number_format((memory_get_usage() - $memGetLanePercentages)/1024, 2, ',', '.')." kB";
                             if(!$execOnlyOnce) $startGetMostPlayedWith = microtime(true);
                             $memGetMostPlayedWith = memory_get_usage();
-                            $mostPlayedWithArray = mostPlayedWith($matchDaten, $puuid); // As the name says <--
+                            // $mostPlayedWithArray = mostPlayedWith($matchDaten, $puuid); // As the name says <--
+                            // print_r($mostPlayedWithArray);
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMostPlayedWith"]["Time"] = number_format((microtime(true) - $startGetMostPlayedWith), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMostPlayedWith"]["Memory"] = number_format((memory_get_usage() - $memGetMostPlayedWith)/1024, 2, ',', '.')." kB";
                             unset($matchDaten); // cleanup array for next player & faster loadtime
@@ -359,7 +424,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         <div class='flex h-8 items-center justify-between'>
                                             <span>Avg. Score:</span>
                                             <div class='inline-flex w-[4.5rem] justify-center'>
-                                                <span>".number_format((array_sum($matchRankingArray["Scores"])/count($matchRankingArray["Scores"])), 2)."</span>
+                                                <span>".number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2)."</span>
                                             </div>
                                         </div>";
                                         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
@@ -498,7 +563,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             echo "
                             <tr>
                                 <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")'>";
-                                    printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray["Scores"]);
+                                    printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray);
                                     echo "
                                 </td>
                             </tr>
@@ -527,6 +592,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
     // -------------------------------------------------------------------------------v- CALCULATE & PRINT SUGGESTED BAN DATA  -v------------------------------------------------------------------------------- //
 
+    // $recalculateSuggestedBanData = true; // uncomment to force recalc
     // Check if suggested ban data is already locally stored
     $currentTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
     if(!isset($currentTeamJSON["SuggestedBanData"]) || $recalculateSuggestedBanData){
@@ -544,56 +610,56 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
     $timer = 0;
     $zIndex = 10;
-    foreach($suggestedBanArray["Return"] as $banChampion){
+    foreach($suggestedBanArray as $champname => $banChampion){
             echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0 relative" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards; z-index: '.$zIndex.';" x-data="{ showExplanation: false }">
                 <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);" @mouseover="showExplanation=true" @mouseout="showExplanation=false">
-                    <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" alt="A league of legends champion icon of '.$banChampion["Champion"].'"></div>
-                <span class="suggested-ban-caption w-16 block">' . $banChampion["Champion"] . '</span>
+                    <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" alt="A league of legends champion icon of '.$champname.'"></div>
+                <span class="suggested-ban-caption w-16 block">' . $champname . '</span>
                 <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3" x-show="showExplanation" x-transition x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
                 <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark">Category</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">Addition</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">Explanation</div>';
-                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["Points"]["Value"])){
-                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Highest Mastery:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["Points"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$playerSumidTeamArray[$suggestedBanArray["Explain"][$banChampion["Champion"]]["Points"]["Cause"]].' achieved a mastery score of '.$suggestedBanArray["Explain"][$banChampion["Champion"]]["Points"]["Value"].' on '.$banChampion["Champion"].'.</div>';
+                if(isset($suggestedBanArray[$champname]["Points"]["Value"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Highest Mastery:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["Points"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$playerSumidTeamArray[$suggestedBanArray[$champname]["Points"]["Cause"]].' achieved a mastery score of '.$suggestedBanArray[$champname]["Points"]["Value"].' on '.$champname.'.</div>';
                 }
-                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["TotalTeamPoints"]["Value"])){
-                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Total Team Mastery:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["TotalTeamPoints"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">This team has a combined mastery score of '.str_replace(".", ",", $suggestedBanArray["Explain"][$banChampion["Champion"]]["TotalTeamPoints"]["Value"]).' on '.$banChampion["Champion"].'.</div>';
+                if(isset($suggestedBanArray[$champname]["TotalTeamPoints"]["Value"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Total Team Mastery:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["TotalTeamPoints"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">This team has a combined mastery score of '.str_replace(".", ",", $suggestedBanArray[$champname]["TotalTeamPoints"]["Value"]).' on '.$champname.'.</div>';
                 }
-                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Value"])){
-                    if($suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Value"] > 1){
-                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Capable Player:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Value"].' summoners of this team are able to play '.$banChampion["Champion"].'.</div>';
+                if(isset($suggestedBanArray[$champname]["CapablePlayers"]["Value"])){
+                    if($suggestedBanArray[$champname]["CapablePlayers"]["Value"] > 1){
+                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Capable Player:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["CapablePlayers"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$suggestedBanArray[$champname]["CapablePlayers"]["Value"].' summoners of this team are able to play '.$champname.'.</div>';
                     } else {
-                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Capable Player:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$suggestedBanArray["Explain"][$banChampion["Champion"]]["CapablePlayers"]["Value"].' summoner of this team is able to play '.$banChampion["Champion"].'.</div>';
+                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Capable Player:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["CapablePlayers"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$suggestedBanArray[$champname]["CapablePlayers"]["Value"].' summoner of this team is able to play '.$champname.'.</div>';
                     }
                 }
-                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Cause"])){
-                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Matching Laners:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">';
-                foreach($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Cause"] as $laner){
-                    if($laner == reset($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Cause"])){
+                if(isset($suggestedBanArray[$champname]["MatchingLanersPrio"]["Cause"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Matching Laners:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["MatchingLanersPrio"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">';
+                foreach($suggestedBanArray[$champname]["MatchingLanersPrio"]["Cause"] as $laner){
+                    if($laner == reset($suggestedBanArray[$champname]["MatchingLanersPrio"]["Cause"])){
                         echo $playerSumidTeamArray[$laner];
-                    } else if($laner == end($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Cause"])){
+                    } else if($laner == end($suggestedBanArray[$champname]["MatchingLanersPrio"]["Cause"])){
                         echo " & ".$playerSumidTeamArray[$laner];
                     } else {
                         echo ", ".$playerSumidTeamArray[$laner];
                     }
-                } echo ' are able to perform with '.$banChampion["Champion"].' '; 
-                foreach($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Lanes"] as $lane){
-                    if($lane == reset($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                } echo ' are able to perform with '.$champname.' while matching lanes ('; 
+                foreach($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"] as $lane){
+                    if($lane == reset($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"])){
                         echo ucfirst(strtolower($lane));
-                    } else if($laner == end($suggestedBanArray["Explain"][$banChampion["Champion"]]["MatchingLanersPrio"]["Lanes"])){
+                    } else if($laner == end($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"])){
                         echo " & ".ucfirst(strtolower($lane));
                     } else {
                         echo ", ".ucfirst(strtolower($lane));
                     }
-                } echo'.</div>  '; } echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Last Played:</div>
-                <div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["LastPlayed"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">The last time someone played '.$banChampion["Champion"].' was '.timeDiffToText($suggestedBanArray["Explain"][$banChampion["Champion"]]["LastPlayed"]["Value"]).'.</div>';
-                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Count"])){
-                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Occurences:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$banChampion["Champion"].' was played ';
-                    echo $suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Count"] > 1 ? $suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Count"].' times ' : ' once ';
-                    echo 'in the teams '.$suggestedBanArray["Explain"][$banChampion["Champion"]]["OccurencesInLastGames"]["Games"].' unique fetched Flex or Clash games.</div>';
+                } echo').</div>  '; } echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Last Played:</div>
+                <div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["LastPlayed"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">The last time someone played '.$champname.' was '.timeDiffToText($suggestedBanArray[$champname]["LastPlayed"]["Value"]).'.</div>';
+                if(isset($suggestedBanArray[$champname]["OccurencesInLastGames"]["Count"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">Occurences:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["OccurencesInLastGames"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$champname.' was played ';
+                    echo $suggestedBanArray[$champname]["OccurencesInLastGames"]["Count"] > 1 ? $suggestedBanArray[$champname]["OccurencesInLastGames"]["Count"].' times ' : ' once ';
+                    echo 'in the teams '.$suggestedBanArray[$champname]["OccurencesInLastGames"]["Games"].' unique fetched Flex or Clash games.</div>';
                 } 
-                if(isset($suggestedBanArray["Explain"][$banChampion["Champion"]]["AverageMatchScore"]["Add"])){
-                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-dark">Average Matchscore:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-dark">+ '.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["AverageMatchScore"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left">The average matchscore achieved on '.$banChampion["Champion"].' is '.$suggestedBanArray["Explain"][$banChampion["Champion"]]["AverageMatchScore"]["Value"].'.</div>';
+                if(isset($suggestedBanArray[$champname]["AverageMatchScore"]["Add"])){
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-dark">Average Matchscore:</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["AverageMatchScore"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left">The average matchscore achieved on '.$champname.' is '.$suggestedBanArray[$champname]["AverageMatchScore"]["Value"].'.</div>';
                 } echo '
-                <div class="py-3 px-2 flex justify-end items-center font-bold border-solid border-r-2 border-t-2 border-dark">Finalscore:</div><div class="py-3 px-2 flex justify-center items-center underline decoration-double font-bold border-solid border-r-2 border-t-2 border-dark text-base underline-offset-2">'.number_format($suggestedBanArray["Explain"][$banChampion["Champion"]]["FinalScore"],2,'.','').'</div><div class="flex justify-end items-end text-gray-600 border-solid border-t-2 border-dark"><a href="/docs" onclick="return false;">&#187; Graphs & Formulas</a></div>
+                <div class="py-3 px-2 flex justify-end items-center font-bold border-solid border-r-2 border-t-2 border-dark">Finalscore:</div><div class="py-3 px-2 flex justify-center items-center underline decoration-double font-bold border-solid border-r-2 border-t-2 border-dark text-base underline-offset-2">'.number_format($suggestedBanArray[$champname]["FinalScore"],2,'.','').'</div><div class="flex justify-end items-end text-gray-600 border-solid border-t-2 border-dark"><a href="/docs" onclick="return false;">&#187; Graphs & Formulas</a></div>
                 <svg class="absolute text-black/90 h-4 -ml-4 mt-5 rotate-90" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
                 </div>';
             echo '</div>';
