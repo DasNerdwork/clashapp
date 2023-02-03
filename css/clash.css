@@ -2,11 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family:'Montserrat',sans-serif;
-  src: url("/clashapp/data/fonts/Montserrat/static/Montserrat-Regular.ttf") format('truetype');
-  font-weight: 400;
-  font-style: normal;
+@layer base {
+  @font-face {
+    font-family:'Montserrat',sans-serif;
+    src: url("/clashapp/data/fonts/Montserrat/Montserrat-Regular.ttf") format('truetype');
+    font-weight: 400;
+    font-style: normal;
+  }
 }
 
 [x-cloak] { display: none; }
