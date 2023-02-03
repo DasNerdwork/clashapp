@@ -1,5 +1,9 @@
 <?php
 include_once('functions.php');
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 
 /** update.php updates the player.json of a given user by a specific matchcount. This includes the count of give matches, matchids, mastery data, rank data, etc.
  *
@@ -50,8 +54,11 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
         $jsonArray["RankData"] = $rankData;
         $jsonArray["MasteryData"] = $masteryData;
         for ($i=0; $i < count($matchIDs); $i++) { 
-            $jsonArray["MatchIDs"][$matchIDs[$i]] = "";
+            if(!isset($jsonArray["MatchIDs"][$matchIDs[$i]])){
+                $jsonArray["MatchIDs"][$matchIDs[$i]] = "";
+            }
         }
+
         $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 
         /**
@@ -68,7 +75,7 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                 // }
                 $return = true;
                 foreach($matchIDs as $checkSingleMatch){
-                    if(!in_array($checkSingleMatch, $existingJson["MatchIDs"])){
+                    if(!in_array($checkSingleMatch, array_keys($existingJson["MatchIDs"]))){
                         downloadMatchByID($checkSingleMatch, $playerName);
                         $return = false;
                     }
@@ -101,6 +108,7 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                     $downloadReturn = downloadMatchByID($match, $playerName);
                     if(($downloadReturn["Status"] == "Success") && ($downloadReturn["ErrorFile"] != null)){
                         if(($found = array_search($downloadReturn["ErrorFile"], array_keys($jsonArray["MatchIDs"]))) !== false){
+                            echo "<script>console.log(".json_encode($found).");</script>"; // FIXME: Check this
                             unset($jsonArray["MatchIDs"][$found]);
                             $fp = fopen('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json', 'w');
                             fwrite($fp, json_encode($jsonArray));

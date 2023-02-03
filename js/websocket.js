@@ -111,7 +111,7 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                             newParentDiv.style.marginLeft = "-7rem";
                             break;
                         case "Brambleback":
-                            newParentDiv.style.marginLeft = "-9rem";
+                            newParentDiv.style.marginLeft = "-10rem";
                             break;
                         default:
                             newParentDiv.style.marginLeft = "-9rem";
@@ -120,7 +120,7 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                     newParentDiv.setAttribute("onmouseout", "showIdentityNotice(false)");
                     newSpan.setAttribute("onmouseover", "showIdentityNotice(true)");
                     newSpan.setAttribute("onmouseout", "showIdentityNotice(false)");
-                    newParentDiv.classList.add("z-20","w-36","h-8");
+                    newParentDiv.classList.add("z-20","w-40","h-8");
                     newImg.src="/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp"
                     newImg.width = "32";
                     newImg.classList.add("align-middle","mr-2.5","no-underline","inline-flex");
