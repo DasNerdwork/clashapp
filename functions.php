@@ -541,11 +541,30 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 if ($inhalt->info->participants[$in])
                                 $champion = $inhalt->info->participants[$in]->championName;
                                 if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** TODO: One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                                if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
-                                    echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
-                                    echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative bottom-16 -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                if($champion == "Kayn"){
+                                    if($inhalt->info->participants[$in]->championTransform == "1"){
+                                        if(file_exists('/hdd1/clashapp/data/misc/webp/kayn_rhaast_darkin.webp')){
+                                            echo '<img src="/clashapp/data/misc/webp/kayn_rhaast_darkin.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                            echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative bottom-16 -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                        }
+                                    } else if($inhalt->info->participants[$in]->championTransform == "2") {
+                                        if(file_exists('/hdd1/clashapp/data/misc/webp/kayn_shadow_assassin.webp')){
+                                            echo '<img src="/clashapp/data/misc/webp/kayn_shadow_assassin.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                            echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative bottom-16 -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                        }
+                                    } else {
+                                        if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
+                                            echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                            echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative bottom-16 -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                        }
+                                    }
                                 } else {
-                                    echo '<img src="/clashapp/data/misc/na.webp" width="68" height="68" class="align-middle max-w-[68px] min-w-[68px] rounded" loading="lazy" alt="This icon represents a value not being available">';
+                                    if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
+                                        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                        echo '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="max-w-[68px] min-w-[68px] flex align-middle relative bottom-16 -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                    } else {
+                                        echo '<img src="/clashapp/data/misc/na.webp" width="68" height="68" class="align-middle max-w-[68px] min-w-[68px] rounded" loading="lazy" alt="This icon represents a value not being available">';
+                                    }
                                 }
                                 
                                 // Save values dealt for later print below
