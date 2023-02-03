@@ -473,7 +473,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 <td class='text-center h-32 min-h-[8rem]'> 
                                     <div class='inline-flex w-full justify-evenly'>";
                                     if(empty($rankData) || empty(array_intersect(array("RANKED_SOLO_5x5", "RANKED_FLEX_SR"), array_column($rankData,"Queue")))){
-                                        echo "<div class='flex items-center gap-2 rounded bg-[#0e0f18] p-2'><img src='/clashapp/data/misc/webp/unranked_emote.webp' width='64' height='64' loading='lazy' class='w-16' alt='A blitzcrank emote with a questionmark in case this player has no retrievable ranked data'><span class='w-[4.5rem]'>Unranked</span></div>";
+                                        echo "<div class='flex items-center gap-2 rounded bg-[#0e0f18] p-2'><img src='/clashapp/data/misc/webp/unranked_emote.webp' width='64' height='64' loading='lazy' class='w-16' alt='A blitzcrank emote with a questionmark in case this player has no retrievable ranked data'><span class='min-w-[5.5rem]'>Unranked</span></div>";
                                     } else {
                                         foreach($rankData as $rankQueue){
                                             if($rankQueue["Queue"] == "RANKED_SOLO_5x5"){ echo "
