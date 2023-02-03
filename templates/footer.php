@@ -17,7 +17,7 @@
             $createDate = new DateTime("2022-01-28"); // 28.01.2022
             $today = new DateTime("today");
             $difference = $createDate->diff($today);
-            echo "v0.".sprintf("%03d", $output[0]).".".($difference->y+1).".".($difference->m+($difference->y*12)).".".sprintf("%04d", $difference->days).
+            echo "v0.".sprintf("%03d", $output[0]).".".($difference->y).".".($difference->m+($difference->y*12)).".".sprintf("%04d", $difference->days).
             "<!-- v0.commitCount.yearsSinceCreate.monthsSinceCreate.daysSinceCreate -->";
         ?>
     </div>
