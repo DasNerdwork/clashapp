@@ -3,9 +3,9 @@ if (!isset($_SESSION)) session_start();
 
 // print_r($_SESSION);
 
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 $startInitialTime = microtime(true);
@@ -220,7 +220,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         }
                                     }
                                     if(!isset($sumid) && $player["summonerId"] != "") {
-                                        updateProfile($player["summonerId"], 15, "sumid", $tempMatchIDs);
+                                        updateProfile($player["summonerId"], 15, "sumid");
                                         foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
                                             $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
                                             if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
@@ -238,7 +238,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             }
                                         }
                                     }
-
                                     if($teamDataArray["Players"][$key] == end($teamDataArray["Players"])){ // If we are at the last player (all possible downloads would be ready at this point)
                                         if($newMatchesDownloaded){
                                             $recalculateSuggestedBanData = true;
@@ -258,7 +257,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
                                                 echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" height="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px]" alt="The custom profile icon of a player">';
                                             } else {
-                                                echo "huh";
+                                                echo "Missing Img"; // FIXME: Create Fallback
                                             }
 
                                             $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
@@ -302,9 +301,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 if($score == ""){
                                     $recalculateMatchIDs = true;
                                     break;
-                                } else {
-                                    $matchRankingArray = $playerDataJSON["MatchIDs"];
-                                    break;
                                 }
                             }
 
@@ -314,7 +310,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 $playerLanes = $playerDataJSON["LanePercentages"];
                             }
 
-                            if($recalculateMatchIDs || $recalculatePlayerLanes){ $matchDaten = getMatchData($matchids_sliced); } // Get the opened & combined data of all of them
+                            if($recalculateMatchIDs || $recalculatePlayerLanes){ // Get the opened & combined data of all of them
+                                $matchDaten = getMatchData($matchids_sliced); 
+                            }
+                            
                             //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchData"]["Time"] = number_format((microtime(true) - $startGetMatchData), 2, ',', '.')." s";
                             //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchData"]["Memory"] = number_format((memory_get_usage() - $memGetMatchData)/1024, 2, ',', '.')." kB";
                             
@@ -330,7 +329,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             }
 
                             if($recalculateMatchIDs){
-                                $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid)["Scores"]; // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE"
+                                $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE"
+
                                 foreach($slicedPlayerDataMatchIDs as $singleMatchID => $score){
                                     foreach($matchRankingArray as $matchRankingID => $matchRankingScore){
                                         if($matchRankingID == $singleMatchID){
@@ -340,10 +340,23 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 }
                                 $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get CURRENT filecontent
                                 $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
-                                $playerDataJSON["MatchIDs"] = $recalculatedMatchIDsArray;
+                                $playerDataJSON["MatchIDs"] = array_slice($recalculatedMatchIDsArray, 0, 15);
+                                echo "<script>console.log('".json_encode($playerDataJSON["MatchIDs"])."');</script>";
                                 fwrite($fp, json_encode($playerDataJSON));
                                 fclose($fp);
+                                unset($recalculatedMatchIDsArray); // Necessary to reset the array for the next player iteration, otherwise everyone has the same matchids stored
+                            } else {
+                                $matchRankingArray = $playerDataJSON["MatchIDs"];
                             }
+
+
+
+
+
+
+
+
+
 
                             // if(!isset($matchRankingArray)) $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE" // FIXME: Temp fix for testing
                             // print_r($matchRankingArray["Scores"]);
@@ -582,6 +595,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     $timeAndMemoryArray["Player"][$playerName]["TotalPlayer"]["Memory"] = number_format((memory_get_usage() - $memFetchPlayer[$key])/1024, 2, ',', '.')." kB";
                     // break; // Uncomment if we want only 1 player to render
                 }
+                unset($matchids_sliced);
+                unset($slicedPlayerDataMatchIDs);
                 $startGetSuggestedBans = microtime(true);
                 $memGetSuggestedBans = memory_get_usage();
                 echo "
