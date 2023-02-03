@@ -1,7 +1,7 @@
 <?php
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 /** Main functions.php containing overall used functions throughout different php files
@@ -1539,8 +1539,8 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
             }
             unset($tempArray);
         }
-        $returnArray["Scores"][$matchID] = number_format(($maxRankScore/247), 2);
-        $returnArray["Reasons"][$matchID] = $reasonArray[$matchID];
+        $returnArray[$matchID] = number_format(($maxRankScore/247), 2);
+        // $returnArray["Reasons"][$matchID] = $reasonArray[$matchID];
     }
     return $returnArray;
 }
@@ -1741,7 +1741,7 @@ function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
                 foreach($inhalt->info->participants as $enemy){
                     if($enemy->teamId != $teamId){ // Select only enemy team
                         $tempArray[$enemy->summonerId]["Champion"] = $enemy->championName;
-                        $tempArray[$enemy->summonerId]["Matchscore"] = implode("",getMatchRanking(array($inhalt->metadata->matchId), $matchData, $enemy->summonerId)["Scores"]);
+                        $tempArray[$enemy->summonerId]["Matchscore"] = implode("",getMatchRanking(array($inhalt->metadata->matchId), $matchData, $enemy->summonerId));
                     }
                 }
                 $matchscoreArray[$inhalt->metadata->matchId] = $tempArray;
@@ -2012,7 +2012,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
                 foreach($sortedMasteryArray as $key => $championData){
                     if($championData["Champion"] == $player->championName){
                         if(!isset($sortedMasteryArray[$key]["AverageMatchScore"])) $sortedMasteryArray[$key]["AverageMatchScore"] = [];
-                        $sortedMasteryArray[$key]["AverageMatchScore"][] = implode("",getMatchRanking(array($mainKey), $matchData, $player->summonerId)["Scores"]);
+                        $sortedMasteryArray[$key]["AverageMatchScore"][] = implode("",getMatchRanking(array($mainKey), $matchData, $player->summonerId));
                         break; // Break to prevent unnecessary loops
                     }
                 }
