@@ -132,7 +132,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
-                            <span class='text-sm absolute top-[14.5rem]' x-show='showNotice' x-transition>Voting is only available for users</span>
+                            <span class='text-sm absolute top-[14.5rem]' x-show='showNotice' x-transition>Voting is only available for <a href='/login' class='underline'>logged-in</a> users</span>
                         </div>
                     </div>"; } echo "
                     <div class='flex justify-center items-center opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
@@ -341,7 +341,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get CURRENT filecontent
                                 $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
                                 $playerDataJSON["MatchIDs"] = array_slice($recalculatedMatchIDsArray, 0, 15);
-                                echo "<script>console.log('".json_encode($playerDataJSON["MatchIDs"])."');</script>";
                                 fwrite($fp, json_encode($playerDataJSON));
                                 fclose($fp);
                                 unset($recalculatedMatchIDsArray); // Necessary to reset the array for the next player iteration, otherwise everyone has the same matchids stored
@@ -380,6 +379,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             //         fclose($fp);
                             //     }
                             // }
+
+
                             if(!$execOnlyOnce) $startGetLanePercentages = microtime(true);
                             $memGetLanePercentages = memory_get_usage();
                             // print_r($playerLanes);
@@ -530,34 +531,34 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             echo "
                             <tr>
                                 <td>
-                                    <div class='max-h-[6rem] overflow-hidden mb-2 flex flex-wrap px-4 justify-evenly'>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>MVP</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Dragonkiller</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Newly</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Invader</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Lowbob</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Captain</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Premate</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
-                                            <div class='list-none my-1.5 mx-1 border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] float-left cursor-help'>Test</div>
+                                    <div class='max-h-[6.5rem] overflow-hidden mb-2 flex flex-wrap px-4 justify-evenly gap-1'>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>MVP</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Dragonkiller</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Newly</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Invader</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Lowbob</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Captain</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Premate</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
                                     </div>
                                 </td>
                             </tr>";
@@ -607,7 +608,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
     // -------------------------------------------------------------------------------v- CALCULATE & PRINT SUGGESTED BAN DATA  -v------------------------------------------------------------------------------- //
 
-    // $recalculateSuggestedBanData = true; // uncomment to force recalc
+    $recalculateSuggestedBanData = true; // uncomment to force recalc
     // Check if suggested ban data is already locally stored
     $currentTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
     if(!isset($currentTeamJSON["SuggestedBanData"]) || $recalculateSuggestedBanData){
@@ -615,7 +616,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         $suggestedBanMatchData = getMatchData($matchIDTeamArray);
         $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
         $currentTeamJSON["SuggestedBanData"] = $suggestedBanArray;
-        $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'r+');
+        $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'w+');
         fwrite($fp, json_encode($currentTeamJSON));
         fclose($fp);
     } else {

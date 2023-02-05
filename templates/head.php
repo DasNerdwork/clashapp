@@ -13,7 +13,7 @@ function setCodeHeader($title, $css, $javascript, $alpinejs, $websocket, $favico
         if($alpinejs){ echo '<script src="//unpkg.com/alpinejs" defer></script>'; }
         if($javascript || $javascript == "qr"){ echo '<script type="text/javascript" src="../clashapp/clash.min.js"></script><script type="text/javascript" src="../clashapp/main.js"></script>'; }
         if($javascript === "qr"){ echo '<script type="text/javascript" src="../clashapp/qr-codes.min.js"></script>'; }
-        if($websocket){ echo '<script type="text/javascript" src="../clashapp/websocket.min.js"></script>'; }
+        if($websocket){ echo '<script type="text/javascript" src="../clashapp/websocket.js"></script>'; }
     echo '</head>';
 }
 ?>
