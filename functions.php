@@ -494,7 +494,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                 for($in = 0; $in < 10; $in++){
                     if($inhalt->info->participants[$in]->puuid == $puuid) {
                         $teamID = $inhalt->info->participants[$in]->teamId;
-                        if($inhalt->info->participants[$in]->win == false){
+                        if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
+                            echo '<div class="w-full bg-gray-800 border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }" style="content-visibility: auto;">';
+                        } elseif ($inhalt->info->participants[$in]->win == false){
                             echo '<div class="w-full bg-lose border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }" style="content-visibility: auto;">';
                         } else {
                             echo '<div class="w-full bg-win border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }" style="content-visibility: auto;">';
@@ -502,7 +504,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                             echo '<div id="match-header" class="inline-flex w-full gap-2 pt-2 px-2">';
                                 echo '<div class="match-result mb-2">';
                                 // Display of W(in) or L(ose)
-                                if($inhalt->info->participants[$in]->win == true) {
+                                if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
+                                    echo '<span class="text-white font-bold">R</span>';
+                                } elseif($inhalt->info->participants[$in]->win == true) {
                                     echo '<span class="text-online font-bold">W</span>';
                                 } else {
                                     echo '<span class="text-offline font-bold">L</span>';
