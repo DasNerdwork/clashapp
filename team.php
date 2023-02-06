@@ -95,10 +95,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <div class='p-4 rounded bg-[#141624] h-96'>
                     <h1 id='teamname' class='inline-flex items-center gap-4'>
                         <img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>
-                        <span id='team-title' class='text-2xl'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (Tier ".$teamDataArray["Tier"].")</span>
+                        <span id='team-title' class='text-2xl'>".strtoupper(__($teamDataArray["Tag"]))." | ".strtoupper(__($teamDataArray["Name"]))." (".__("Tier")." ".$teamDataArray["Tier"].")</span>
                     </h1>
                     <div class='h-full w-full flex -mt-16 flex-col justify-end'>
-                    <span class='ml-1 mb-0.5 text-base font-bold'>History</span>
+                    <span class='ml-1 mb-0.5 text-base font-bold'>".__("History")."</span>
                         <div id='historyContainer' class='bg-darker w-full h-32 p-2 flex flex-col-reverse overflow-auto'>
                         </div>
                     </div>
@@ -107,11 +107,11 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             </div>
             <div class='row-span-2 h-96 flex items-center justify-center rounded bg-[#141624]'>
                 <div class='h-[21rem] w-[17.5rem] bg-black'>
-                    <span class='h-[21rem] flex items-center justify-center'>Advertisement</span> 
+                    <span class='h-[21rem] flex items-center justify-center'>".__("Advertisement")."</span> 
                 </div>
             </div>
             <div class='row-span-2 h-96 grid rounded bg-[#141624]'>
-                <span class='w-full h-8 flex justify-center items-center'>Suggested Bans:</span>
+                <span class='w-full h-8 flex justify-center items-center'>".__("Suggested Bans").":</span>
                 <div id='suggestedBans' class='w-full grid grid-cols-[64px_64px_64px_64px_64px] gap-y-8 p-2 justify-evenly rounded bg-[#141624] min-h-[180px]'></div>
                 "; if(isset($_SESSION['user']['email'])){ echo "
                 <div class='flex justify-center text-2xl h-8 mt-4'>
@@ -132,12 +132,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
-                            <span class='text-sm absolute top-[14.5rem]' x-show='showNotice' x-transition>Voting is only available for <a href='/login' class='underline'>logged-in</a> users</span>
+                            <span class='text-sm absolute top-[14.5rem]' x-show='showNotice' x-transition>".sprintf(__("Voting is only available for %slogged-in%s users"), "<a href='/login' class='underline'>", "</a>")."</span>
                         </div>
                     </div>"; } echo "
                     <div class='flex justify-center items-center opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
                         <div class='group relative inline-block' x-data='{ tooltip: 0 }' x-cloak>
-                            <button onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-xl p-3 w-fit bg-[#0e0f18] rounded-xl' type='button' @click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'>Click to Copy URL</button>
+                            <button onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-xl p-3 w-fit bg-[#0e0f18] rounded-xl' type='button' @click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'>".__("Click to Copy URL")."</button>
                             <div class='w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition @click='tooltip = 0'>
                                 Copied to Clipboard
                                 <svg class='absolute text-black h-2 w-full left-0 top-full' x='0px' y='0px' viewBox='0 0 255 255' xml:space='preserve'><polygon class='fill-current' points='0,0 127.5,127.5 255,0'/></svg>
@@ -147,7 +147,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 </div>
                 <div class='row-span-2 h-96 flex items-center justify-center rounded bg-[#141624]'>
                     <div class='h-[21rem] w-[17.5rem] bg-black'>
-                        <span class='h-[21rem] flex items-center justify-center'>Advertisement</span>
+                        <span class='h-[21rem] flex items-center justify-center'>".__("Advertisement")."</span>
                     </div>
                 </div>
                 <div class='flex justify-center rounded bg-[#141624] overflow-hidden h-fit fullhd:h-44 twok:h-48'>
@@ -156,7 +156,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <div class='flex justify-center rounded bg-[#141624] fullhd:h-48 twok:h-44'>
                     <form id='banSearch' class='m-0 pb-4 w-full' action='' onsubmit='return false;' method='GET' autocomplete='off'>
                         <div id='top-ban-bar' class='h-10 text-black'>
-                            <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2' value='' placeholder='Championname'>
+                            <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2' value='' placeholder='".__("Championname")."'>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer' src='/clashapp/data/misc/lanes/UTILITY.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='sup' alt='An icon for the support lane'>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/BOTTOM.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='adc' alt='An icon for the bottom lane'>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/MIDDLE.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='mid' alt='An icon for the middle lane'>
@@ -166,7 +166,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] twok:max-h-[7.5rem] fullhd:max-h-[8.5rem] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1'>";
                             showBanSelector(); echo "
                         </div>
-                        <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/4'><img src='/clashapp/data/misc/webp/empty_search.webp' class='w-16' alt='A frog emoji with a questionmark'><span>Whoops, did you mistype?</span></div>
+                        <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/5 '><img src='/clashapp/data/misc/webp/empty_search.webp' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
                     </form>
                 </div>
             </div>";
@@ -408,7 +408,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             echo "<div class='inline-flex leading-8 gap-1 z-20'>
                                     <div class='grid w-11/12 gap-2 h-fit'>
                                         <div class='flex h-8 items-center justify-between'>
-                                            <span>Queued as:</span>
+                                            <span>".__("Queued as").":</span>
                                             <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
                                             if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
                                                 if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
@@ -424,7 +424,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             } echo"</div>
                                         </div>
                                         <div class='flex h-8 items-center justify-between'>
-                                            <span>Position(s):</span>
+                                            <span>".__("Position(s)").":</span>
                                             <div class='inline-flex gap-2 w-[72px] justify-center'>";
                                             if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
                                                 echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
@@ -436,7 +436,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         if(!$execOnlyOnce) $startPrintAverageMatchscore = microtime(true);
                                         $memPrintAverageMatchscore = memory_get_usage(); echo "
                                         <div class='flex h-8 items-center justify-between'>
-                                            <span>Avg. Score:</span>
+                                            <span>".__("Avg. Score").":</span>
                                             <div class='inline-flex w-[4.5rem] justify-center'>
                                                 <span>".number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2)."</span>
                                             </div>
@@ -474,20 +474,20 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 <td class='text-center h-32 min-h-[8rem]'> 
                                     <div class='inline-flex w-full justify-evenly'>";
                                     if(empty($rankData) || empty(array_intersect(array("RANKED_SOLO_5x5", "RANKED_FLEX_SR"), array_column($rankData,"Queue")))){
-                                        echo "<div class='flex items-center gap-2 rounded bg-[#0e0f18] p-2'><img src='/clashapp/data/misc/webp/unranked_emote.webp' width='64' height='64' loading='lazy' class='w-16' alt='A blitzcrank emote with a questionmark in case this player has no retrievable ranked data'><span class='min-w-[5.5rem]'>Unranked</span></div>";
+                                        echo "<div class='flex items-center gap-2 rounded bg-[#0e0f18] p-2'><img src='/clashapp/data/misc/webp/unranked_emote.webp' width='64' height='64' loading='lazy' class='w-16' alt='A blitzcrank emote with a questionmark in case this player has no retrievable ranked data'><span class='min-w-[5.5rem]'>".__("Unranked")."</span></div>";
                                     } else {
                                         foreach($rankData as $rankQueue){
                                             if($rankQueue["Queue"] == "RANKED_SOLO_5x5"){ echo "
                                                 <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
-                                                <span class='block text-[0.75rem]'>Ranked Solo/Duo:</span>
-                                                    <span class='text-".strtolower($rankQueue["Tier"])."/100'>".ucfirst(strtolower($rankQueue["Tier"])). " " . $rankQueue["Rank"];
+                                                <span class='block text-[0.75rem]'>".__("Ranked Solo/Duo").":</span>
+                                                    <span class='text-".strtolower($rankQueue["Tier"])."/100'>".__(ucfirst(strtolower($rankQueue["Tier"]))). " " . $rankQueue["Rank"];
                                             } else if($rankQueue["Queue"] == "RANKED_FLEX_SR"){ echo "
                                                 <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
-                                                    <span class='block text-[0.75rem]'>Ranked Flex:</span>
-                                                    <span class='block text-".strtolower($rankQueue["Tier"])."/100'>".ucfirst(strtolower($rankQueue["Tier"])). " " . $rankQueue["Rank"];
-                                            } echo " / " . $rankQueue["LP"] . " LP</span><span class='block'>
-                                                    WR: " . round((($rankQueue["Wins"]/($rankQueue["Wins"]+$rankQueue["Losses"]))*100),2) . "%</span>
-                                                    <span class='text-[0.75rem]'>(".$rankQueue["Wins"]+$rankQueue["Losses"]." Games)</span>
+                                                    <span class='block text-[0.75rem]'>".__("Ranked Flex").":</span>
+                                                    <span class='block text-".strtolower($rankQueue["Tier"])."/100'>".__(ucfirst(strtolower($rankQueue["Tier"]))). " " . $rankQueue["Rank"];
+                                            } echo " / " . $rankQueue["LP"] . " ".__("LP")."</span><span class='block'>
+                                                ".__("WR").": " . round((($rankQueue["Wins"]/($rankQueue["Wins"]+$rankQueue["Losses"]))*100),2) . "%</span>
+                                                    <span class='text-[0.75rem]'>(".$rankQueue["Wins"]+$rankQueue["Losses"]." ".__("Games").")</span>
                                                 </div>";
                                         }
                                     } echo "
@@ -532,33 +532,33 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             <tr>
                                 <td>
                                     <div class='max-h-[6.5rem] overflow-hidden mb-2 flex flex-wrap px-4 justify-evenly gap-1'>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>MVP</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Dragonkiller</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Newly</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Invader</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Lowbob</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Captain</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Premate</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>Test</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("MVP")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Dragonkiller")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Newly")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Invader")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Lowbob")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Captain")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Premate")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
+                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
                                     </div>
                                 </td>
                             </tr>";

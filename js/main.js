@@ -36,3 +36,66 @@ function sanitize(text){
       alert("[" + d.toLocaleTimeString() + "] ERROR: Eingabe fehlerhaft oder unvollständig.\n\nErlaubte Zeichen sind a-Z, 0-9 und Alphabete andere Sprachen.\nZudem muss ein Beschwörername zwischen 3-16 Zeichen lang sein.");
   }
 }
+
+function setCookie(name, value) {
+    var time = (new Date(Date.now()+ 86400*1000*365)).toUTCString(); // 1 year
+    document.cookie = name+"="+value+"; expires="+time+"; path=/";
+}
+
+function selectLang(lang){
+    setCookie("lang", lang.value);
+    lang.disabled = true;
+    location.reload();
+}
+
+function __(string, args = []) {
+    // Determine the language based on a cookie. If the cookie is not set, default to 'en_US'.
+    var lang = getCookie('lang') || 'en_US';
+    var translations = {};
+  
+    // Return a promise that resolves to the translated string.
+    return new Promise(function (resolve, reject) {
+      // Load the translation data from the JSON file.
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', '/lang/' + lang + '.csv', true);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+          if (xhr.status === 200) {
+            var lines = xhr.responseText.split("\r\n");
+            for (var i = 0; i < lines.length; i++) {
+              var parts = lines[i].split(",");
+              if (parts.length >= 2) {
+                translations[parts[0]] = parts[1];
+              }
+            }
+            // Check if a translation for the string is available, and if so, replace the string with the translation.
+            if (translations[string]) {
+              string = translations[string];
+            }
+  
+            // Replace any placeholders in the string with the provided arguments, if any.
+            if (args.length) {
+              string = string.replace(/{(\d+)}/g, function(match, number) {
+                return typeof args[number] != 'undefined' ? args[number] : match;
+              });
+            }
+  
+            // Resolve the promise with the translated string.
+            resolve(string);
+          } else {
+            // Reject the promise if there was an error with the request.
+            reject(new Error(xhr.statusText));
+          }
+        }
+      };
+      xhr.send();
+    });
+  }
+
+function getCookie(name) {
+    var value = '; ' + document.cookie;
+    var parts = value.split('; ' + name + '=');
+    if (parts.length === 2) {
+        return parts.pop().split(';').shift();
+    }
+}

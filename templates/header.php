@@ -1,5 +1,6 @@
 <?php
 $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
+// include_once('/hdd1/clashapp/lang/translate.php');
 ?>
 <!DOCTYPE html>
 <div class="min-h-[calc(100vh_-_90px)]">
@@ -14,32 +15,32 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
 			<ul class="flex">
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
                     <a href="https://clash.dasnerdwork.net/profile">
-						<span class="text-xl leading-4 active:text-[#ccc]">Profile</span>
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Profile')?></span>
 					</a>
 				</li>
                 <li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
                     <a href="https://clash.dasnerdwork.net/patch-notes"> 
-						<span class="text-xl leading-4 active:text-[#ccc]">Patchnotes</span>
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Patchnotes')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
 					<a href="https://clash.dasnerdwork.net/stats" onclick="return false;">
-						<span class="text-xl leading-4 active:text-[#ccc]">Stats</span>
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Stats')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
 					<a href="https://clash.dasnerdwork.net/docs" onclick="return false;">
-						<span class="text-xl leading-4 active:text-[#ccc]">Docs</span>
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Docs')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
 					<a href="https://clash.dasnerdwork.net/counters" onclick="return false;">
-						<span class="text-xl leading-4 active:text-[#ccc]">Counters</span>
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Counters')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
 					<a href="https://clash.dasnerdwork.net/team/test">
-						<span class="text-xl leading-4 active:text-[#ccc]">Test</span>
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Test')?></span>
 					</a>
 				</li>
 			</ul>
@@ -54,8 +55,8 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             </form>';
         } else { echo '
             <form class="h-10 flex absolute left-2/4 -translate-x-2/4 translate-y-1/4" action="" onsubmit="return false;" method="GET" autocomplete="off">
-                <input type="text" name="name" class="pl-2.5 text-base text-black focus:pl-2.5 focus:text-base" value="" placeholder="Summonername">
-                <input type="submit" name="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="Search" onclick="sanitize(this.form.name.value);">
+                <input type="text" name="name" class="pl-2.5 text-base text-black focus:pl-2.5 focus:text-base" value="" placeholder='.__("Summonername").'>
+                <input type="submit" name="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="'.__('Search').'" onclick="sanitize(this.form.name.value);">
                 <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
                 <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
                 </div>
@@ -82,19 +83,20 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             </div>
             <?php } ?>
             <div class="w-40 bg-black/75 text-white text-center text-xs rounded-lg py-2 absolute px-3 -ml-[116px] mt-[56px] transition-opacity hidden z-30" id="identityNotice">
-                This is your current identity and color for others. To customize it please <a href='/login' class='underline'>login</a>.
+                <?=__('This is your current identity and color for others. To customize it please')?> <a href='/login' class='underline'><?=__('login')?></a>.
                 <svg class="absolute text-black h-4 w-full left-0 top-full -mt-24 rotate-180" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
             </div>
             <div id="highlighterAfter">
-                <button type="button" class="after:content-['\2B9F'] h-8 w-28 align-middle mr-2.5 ml-2.5 text-base translate-y-2/4 bg-[#eee] text-black active:bg-[#ccc]">
-                    <span id="language-selector">English</span>
-                </button>
+                <select id="language-selector" class="text-center h-8 w-28 align-middle mr-2.5 ml-2.5 text-base translate-y-2/4 bg-[#eee] text-black active:bg-[#ccc] focus:outline-none border-none" onchange="selectLang(this)">
+                    <option value="en_US" <?= (!isset($_COOKIE["lang"]) || $_COOKIE["lang"] == "en_US") ? "selected disabled hidden" : ""; ?>>English</option>
+                    <option value="de_DE" <?= (isset($_COOKIE["lang"]) && $_COOKIE["lang"] == "de_DE") ? "selected disabled hidden" : ""; ?>>Deutsch</option>
+                </select>
             </div>
             <?php if(!isset($_SESSION['user'])){ ?>
             <div id="login-register-button">
                 <a href="https://clash.dasnerdwork.net/login?location=<?= urlencode($_SERVER['REQUEST_URI']) ?>">
                     <button type="button" class="h-8 w-28 align-middle mr-2.5 ml-2.5 text-base translate-y-2/4 bg-[#eee] text-black active:bg-[#ccc]">
-                        <span>Login</span>
+                        <span><?=__('Login');?></span>
                     </button>
                 </a>
             </div>
@@ -102,7 +104,7 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             <div id="logout-button">
                 <a href="https://clash.dasnerdwork.net/logout?location=<?= urlencode($_SERVER['REQUEST_URI']) ?>">
                     <button type="button" class="h-8 w-28 align-middle mr-2.5 ml-2.5 text-base translate-y-2/4 bg-[#eee] text-black active:bg-[#ccc]">
-                        <span>Logout</span>
+                        <span><?=__('Logout');?></span>
                     </button>
                 </a>
             </div>
