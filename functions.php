@@ -27,12 +27,12 @@ $headers = array(
     "Origin: https://dasnerdwork.net/",
     "X-Riot-Token: ".$apiKey
  );
- $currentTimestamp = time();
- $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns", 
- "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
- $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
- "takedowns", "turretTakedowns", "inhibitorTakedowns", "dragonTakedowns", "riftHeraldTakedowns", "damageDealtToBuildings", "damageDealtToObjectives", "damageSelfMitigated", "totalDamageDealtToChampions", "totalDamageTaken", "totalDamageShieldedOnTeammates",
- "totalHealsOnTeammates", "totalTimeCCDealt", "totalTimeSpentDead", "skillshotsDodged", "skillshotsHit", "championName", "championTransform", "individualPosition", "teamPosition", "lane", "puuid", "summonerId","summonerName", "win", "neutralMinionsKilled");
+$currentTimestamp = time();
+$rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns", 
+"InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
+$cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
+"takedowns", "turretTakedowns", "inhibitorTakedowns", "dragonTakedowns", "riftHeraldTakedowns", "damageDealtToBuildings", "damageDealtToObjectives", "damageSelfMitigated", "totalDamageDealtToChampions", "totalDamageTaken", "totalDamageShieldedOnTeammates",
+"totalHealsOnTeammates", "totalTimeCCDealt", "totalTimeSpentDead", "skillshotsDodged", "skillshotsHit", "championName", "championTransform", "individualPosition", "teamPosition", "lane", "puuid", "summonerId","summonerName", "win", "neutralMinionsKilled");
 
 /** General Summoner Info
  * This function retrieves all general playerdata of a given username or PUUID
@@ -438,25 +438,25 @@ function getMatchData($matchIDArray){
 function secondsToTime($seconds) {
     switch ($seconds) {
         case ($seconds<120):
-            return "A minute ago";
+            return __("1 minute ago");
         case ($seconds>=120 && $seconds<3600):
-            return floor($seconds / 60)." minutes ago";
+            return sprintf(__("%d minutes ago"), floor($seconds / 60));
         case ($seconds>=3600 && $seconds<7200):
-            return "1 hour ago";
+            return __("1 hour ago");
         case ($seconds>=7200 && $seconds<86400):
-            return floor($seconds / 3600)." hours ago";
+            return sprintf(__("%d hours ago"), floor($seconds / 3600));
         case ($seconds>=86400 && $seconds<172800):
-            return "1 day ago";
+            return __("1 day ago");
         case ($seconds>=172800 && $seconds<2630000):
-            return floor($seconds / 86400)." days ago";
+            return sprintf(__("%d days ago"), floor($seconds / 86400));
         case ($seconds>=2630000 && $seconds<5260000):
-            return "1 month ago";
+            return __("1 month ago");
         case ($seconds>=5260000 && $seconds<31536000):
-            return floor($seconds / 2630000)." months ago";
+            return sprintf(__("%d months ago"), floor($seconds / 2630000));
         case ($seconds>=31536000 && $seconds<63072000):
-            return "1 years ago";
+            return __("1 years ago");
         case ($seconds>=63072000):
-            return floor($seconds / 31536000)." years ago";
+            return sprintf(__("%d years ago"), floor($seconds / 31536000));
     }
 }
 
@@ -1540,7 +1540,7 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                         case "TimeCC":
                             $maxRankScore += (($rank+1)*8);
                             $reasonArray[$matchID]["TimeCC"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["TimeCC"]["Points"] = ($rank+1)*8;
+                            $reasonArray[$matchID]["TimeCC"]["Points"] = ($rank+1)*5;
                             break;
                         case "DeathTime":                   
                             $maxRankScore += (($rank+1)*20);

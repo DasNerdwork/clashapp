@@ -200,9 +200,11 @@ function showIdentityNotice(boolean){
 function addHistoryMessage(message){
     const historyContainer = document.getElementById("historyContainer");
     const textMessage = document.createElement("span");
-    textMessage.innerText = message;
     textMessage.classList.add("text-[#333344]");
-    historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);
+    __(message).then(function (result) {
+        textMessage.innerText = result;
+        historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);
+    });
 }
 
 function addCustomHistoryMessage(message, name, color){
