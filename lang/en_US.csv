@@ -1,4 +1,5 @@
 Login,Login
+login,login
 Search,Search
 Profile,Profile
 Patchnotes,Patchnotes
@@ -11,8 +12,9 @@ Team Name,Team Name
 Tier,Tier
 History,History
 Advertisement,Advertisement
-Suggested Bans,Empfohlene Bannungen
+Suggested Bans,Suggested Bans
 Voting is only available for %slogged-in%s users,Voting is only available for %slogged-in%s users
+This is your current identity and color for others. To customize it please,This is your current identity and color for others. To customize it please
 Click to Copy URL,Click to Copy URL
 Championname,Championname
 "Whoops, did you mistype?","Whoops, did you mistype?"
@@ -58,3 +60,22 @@ left the session.,left the session.
 added %1.,added %1.
 removed %1.,removed %1.
 swapped %1 with %2.,swapped %1 with %2.
+Impressum,Legal Notice
+Datenschutzerklärung,Privacy Policy
+DasNerdwork.net isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties.,DasNerdwork.net isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties.
+"Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.","Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc."
+R,R
+W,W
+L,L
+Solo/Duo,Solo/Duo
+Flex,Flex
+Clash,Clash
+KDA,KDA
+Score,Score
+KP,KP
+Dealt,Dealt
+Tanked,Tanked
+Shealed,Shealed
+Objs,Objs
+CS,CS
+V-Score,V-Score

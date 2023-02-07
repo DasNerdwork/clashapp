@@ -505,11 +505,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 echo '<div class="match-result mb-2">';
                                 // Display of W(in) or L(ose)
                                 if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
-                                    echo '<span class="text-white font-bold">R</span>';
+                                    echo '<span class="text-white font-bold">'.__("R").'</span>';
                                 } elseif($inhalt->info->participants[$in]->win == true) {
-                                    echo '<span class="text-online font-bold">W</span>';
+                                    echo '<span class="text-online font-bold">'.__("W").'</span>';
                                 } else {
-                                    echo '<span class="text-offline font-bold">L</span>';
+                                    echo '<span class="text-offline font-bold">'.__("L").'</span>';
                                 }
                                 echo '</div>';
 
@@ -518,15 +518,15 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 switch ($inhalt->info->queueId) {
                                     case 420:
                                         $matchType = "Solo/Duo";
-                                        echo "<span>Solo/Duo ";
+                                        echo "<span>".__("Solo/Duo")." ";
                                         break;
                                         case 440:
                                             $matchType = "Flex 5v5";
-                                            echo "<span>Flex ";
+                                            echo "<span>".__("Flex")." ";
                                             break;
                                             case 700:
                                                 $matchType = "Clash";
-                                                echo "<span>Clash ";
+                                                echo "<span>".__("Clash")." ";
                                                 break;
                                             }
                                             echo gmdate("i:s", $inhalt->info->gameDuration)."</span>";
@@ -633,9 +633,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         echo $assists;
                         echo '</div><div class="kda text-xs">';
                         if($deaths != 0){
-                            echo " KDA: ".number_format(($kills+$assists)/$deaths, 2)."</div>";
+                            echo __("KDA").": ".number_format(($kills+$assists)/$deaths, 2)."</div>";
                         } else {
-                            echo " KDA: ".number_format(($kills+$assists)/1, 2)."</div>";
+                            echo __("KDA").": ".number_format(($kills+$assists)/1, 2)."</div>";
                         }
                         echo "</div>";
                                 
@@ -643,7 +643,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         foreach ($matchRankingArray as $matchID => $rankingValue){
                             // print_r($matchID."<br>");
                             if($matchID == $inhalt->metadata->matchId){
-                                $matchScore = "Score: ".$matchRankingArray[$matchID];
+                                $matchScore = __("Score").": ".$matchRankingArray[$matchID];
                             }
                         }
 
@@ -710,27 +710,27 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
                     echo '<div class="kill-participation">';
                         if($totalTeamTakedowns != 0){
-                            echo "KP: ".number_format(($ownTakedowns/$totalTeamTakedowns)*100, 0). "%";
+                            echo __("KP").": ".number_format(($ownTakedowns/$totalTeamTakedowns)*100, 0). "%";
                         } else {
-                            echo "KP: 0%";
+                            echo __("KP").": 0%";
                         }
                     echo '</div>';
 
                     echo '<div class="damage-dealt">';
                     echo '<img src="/clashapp/data/misc/icons/DamageDealt.webp" width="16" height="16" loading="lazy" alt="An icon of a sword clashing through a bone">';
-                    echo 'Dealt: '.$dealt;
+                    echo __('Dealt').': '.$dealt;
                     echo '</div>';
 
                     echo '<div class="damage-tanked">';
-                    echo 'Tanked: '.$tanked;
+                    echo __('Tanked').': '.$tanked;
                     echo '</div>';
 
                     echo '<div class="damage-healed-and-shielded">';
-                    echo "Shealed: ".$shealed;
+                    echo __("Shealed").": ".$shealed;
                     echo "</div>";
 
                     echo '<div class="damage-to-objectives">';
-                    echo "Objs: ".$objs;
+                    echo __("Objs").": ".$objs;
                     echo "</div></div>";
 
                     echo '<div class="additional-info-2 inline-flex h-8 justify-center items-center gap-2 mt-2">';
@@ -740,11 +740,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     echo "</div>";
 
                     echo '<div class="creepscore">';
-                    echo '<div class="creepscore-count">CS: '.$creepScore.'</div>';
+                    echo '<div class="creepscore-count">'.__("CS").': '.$creepScore.'</div>';
                     echo "</div>";
 
                     echo '<div class="visionscore">';
-                    echo '<div class="visionscore-count">V-Score: '.$visionScore.'</div>';
+                    echo '<div class="visionscore-count">'.__("V-Score").': '.$visionScore.'</div>';
                     echo "</div>";
                     
                     echo '<div class="matchid">';
