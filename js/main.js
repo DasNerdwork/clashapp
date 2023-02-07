@@ -48,49 +48,64 @@ function selectLang(lang){
     location.reload();
 }
 
-function __(string, args = []) {
+let cache = {};
+let translationDataLoaded = false;
+
+function __(string) {
+  return new Promise(resolve => {
     // Determine the language based on a cookie. If the cookie is not set, default to 'en_US'.
     var lang = getCookie('lang') || 'en_US';
-    var translations = {};
   
-    // Return a promise that resolves to the translated string.
-    return new Promise(function (resolve, reject) {
-      // Load the translation data from the JSON file.
+    // Check if the translation is in cache, if it is return it.
+    if (cache[lang + '_' + string]) {
+      resolve(cache[lang + '_' + string]);
+      return;
+    }
+
+    // Check if the translation data has already been loaded, the following if block will only load on the first call of this function
+    if (!translationDataLoaded) {
+      // Load the translation data from the csv file.
       var xhr = new XMLHttpRequest();
       xhr.open('GET', '/lang/' + lang + '.csv', true);
       xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
           if (xhr.status === 200) {
             var lines = xhr.responseText.split("\r\n");
+            var translations = {};
             for (var i = 0; i < lines.length; i++) {
               var parts = lines[i].split(",");
               if (parts.length >= 2) {
                 translations[parts[0]] = parts[1];
               }
             }
-            // Check if a translation for the string is available, and if so, replace the string with the translation.
+
+            // Save all the translations in cache for subsequent requests
+            for (var key in translations) {
+              cache[lang + '_' + key] = translations[key];
+            }
+
+            // Set the flag to indicate that the translation data has been loaded
+            translationDataLoaded = true;
+
+            // Additionally check if a translation for the string is available, and if so, replace the string with the translation.
             if (translations[string]) {
               string = translations[string];
+            } else {
+              string = string;
             }
-  
-            // Replace any placeholders in the string with the provided arguments, if any.
-            if (args.length) {
-              string = string.replace(/{(\d+)}/g, function(match, number) {
-                return typeof args[number] != 'undefined' ? args[number] : match;
-              });
-            }
-  
-            // Resolve the promise with the translated string.
-            resolve(string);
-          } else {
-            // Reject the promise if there was an error with the request.
-            reject(new Error(xhr.statusText));
+
+            resolve(string); // Finally resolve Promise
           }
         }
       };
       xhr.send();
-    });
-  }
+    } else { 
+      // If the translation data has already been loaded and the transation data is not in cache, just resolve promise with the untranslated
+      resolve(string);
+      return;
+    }
+  });
+}
 
 function getCookie(name) {
     var value = '; ' + document.cookie;

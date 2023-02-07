@@ -43,7 +43,7 @@ Captain,Captain
 Premate,Premate
 Test,Test
 1 minute ago,1 minute ago
-$d minutes ago,%d minutes ago
+%d minutes ago,%d minutes ago
 1 hour ago,1 hour ago
 %d hours ago,%d hours ago
 1 day ago,1 day ago
@@ -53,3 +53,8 @@ $d minutes ago,%d minutes ago
 1 year ago,1 year ago
 %d years ago,%d years ago
 Handshake successful: Server received client request and answered.,Handshake successful: Server received client request and answered.
+joined the session.,joined the session.
+left the session.,left the session.
+added %1.,added %1.
+removed %1.,removed %1.
+swapped %1 with %2.,swapped %1 with %2.

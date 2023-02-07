@@ -53,3 +53,8 @@ Test,Test
 1 year ago,vor einem Jahr
 %d years ago,vor %d Jahren
 Handshake successful: Server received client request and answered.,Handschlag erfolgreich: Server erhielt Klientenanfrage und antwortete.
+joined the session.,trat der Sitzung bei.
+left the session.,verließ die Sitzung.
+added %1.,hat %1 hinzugefügt.
+removed %1.,hat %1 entfernt.
+swapped %1 with %2.,tauschte %1 mit %2.
