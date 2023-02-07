@@ -691,12 +691,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     <div class='flex items-center justify-center gap-x-56 mb-6 mt-2' style='content-visibility: auto;'>
         <div class='rounded bg-[#141624] p-4'>
             <div class='w-[970px] h-[90px] bg-black'>
-                <span class='h-full flex items-center justify-center'>Advertisement</span> 
+                <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
             </div>
         </div>
         <div class='rounded bg-[#141624] p-4'>
             <div class='w-[970px] h-[90px] bg-black'>
-                <span class='h-full flex items-center justify-center'>Advertisement</span> 
+                <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
             </div>
         </div>
     </div>
