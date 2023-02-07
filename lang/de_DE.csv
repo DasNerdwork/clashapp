@@ -1,4 +1,5 @@
 Login,Anmelden
+login,anmelden
 Search,Suchen
 Profile,Profil
 Patchnotes,Patchnotizen
@@ -13,6 +14,7 @@ History,Verlauf
 Advertisement,Werbung
 Suggested Bans,Empfohlene Banns
 Voting is only available for %slogged-in%s users,Das Bewerten ist nur %seingeloggten%s Benutzern möglich
+This is your current identity and color for others. To customize it please,Dies ist deine Identität und Farbe für andere. Zum Individualisieren bitte
 Click to Copy URL,Anklicken zum URL kopieren
 Championname,Championname
 "Whoops, did you mistype?","Huch, hast du dich verschrieben?"
@@ -58,3 +60,22 @@ left the session.,verließ die Sitzung.
 added %1.,hat %1 hinzugefügt.
 removed %1.,hat %1 entfernt.
 swapped %1 with %2.,tauschte %1 mit %2.
+Impressum,Impressum
+Datenschutzerklärung,Datenschutzerklärung
+DasNerdwork.net isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties.,"DasNerdwork.net wird nicht von Riot Games unterstützt und spiegelt nicht die Ansichten oder Meinungen von Riot Games oder anderen Personen wider, die offiziell an der Produktion oder Verwaltung von Riot Games-Eigentum beteiligt sind."
+"Riot Games, and all associated properties are trademarks or registered trademarks of Riot Games, Inc.","Riot Games und alle damit verbundenen Eigentumsrechte sind Warenzeichen oder eingetragene Warenzeichen von Riot Games, Inc."
+R,R
+W,S
+L,N
+Solo/Duo,Solo/Duo
+Flex,Flex
+Clash,Clash
+KDA,KTU
+Score,Wertung
+KP,KB
+Dealt,Verursacht
+Tanked,Eingesteckt
+Shealed,Schildheilt
+Objs,Obj
+CS,TW
+V-Score,Sichtwertung
