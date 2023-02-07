@@ -107,7 +107,7 @@ wss.on('connection', function connection(ws, req) {
                   wss.clients.forEach(function each(client) {
                     if(client.location == dataAsJSON.teamid && client != ws){
                       // client.send(ws.name+' added '+dataAsJSON.champname);
-                      client.send('{"status":"Message","message":"added '+dataAsJSON.champname+'.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+                      client.send('{"status":"Message","message":"added %1.","champ":"'+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
                     }
                   });
                 }
@@ -184,7 +184,7 @@ wss.on('connection', function connection(ws, req) {
                 wss.clients.forEach(function each(client) {
                   if(client.location == dataAsJSON.teamid && client != ws){
                     // client.send(ws.name+' removed '+dataAsJSON.champname);
-                    client.send('{"status":"Message","message":"removed '+dataAsJSON.champname+'.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+                    client.send('{"status":"Message","message":"removed %1.","champ":"'+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
                   }
                 });
               }
@@ -224,7 +224,7 @@ wss.on('connection', function connection(ws, req) {
             wss.clients.forEach(function each(client) {
               if(client.location == dataAsJSON.teamid && client != ws){
                 // client.send(ws.name+' swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName);
-                client.send('{"status":"Message","message":"swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName+'.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+                client.send('{"status":"Message","message":"swapped %1 with %2.","champ1":"'+dataAsJSON.fromName+'","champ2":"'+dataAsJSON.toName+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
               }
             });
           }

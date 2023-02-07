@@ -138,7 +138,13 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                     identityNotice.setAttribute("onmouseout", "showIdentityNotice(false)");
                 }
             } else if (messageAsJson.status == "Message"){
-                addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color);
+                if((messageAsJson.message == "added %1.") || (messageAsJson.message == "removed %1.")){
+                    addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color, messageAsJson.champ);
+                } else if(messageAsJson.message == "swapped %1 with %2.") {
+                    addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color, messageAsJson.champ1, messageAsJson.champ2);
+                } else {
+                    addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color);
+                }
             }
         }
     } else {
@@ -207,12 +213,15 @@ function addHistoryMessage(message){
     });
 }
 
-function addCustomHistoryMessage(message, name, color){
-const historyContainer = document.getElementById("historyContainer");
+function addCustomHistoryMessage(message, name, color, arg1, arg2){
+    arg1 = arg1 || "";
+    arg2 = arg2 || "";
+    const historyContainer = document.getElementById("historyContainer");
     const textMessage = document.createElement("span");
-    // const highlighterColor = document.getElementById("highlighter").classList.split('decoration-')[2];
-    textMessage.innerHTML = "<span class='text-"+color+"/100'>"+name+"</span> "+message;
-    historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);
+    __(message).then(function (result) {
+        textMessage.innerHTML = "<span class='text-"+color+"/100'>"+name+"</span> "+result.replace("%1", arg1).replace("%2", arg2);
+        historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);
+    });
 }
 
 // DROPPABLE
