@@ -481,7 +481,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     $totalTeamTakedowns = 0;
 
     // Initiating Matchdetail Table
-    echo "<button type='button' class='collapsible bg-[#0e0f18] cursor-pointer h-6 w-full' 
+    echo "<button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full' 
             @click='open = !open' 
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
     echo "<div class='smooth-transition w-full overflow-hidden min-h-[2300px]' x-show='open' x-transition x-cloak>";
@@ -495,11 +495,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     if($inhalt->info->participants[$in]->puuid == $puuid) {
                         $teamID = $inhalt->info->participants[$in]->teamId;
                         if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
-                            echo '<div class="w-full bg-gray-800 border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }" style="content-visibility: auto;">';
+                            echo '<div class="w-full bg-gray-800 border-b border-[4px] border-dark" x-data="{ advanced: false }" style="content-visibility: auto;">';
                         } elseif ($inhalt->info->participants[$in]->win == false){
-                            echo '<div class="w-full bg-lose border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }" style="content-visibility: auto;">';
+                            echo '<div class="w-full bg-lose border-b border-[4px] border-dark" x-data="{ advanced: false }" style="content-visibility: auto;">';
                         } else {
-                            echo '<div class="w-full bg-win border-b border-[4px] border-[#0e0f18]" x-data="{ advanced: false }" style="content-visibility: auto;">';
+                            echo '<div class="w-full bg-win border-b border-[4px] border-dark" x-data="{ advanced: false }" style="content-visibility: auto;">';
                         }
                             echo '<div id="match-header" class="inline-flex w-full gap-2 pt-2 px-2">';
                                 echo '<div class="match-result mb-2">';

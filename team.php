@@ -531,7 +531,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             echo "
                             <tr>
                                 <td>
-                                    <div class='max-h-[6.5rem] overflow-hidden mb-2 flex flex-wrap px-4 justify-evenly gap-1'>
+                                    <div class='max-h-[5.7rem] overflow-hidden mb-2 flex flex-wrap px-4 justify-evenly gap-1'>
                                             <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("MVP")."</div>
                                             <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Dragonkiller")."</div>
                                             <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Newly")."</div>
@@ -570,22 +570,15 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintTags"]["Time"] = number_format((microtime(true) - $startPrintTags), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintTags"]["Memory"] = number_format((memory_get_usage() - $memPrintTags)/1024, 2, ',', '.')." kB";
 
-                            // ----------------------------------------------------------------v- PRINT MATCH HISTORY  -v---------------------------------------------------------------- //
+                            // ---------------------------------------------------v- SAVE DATA FOR MATCH HISTORY AND END TOP PART PLAYER  -v---------------------------------------------------- //
 
-                            if(!$execOnlyOnce) $startPrintMatchHistory = microtime(true);
-                            $memPrintMatchHistory = memory_get_usage();
+                            $tempStoreArray[$key]["matchids_sliced"] = $matchids_sliced;
+                            $tempStoreArray[$key]["puuid"] = $puuid;
+                            $tempStoreArray[$key]["matchRankingArray"] = $matchRankingArray;
+
                             echo "
-                            <tr>
-                                <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")'>";
-                                    printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $matchRankingArray);
-                                    echo "
-                                </td>
-                            </tr>
                         </table>
                     </td>";
-                    $matchAlpineCounter += 50;
-                    if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistory"]["Time"] = number_format((microtime(true) - $startPrintMatchHistory), 2, ',', '.')." s";
-                    if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistory"]["Memory"] = number_format((memory_get_usage() - $memPrintMatchHistory)/1024, 2, ',', '.')." kB";
                     foreach($matchids as $matchid){
                         if(!in_array($matchid, $matchIDTeamArray)){
                             $matchIDTeamArray[] = $matchid;
@@ -600,7 +593,66 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 unset($slicedPlayerDataMatchIDs);
                 $startGetSuggestedBans = microtime(true);
                 $memGetSuggestedBans = memory_get_usage();
+
+                // -----------------------------------------------------------------------------v- MIDDLE AD BANNER  -v----------------------------------------------------------------------- //
+
                 echo "
+                </tr>
+                <tr class='trenner h-32 bg-darker rounded'>
+                    <td colspan='5'>
+                        <div class='flex items-center justify-start gap-4 w-full' style='content-visibility: auto;'>
+                            <div class='rounded bg-[#141624] p-4'>
+                                <div class='w-[970px] h-[90px] bg-black'>
+                                    <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
+                                </div>
+                            </div>
+                            <div class='rounded bg-[#141624] p-4'>
+                                <div class='w-[970px] h-[90px] bg-black'>
+                                    <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
+                                </div>
+                            </div>
+                            <div class='grid grid-cols-2 flex-grow rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max'>
+                                <div class=''>Custom Setting 1[ ]</div>
+                                <div class=''>Custom Setting 2[ ]</div>
+                                <div class=''>Custom Setting 3[ ]</div>
+                                <div class=''>Custom Setting 4[ ]</div>
+                                <div class=''>Custom Setting 5[ ]</div>
+                                <div class=''>Custom Setting 6[ ]</div>
+                                <div class=''>Custom Setting 7[ ]</div>
+                                <div class=''>Custom Setting 8[ ]</div>
+                            </div>
+                        </div>
+                        </div>
+                    </td>
+                </tr>
+                <tr>";
+
+                // ------------------------------------------------------------------------v- PRINT MATCH HISTORY & CONTROL PANEL -v--------------------------------------------------------------- //
+                
+                echo '
+                    <td colspan="5">
+                        <div class="bg-dark w-full rounded-t h-8 -mb-[1.15rem]"></div>
+                    </td>
+                </tr>
+                <tr>';
+            foreach($tempStoreArray as $key => $player){ 
+                if(!$execOnlyOnce) $startPrintMatchHistory = microtime(true);
+                $memPrintMatchHistory = memory_get_usage(); 
+                echo "
+                <td class='align-top w-1/5 max-w-[19.25vw] opacity-0' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
+                    <table class='rounded-b bg-[#141624] w-full'>
+                        <tr>
+                            <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")'>";
+                                printTeamMatchDetailsByPUUID($player["matchids_sliced"], $player["puuid"], $player["matchRankingArray"]);
+                                echo "
+                            </td>
+                        </tr>
+                    </table>
+                </td>";
+                $matchAlpineCounter += 50;
+                if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistory"]["Time"] = number_format((microtime(true) - $startPrintMatchHistory), 2, ',', '.')." s";
+                if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistory"]["Memory"] = number_format((memory_get_usage() - $memPrintMatchHistory)/1024, 2, ',', '.')." kB";
+                } echo "
             </tr>
         </table>";
         $timeAndMemoryArray["FetchPlayerTotal"]["Time"] = number_format((microtime(true) - $startFetchPlayerTotal), 2, ',', '.')." s";
