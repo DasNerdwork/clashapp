@@ -3,9 +3,9 @@ if (!isset($_SESSION)) session_start();
 
 // print_r($_SESSION);
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 
 
 $startInitialTime = microtime(true);
@@ -97,7 +97,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>
                         <span id='team-title' class='text-2xl'>".strtoupper(__($teamDataArray["Tag"]))." | ".strtoupper(__($teamDataArray["Name"]))." (".__("Tier")." ".$teamDataArray["Tier"].")</span>
                     </h1>
-                    <div class='h-full w-full flex -mt-16 flex-col justify-end'>
+                    <div class='h-full w-full flex twok:-mt-16 fullhd:-mt-24 flex-col justify-end'>
                     <span class='ml-1 mb-0.5 text-base font-bold'>".__("History")."</span>
                         <div id='historyContainer' class='bg-darker w-full h-32 p-2 flex flex-col-reverse overflow-auto'>
                         </div>
@@ -485,11 +485,14 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
                                                     <span class='block text-[0.75rem]'>".__("Ranked Flex").":</span>
                                                     <span class='block text-".strtolower($rankQueue["Tier"])."/100'>".__(ucfirst(strtolower($rankQueue["Tier"]))). " " . $rankQueue["Rank"];
-                                            } echo " / " . $rankQueue["LP"] . " ".__("LP")."</span><span class='block'>
-                                                ".__("WR").": " . round((($rankQueue["Wins"]/($rankQueue["Wins"]+$rankQueue["Losses"]))*100),2) . "%</span>
-                                                    <span class='text-[0.75rem]'>(".$rankQueue["Wins"]+$rankQueue["Losses"]." ".__("Games").")</span>
-                                                </div>";
-                                        }
+                                            } 
+                                            if(($rankQueue["Queue"] == "RANKED_SOLO_5x5") || ($rankQueue["Queue"] == "RANKED_FLEX_SR")){
+                                                echo " / " . $rankQueue["LP"] . " ".__("LP")."</span><span class='block'>
+                                                    ".__("WR").": " . round((($rankQueue["Wins"]/($rankQueue["Wins"]+$rankQueue["Losses"]))*100),2) . "%</span>
+                                                        <span class='text-[0.75rem]'>(".$rankQueue["Wins"]+$rankQueue["Losses"]." ".__("Games").")</span>
+                                                    </div>";
+                                            }
+                                        } // TODO: Add previous seasons ranks
                                     } echo "
                                     </div>
                                 </td>
@@ -510,8 +513,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 <div>
                                                     <img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp" width="64" height="64" class="block relative z-0;" alt="A champion icon of the league of legends champion '.$masteryData[$i]["Champion"].'">
                                                     <span>'.$masteryData[$i]["Champion"].'</span>
-                                                    <img src="/clashapp/data/misc/mastery-'.$masteryData[$i]["Lvl"].'.webp" width="32" height="32" class="relative -top-[5.75rem] -right-11 z-10" alt="A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher">'.
-                                                    "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".explode(",",$masteryData[$i]["Points"])[0]."k</div>
+                                                    <img src="/clashapp/data/misc/mastery-'.$masteryData[$i]["Lvl"].'.webp" width="32" height="32" class="relative -top-[5.75rem] -right-11 z-10" alt="A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher">';
+                                                    if(str_replace(',','', $masteryData[$i]["Points"]) > 999999){
+                                                        echo "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".str_replace(",",".",substr($masteryData[$i]["Points"],0,4))."m</div>";
+                                                    } else {
+                                                        echo "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".explode(",",$masteryData[$i]["Points"])[0]."k</div>";
+                                                    } echo "
                                                 </div>";
                                             }
                                         } echo "
@@ -602,24 +609,20 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     <td colspan='5'>
                         <div class='flex items-center justify-start gap-4 w-full' style='content-visibility: auto;'>
                             <div class='rounded bg-[#141624] p-4'>
-                                <div class='w-[970px] h-[90px] bg-black'>
+                                <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
                                     <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
                                 </div>
                             </div>
                             <div class='rounded bg-[#141624] p-4'>
-                                <div class='w-[970px] h-[90px] bg-black'>
+                                <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
                                     <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
                                 </div>
                             </div>
-                            <div class='grid grid-cols-2 flex-grow rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max'>
-                                <div class=''>Custom Setting 1[ ]</div>
-                                <div class=''>Custom Setting 2[ ]</div>
-                                <div class=''>Custom Setting 3[ ]</div>
-                                <div class=''>Custom Setting 4[ ]</div>
-                                <div class=''>Custom Setting 5[ ]</div>
-                                <div class=''>Custom Setting 6[ ]</div>
-                                <div class=''>Custom Setting 7[ ]</div>
-                                <div class=''>Custom Setting 8[ ]</div>
+                            <div class='grid rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max items-center'>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='expand-all-matches' id='expand-all-matches'></input><label for='expand-all-matches'> ".__("Expand all matches")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
                             </div>
                         </div>
                         </div>
@@ -740,14 +743,14 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     // ------------------------------------------------------------------------------------------v- BOTTOM AD BANNERS  -v------------------------------------------------------------------------------------------- //
 
     echo "
-    <div class='flex items-center justify-center gap-x-56 mb-6 mt-2' style='content-visibility: auto;'>
+    <div class='flex items-center justify-center twok:gap-x-48 fullhd:gap-x-36 mb-6 mt-2' style='content-visibility: auto;'>
         <div class='rounded bg-[#141624] p-4'>
-            <div class='w-[970px] h-[90px] bg-black'>
+            <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
                 <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
             </div>
         </div>
         <div class='rounded bg-[#141624] p-4'>
-            <div class='w-[970px] h-[90px] bg-black'>
+            <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
                 <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
             </div>
         </div>
