@@ -277,3 +277,9 @@ function makeDragDroppable(){
         return false
     }
 }
+
+// ADDITIONAL SETTINGS
+
+function expandAllMatches(){
+    
+}
