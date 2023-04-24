@@ -37,9 +37,12 @@ function sanitize(text){
   }
 }
 
-function setCookie(name, value) {
-    var time = (new Date(Date.now()+ 86400*1000*365)).toUTCString(); // 1 year
+function setCookie(name, value, time = (new Date(Date.now()+ 86400*1000*365)).toUTCString()) {
     document.cookie = name+"="+value+"; expires="+time+"; path=/";
+}
+
+function deleteCookie(name) {
+  document.cookie = name+"=; expires=Thu, 01 Jan 2000 00:00:00 UTC; path=/";
 }
 
 function selectLang(lang){

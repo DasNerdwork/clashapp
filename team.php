@@ -156,7 +156,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <div class='flex justify-center rounded bg-[#141624] fullhd:h-48 twok:h-44'>
                     <form id='banSearch' class='m-0 pb-4 w-full' action='' onsubmit='return false;' method='GET' autocomplete='off'>
                         <div id='top-ban-bar' class='h-10 text-black'>
-                            <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2' value='' placeholder='".__("Championname")."'>
+                            <div class='inline'>
+                                <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2 twok:pr-10' value='' placeholder='".__("Championname")."'>
+                                <button id='champSelectorClear' class='bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none -ml-7 px-2 py-1' onclick='this.previousElementSibling.value=\"\";'>x</button>
+                            </div>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer' src='/clashapp/data/misc/lanes/UTILITY.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='sup' alt='An icon for the support lane'>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/BOTTOM.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='adc' alt='An icon for the bottom lane'>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/MIDDLE.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='mid' alt='An icon for the middle lane'>
@@ -177,8 +180,13 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
         $startFetchPlayerTotal = microtime(true);
         $memFetchPlayerTotal = memory_get_usage();
+        if (isset($_COOKIE["matches-expanded"])) {
+            $matchesExpanded = 'true';
+          } else {
+            $matchesExpanded = 'false';
+          }
         echo "
-        <table class='w-full flex table-fixed border-separate border-spacing-4 min-h-[2300px]'>
+        <table class='w-full flex table-fixed border-separate border-spacing-4 min-h-[2300px]' x-data='{ advancedGlobal: ".$matchesExpanded." }'>
             <tr>";
             // count($teamDataArray["Players"]) == 1 ? $tableWidth = "100%" : $tableWidth = round(100/count($teamDataArray["Players"]));          // disabled due to cumulative layout shift
                 $playerDataDirectory = new DirectoryIterator('/hdd1/clashapp/data/player/');
@@ -619,7 +627,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 </div>
                             </div>
                             <div class='grid rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max items-center'>
-                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='expand-all-matches' id='expand-all-matches'></input><label for='expand-all-matches'> ".__("Expand all matches")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='expand-all-matches' id='expand-all-matches' @change='document.getElementById(\"expand-all-matches\").checked ? advancedGlobal = true : advancedGlobal = false'></input><label for='expand-all-matches'> ".__("Expand all matches")."</label></div>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
@@ -637,7 +645,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <div class="bg-dark w-full rounded-t h-8 -mb-[1.15rem]"></div>
                     </td>
                 </tr>
-                <tr>';
+                <tr id="match-history">';
             foreach($tempStoreArray as $key => $player){ 
                 if(!$execOnlyOnce) $startPrintMatchHistory = microtime(true);
                 $memPrintMatchHistory = memory_get_usage(); 
