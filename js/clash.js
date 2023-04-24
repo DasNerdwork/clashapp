@@ -15,10 +15,12 @@ ready(function() {
 
     var championList = document.getElementsByClassName("champ-select-champion"); // separate champion icon+name elements in the list
     var champInput = document.getElementById("champSelector"); // Input field of the champion name search
+    var clearButton = document.getElementById("champSelectorClear"); // The clear button "x" on the right of the input field
     champInput.addEventListener('keyup', selectChampions); // event listener to fire for typing
+    clearButton.addEventListener('click', selectChampions); // event listener to fire for x clicking
 
     // CHAMPION LIST FILTERING
-    function selectChampions(){          
+    function selectChampions(){       
       var lanes = document.getElementsByClassName("lane-selector"); // the 5 lane icons as elements in a list
       for (let i = 0; i < lanes.length; i++) { 
         if(lanes.item(i).classList.contains == "brightness-200"){ // checks if a lane filter icon is set to active (brightness(100%)) and saves the specific lane name for futher sorting
@@ -77,6 +79,21 @@ ready(function(){
   var suggestedBans = document.getElementsByClassName("suggested-ban-champion");
   for(var i = 0; i < suggestedBans.length;i++){
     document.getElementById("suggestedBans").appendChild(suggestedBans[i])
+  }
+});
+
+ready(function(){
+  // Event-Listener für die Checkbox
+  let matchExpander = document.getElementById("expand-all-matches");
+  matchExpander.addEventListener('change', function() {
+    if(matchExpander.checked){
+      setCookie("matches-expanded", true);
+    } else {
+      deleteCookie("matches-expanded");
+    }
+  });
+  if(getCookie("matches-expanded")){
+    matchExpander.checked = true;
   }
 });
 
@@ -198,7 +215,6 @@ function setError(message){
 //       }
 //   });
 // });
-
 
 function copyToClipboard(text){
   navigator.clipboard.writeText(text).then(function() {
