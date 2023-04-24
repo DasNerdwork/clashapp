@@ -495,11 +495,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     if($inhalt->info->participants[$in]->puuid == $puuid) {
                         $teamID = $inhalt->info->participants[$in]->teamId;
                         if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
-                            echo '<div class="w-full bg-gray-800 border-b border-[4px] border-dark" x-data="{ advanced: false }" style="content-visibility: auto;">';
+                            echo '<div class="w-full bg-gray-800 border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;">';
                         } elseif ($inhalt->info->participants[$in]->win == false){
-                            echo '<div class="w-full bg-lose border-b border-[4px] border-dark" x-data="{ advanced: false }" style="content-visibility: auto;">';
+                            echo '<div class="w-full bg-lose border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;">';
                         } else {
-                            echo '<div class="w-full bg-win border-b border-[4px] border-dark" x-data="{ advanced: false }" style="content-visibility: auto;">';
+                            echo '<div class="w-full bg-win border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;">';
                         }
                             echo '<div id="match-header" class="inline-flex w-full gap-2 pt-2 px-2">';
                                 echo '<div class="match-result mb-2">';
@@ -690,7 +690,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                 }
 
                 echo '</div>';
-                echo '<div class="additional-info px-2" x-cloak x-show="advanced" x-transition><div class="additional-info-1 inline-flex h-8 justify-center items-center gap-1 mt-2">';
+                echo '<div class="additional-info px-2" x-cloak x-show="advanced || advancedGlobal" x-transition><div class="additional-info-1 inline-flex h-8 justify-center items-center gap-1 mt-2">';
                 // Display of enemy champions icon in lane
                     for($i = 0; $i < 10; $i++){
                         if (($inhalt->info->participants[$i]->teamPosition == $matchLane) && ($inhalt->info->participants[$i]->championName != $champion)){
