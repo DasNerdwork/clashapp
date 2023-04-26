@@ -1,7 +1,7 @@
 <?php
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 
 /** Main functions.php containing overall used functions throughout different php files
@@ -244,6 +244,7 @@ function getCurrentRank($sumid){
 function getMatchIDs($puuid, $maxMatchIDs){
     global $headers;
     $matchIDArray = array();
+    $clashIDArray = array();
     $gameType = "ranked";
     $start = 0;
     $matchCount = "100";
@@ -254,7 +255,31 @@ function getMatchIDs($puuid, $maxMatchIDs){
             $matchCount = 100 - (($start + 100) - $maxMatchIDs);
         }
 
-        // Curl API request block
+        // Curl API request block for clash matches
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=700&type=normal&start=" . $start . "&count=" . $matchCount);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $clashidOutput = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        echo "<script>matchIdCalls++;</script>";
+
+        // 429 Too Many Requests
+        if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
+            sleep(5);
+            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=700&type=normal&start=".$start."&count=" . $matchCount);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            $clashidOutput = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            echo "<script>matchIdCalls++;</script>";
+        }
+
+        // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Curl API request for of ranked matches
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -265,7 +290,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
         echo "<script>matchIdCalls++;</script>";
 
         // 429 Too Many Requests
-        if($httpCode == "429"){ /** @todo fetch function with switch to handle and log every httpcode error */
+        if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
             sleep(5);
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -277,12 +302,21 @@ function getMatchIDs($puuid, $maxMatchIDs){
         }
 
         // Add each matchID to return array
-        foreach (json_decode($matchidOutput) as $match) {
-            $matchIDArray[] = $match;
+        foreach (json_decode($matchidOutput) as $rankedMatch) {
+            $matchIDArray[] = $rankedMatch;
+        }
+        foreach (json_decode($clashidOutput) as $clashMatch) {
+            $clashIDArray[] = $clashMatch;
         }
         $start += 100;
     }
-    return $matchIDArray;
+
+    // Merge and sort clash matchids and ranked match ids
+    $returnArray = array_merge($matchIDArray, $clashIDArray);
+    rsort($returnArray);
+    $returnArray = array_slice($returnArray,0 ,$maxMatchIDs);
+    
+    return $returnArray;
 }
 
 /** Download and local storing of matchid.json
@@ -520,21 +554,21 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                         $matchType = "Solo/Duo";
                                         echo "<span>".__("Solo/Duo")." ";
                                         break;
-                                        case 440:
-                                            $matchType = "Flex 5v5";
-                                            echo "<span>".__("Flex")." ";
-                                            break;
-                                            case 700:
-                                                $matchType = "Clash";
-                                                echo "<span>".__("Clash")." ";
-                                                break;
-                                            }
-                                            echo gmdate("i:s", $inhalt->info->gameDuration)."</span>";
-                                            echo "</div>";
-                                            
-                                            // echo "<div class='match-id hidden'>".$matchIDJSON."</div>";
-                                            
-                                            echo '<div id="match-time-ago" class="ml-auto">';
+                                    case 440:
+                                        $matchType = "Flex 5v5";
+                                        echo "<span>".__("Flex")." ";
+                                        break;
+                                    case 700:
+                                        $matchType = "Clash";
+                                        echo "<span>".__("Clash")." ";
+                                        break;
+                                }
+                                echo gmdate("i:s", $inhalt->info->gameDuration)."</span>";
+                                echo "</div>";
+                                
+                                // echo "<div class='match-id hidden'>".$matchIDJSON."</div>";
+                                
+                                echo '<div id="match-time-ago" class="ml-auto">';
                                             
                                 // Display when the game date was, if > than 23h -> day format, if > than 30d -> month format, etc.
                                 echo "<span>".secondsToTime(strtotime('now')-intdiv($inhalt->info->gameEndTimestamp, 1000))."</span></div>";
