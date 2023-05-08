@@ -21,6 +21,12 @@ def convert_to_webp(source):
     Returns:
         pathlib.Path: path to new image
     """
+    try:
+        with Image.open(source) as img:
+            pass
+    except (FileNotFoundError, OSError):
+        raise ValueError("Unsupported file format")
+
     destination = source.with_suffix(".webp")
 
     image = Image.open(source)  # Open image
