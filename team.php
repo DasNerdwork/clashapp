@@ -327,7 +327,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             
                             if($recalculatePlayerLanes || $recalculateMatchIDs){
                                 $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get CURRENT filecontent
-                                $playerLanes = getLanePercentages($matchDaten, $puuid); // Retrieves the two most played lanes of the give puuid
+                                // $playerLanes = getLanePercentages($matchDaten, $puuid); // Retrieves the two most played lanes of the give puuid TODO: REENABLE
                                 $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
                                 $playerDataJSON["LanePercentages"] = $playerLanes;
                                 fwrite($fp, json_encode($playerDataJSON));
@@ -337,7 +337,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             }
 
                             if($recalculateMatchIDs){
-                                $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE"
+                                // $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE" TODO: REENABLE
 
                                 foreach($slicedPlayerDataMatchIDs as $singleMatchID => $score){
                                     foreach($matchRankingArray as $matchRankingID => $matchRankingScore){
@@ -348,7 +348,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 }
                                 $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get CURRENT filecontent
                                 $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
-                                $playerDataJSON["MatchIDs"] = array_slice($recalculatedMatchIDsArray, 0, 15);
+                                // $playerDataJSON["MatchIDs"] = array_slice($recalculatedMatchIDsArray, 0, 15); TODO: REENABLE
                                 fwrite($fp, json_encode($playerDataJSON));
                                 fclose($fp);
                                 unset($recalculatedMatchIDsArray); // Necessary to reset the array for the next player iteration, otherwise everyone has the same matchids stored
@@ -446,7 +446,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         <div class='flex h-8 items-center justify-between'>
                                             <span>".__("Avg. Score").":</span>
                                             <div class='inline-flex w-[4.5rem] justify-center'>
-                                                <span>".number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2)."</span>
+                                                <span> <!-- number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2) --> </span>
                                             </div>
                                         </div>";
                                         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
@@ -463,15 +463,15 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
                             // ------------------------------------------------------------------v- AGAIN DOWNLOAD? -v------------------------------------------------------------------ //
 
-                            if(!$execOnlyOnce) $startAgainDownload = microtime(true);
-                            $memAgainDownload = memory_get_usage();
-                            foreach($matchids_sliced as $matchid){
-                                if(!file_exists('/hdd1/clashapp/data/matches/' . $matchid . ".json")){
-                                    downloadMatchByID($matchid, $playerName);
-                                }
-                            }
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["StartAgainDownload"]["Time"] = number_format((microtime(true) - $startAgainDownload), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["StartAgainDownload"]["Memory"] = number_format((memory_get_usage() - $memAgainDownload)/1024, 2, ',', '.')." kB";
+                            // if(!$execOnlyOnce) $startAgainDownload = microtime(true);
+                            // $memAgainDownload = memory_get_usage();
+                            // foreach($matchids_sliced as $matchid){
+                            //     if(!file_exists('/hdd1/clashapp/data/matches/' . $matchid . ".json")){
+                            //         downloadMatchByID($matchid, $playerName);
+                            //     }
+                            // }
+                            // if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["StartAgainDownload"]["Time"] = number_format((microtime(true) - $startAgainDownload), 2, ',', '.')." s";
+                            // if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["StartAgainDownload"]["Memory"] = number_format((memory_get_usage() - $memAgainDownload)/1024, 2, ',', '.')." kB";
 
                             // ------------------------------------------------------------------v- PRINT RANKED STATS -v------------------------------------------------------------------ //
 
@@ -654,7 +654,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     <table class='rounded-b bg-[#141624] w-full'>
                         <tr>
                             <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")'>";
-                                printTeamMatchDetailsByPUUID($player["matchids_sliced"], $player["puuid"], $player["matchRankingArray"]);
+                                // printTeamMatchDetailsByPUUID($player["matchids_sliced"], $player["puuid"], $player["matchRankingArray"]);
                                 echo "
                             </td>
                         </tr>
@@ -671,7 +671,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
     // -------------------------------------------------------------------------------v- CALCULATE & PRINT SUGGESTED BAN DATA  -v------------------------------------------------------------------------------- //
 
-    $recalculateSuggestedBanData = true; // uncomment to force recalc
+    // $recalculateSuggestedBanData = true; // uncomment to force recalc
     // Check if suggested ban data is already locally stored
     $currentTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
     if(!isset($currentTeamJSON["SuggestedBanData"]) || $recalculateSuggestedBanData){
