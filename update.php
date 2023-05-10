@@ -29,16 +29,16 @@ include_once('functions.php');
  * Example data of $_POST:
  * $_POST["username"] = "DasNerdwork"
  */
+$requestIterator = 0;
 
-if(isset($_POST["username"])){
-    // If function is explicitly called via a POST (e.g. by pressing the update button on a single users profile) start the function with a maximum Match ID fetch count of 150
-    updateProfile($_POST["username"], 150);
-}
+// if(isset($_POST["username"])){
+//     // If function is explicitly called via a POST (e.g. by pressing the update button on a single users profile) start the function with a maximum Match ID fetch count of 150
+//     updateProfile($_POST["username"], 150);
+// }
 
 // Fetch all the necessary data for updating or generating a single players player.json, stored in /clashapp/data/player/
 function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
     if($id != ""){
-        echo "<script>console.log('Trying updateProfile')</script>";
         $playerData = getPlayerData($type,$id);
         $playerName = $playerData["Name"];
         $sumid = $playerData["SumID"];
@@ -59,6 +59,8 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                 $jsonArray["MatchIDs"][$matchIDs[$i]] = "";
             }
         }
+        $tempAjaxMatchIDArray = array();
+        global $requestIterator;
 
         $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 
@@ -73,31 +75,41 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                 $return = true;
                 foreach($matchIDs as $checkSingleMatch){
                     if(!in_array($checkSingleMatch, array_keys($existingJson["MatchIDs"]))){
-                        echo "<script>
-                        var xhr = new XMLHttpRequest();
-
-                        xhr.open('POST', '/ajax/downloadMatch.php', true);
-
-                        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-                        xhr.onreadystatechange = function() {
-                            if (xhr.readyState === 4 && xhr.status === 200) {
-                                console.log(xhr.response);
-                            }
-                        };
-
-                        var data = 'match=".$checkSingleMatch."&playerName=".$playerName."';
-
-                        xhr.send(data);
-                        </>
-                        ";
-                        $return = false;
+                        $tempAjaxMatchIDArray[] = $checkSingleMatch;
                     }
                 }
+                if(empty($tempAjaxMatchIDArray)){
+                    echo "<script>console.log('All matches of ".$playerName." already local.');</script>";
+                } else {
+                // THIS REQUEST IS SENT IF A PLAYER IS MISSING SOME MATCH IDS IN THEIR PLAYERFILE
+                echo "<script>
+                var startTime".$requestIterator." = new Date().getTime();
+                var xhr".$requestIterator." = new XMLHttpRequest();
+
+                xhr".$requestIterator.".open('POST', '/ajax/downloadMatch.php', true);
+
+                xhr".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                xhr".$requestIterator.".onreadystatechange = function() {
+                    if (xhr".$requestIterator.".readyState === 4 && xhr".$requestIterator.".status === 200) {
+                        var endTime".$requestIterator." = new Date().getTime();
+                        var elapsedTime".$requestIterator." = (endTime".$requestIterator." - startTime".$requestIterator.") / 1000;
+                        var playerName = xhr".$requestIterator.".responseText;
+                        console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
+                    }
+                };
+
+                var data = 'matches=".json_encode($tempAjaxMatchIDArray)."&playerName=".$playerName."';
+
+                xhr".$requestIterator.".send(data);
+                </script>
+                ";
+                $return = false;
+                }
+        
                 if($return){
                     return '{"status":"up-to-date"}';
                 }
-
 
             } else { 
                 // else empty $existingJson string so following if-statement forced into its else part
@@ -119,50 +131,42 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
             $playerDataArray = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
             foreach(array_keys($playerDataArray["MatchIDs"]) as $match){
                 if(!file_exists('/var/www/html/clash/clashapp/data/matches/'.$match.'.json')){
-                    echo "<script>
-                        var xhr = new XMLHttpRequest();
-
-                        xhr.open('POST', '/ajax/downloadMatch.php', true);
-
-                        xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
-                        xhr.onreadystatechange = function() {
-                            if (xhr.readyState === 4 && xhr.status === 200) {
-                                console.log(xhr.response);
-                            }
-                        };
-
-                        var data = 'match=".$match."&playerName=".$playerName."';
-
-                        xhr.send(data);
-                        </script>
-                        ";
-                    // $downloadReturn = downloadMatchByID($match, $playerName);
-                    // if(($downloadReturn["Status"] == "Success") && ($downloadReturn["ErrorFile"] != null)){
-                    //     if(($found = array_search($downloadReturn["ErrorFile"], array_keys($jsonArray["MatchIDs"]))) !== false){
-                    //         echo "<script>console.log(".json_encode($found).");</script>"; // FIXME: Check this
-                    //         unset($jsonArray["MatchIDs"][$found]);
-                    //         $fp = fopen('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json', 'w');
-                    //         fwrite($fp, json_encode($jsonArray));
-                    //         fclose($fp);
-                    //     }
-                    // }
+                    $tempAjaxMatchIDArray[] = $match;
                 }
             }
+            
+            if($existingJson == ""){
+                if(empty($tempAjaxMatchIDArray)){
+                    echo "<script>console.log('All matches of ".$playerName." already local.');</script>";
+                } else {
+                // THIS REQUEST IS SENT IF NO PLAYER FILE EXISTS / LINE 69 IS SKIPPED
+                echo "<script>
+                var startTime".$requestIterator." = new Date().getTime();
+                var xhr".$requestIterator." = new XMLHttpRequest();
 
-            /**
-             * STEP 4: Logging & Finishing up
-             */
-            clearstatcache(true, $logPath); // Used for proper filesize calculation at the end of line 82
-            $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $endofup = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: End of update for \"" . $playerName . "\" - (Final Matchcount: ".count($playerDataArray["MatchIDs"]).", Approximate Filesize: ".number_format((filesize($logPath)/1048576), 3)." MB)";
-            $border = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
-            file_put_contents($logPath, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
-            file_put_contents($logPath, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
-            // Finally return successful updated status via javascript json format
-            // echo '{"status":"updated"}';
+                xhr".$requestIterator.".open('POST', '/ajax/downloadMatch.php', true);
+
+                xhr".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+                xhr".$requestIterator.".onreadystatechange = function() {
+                    if (xhr".$requestIterator.".readyState === 4 && xhr".$requestIterator.".status === 200) {
+                        var endTime".$requestIterator." = new Date().getTime();
+                        var elapsedTime".$requestIterator." = (endTime".$requestIterator." - startTime".$requestIterator.") / 1000;
+                        var playerName = xhr".$requestIterator.".responseText;
+                        console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
+                    }
+                };
+
+                var data = 'matches=".json_encode($tempAjaxMatchIDArray)."&playerName=".$playerName."';
+
+                xhr".$requestIterator.".send(data);
+                </script>
+                ";
+                }
+            }
         }
     }
+    $requestIterator++;
 }
 
 ?>
