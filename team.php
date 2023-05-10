@@ -54,6 +54,7 @@ $execOnlyOnce = false;
 $newMatchesDownloaded = false;
 $recalculateSuggestedBanData = false;
 $matchAlpineCounter = 0;
+$matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 
 // -----------------------------------------------------------v- SANITIZE & CHECK TEAM ID -v----------------------------------------------------------- //
 
@@ -95,7 +96,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <div class='p-4 rounded bg-[#141624] h-96'>
                     <h1 id='teamname' class='inline-flex items-center gap-4'>
                         <img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>
-                        <span id='team-title' class='text-2xl'>".strtoupper(__($teamDataArray["Tag"]))." | ".strtoupper(__($teamDataArray["Name"]))." (".__("Tier")." ".$teamDataArray["Tier"].")</span>
+                        <span id='team-title' class='text-2xl'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (".__("Tier")." ".$teamDataArray["Tier"].")</span>
                     </h1>
                     <div class='h-full w-full flex twok:-mt-16 fullhd:-mt-24 flex-col justify-end'>
                     <span class='ml-1 mb-0.5 text-base font-bold'>".__("History")."</span>
@@ -608,6 +609,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 unset($slicedPlayerDataMatchIDs);
                 $startGetSuggestedBans = microtime(true);
                 $memGetSuggestedBans = memory_get_usage();
+                clearstatcache(true, $matchDownloadLog); // Used for proper filesize calculation
+                $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+                $endofup = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Start of update for \"".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])."\" - (Approximate Logsize: ".number_format((filesize($matchDownloadLog)/1048576), 3)." MB)";
+                $border = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: -------------------------------------------------------------------------------------";
+                file_put_contents($matchDownloadLog, $border.PHP_EOL , FILE_APPEND | LOCK_EX);
+                file_put_contents($matchDownloadLog, $endofup.PHP_EOL , FILE_APPEND | LOCK_EX);
 
                 // -----------------------------------------------------------------------------v- MIDDLE AD BANNER  -v----------------------------------------------------------------------- //
 
