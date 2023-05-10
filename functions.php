@@ -332,75 +332,91 @@ function getMatchIDs($puuid, $maxMatchIDs){
  * Returnvalue:
  * @return void N/A, file saving & logging instead
  */
-function downloadMatchByID($matchid, $username = null){
+function downloadMatchesByID($matchids, $username = null){
     global $headers, $counter;
     $logPath = '/hdd1/clashapp/data/logs/matchDownloader.log';
     $errorFile = null;
 
-    // Halving of matchDownloader.log in case the logfile exceeds 10 MB
-    if(filesize($logPath) > 10000000 && $counter == 0){
-        $counter++;
-        $file = file($logPath);
-        $file = array_chunk($file, ceil(count($file)/2))[1];
-        file_put_contents($logPath, $file, LOCK_EX);
-        clearstatcache(true, $logPath);
-        $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $slimmed = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".number_format((filesize($logPath)/1048576), 3)." MB)";
-        file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
-        $counter = 0;
-    }
+    foreach($matchids as $matchid){
 
-    // Only download if file doesn't exist yet
-    if(!file_exists('/hdd1/clashapp/data/matches/' . $matchid . ".json")){
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $matchOutput = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-
-        // 429 Too Many Requests
-        if($httpCode == "429"){
-            sleep(10);
+        // Halving of matchDownloader.log in case the logfile exceeds 10 MB
+        if(filesize($logPath) > 10000000 && $counter == 0){
+            $counter++;
+            $file = file($logPath);
+            $file = array_chunk($file, ceil(count($file)/2))[1];
+            file_put_contents($logPath, $file, LOCK_EX);
+            clearstatcache(true, $logPath);
             $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $limit = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Rate limit got exceeded -> Now sleeping for 5 seconds - Status: " . $httpCode . " Too Many Requests";
-            file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
+            $slimmed = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".number_format((filesize($logPath)/1048576), 3)." MB)";
+            file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
+            $counter = 0;
+        }
+
+        // Only download if file doesn't exist yet
+        if(!file_exists('/hdd1/clashapp/data/matches/' . $matchid . ".json")){
+            $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             $matchOutput = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
-        }
 
-        // Write to log and save the matchid.json, else skip
-        clearstatcache(true, $logPath);
-        $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $answer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Got new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpCode . " (Size: ".number_format((filesize($logPath)/1048576), 3)." MB)";
-        file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
-        if($httpCode == "200"){
-            // if(($matchOutput->info->gameDuration != "0")){ // && (isset($matchOutput->info->participants[0]->killParticipation)
-                $fp = fopen('/hdd1/clashapp/data/matches/' . $matchid . '.json', 'w');
-                fwrite($fp, $matchOutput);
-                fclose($fp);
-            // } else {
-            //     $errorFile = $matchid;
-            //     $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            //     $warning = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: " . $matchid . " is empty or a remake - Skipping";
-            //     file_put_contents($logPath, $warning.PHP_EOL , FILE_APPEND | LOCK_EX);
-            // }
-        } else {
+            // 429 Too Many Requests -> HITTING LOWER RATE LIMIT OF --- 20 requests every 1 seconds ---
+            if($httpCode == "429"){
+                sleep(1);
+                $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+                $limit = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Lower Rate limit got exceeded -> Now sleeping for 1 second - Status: " . $httpCode . " Too Many Requests";
+                file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
+                curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                $matchOutput = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+
+                // 429 Too Many Requests -> HITTING HIGHER RATE LIMIT OF --- 100 requests every 2 minutes ---
+                if($httpCode == "429"){
+                    sleep(10);
+                    $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+                    $limit = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Upper Rate limit got exceeded -> Now sleeping for 10 seconds - Status: " . $httpCode . " Too Many Requests";
+                    file_put_contents($logPath, $limit.PHP_EOL , FILE_APPEND | LOCK_EX);
+                    curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                    $matchOutput = curl_exec($ch);
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    curl_close($ch);
+                }
+            }
+
+            // Write to log and save the matchid.json, else skip
+            clearstatcache(true, $logPath);
             $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-            $warning = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: " . $matchid . " received HTTP-Code: " . $httpCode . " - Skipping";
-            file_put_contents($logPath, $warning.PHP_EOL , FILE_APPEND | LOCK_EX);
+            $answer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Downloading new matchdata from \"" . $username . "\" via " . $matchid . ".json - Status: " . $httpCode;
+            file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
+            if($httpCode == "200"){
+                // if(($matchOutput->info->gameDuration != "0")){ // && (isset($matchOutput->info->participants[0]->killParticipation)
+                    $fp = fopen('/hdd1/clashapp/data/matches/' . $matchid . '.json', 'w');
+                    fwrite($fp, $matchOutput);
+                    fclose($fp);
+                // } else {
+                //     $errorFile = $matchid;
+                //     $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+                //     $warning = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: " . $matchid . " is empty or a remake - Skipping";
+                //     file_put_contents($logPath, $warning.PHP_EOL , FILE_APPEND | LOCK_EX);
+                // }
+            } else {
+                $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+                $warning = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: " . $matchid . " received HTTP-Code: " . $httpCode . " - Skipping";
+                file_put_contents($logPath, $warning.PHP_EOL , FILE_APPEND | LOCK_EX);
+            }
+        }else{
+            $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
+            $noAnswer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
+            file_put_contents($logPath, $noAnswer.PHP_EOL , FILE_APPEND | LOCK_EX);
         }
-    }else{
-        $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-        $noAnswer = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: " . $matchid . ".json already existing - Skipping";
-        file_put_contents($logPath, $noAnswer.PHP_EOL , FILE_APPEND | LOCK_EX);
     }
     // return array("Status" => "Success", "ErrorFile" => $errorFile);
     return;
