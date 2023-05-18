@@ -450,9 +450,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             <div class='flex h-8 items-center justify-between'>
                                                 <span>".__("Avg. Score").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center'>
-                                                    <span> <!-- number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2) --> </span>
+                                                    <span>";
+                                                    if($upToDate){
+                                                        echo number_format((array_sum(array_values($playerDataJSON["MatchIDs"]))/count(array_values($playerDataJSON["MatchIDs"]))), 2);
+                                                    } echo "</span>
                                                 </div>
-                                            </div>";
+                                            </div>"; // TODO: Add avg. matchscore in file
                                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
                                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Memory"] = number_format((memory_get_usage() - $memPrintAverageMatchscore)/1024, 2, ',', '.')." kB"; echo "
                                         </div>
