@@ -79,7 +79,11 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                     }
                 }
                 if(empty($tempAjaxMatchIDArray)){
-                    echo "<script>console.log('All matches of ".$playerName." already local.');</script>";
+                    echo "<script>console.log('All matches of ".$playerName." already local.');
+                    requests['".$sumid."'] = 'Done';
+                    if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
+                        console.log('ALL PLAYERS FINISHED');
+                    }</script>";
                 } else {
                 // THIS REQUEST IS SENT IF A PLAYER IS MISSING SOME MATCH IDS IN THEIR PLAYERFILE
                 echo "<script>
@@ -96,6 +100,10 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                         var elapsedTime".$requestIterator." = (endTime".$requestIterator." - startTime".$requestIterator.") / 1000;
                         var playerName = xhr".$requestIterator.".responseText;
                         console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
+                        requests['".$sumid."'] = 'Done';
+                        if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
+                            console.log('ALL PLAYERS FINISHED');
+                        }
                     }
                 };
 
@@ -137,7 +145,11 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
             
             if($existingJson == ""){
                 if(empty($tempAjaxMatchIDArray)){
-                    echo "<script>console.log('All matches of ".$playerName." already local.');</script>";
+                    echo "<script>console.log('All matches of ".$playerName." already local.');
+                    requests['".$sumid."'] = 'Done';
+                    if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
+                        console.log('ALL PLAYERS FINISHED');
+                    }</script>";
                 } else {
                 // THIS REQUEST IS SENT IF NO PLAYER FILE EXISTS / LINE 69 IS SKIPPED
                 echo "<script>
@@ -154,6 +166,10 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                         var elapsedTime".$requestIterator." = (endTime".$requestIterator." - startTime".$requestIterator.") / 1000;
                         var playerName = xhr".$requestIterator.".responseText;
                         console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
+                        requests['".$sumid."'] = 'Done';
+                        if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
+                            console.log('ALL PLAYERS FINISHED');
+                        }
                     }
                 };
 
