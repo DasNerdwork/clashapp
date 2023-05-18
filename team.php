@@ -54,7 +54,10 @@ $execOnlyOnce = false;
 $newMatchesDownloaded = false;
 $recalculateSuggestedBanData = false;
 $matchAlpineCounter = 0;
+$currentPlayerNumber = 1;
+$upToDate = false;
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
+echo "<script>const requests = {};</script>";
 
 // -----------------------------------------------------------v- SANITIZE & CHECK TEAM ID -v----------------------------------------------------------- //
 
@@ -187,6 +190,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             $matchesExpanded = 'false';
           }
         echo "
+        <script>const playerCount = ".count($teamDataArray["Players"])."</script>
         <table class='w-full flex table-fixed border-separate border-spacing-4 min-h-[2300px]' x-data='{ advancedGlobal: ".$matchesExpanded." }'>
             <tr>";
             // count($teamDataArray["Players"]) == 1 ? $tableWidth = "100%" : $tableWidth = round(100/count($teamDataArray["Players"]));          // disabled due to cumulative layout shift
@@ -210,17 +214,74 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                                                 $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
                                                 if(array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
-                                                    echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Updated.');</script>";
+                                                    echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Force updating.'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
                                                     $newMatchesDownloaded = true;
                                                     break;
                                                 } else {
-                                                    $playerData = $playerDataJSON["PlayerData"];
                                                     $playerName = $playerDataJSON["PlayerData"]["Name"];
+                                                    $playerData = $playerDataJSON["PlayerData"];
                                                     $sumid = $playerDataJSON["PlayerData"]["SumID"];
                                                     $puuid = $playerDataJSON["PlayerData"]["PUUID"];
                                                     $rankData = $playerDataJSON["RankData"];
                                                     $masteryData = $playerDataJSON["MasteryData"];
                                                     $matchids = array_keys($playerDataJSON["MatchIDs"]);
+
+
+                                                    echo "<script>console.log('".$playerName." already up to date.'); requests['".$player["summonerId"]."'] = 'Done';</script>";
+                                                    // HIERNACH MATCHIDS SENDEN
+                                                    $recalculateMatchIDs = false;
+                                                    $recalculatePlayerLanes = false;
+                                                    foreach($playerDataJSON["MatchIDs"] as $singleMatchID => $score){
+                                                        if($score == ""){
+                                                            $recalculateMatchIDs = true;
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    if(!isset($playerDataJSON["LanePercentages"]) || $playerDataJSON["LanePercentages"] == null){
+                                                        $recalculatePlayerLanes = true;
+                                                    } else {
+                                                        $playerLanes = $playerDataJSON["LanePercentages"];
+                                                    }
+
+                                                    $xhrMessage = "";
+                                                    
+                                                    if($recalculatePlayerLanes){
+                                                        if($recalculateMatchIDs){
+                                                            // If both player lanes and matchscores are missing/wrong in players .json
+                                                            $xhrMessage = "mode=both&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid."&sumid=".$sumid;
+                                                        } else {
+                                                            // if only player lanes are missing/wrong
+                                                            $xhrMessage = "mode=lanes&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid;
+                                                        }
+                                                    } elseif($recalculateMatchIDs){
+                                                        // if only matchscores are wrong/missing
+                                                        $xhrMessage = "mode=scores&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&sumid=".$sumid;
+                                                    }
+
+                                                    if($recalculatePlayerLanes || $recalculateMatchIDs){
+                                                        echo "<script>
+                                                        var xhrAfter".$currentPlayerNumber." = new XMLHttpRequest();
+                                        
+                                                        xhrAfter".$currentPlayerNumber.".open('POST', '/ajax/onSingleFinish.php', true);
+                                        
+                                                        xhrAfter".$currentPlayerNumber.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                                        
+                                                        xhrAfter".$currentPlayerNumber.".onreadystatechange = function() {
+                                                            if (xhrAfter".$currentPlayerNumber.".readyState === 4 && xhrAfter".$currentPlayerNumber.".status === 200) {
+                                                                console.log(xhrAfter".$currentPlayerNumber.".responseText);
+                                                            }
+                                                        };
+                                        
+                                                        var data = '".$xhrMessage."';
+                                        
+                                                        xhrAfter".$currentPlayerNumber.".send(data);
+                                                        </script>
+                                                        ";
+                                                        $currentPlayerNumber++;
+                                                    } else {
+                                                        $upToDate = true; // FIXME: As soon as update.php is changed to add via javascript -> remove this
+                                                    }
                                                     break;
                                                 }  
                                             } else {
@@ -229,6 +290,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         }
                                     }
                                     if(!isset($sumid) && $player["summonerId"] != "") {
+                                        echo "<script>console.log('No playerfile found for ".$player["summonerId"]."'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
                                         updateProfile($player["summonerId"], 15, "sumid");
                                         foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
                                             $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
@@ -304,68 +366,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             $memGetMatchData = memory_get_usage();
                             $matchids_sliced = array_slice($matchids, 0, 15); // Select first 15 MatchIDs of current player
                             $slicedPlayerDataMatchIDs = array_slice($playerDataJSON["MatchIDs"], 0, 15);
-                            $recalculateMatchIDs = false;
-                            $recalculatePlayerLanes = false;
-                            foreach($slicedPlayerDataMatchIDs as $singleMatchID => $score){
-                                if($score == ""){
-                                    $recalculateMatchIDs = true;
-                                    break;
-                                }
-                            }
-
-                            if(!isset($playerDataJSON["LanePercentages"])){
-                                $recalculatePlayerLanes = true;
-                            } else {
-                                $playerLanes = $playerDataJSON["LanePercentages"];
-                            }
-
-                            if($recalculateMatchIDs || $recalculatePlayerLanes){ // Get the opened & combined data of all of them
-                                $matchDaten = getMatchData($matchids_sliced); 
-                            }
                             
-                            //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchData"]["Time"] = number_format((microtime(true) - $startGetMatchData), 2, ',', '.')." s";
-                            //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchData"]["Memory"] = number_format((memory_get_usage() - $memGetMatchData)/1024, 2, ',', '.')." kB";
-                            
-                            if($recalculatePlayerLanes || $recalculateMatchIDs){
-                                $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get CURRENT filecontent
-                                // $playerLanes = getLanePercentages($matchDaten, $puuid); // Retrieves the two most played lanes of the give puuid TODO: REENABLE
-                                $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
-                                $playerDataJSON["LanePercentages"] = $playerLanes;
-                                fwrite($fp, json_encode($playerDataJSON));
-                                fclose($fp);
-                            } else {
-                                $playerLanes = $playerDataJSON["LanePercentages"];
-                            }
-
-                            if($recalculateMatchIDs){
-                                // $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE" TODO: REENABLE
-
-                                foreach($slicedPlayerDataMatchIDs as $singleMatchID => $score){
-                                    foreach($matchRankingArray as $matchRankingID => $matchRankingScore){
-                                        if($matchRankingID == $singleMatchID){
-                                            $recalculatedMatchIDsArray[$singleMatchID] = $matchRankingScore;
-                                        }
-                                    }
-                                }
-                                $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get CURRENT filecontent
-                                $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
-                                // $playerDataJSON["MatchIDs"] = array_slice($recalculatedMatchIDsArray, 0, 15); TODO: REENABLE
-                                fwrite($fp, json_encode($playerDataJSON));
-                                fclose($fp);
-                                unset($recalculatedMatchIDsArray); // Necessary to reset the array for the next player iteration, otherwise everyone has the same matchids stored
-                            } else {
-                                $matchRankingArray = $playerDataJSON["MatchIDs"];
-                            }
-
-
-
-
-
-
-
-
-
-
                             // if(!isset($matchRankingArray)) $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE" // FIXME: Temp fix for testing
                             // print_r($matchRankingArray["Scores"]);
 
@@ -407,54 +408,58 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
                             if(!$execOnlyOnce) $startProfileIconBorders = microtime(true);
                             $memProfileIconBorders = memory_get_usage();
-                            $playerMainRole = $playerLanes[0];
-                            $playerSecondaryRole = $playerLanes[1];
-                            $queueRole = $player["position"];
-                            // Also add main & secondary role to collective team array
-                            $playerLanesTeamArray[$sumid]["Mainrole"] = $playerLanes[0];
-                            $playerLanesTeamArray[$sumid]["Secrole"] = $playerLanes[1];
 
-                            echo "<div class='inline-flex leading-8 gap-1 z-20'>
-                                    <div class='grid w-11/12 gap-2 h-fit'>
-                                        <div class='flex h-8 items-center justify-between'>
-                                            <span>".__("Queued as").":</span>
-                                            <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
-                                            if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
-                                                if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
-                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">
-                                                          <span class="text-yellow-400 absolute z-20 text-xl -mr-12 font-bold mt-0.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
-                                                          <div class="w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 ml-[84px] -mt-[54px]" x-show="exclamation" x-transition x-cloak>
-                                                            This player did not queue on their main position
-                                                            <svg class="absolute text-black h-2 w-full left-0 -ml-[1.2rem] top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
-                                                          </div>';
-                                                } else {
-                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
-                                                }
-                                            } echo"</div>
-                                        </div>
-                                        <div class='flex h-8 items-center justify-between'>
-                                            <span>".__("Position(s)").":</span>
-                                            <div class='inline-flex gap-2 w-[72px] justify-center'>";
-                                            if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
-                                                echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
-                                            }
-                                            if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
-                                                echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players secondary position">';
-                                            }echo "</div>
-                                        </div>";
-                                        if(!$execOnlyOnce) $startPrintAverageMatchscore = microtime(true);
-                                        $memPrintAverageMatchscore = memory_get_usage(); echo "
-                                        <div class='flex h-8 items-center justify-between'>
-                                            <span>".__("Avg. Score").":</span>
-                                            <div class='inline-flex w-[4.5rem] justify-center'>
-                                                <span> <!-- number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2) --> </span>
+                            if(isset($playerLanes)){
+                                $playerMainRole = $playerLanes[0];
+                                $playerSecondaryRole = $playerLanes[1];
+                                $queueRole = $player["position"];
+                                // Also add main & secondary role to collective team array
+                                $playerLanesTeamArray[$sumid]["Mainrole"] = $playerLanes[0];
+                                $playerLanesTeamArray[$sumid]["Secrole"] = $playerLanes[1];
+
+                                echo "<div class='inline-flex leading-8 gap-1 z-20'>
+                                        <div class='grid w-11/12 gap-2 h-fit'>
+                                            <div class='flex h-8 items-center justify-between'>
+                                                <span>".__("Queued as").":</span>
+                                                <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
+                                                if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
+                                                    if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
+                                                        echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">
+                                                            <span class="text-yellow-400 absolute z-20 text-xl -mr-12 font-bold mt-0.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
+                                                            <div class="w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 ml-[84px] -mt-[54px]" x-show="exclamation" x-transition x-cloak>
+                                                                This player did not queue on their main position
+                                                                <svg class="absolute text-black h-2 w-full left-0 -ml-[1.2rem] top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                                            </div>';
+                                                    } else {
+                                                        echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
+                                                    }
+                                                } echo"</div>
                                             </div>
-                                        </div>";
-                                        if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
-                                        if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Memory"] = number_format((memory_get_usage() - $memPrintAverageMatchscore)/1024, 2, ',', '.')." kB"; echo "
+                                            <div class='flex h-8 items-center justify-between'>
+                                                <span>".__("Position(s)").":</span>
+                                                <div class='inline-flex gap-2 w-[72px] justify-center'>";
+                                                if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
+                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
+                                                }
+                                                if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
+                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players secondary position">';
+                                                }echo "</div>
+                                            </div>";
+                                            if(!$execOnlyOnce) $startPrintAverageMatchscore = microtime(true);
+                                            $memPrintAverageMatchscore = memory_get_usage(); echo "
+                                            <div class='flex h-8 items-center justify-between'>
+                                                <span>".__("Avg. Score").":</span>
+                                                <div class='inline-flex w-[4.5rem] justify-center'>
+                                                    <span> <!-- number_format((array_sum($matchRankingArray)/count($matchRankingArray)), 2) --> </span>
+                                                </div>
+                                            </div>";
+                                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
+                                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Memory"] = number_format((memory_get_usage() - $memPrintAverageMatchscore)/1024, 2, ',', '.')." kB"; echo "
+                                        </div>
                                     </div>
-                                </div>
-                            </div>";
+                                </div>";
+                            }
+
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
 
@@ -661,7 +666,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     <table class='rounded-b bg-[#141624] w-full'>
                         <tr>
                             <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")'>";
-                                // printTeamMatchDetailsByPUUID($player["matchids_sliced"], $player["puuid"], $player["matchRankingArray"]);
+                                if($upToDate){
+                                    printTeamMatchDetailsByPUUID($player["matchids_sliced"], $player["puuid"], $player["matchRankingArray"]);
+                                }
                                 echo "
                             </td>
                         </tr>
@@ -781,13 +788,13 @@ $timeAndMemoryArray["Total"]["Memory"] = number_format((memory_get_usage() - $me
 
     // --------------------------------------------------------------------------------------------------v- DEBUG  -v-------------------------------------------------------------------------------------------------- //
 
-echo "
-<script>console.log(".json_encode($timeAndMemoryArray).");
-console.log({
-    PlayerData: playerDataCalls,
-    MasteryScore: masteryScoresCalls,
-    CurrentRank: currentRankCalls,
-    MatchIDs: matchIdCalls,
-    MatchDownload: matchDownloadCalls,
-    TotalCalls: playerDataCalls+masteryScoresCalls+currentRankCalls+matchIdCalls+matchDownloadCalls});</script>";
+// echo "
+// <script>console.log(".json_encode($timeAndMemoryArray).");
+// console.log({
+//     PlayerData: playerDataCalls,
+//     MasteryScore: masteryScoresCalls,
+//     CurrentRank: currentRankCalls,
+//     MatchIDs: matchIdCalls,
+//     MatchDownload: matchDownloadCalls,
+//     TotalCalls: playerDataCalls+masteryScoresCalls+currentRankCalls+matchIdCalls+matchDownloadCalls});</script>";
 ?>
