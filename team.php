@@ -269,7 +269,29 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         
                                                         xhrAfter".$currentPlayerNumber.".onreadystatechange = function() {
                                                             if (xhrAfter".$currentPlayerNumber.".readyState === 4 && xhrAfter".$currentPlayerNumber.".status === 200) {
-                                                                console.log(xhrAfter".$currentPlayerNumber.".responseText);
+                                                                xhrAfter".$currentPlayerNumber.".responseText;
+                                                                var playerColumns = document.getElementsByClassName('single-player-column');
+                                                                var response = JSON.parse(xhrAfter".$currentPlayerNumber.".responseText);
+                                                                for (let item of playerColumns) {
+                                                                    if(response.sumid === item.dataset.sumid) {
+                                                                        if(response.playerLanes) {
+                                                                            response.playerLanes.forEach(function(singleLane) {
+                                                                                if(singleLane != ''){
+                                                                                    item.children[1].children[0].children[1].children[1].insertAdjacentHTML('beforeend', \"<img class='saturate-0 brightness-150' src='/clashapp/data/misc/lanes/\"+singleLane+\".webp' width='32' height='32' alt='A league of legends lane icon corresponding to a players main position'>\");
+                                                                                }
+                                                                            });
+                                                                        }
+                                                                        if(response.matchScores) {
+                                                                            var scoresArray = Object.values(response.matchScores);
+                                                                            var sum = 0;
+                                                                            for (var i = 0; i < scoresArray.length; i++) {
+                                                                                sum += parseFloat(scoresArray[i]);
+                                                                            }
+                                                                            var averageScore = (sum / scoresArray.length).toFixed(2);
+                                                                            item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                                                        }
+                                                                    }
+                                                                }
                                                             }
                                                         };
                                         
@@ -323,7 +345,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
                                     if(!$execOnlyOnce) $startProfileIconBorders = microtime(true);
                                     $memProfileIconBorders = memory_get_usage();
-                                    echo "<div class='h-[9.75rem] mt-4 grid grid-cols-2 gap-4'>
+                                    echo "<div class='h-[9.75rem] mt-4 grid grid-cols-2 gap-4 single-player-column' data-puuid='".$puuid."' data-sumid='".$sumid."'>
                                         <div class='relative flex justify-center'>";
                                             if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
                                                 echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" height="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px]" alt="The custom profile icon of a player">';
@@ -409,10 +431,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             if(!$execOnlyOnce) $startProfileIconBorders = microtime(true);
                             $memProfileIconBorders = memory_get_usage();
 
+                            $queueRole = $player["position"];
                             if(isset($playerLanes)){
                                 $playerMainRole = $playerLanes[0];
                                 $playerSecondaryRole = $playerLanes[1];
-                                $queueRole = $player["position"];
                                 // Also add main & secondary role to collective team array
                                 $playerLanesTeamArray[$sumid]["Mainrole"] = $playerLanes[0];
                                 $playerLanesTeamArray[$sumid]["Secrole"] = $playerLanes[1];
@@ -436,7 +458,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 } echo"</div>
                                             </div>
                                             <div class='flex h-8 items-center justify-between'>
-                                                <span>".__("Position(s)").":</span>
+                                                <span class='lane-positions'>".__("Position(s)").":</span>
                                                 <div class='inline-flex gap-2 w-[72px] justify-center'>";
                                                 if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
                                                     echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
@@ -458,6 +480,31 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             </div>"; // TODO: Add avg. matchscore in file
                                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
                                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintAverageMatchscore"]["Memory"] = number_format((memory_get_usage() - $memPrintAverageMatchscore)/1024, 2, ',', '.')." kB"; echo "
+                                        </div>
+                                    </div>
+                                </div>";
+                            } else {
+                                echo "<div class='inline-flex leading-8 gap-1 z-20'>
+                                        <div class='grid w-11/12 gap-2 h-fit'>
+                                            <div class='flex h-8 items-center justify-between'>
+                                                <span>".__("Queued as").":</span>
+                                                <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
+                                                if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
+                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
+                                                } echo "
+                                                </div>
+                                            </div>
+                                            <div class='flex h-8 items-center justify-between'>
+                                                <span class='lane-positions'>".__("Position(s)").":</span>
+                                                <div class='inline-flex gap-2 w-[72px] justify-center'>
+                                                </div>
+                                            </div>
+                                            <div class='flex h-8 items-center justify-between'>
+                                                <span>".__("Avg. Score").":</span>
+                                                <div class='inline-flex w-[4.5rem] justify-center'>
+                                                    <span></span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>";
