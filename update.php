@@ -140,6 +140,39 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                         var playerName = xhr".$requestIterator.".responseText;
                         console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
                         requests['".$sumid."'] = 'Done';
+
+                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';
+                        var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
+                        xhrAfter".$ajaxUniquifier.".open('POST', '/ajax/onSingleFinish.php', true);
+                        xhrAfter".$ajaxUniquifier.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                        xhrAfter".$ajaxUniquifier.".onreadystatechange = function() {
+                            if (xhrAfter".$ajaxUniquifier.".readyState === 4 && xhrAfter".$ajaxUniquifier.".status === 200) {
+                                var playerColumns = document.getElementsByClassName('single-player-column');
+                                var response = JSON.parse(xhrAfter".$ajaxUniquifier.".responseText);
+                                for (let item of playerColumns) {
+                                    if(response.sumid === item.dataset.sumid) {
+                                        if(response.playerLanes) {
+                                            response.playerLanes.forEach(function(singleLane) {
+                                                if(singleLane != ''){
+                                                    item.children[1].children[0].children[1].children[1].insertAdjacentHTML('beforeend', \"<img class='saturate-0 brightness-150' src='/clashapp/data/misc/lanes/\"+singleLane+\".webp' width='32' height='32' alt='A league of legends lane icon corresponding to a players main position'>\");
+                                                }
+                                            });
+                                        }
+                                        if(response.matchScores) {
+                                            var scoresArray = Object.values(response.matchScores);
+                                            var sum = 0;
+                                            for (var i = 0; i < scoresArray.length; i++) {
+                                                sum += parseFloat(scoresArray[i]);
+                                            }
+                                            var averageScore = (sum / scoresArray.length).toFixed(2);
+                                            item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                        xhrAfter".$ajaxUniquifier.".send(xhrMessage);
+
                         if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
                             console.log('ALL PLAYERS FINISHED');
                         }
@@ -239,6 +272,39 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                         var playerName = xhr".$requestIterator.".responseText;
                         console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
                         requests['".$sumid."'] = 'Done';
+
+                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';
+                        var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
+                        xhrAfter".$ajaxUniquifier.".open('POST', '/ajax/onSingleFinish.php', true);
+                        xhrAfter".$ajaxUniquifier.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                        xhrAfter".$ajaxUniquifier.".onreadystatechange = function() {
+                            if (xhrAfter".$ajaxUniquifier.".readyState === 4 && xhrAfter".$ajaxUniquifier.".status === 200) {
+                                var playerColumns = document.getElementsByClassName('single-player-column');
+                                var response = JSON.parse(xhrAfter".$ajaxUniquifier.".responseText);
+                                for (let item of playerColumns) {
+                                    if(response.sumid === item.dataset.sumid) {
+                                        if(response.playerLanes) {
+                                            response.playerLanes.forEach(function(singleLane) {
+                                                if(singleLane != ''){
+                                                    item.children[1].children[0].children[1].children[1].insertAdjacentHTML('beforeend', \"<img class='saturate-0 brightness-150' src='/clashapp/data/misc/lanes/\"+singleLane+\".webp' width='32' height='32' alt='A league of legends lane icon corresponding to a players main position'>\");
+                                                }
+                                            });
+                                        }
+                                        if(response.matchScores) {
+                                            var scoresArray = Object.values(response.matchScores);
+                                            var sum = 0;
+                                            for (var i = 0; i < scoresArray.length; i++) {
+                                                sum += parseFloat(scoresArray[i]);
+                                            }
+                                            var averageScore = (sum / scoresArray.length).toFixed(2);
+                                            item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                        }
+                                    }
+                                }
+                            }
+                        };
+                        xhrAfter".$ajaxUniquifier.".send(xhrMessage);
+
                         if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
                             console.log('ALL PLAYERS FINISHED');
                         }
