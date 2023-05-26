@@ -271,6 +271,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                             if (xhrAfter".$currentPlayerNumber.".readyState === 4 && xhrAfter".$currentPlayerNumber.".status === 200) {
                                                                 xhrAfter".$currentPlayerNumber.".responseText;
                                                                 var playerColumns = document.getElementsByClassName('single-player-column');
+                                                                var matchHistories = document.getElementsByClassName('single-player-match-history');
                                                                 var response = JSON.parse(xhrAfter".$currentPlayerNumber.".responseText);
                                                                 for (let item of playerColumns) {
                                                                     if(response.sumid === item.dataset.sumid) {
@@ -289,6 +290,13 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                                             }
                                                                             var averageScore = (sum / scoresArray.length).toFixed(2);
                                                                             item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                for (let historyColumn of matchHistories) {
+                                                                    if(response.sumid === historyColumn.dataset.sumid) {
+                                                                        if(response.matchHistory) {
+                                                                            historyColumn.insertAdjacentHTML('beforeend', response.matchHistory);
                                                                         }
                                                                     }
                                                                 }
@@ -645,6 +653,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
                             $tempStoreArray[$key]["matchids_sliced"] = $matchids_sliced;
                             $tempStoreArray[$key]["puuid"] = $puuid;
+                            $tempStoreArray[$key]["sumid"] = $sumid;
                             $tempStoreArray[$key]["matchRankingArray"] = $matchRankingArray;
 
                             echo "
@@ -715,9 +724,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <td class='align-top w-1/5 max-w-[19.25vw] opacity-0' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
                     <table class='rounded-b bg-[#141624] w-full'>
                         <tr>
-                            <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")'>";
+                            <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")' class='single-player-match-history' data-puuid='".$player["puuid"]."' data-sumid='".$player["sumid"]."'>";
                                 if($upToDate){
-                                    printTeamMatchDetailsByPUUID($player["matchids_sliced"], $player["puuid"], $player["matchRankingArray"]);
+                                    echo printTeamMatchDetailsByPUUID($player["matchids_sliced"], $player["puuid"], $player["matchRankingArray"]);
                                 }
                                 echo "
                             </td>
