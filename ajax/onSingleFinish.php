@@ -43,9 +43,14 @@ if(isset($_POST['mode'])){
     fwrite($fp, json_encode($playerDataJSON));
     fclose($fp);
 
+    if($_POST['mode'] == "both") {
+        $matchHistoryAsHTML = printTeamMatchDetailsByPUUID($matchids, $puuid, $matchRankingArray);
+        $response['matchHistory'] = $matchHistoryAsHTML;
+    }
+
     unset($recalculatedMatchIDsArray); // Necessary to reset the array for the next player iteration, otherwise everyone has the same matchids stored
     unset($matchData); // Empty RAM
-
+    
     echo json_encode($response);
 }
 ?>
