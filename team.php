@@ -94,7 +94,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         $memPageTop = memory_get_usage();
         // echo "TournamentID: ".$teamDataArray["TournamentID"]; // TODO: Add current tournament to view
         echo"
-        <div id='top-part' class='h-96 grid twok:grid-cols-topbartwok fullhd:grid-cols-topbarfullhd gap-4 mt-4 ml-4 mr-4 z-20 relative'>
+        <div id='top-part' class='h-96 grid twok:grid-cols-topbartwok fullhd:grid-cols-topbarfullhd gap-4 mt-4 ml-4 mr-4 relative'>
             <div id='team-info' class=' h-96 row-span-2'>
                 <div class='p-4 rounded bg-[#141624] h-96'>
                     <h1 id='teamname' class='inline-flex items-center gap-4'>
@@ -353,10 +353,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
                                     if(!$execOnlyOnce) $startProfileIconBorders = microtime(true);
                                     $memProfileIconBorders = memory_get_usage();
-                                    echo "<div class='h-[9.75rem] mt-4 grid grid-cols-2 gap-4 single-player-column' data-puuid='".$puuid."' data-sumid='".$sumid."'>
-                                        <div class='relative flex justify-center'>";
+                                    echo "<div class='h-40 mt-4 grid grid-cols-2 gap-4 single-player-column' data-puuid='".$puuid."' data-sumid='".$sumid."'>
+                                        <div class='relative flex justify-center overflow-hidden'>";
                                             if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
-                                                echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" height="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px]" alt="The custom profile icon of a player">';
+                                                echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" height="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px] pointer-events-none select-none" alt="The custom profile icon of a player">';
                                             } else {
                                                 echo "Missing Img"; // FIXME: Create Fallback
                                             }
@@ -367,7 +367,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/*'.strtolower($rankOrLevelArray["HighestRank"]).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
                                                 $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
                                                 if(file_exists($profileBorderPath)){
-                                                    echo '<img src="'.$webBorderPath.'" width="384" height="384" class="max-w-[384px] -top-32 absolute z-10" style="-webkit-mask-image: radial-gradient(circle at center, white 20%, transparent 33%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
+                                                    echo '<img src="'.$webBorderPath.'" width="384" height="384" class="max-w-[384px] -top-32 absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 20%, transparent 33%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
                                                 }
                                                 // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
                                                 if ($rankOrLevelArray["HighEloLP"] != ""){
@@ -381,11 +381,11 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
                                                 $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
                                                 if(file_exists($profileBorderPath)){
-                                                    echo '<img src="'.$webBorderPath.'" width="190" height="190" class="absolute -mt-[2.05rem] z-10" style="-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);" alt="The profile border corresponding to a players level">';
+                                                    echo '<img src="'.$webBorderPath.'" width="190" height="190" class="absolute -mt-[2.05rem] z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);" alt="The profile border corresponding to a players level">';
                                                     }
                                             echo "<div class='absolute text-[#e8dfcc] mt-24 text-xs z-20 twok:mt-[6.8rem]'>".$playerData["Level"]."</div>";
                                             } echo "
-                                  <span class='absolute mt-[8.75rem]'>".$playerName."</span></div>";
+                                  <span class='absolute mt-[8.75rem] z-20'>".$playerName."</span></div>";
 
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
@@ -455,10 +455,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
                                                     if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
                                                         echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">
-                                                            <span class="text-yellow-400 absolute z-20 text-xl -mr-12 font-bold mt-0.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
-                                                            <div class="w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 ml-[84px] -mt-[54px]" x-show="exclamation" x-transition x-cloak>
+                                                            <span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
+                                                            <div class="w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 -ml-16 -mt-[54px]" x-show="exclamation" x-transition x-cloak>
                                                                 This player did not queue on their main position
-                                                                <svg class="absolute text-black h-2 w-full left-0 -ml-[1.2rem] top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                                                <svg class="absolute text-black h-2 w-full left-0 ml-14 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
                                                             </div>';
                                                     } else {
                                                         echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
@@ -699,9 +699,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             </div>
                             <div class='grid rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max items-center'>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='expand-all-matches' id='expand-all-matches' @change='document.getElementById(\"expand-all-matches\").checked ? advancedGlobal = true : advancedGlobal = false'></input><label for='expand-all-matches'> ".__("Expand all matches")."</label></div>
-                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
-                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
-                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' id='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting2' id='additional-setting2' disabled></input><label for='additional-setting2'> ".__("Additional setting")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting3' id='additional-setting3' disabled></input><label for='additional-setting3'> ".__("Additional setting")."</label></div>
                             </div>
                         </div>
                         </div>

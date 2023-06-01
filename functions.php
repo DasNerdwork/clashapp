@@ -1392,45 +1392,47 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
         unset($mainArray);
         unset($reasonArray);
         //going through all matches to save all data in array per sumid
-        foreach ($matchData[$matchID]->info as $player) {
-            for ($i = 0; $i < 10; $i++){
-                if (isset($player[$i]->summonerId)) { // Necessary to loop over every player to get comparable results
-                    // echo $i."<br>";
-                    // Ternary Operator == if(isset(playerStat)) then set "Attribute" to the playerStat else set the "Attribute" to 0
-                    isset($player[$i]->kills) ? $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills : $mainArray[$player[$i]->summonerId]["Kills"] = 0;
-                    isset($player[$i]->deaths) ? $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths : $mainArray[$player[$i]->summonerId]["Deaths"] = 0;
-                    isset($player[$i]->assists) ? $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists : $mainArray[$player[$i]->summonerId]["Assists"] = 0;
-                    isset($player[$i]->challenges->kda) ? $mainArray[$player[$i]->summonerId]["KDA"] = $player[$i]->challenges->kda : $mainArray[$player[$i]->summonerId]["KDA"] = 0;
-                    isset($player[$i]->challenges->killParticipation) ? $mainArray[$player[$i]->summonerId]["KillParticipation"] = $player[$i]->challenges->killParticipation : $mainArray[$player[$i]->summonerId]["KillParticipation"] = 0;
-                    isset($player[$i]->totalMinionsKilled) ? $mainArray[$player[$i]->summonerId]["CS"] = $player[$i]->totalMinionsKilled+$player[$i]->neutralMinionsKilled : $mainArray[$player[$i]->summonerId]["CS"] = 0;
-                    isset($player[$i]->goldEarned) ? $mainArray[$player[$i]->summonerId]["Gold"] = $player[$i]->goldEarned : $mainArray[$player[$i]->summonerId]["Gold"] = 0;
-                    isset($player[$i]->visionScore) ? $mainArray[$player[$i]->summonerId]["VisionScore"] = $player[$i]->visionScore : $mainArray[$player[$i]->summonerId]["VisionScore"] = 0;
-                    isset($player[$i]->challenges->wardTakedowns) ? $mainArray[$player[$i]->summonerId]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns : $mainArray[$player[$i]->summonerId]["WardTakedowns"] = 0;
-                    isset($player[$i]->wardsPlaced) ? $mainArray[$player[$i]->summonerId]["WardsPlaced"] = $player[$i]->wardsPlaced : $mainArray[$player[$i]->summonerId]["WardsPlaced"] = 0;
-                    isset($player[$i]->challenges->wardsGuarded) ? $mainArray[$player[$i]->summonerId]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded : $mainArray[$player[$i]->summonerId]["WardsGuarded"] = 0;
-                    isset($player[$i]->detectorWardsPlaced) ? $mainArray[$player[$i]->summonerId]["VisionWards"] = $player[$i]->detectorWardsPlaced : $mainArray[$player[$i]->summonerId]["VisionWards"] = 0;
-                    isset($player[$i]->consumablesPurchased) ? $mainArray[$player[$i]->summonerId]["Consumables"] = $player[$i]->consumablesPurchased : $mainArray[$player[$i]->summonerId]["Consumables"] = 0;
-                    isset($player[$i]->challenges->turretPlatesTaken) ? $mainArray[$player[$i]->summonerId]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken : $mainArray[$player[$i]->summonerId]["TurretPlates"] = 0;
-                    isset($player[$i]->challenges->takedowns) ? $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = $player[$i]->challenges->takedowns : $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = 0;
-                    isset($player[$i]->turretTakedowns) ? $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = $player[$i]->turretTakedowns : $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = 0;
-                    isset($player[$i]->inhibitorTakedowns) ? $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns : $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = 0;
-                    isset($player[$i]->challenges->dragonTakedowns) ? $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns : $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = 0;
-                    isset($player[$i]->challenges->riftHeraldTakedowns) ? $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns : $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = 0;
-                    isset($player[$i]->damageDealtToBuildings) ? $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings : $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = 0;
-                    isset($player[$i]->damageDealtToObjectives) ? $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives : $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = 0;
-                    isset($player[$i]->damageSelfMitigated) ? $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated : $mainArray[$player[$i]->summonerId]["DamageMitigated"] = 0;
-                    isset($player[$i]->totalDamageDealtToChampions) ? $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions : $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = 0;
-                    isset($player[$i]->totalDamageTaken) ? $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken : $mainArray[$player[$i]->summonerId]["DamageTaken"] = 0;
-                    isset($player[$i]->totalDamageShieldedOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates : $mainArray[$player[$i]->summonerId]["TeamShielded"] = 0;
-                    isset($player[$i]->totalHealsOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates : $mainArray[$player[$i]->summonerId]["TeamHealed"] = 0;
-                    isset($player[$i]->totalTimeCCDealt) ? $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt : $mainArray[$player[$i]->summonerId]["TimeCC"] = 0;
-                    isset($player[$i]->totalTimeSpentDead) ? $mainArray[$player[$i]->summonerId]["DeathTime"] = $player[$i]->totalTimeSpentDead : $mainArray[$player[$i]->summonerId]["DeathTime"] = 0;
-                    isset($player[$i]->challenges->skillshotsDodged) ? $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged : $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = 0;
-                    isset($player[$i]->challenges->skillshotsHit) ? $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit : $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = 0;
-                    if($player[$i]->summonerId == $sumid){
-                        $reasonArray[$matchID]["Sumid"] = $sumid;
-                        foreach($cleanNameArray as $attributeName){
-                            $reasonArray[$matchID][$attributeName]["Value"] = $mainArray[$player[$i]->summonerId][$attributeName];
+        if(isset($matchData[$matchID])){ // FIXME: No clue why necessary
+            foreach ($matchData[$matchID]->info as $player) {
+                for ($i = 0; $i < 10; $i++){
+                    if (isset($player[$i]->summonerId)) { // Necessary to loop over every player to get comparable results
+                        // echo $i."<br>";
+                        // Ternary Operator == if(isset(playerStat)) then set "Attribute" to the playerStat else set the "Attribute" to 0
+                        isset($player[$i]->kills) ? $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills : $mainArray[$player[$i]->summonerId]["Kills"] = 0;
+                        isset($player[$i]->deaths) ? $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths : $mainArray[$player[$i]->summonerId]["Deaths"] = 0;
+                        isset($player[$i]->assists) ? $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists : $mainArray[$player[$i]->summonerId]["Assists"] = 0;
+                        isset($player[$i]->challenges->kda) ? $mainArray[$player[$i]->summonerId]["KDA"] = $player[$i]->challenges->kda : $mainArray[$player[$i]->summonerId]["KDA"] = 0;
+                        isset($player[$i]->challenges->killParticipation) ? $mainArray[$player[$i]->summonerId]["KillParticipation"] = $player[$i]->challenges->killParticipation : $mainArray[$player[$i]->summonerId]["KillParticipation"] = 0;
+                        isset($player[$i]->totalMinionsKilled) ? $mainArray[$player[$i]->summonerId]["CS"] = $player[$i]->totalMinionsKilled+$player[$i]->neutralMinionsKilled : $mainArray[$player[$i]->summonerId]["CS"] = 0;
+                        isset($player[$i]->goldEarned) ? $mainArray[$player[$i]->summonerId]["Gold"] = $player[$i]->goldEarned : $mainArray[$player[$i]->summonerId]["Gold"] = 0;
+                        isset($player[$i]->visionScore) ? $mainArray[$player[$i]->summonerId]["VisionScore"] = $player[$i]->visionScore : $mainArray[$player[$i]->summonerId]["VisionScore"] = 0;
+                        isset($player[$i]->challenges->wardTakedowns) ? $mainArray[$player[$i]->summonerId]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns : $mainArray[$player[$i]->summonerId]["WardTakedowns"] = 0;
+                        isset($player[$i]->wardsPlaced) ? $mainArray[$player[$i]->summonerId]["WardsPlaced"] = $player[$i]->wardsPlaced : $mainArray[$player[$i]->summonerId]["WardsPlaced"] = 0;
+                        isset($player[$i]->challenges->wardsGuarded) ? $mainArray[$player[$i]->summonerId]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded : $mainArray[$player[$i]->summonerId]["WardsGuarded"] = 0;
+                        isset($player[$i]->detectorWardsPlaced) ? $mainArray[$player[$i]->summonerId]["VisionWards"] = $player[$i]->detectorWardsPlaced : $mainArray[$player[$i]->summonerId]["VisionWards"] = 0;
+                        isset($player[$i]->consumablesPurchased) ? $mainArray[$player[$i]->summonerId]["Consumables"] = $player[$i]->consumablesPurchased : $mainArray[$player[$i]->summonerId]["Consumables"] = 0;
+                        isset($player[$i]->challenges->turretPlatesTaken) ? $mainArray[$player[$i]->summonerId]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken : $mainArray[$player[$i]->summonerId]["TurretPlates"] = 0;
+                        isset($player[$i]->challenges->takedowns) ? $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = $player[$i]->challenges->takedowns : $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = 0;
+                        isset($player[$i]->turretTakedowns) ? $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = $player[$i]->turretTakedowns : $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = 0;
+                        isset($player[$i]->inhibitorTakedowns) ? $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns : $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = 0;
+                        isset($player[$i]->challenges->dragonTakedowns) ? $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns : $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = 0;
+                        isset($player[$i]->challenges->riftHeraldTakedowns) ? $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns : $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = 0;
+                        isset($player[$i]->damageDealtToBuildings) ? $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings : $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = 0;
+                        isset($player[$i]->damageDealtToObjectives) ? $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives : $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = 0;
+                        isset($player[$i]->damageSelfMitigated) ? $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated : $mainArray[$player[$i]->summonerId]["DamageMitigated"] = 0;
+                        isset($player[$i]->totalDamageDealtToChampions) ? $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions : $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = 0;
+                        isset($player[$i]->totalDamageTaken) ? $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken : $mainArray[$player[$i]->summonerId]["DamageTaken"] = 0;
+                        isset($player[$i]->totalDamageShieldedOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates : $mainArray[$player[$i]->summonerId]["TeamShielded"] = 0;
+                        isset($player[$i]->totalHealsOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates : $mainArray[$player[$i]->summonerId]["TeamHealed"] = 0;
+                        isset($player[$i]->totalTimeCCDealt) ? $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt : $mainArray[$player[$i]->summonerId]["TimeCC"] = 0;
+                        isset($player[$i]->totalTimeSpentDead) ? $mainArray[$player[$i]->summonerId]["DeathTime"] = $player[$i]->totalTimeSpentDead : $mainArray[$player[$i]->summonerId]["DeathTime"] = 0;
+                        isset($player[$i]->challenges->skillshotsDodged) ? $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged : $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = 0;
+                        isset($player[$i]->challenges->skillshotsHit) ? $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit : $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = 0;
+                        if($player[$i]->summonerId == $sumid){
+                            $reasonArray[$matchID]["Sumid"] = $sumid;
+                            foreach($cleanNameArray as $attributeName){
+                                $reasonArray[$matchID][$attributeName]["Value"] = $mainArray[$player[$i]->summonerId][$attributeName];
+                            }
                         }
                     }
                 }
