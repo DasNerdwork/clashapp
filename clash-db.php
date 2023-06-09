@@ -1,10 +1,15 @@
 <?php
 
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
 class DB {
     private $dbHost     ***REMOVED***
     private $dbUsername = "***REMOVED***";
     private $dbPassword = "***REMOVED***";
     private $dbName     = "***REMOVED***";
+    private $db;
   
     public function __construct() {
         if(!isset($this->db)){
@@ -93,9 +98,13 @@ class DB {
         }
     } 
 
-    public function set_stay_code($username = '', $staycode) {
-        $sql = $this->db->prepare("UPDATE users SET staycode = ? WHERE username = ?");
-        $sql->bind_param('ss', $staycode, $username);
+    public function set_stay_code($mailorname = '', $staycode) {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("UPDATE users SET staycode = ? WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("UPDATE users SET staycode = ? WHERE username = ?");
+        }
+        $sql->bind_param('ss', $staycode, $mailorname);
         $sql->execute();
         $result = $sql->affected_rows;
 

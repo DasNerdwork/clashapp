@@ -1,5 +1,5 @@
 <?php
-if($_SERVER['HTTP_HOST'] == "clash.dasnerdwork.net"){
+if($_SERVER['HTTP_HOST'] == "clashscout.com"){
     function __($string, $args = []) {
         // Declare a static variable to store the translations.
         // This allows the translations to be loaded only once per request,
