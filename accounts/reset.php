@@ -1,5 +1,5 @@
 <?php
-if (!isset($_SESSION)) session_start();
+session_start();
  
 if (isset($_SESSION['user'])) {
     header('Location: settings');
@@ -62,7 +62,7 @@ if (isset($_POST['submit'])) {
         ];
         $reset = $db->reset_password($response['id'], $response['username'], $response['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options));
         if($reset['status'] == 'success'){
-            header('Location: https://clash.dasnerdwork.net/login?password=reset');
+            header('Location: https://clashscout.com/login?password=reset');
         }
     }
 }

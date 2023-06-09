@@ -35,7 +35,7 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                 status = messageAsJson["Status"];
                 var html = "";
                 let animateTimer = 0;
-                fetch("https://clash.dasnerdwork.net/clashapp/data/patch/version.txt")
+                fetch("https://clashscout.com/clashapp/data/patch/version.txt")
                 .then(response => { return response.text();
                 }).then(currentpatch => {
                     

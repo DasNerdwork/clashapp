@@ -1,4 +1,4 @@
-# Clash.DasNerdwork.net
+# clashscout.com
 
 Dies ist das Backup & History Repository für die League of Legends Clash Webapp von DasNerdwork.net
 

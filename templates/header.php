@@ -14,32 +14,32 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
 		<nav class="m-2.5 p-1">
 			<ul class="flex">
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-                    <a href="https://clash.dasnerdwork.net/profile">
+                    <a href="https://clashscout.com/profile">
 						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Profile')?></span>
 					</a>
 				</li>
                 <li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-                    <a href="https://clash.dasnerdwork.net/patch-notes"> 
+                    <a href="https://clashscout.com/patch-notes"> 
 						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Patchnotes')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-					<a href="https://clash.dasnerdwork.net/stats" onclick="return false;">
+					<a href="https://clashscout.com/stats" onclick="return false;">
 						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Stats')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-					<a href="https://clash.dasnerdwork.net/docs" onclick="return false;">
+					<a href="https://clashscout.com/docs" onclick="return false;">
 						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Docs')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-					<a href="https://clash.dasnerdwork.net/counters" onclick="return false;">
+					<a href="https://clashscout.com/counters" onclick="return false;">
 						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Counters')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-					<a href="https://clash.dasnerdwork.net/team/test">
+					<a href="https://clashscout.com/team/test">
 						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Test')?></span>
 					</a>
 				</li>
@@ -71,13 +71,13 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
                 }
             ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
-                <?php echo '<a href="https://clash.dasnerdwork.net/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'">';
+                <?php echo '<a href="https://clashscout.com/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'">';
                       echo '<img width="32" height="32" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" class="align-middle mr-2.5 no-underline inline-flex" alt="A custom profile icon of a player">';
                       echo '<p id="highlighter" class="inline hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;"><span class="text-white">'.$headerJson["PlayerData"]["Name"].'</span></p></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
-                <a href="https://clash.dasnerdwork.net/settings">
+                <a href="https://clashscout.com/settings">
                     <img width="32" height="32" src="/clashapp/data/misc/profile-icon.webp" class="align-middle mr-2.5 no-underline inline-flex" alt="The sandard profile icon if no league of legends account is connected">
                     <?php echo '<span id="highlighter" class="hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;">'.$_SESSION['user']['username'].'</span></a>'; ?> 
             </div>
@@ -94,7 +94,7 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             </div>
             <?php if(!isset($_SESSION['user'])){ ?>
             <div id="login-register-button">
-                <a href="https://clash.dasnerdwork.net/login?location=<?= urlencode($_SERVER['REQUEST_URI']) ?>">
+                <a href="https://clashscout.com/login?location=<?= urlencode($_SERVER['REQUEST_URI']) ?>">
                     <button type="button" class="h-8 w-28 align-middle mr-2.5 ml-2.5 text-base translate-y-2/4 bg-[#eee] text-black active:bg-[#ccc]">
                         <span><?=__('Login');?></span>
                     </button>
@@ -102,7 +102,7 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
             </div>
             <?php } else { ?>
             <div id="logout-button">
-                <a href="https://clash.dasnerdwork.net/logout?location=<?= urlencode($_SERVER['REQUEST_URI']) ?>">
+                <a href="https://clashscout.com/logout?location=<?= urlencode($_SERVER['REQUEST_URI']) ?>">
                     <button type="button" class="h-8 w-28 align-middle mr-2.5 ml-2.5 text-base translate-y-2/4 bg-[#eee] text-black active:bg-[#ccc]">
                         <span><?=__('Logout');?></span>
                     </button>
