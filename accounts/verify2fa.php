@@ -3,7 +3,7 @@
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
-if (!isset($_SESSION)) session_start();
+session_start();
 // print_r($_SESSION);
 
 require_once '/hdd1/clashapp/accounts/qr-codes.php';

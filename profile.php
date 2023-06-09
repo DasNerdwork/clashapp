@@ -3,7 +3,7 @@
         var re = RegExp("^[" + characterSet + "\\s'-]+$");
     function sanitize(text){
         if(text.match(re) && text.length > 2 && text.length < 17){
-            window.location.href="https://clash.dasnerdwork.net/profile/" + text;
+            window.location.href="https://clashscout.com/profile/" + text;
         } else {
             var d = new Date();
             alert("[" + d.toLocaleTimeString() + "] ERROR: Eingabe fehlerhaft oder unvollständig.\n\nErlaubte Zeichen sind a-Z, 0-9 und Alphabete andere Sprachen.\nZudem muss ein Beschwörername zwischen 3-16 Zeichen lang sein.");
@@ -52,7 +52,7 @@
 include('/hdd1/clashapp/templates/head.php');
 setCodeHeader('Profile', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
 include('/hdd1/clashapp/templates/header.php');
-if (!isset($_SESSION)) session_start();
+session_start();
 ?>
 
 <body style="background-color:#1a1a1a; color:#ddd">
@@ -398,7 +398,7 @@ if($formattedInput != "") {
 
 include('/hdd1/clashapp/templates/footer.php');
 
-// if (strstr($_SERVER['HTTP_REFERER'],"clash.dasnerdwork.net/clash")) {
+// if (strstr($_SERVER['HTTP_REFERER'],"clashscout.com/clash")) {
 //     if (isset($_POST["load"])) {
 //         $query = preg_replace('/\s+/', '+', $_POST["search"]);
 //         $puuid = getPlayerData($query)["PUUID"];

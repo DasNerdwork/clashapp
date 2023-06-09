@@ -1,5 +1,5 @@
 <?php
-if (!isset($_SESSION)) session_start();
+session_start();
  
 if (isset($_SESSION['user'])) {
     header('Location: settings');
@@ -84,15 +84,15 @@ if (isset($_POST['submit'])) {
                 //Server settings
                 $mail = new PHPMailer();
                 $mail->isSMTP();                                            //Send using SMTP
-                $mail->Host       = 'smtp.gmail.com';                       //Set the SMTP server to send through
+                $mail->Host       = 'smtp.sendgrid.net';                    //Set the SMTP server to send through
                 $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-                $mail->Username   = 'dasnerdwork@gmail.com';                //SMTP username
+                $mail->Username   = 'apikey';                               //SMTP username
                 $mail->Password   = '***REMOVED***';                     //SMTP password
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
                 $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
             
                 //Recipients
-                $mail->setFrom('dasnerdwork@gmail.com');
+                $mail->setFrom('no-reply@clashscout.com', 'ClashScout.com');
                 $mail->addAddress($_POST['email']);              //Add a recipient
                 // $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
                 // $mail->addReplyTo('no-reply@dasnerdwork.net');
@@ -105,8 +105,14 @@ if (isset($_POST['submit'])) {
                 //Content
                 $mail->isHTML(true);                                  //Set email format to HTML
                 $mail->Subject = 'Activate your Account';
-                $mail->Body    = 'You can activate your account by visiting the following link: <b>https://clash.dasnerdwork.net/verify?account='.$verifier.'</b>';
-                // $mail->AltBody = 'You can activate your account by visiting the following link: https://clash.dasnerdwork.net/verify?account='.$verifier;
+                $mail->Body    = '
+                Hey '.$_POST['username'].',<br><br>
+                Thank you for registering and welcome to  <a href="https://clashscout.com/"><b>ClashScout.com</b></a><br><br>
+                To use all of our features to the fullest you can activate your account by visiting the following link:<br><br>
+                <a><b>https://clashscout.com/verify?account='.$verifier.'</b></a><br><br>
+                Best regards,<br>
+                The ClashScout.com Team';
+                // $mail->AltBody = 'You can activate your account by visiting the following link: https://clashscout.com/verify?account='.$verifier;
                 // $mail->addCustomHeader('MIME-Version: 1.0');
                 // $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
         
