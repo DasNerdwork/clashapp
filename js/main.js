@@ -25,9 +25,9 @@ function sanitize(text){
             data = data.replace("<script>playerDataCalls++;</script>","");
         }
         if(data == "404"){
-            window.location.href="https://clash.dasnerdwork.net/404";
+            window.location.href="https://clashscout.com/404";
         } else {
-            window.location.href="https://clash.dasnerdwork.net/team/" + data;
+            window.location.href="https://clashscout.com/team/" + data;
         }
       });
     //   showLoader();

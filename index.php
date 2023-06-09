@@ -6,7 +6,7 @@ include('/hdd1/clashapp/templates/head.php');
 setCodeHeader('Clash', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
 include('/hdd1/clashapp/templates/header.php');
 
-if (!isset($_SESSION)) session_start();
+// print_r($_SESSION);
 echo '
 <script>
 document.body.style.backgroundImage = "url(/clashapp/data/misc/webp/background.webp)";

@@ -4,7 +4,7 @@
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
-if (!isset($_SESSION)) session_start();
+session_start();
 
 require_once '/hdd1/clashapp/vendor/autoload.php';
 use PragmaRX\Google2FA\Google2FA;
@@ -20,7 +20,7 @@ function generateQR($username){
     $google2fa = new Google2FA();
     $QRsecret = $google2fa->generateSecretKey();
     $qrCodeUrl = $google2fa->getQRCodeUrl(
-        "Clash.DasNerdwork.net",
+        "clashscout.com",
         $username,
         $QRsecret
     );

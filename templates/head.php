@@ -1,5 +1,5 @@
 <?php
-function setCodeHeader($title, $css, $javascript, $alpinejs, $websocket, $favicon = 'https://clash.dasnerdwork.net/clashapp/data/misc/favicon.ico'){
+function setCodeHeader($title, $css, $javascript, $alpinejs, $websocket, $favicon = 'https://clashscout.com/clashapp/data/misc/favicon.ico'){
     echo '
     <!DOCTYPE html>
     <html lang="en">
