@@ -1,5 +1,5 @@
 <?php
-if (!isset($_SESSION)) session_start();
+session_start();
 
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
@@ -30,7 +30,7 @@ $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 if (isset($_POST['password'])) {
     $response = $db->delete_account($_SESSION['user']['id'], $_SESSION['user']['username'], $_SESSION['user']['region'], $_SESSION['user']['email'], $_POST['password']);
     if ($response['status'] == 'success') {
-        header('Location: https://clash.dasnerdwork.net/logout?deactivated=true');
+        header('Location: https://clashscout.com/logout?deactivated=true');
     } else {
         $error_message[] = $response['message'];
     }
@@ -69,7 +69,7 @@ if (isset($_GET['verify'])){
     if($sumid['status'] == 'success') {
         $_SESSION['user']["sumid"] = $sumid['sumid'];
     }
-    Header('Location: https://clash.dasnerdwork.net/settings?verified=true');
+    Header('Location: https://clashscout.com/settings?verified=true');
 }
 
 if (isset($_GET['verified'])){
@@ -91,7 +91,7 @@ if (isset($_POST['dcpassword'])) {
     if ($response['status'] == 'success') {
         if($db->disconnect_account($_SESSION['user']['username'], $_SESSION['user']["sumid"])){
             unset($_SESSION['user']["sumid"]);
-            Header('Location: https://clash.dasnerdwork.net/settings?verified=false');
+            Header('Location: https://clashscout.com/settings?verified=false');
         } else {
             echo "<script>setError('Unable to locally disconnected accounts. Please reach out to an administrator.');</script>"; // TODO: Fix error banner display
         }
@@ -175,7 +175,7 @@ if (isset($_POST['remove-twofa-input'])){
                 if(isset($_SESSION['user']['2fa'])){
                     unset($_SESSION['user']['2fa']);
                 }
-                Header('Location: https://clash.dasnerdwork.net/settings?remove2FA=true');
+                Header('Location: https://clashscout.com/settings?remove2FA=true');
             } else {
                 echo "<script>setError('Unable to connect to the database. Please contact an administrator.', true);</script>";
             }
