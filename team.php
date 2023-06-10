@@ -57,7 +57,9 @@ $matchAlpineCounter = 0;
 $currentPlayerNumber = 1;
 $upToDate = false;
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
-echo "<script>const requests = {};</script>";
+echo "<script>
+const requests = {};
+</script>";
 
 // -----------------------------------------------------------v- SANITIZE & CHECK TEAM ID -v----------------------------------------------------------- //
 
@@ -453,6 +455,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         </div>
                                     </div>
                                 </div>";
+                                unset($playerLanes);
                             } else {
                                 echo "<div class='inline-flex leading-8 gap-1 z-20'>
                                         <div class='grid w-11/12 gap-2 h-fit'>
@@ -713,18 +716,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         // If not or new matches of any player downloaded -> calculate new and write to team.json file
         $suggestedBanMatchData = getMatchData($matchIDTeamArray);
         $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
-        echo "<pre>";
-        print_r($playerSumidTeamArray);
-        echo "</pre>";
-        echo "<pre>";
-        print_r($masteryDataTeamArray);
-        echo "</pre>";
-        echo "<pre>";
-        print_r($playerLanesTeamArray);
-        echo "</pre>";
-        echo "<pre>";
-        print_r($matchIDTeamArray);
-        echo "</pre>";
         $currentTeamJSON["SuggestedBanData"] = $suggestedBanArray;
         $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'w+');
         fwrite($fp, json_encode($currentTeamJSON));
