@@ -6,7 +6,7 @@ function setCodeHeader($title, $css, $javascript, $alpinejs, $websocket, $favico
     <head>
         <meta name="viewport" content="width=device-width">
         <meta name="description" content="Offizielle League of Legends Website zum scouten von League Clash Teams inklusive Profilen und mehr.">
-        <title>'.$title.' – DasNerdwork.net</title>';
+        <title>'.$title.' – ClashScout.com</title>';
         echo '<link id="favicon" rel="shortcut icon" href='.$favicon.'>';
         // if($css){ echo '<link rel="stylesheet" href="/clashapp/clash.css">'; }
         if($css){ echo '<link rel="stylesheet" href="/clashapp/css/output.css">'; }
