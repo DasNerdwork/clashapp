@@ -62,6 +62,9 @@ module.exports = {
         'topbartwok': '25% 328px auto 328px 25%',
         'topbarfullhd': 'calc((100vw - 1172px)/2) 328px 420px 328px calc((100vw - 1172px)/2)',
       },
+      gridTemplateRows: {
+        'teaminfo': '4rem auto',
+      },
       keyframes: {
         slideAndFadeIn: {
           '0%': { transform: 'translateY(-1rem)', opacity: '0' },
