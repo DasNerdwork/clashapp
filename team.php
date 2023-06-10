@@ -97,9 +97,13 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         <div id='top-part' class='h-96 grid twok:grid-cols-topbartwok fullhd:grid-cols-topbarfullhd gap-4 mt-4 ml-4 mr-4 relative'>
             <div id='team-info' class=' h-96 row-span-2'>
                 <div class='p-4 rounded bg-[#141624] h-96'>
-                    <h1 id='teamname' class='inline-flex items-center gap-4'>
-                        <img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>
-                        <span id='team-title' class='text-2xl'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (".__("Tier")." ".$teamDataArray["Tier"].")</span>
+                    <h1 id='teamname' class='inline-flex items-center gap-4'>";
+                    if(file_exists("/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp")){
+                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>";
+                    } else {
+                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/0/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>";
+                    } echo "
+                        <span id='team-title' class='text-2xl break-all'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (".__("Tier")." ".$teamDataArray["Tier"].")</span>
                     </h1>
                     <div class='h-full w-full flex twok:-mt-16 fullhd:-mt-24 flex-col justify-end'>
                     <span class='ml-1 mb-0.5 text-base font-bold'>".__("History")."</span>
