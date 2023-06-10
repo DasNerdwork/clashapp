@@ -282,19 +282,39 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                                         if(response.playerLanes) {
                                                                             response.playerLanes.forEach(function(singleLane) {
                                                                                 if(singleLane != ''){
-                                                                                    item.children[1].children[0].children[1].children[1].insertAdjacentHTML('beforeend', \"<img class='saturate-0 brightness-150' src='/clashapp/data/misc/lanes/\"+singleLane+\".webp' width='32' height='32' alt='A league of legends lane icon corresponding to a players main position'>\");
+                                                                                    let laneContainerPath = item.children[1].children[0].children[1].children[1];
+                                                                                    let newImage = document.createElement('img');
+                                                                                    newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
+                                                                                    newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
+                                                                                    newImage.width = 32;
+                                                                                    newImage.height = 32;
+                                                                                    newImage.alt = 'A league of legends lane icon corresponding to a players main position';
+                                                                          
+                                                                                    laneContainerPath.appendChild(newImage);
+                                                                                    setTimeout(function() {
+                                                                                        for (let child of laneContainerPath.children) {
+                                                                                            child.classList.remove('opacity-0');
+                                                                                        }
+                                                                                    }, 100);
                                                                                 }
                                                                             });
                                                                         }
                                                                         if(response.matchScores) {
+                                                                            let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
                                                                             var scoresArray = Object.values(response.matchScores);
                                                                             var sum = 0;
                                                                             for (var i = 0; i < scoresArray.length; i++) {
                                                                                 sum += parseFloat(scoresArray[i]);
                                                                             }
                                                                             var averageScore = (sum / scoresArray.length).toFixed(2);
-                                                                            item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                                                            avgScorePath.innerText = averageScore;
+                                                                            setTimeout(function() {
+                                                                                avgScorePath.classList.remove('opacity-0');
+                                                                            }, 100);
                                                                         }
+                                                                    }
+                                                                    for (let child of laneContainerPath.children) {
+                                                                        child.classList.remove('opacity-0');
                                                                     }
                                                                 }
                                                                 for (let historyColumn of matchHistories) {
@@ -484,7 +504,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             <div class='flex h-8 items-center justify-between'>
                                                 <span>".__("Avg. Score").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center'>
-                                                    <span>";
+                                                    <span class='transition-opacity duration-500 easy-in-out opacity-0'>";
                                                     if($upToDate){
                                                         echo number_format((array_sum(array_values($playerDataJSON["MatchIDs"]))/count(array_values($playerDataJSON["MatchIDs"]))), 2);
                                                     } echo "</span>
@@ -514,7 +534,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             <div class='flex h-8 items-center justify-between'>
                                                 <span>".__("Avg. Score").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center'>
-                                                    <span></span>
+                                                    <span class='transition-opacity duration-500 easy-in-out opacity-0'></span>
                                                 </div>
                                             </div>
                                         </div>
