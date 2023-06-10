@@ -90,8 +90,9 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                     processResponseData($ajaxUniquifier)
                     ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-                    if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
-                        console.log('ALL PLAYERS FINISHED');
+                    if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
+                        callAllFinish($requestIterator)
+                        ."
                     }</script>";
                 } else {
                 // THIS REQUEST IS SENT IF A PLAYER IS MISSING SOME MATCH IDS IN THEIR PLAYERFILE
@@ -114,8 +115,9 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                         processResponseData($ajaxUniquifier)
                         ."
                         xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-                        if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
-                            console.log('ALL PLAYERS FINISHED');
+                        if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
+                            callAllFinish($requestIterator)
+                            ."
                         }
                     }
                 };
@@ -164,8 +166,9 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                     processResponseData($ajaxUniquifier)
                     ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-                    if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
-                        console.log('ALL PLAYERS FINISHED');
+                    if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
+                        callAllFinish($requestIterator)
+                        ."
                     }</script>";
                 } else {
                 // THIS REQUEST IS SENT IF NO PLAYER FILE EXISTS / LINE 69 IS SKIPPED
@@ -188,8 +191,9 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                         processResponseData($ajaxUniquifier)
                         ."
                         xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-                        if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
-                            console.log('ALL PLAYERS FINISHED');
+                        if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
+                            callAllFinish($requestIterator)
+                            ."
                         }
                     }
                 };
@@ -263,6 +267,28 @@ function processResponseData($ajaxUniquifier){
             }
         }
     };";
+}
+
+function callAllFinish($requestIterator) {
+    return "
+    console.log('ALL PLAYERS FINISHED');
+
+    var xhrFinal".$requestIterator." = new XMLHttpRequest();
+    xhrFinal".$requestIterator.".open('POST', '/ajax/onAllFinish.php', true);
+    xhrFinal".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    xhrFinal".$requestIterator.".onreadystatechange = function() {
+        if (xhrFinal".$requestIterator.".readyState === 4 && xhrFinal".$requestIterator.".status === 200) {
+            var finalResponse = xhrFinal".$requestIterator.".responseText;
+            console.log(JSON.parse(finalResponse));
+        }
+    };
+    sumids = Object.keys(requests).join(',');
+    teamID = '".filter_var($_GET["name"], FILTER_SANITIZE_URL)."';
+    var data = 'sumids=' + sumids + '&teamid=' + teamID;
+    setTimeout(function() {
+        xhrFinal".$requestIterator.".send(data);
+    }, 100);";
 }
 
 ?>
