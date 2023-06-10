@@ -265,70 +265,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
                                                     if($recalculatePlayerLanes || $recalculateMatchIDs){
                                                         echo "<script>
-                                                        var xhrAfter".$currentPlayerNumber." = new XMLHttpRequest();
-                                        
-                                                        xhrAfter".$currentPlayerNumber.".open('POST', '/ajax/onSingleFinish.php', true);
-                                        
-                                                        xhrAfter".$currentPlayerNumber.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                                        
-                                                        xhrAfter".$currentPlayerNumber.".onreadystatechange = function() {
-                                                            if (xhrAfter".$currentPlayerNumber.".readyState === 4 && xhrAfter".$currentPlayerNumber.".status === 200) {
-                                                                xhrAfter".$currentPlayerNumber.".responseText;
-                                                                var playerColumns = document.getElementsByClassName('single-player-column');
-                                                                var matchHistories = document.getElementsByClassName('single-player-match-history');
-                                                                var response = JSON.parse(xhrAfter".$currentPlayerNumber.".responseText);
-                                                                for (let item of playerColumns) {
-                                                                    if(response.sumid === item.dataset.sumid) {
-                                                                        if(response.playerLanes) {
-                                                                            response.playerLanes.forEach(function(singleLane) {
-                                                                                if(singleLane != ''){
-                                                                                    let laneContainerPath = item.children[1].children[0].children[1].children[1];
-                                                                                    let newImage = document.createElement('img');
-                                                                                    newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
-                                                                                    newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
-                                                                                    newImage.width = 32;
-                                                                                    newImage.height = 32;
-                                                                                    newImage.alt = 'A league of legends lane icon corresponding to a players main position';
-                                                                          
-                                                                                    laneContainerPath.appendChild(newImage);
-                                                                                    setTimeout(function() {
-                                                                                        for (let child of laneContainerPath.children) {
-                                                                                            child.classList.remove('opacity-0');
-                                                                                        }
-                                                                                    }, 100);
-                                                                                }
-                                                                            });
-                                                                        }
-                                                                        if(response.matchScores) {
-                                                                            let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
-                                                                            var scoresArray = Object.values(response.matchScores);
-                                                                            var sum = 0;
-                                                                            for (var i = 0; i < scoresArray.length; i++) {
-                                                                                sum += parseFloat(scoresArray[i]);
-                                                                            }
-                                                                            var averageScore = (sum / scoresArray.length).toFixed(2);
-                                                                            avgScorePath.innerText = averageScore;
-                                                                            setTimeout(function() {
-                                                                                avgScorePath.classList.remove('opacity-0');
-                                                                            }, 100);
-                                                                        }
-                                                                    }
-                                                                    for (let child of laneContainerPath.children) {
-                                                                        child.classList.remove('opacity-0');
-                                                                    }
-                                                                }
-                                                                for (let historyColumn of matchHistories) {
-                                                                    if(response.sumid === historyColumn.dataset.sumid) {
-                                                                        if(response.matchHistory) {
-                                                                            historyColumn.insertAdjacentHTML('beforeend', response.matchHistory);
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        };
-                                        
+                                                        ".processResponseData($currentPlayerNumber)."
                                                         var data = '".$xhrMessage."';
-                                        
                                                         xhrAfter".$currentPlayerNumber.".send(data);
                                                         </script>
                                                         ";
@@ -504,7 +442,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             <div class='flex h-8 items-center justify-between'>
                                                 <span>".__("Avg. Score").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center'>
-                                                    <span class='transition-opacity duration-500 easy-in-out opacity-0'>";
+                                                    <span class='transition-opacity duration-500 easy-in-out'>";
                                                     if($upToDate){
                                                         echo number_format((array_sum(array_values($playerDataJSON["MatchIDs"]))/count(array_values($playerDataJSON["MatchIDs"]))), 2);
                                                     } echo "</span>
@@ -771,10 +709,22 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     // $recalculateSuggestedBanData = true; // uncomment to force recalc
     // Check if suggested ban data is already locally stored
     $currentTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
-    if(!isset($currentTeamJSON["SuggestedBanData"]) || $recalculateSuggestedBanData){
+    if(isset($currentTeamJSON["SuggestedBanData"]) || $recalculateSuggestedBanData){
         // If not or new matches of any player downloaded -> calculate new and write to team.json file
         $suggestedBanMatchData = getMatchData($matchIDTeamArray);
         $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
+        echo "<pre>";
+        print_r($playerSumidTeamArray);
+        echo "</pre>";
+        echo "<pre>";
+        print_r($masteryDataTeamArray);
+        echo "</pre>";
+        echo "<pre>";
+        print_r($playerLanesTeamArray);
+        echo "</pre>";
+        echo "<pre>";
+        print_r($matchIDTeamArray);
+        echo "</pre>";
         $currentTeamJSON["SuggestedBanData"] = $suggestedBanArray;
         $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'w+');
         fwrite($fp, json_encode($currentTeamJSON));
