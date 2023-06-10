@@ -83,13 +83,29 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     logger.info("All files extracted and overwritten. Time elapsed: " + end_extraction + " seconds")
 
     # Convert all .png and .jpg to .webp
+    start_time = time.time()
+    max_duration = 600 # 10 Minuten
+    timed_out = False # Flag für Zeitüberschreitung
+
+    # Conversion Part
     paths = Path('/hdd1/clashapp/data/patch/').glob("**/*.png")
     for path in paths:
         webp_path = convert_to_webp(path)
+        if time.time() - start_time >= max_duration:
+            timed_out = True
+            break
+    
     paths2 = Path('/hdd1/clashapp/data/patch/').glob("**/*.jpg")
     for path2 in paths2:
         webp_path2 = convert_to_webp(path2)
-    logger.info("Converted all available .png and .jpg to .webp")
+        if time.time() - start_time >= max_duration:
+            timed_out = True
+            break
+
+    if timed_out:
+        logger.info("Time limit exceeded. Converted all available .png and .jpg to .webp")
+    else:
+        logger.info("Converted all available .png and .jpg to .webp")
 
     # End of extraction and start of old file deletion
     os.remove(target_path) # Delete tar.gz
