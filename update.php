@@ -86,65 +86,10 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                 if(empty($tempAjaxMatchIDArray)){
                     echo "<script>console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
-
-                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';
-                    var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
-                    xhrAfter".$ajaxUniquifier.".open('POST', '/ajax/onSingleFinish.php', true);
-                    xhrAfter".$ajaxUniquifier.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                    xhrAfter".$ajaxUniquifier.".onreadystatechange = function() {
-                        if (xhrAfter".$ajaxUniquifier.".readyState === 4 && xhrAfter".$ajaxUniquifier.".status === 200) {
-                            xhrAfter".$ajaxUniquifier.".responseText;
-                            var playerColumns = document.getElementsByClassName('single-player-column');
-                            var matchHistories = document.getElementsByClassName('single-player-match-history');
-                            var response = JSON.parse(xhrAfter".$ajaxUniquifier.".responseText);
-                            for (let item of playerColumns) {
-                                if(response.sumid === item.dataset.sumid) {
-                                    if(response.playerLanes) {
-                                        response.playerLanes.forEach(function(singleLane) {
-                                            if(singleLane != ''){
-                                                let laneContainerPath = item.children[1].children[0].children[1].children[1];
-                                                let newImage = document.createElement('img');
-                                                newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
-                                                newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
-                                                newImage.width = 32;
-                                                newImage.height = 32;
-                                                newImage.alt = 'A league of legends lane icon corresponding to a players main position';
-                                      
-                                                laneContainerPath.appendChild(newImage);
-                                                setTimeout(function() {
-                                                    for (let child of laneContainerPath.children) {
-                                                        child.classList.remove('opacity-0'); // Entferne die Klasse 'opacity-0'
-                                                    }
-                                                }, 100);
-                                            }
-                                        });
-                                    }
-                                    if(response.matchScores) {
-                                        let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
-                                        var scoresArray = Object.values(response.matchScores);
-                                        var sum = 0;
-                                        for (var i = 0; i < scoresArray.length; i++) {
-                                            sum += parseFloat(scoresArray[i]);
-                                        }
-                                        var averageScore = (sum / scoresArray.length).toFixed(2);
-                                        avgScorePath.innerText = averageScore;
-                                        setTimeout(function() {
-                                            avgScorePath.classList.remove('opacity-0');
-                                        }, 100);
-                                    }
-                                }
-                            }
-                            for (let historyColumn of matchHistories) {
-                                if(response.sumid === historyColumn.dataset.sumid) {
-                                    if(response.matchHistory) {
-                                        historyColumn.insertAdjacentHTML('beforeend', response.matchHistory);
-                                    }
-                                }
-                            }
-                        }
-                    };
+                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
+                    processResponseData($ajaxUniquifier)
+                    ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-
                     if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
                         console.log('ALL PLAYERS FINISHED');
                     }</script>";
@@ -165,64 +110,10 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                         var playerName = xhr".$requestIterator.".responseText;
                         console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
                         requests['".$sumid."'] = 'Done';
-
-                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';
-                        var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
-                        xhrAfter".$ajaxUniquifier.".open('POST', '/ajax/onSingleFinish.php', true);
-                        xhrAfter".$ajaxUniquifier.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                        xhrAfter".$ajaxUniquifier.".onreadystatechange = function() {
-                            if (xhrAfter".$ajaxUniquifier.".readyState === 4 && xhrAfter".$ajaxUniquifier.".status === 200) {
-                                var playerColumns = document.getElementsByClassName('single-player-column');
-                                var matchHistories = document.getElementsByClassName('single-player-match-history');
-                                var response = JSON.parse(xhrAfter".$ajaxUniquifier.".responseText);
-                                for (let item of playerColumns) {
-                                    if(response.sumid === item.dataset.sumid) {
-                                        if(response.playerLanes) {
-                                            response.playerLanes.forEach(function(singleLane) {
-                                                if(singleLane != ''){
-                                                    let laneContainerPath = item.children[1].children[0].children[1].children[1];
-                                                    let newImage = document.createElement('img');
-                                                    newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
-                                                    newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
-                                                    newImage.width = 32;
-                                                    newImage.height = 32;
-                                                    newImage.alt = 'A league of legends lane icon corresponding to a players main position';
-                                          
-                                                    laneContainerPath.appendChild(newImage);
-                                                    setTimeout(function() {
-                                                        for (let child of laneContainerPath.children) {
-                                                            child.classList.remove('opacity-0'); // Entferne die Klasse 'opacity-0'
-                                                        }
-                                                    }, 100);
-                                                }
-                                            });
-                                        }
-                                        if(response.matchScores) {
-                                            let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
-                                            var scoresArray = Object.values(response.matchScores);
-                                            var sum = 0;
-                                            for (var i = 0; i < scoresArray.length; i++) {
-                                                sum += parseFloat(scoresArray[i]);
-                                            }
-                                            var averageScore = (sum / scoresArray.length).toFixed(2);
-                                            avgScorePath.innerText = averageScore;
-                                            setTimeout(function() {
-                                                avgScorePath.classList.remove('opacity-0');
-                                            }, 100);
-                                        }
-                                    }
-                                }
-                                for (let historyColumn of matchHistories) {
-                                    if(response.sumid === historyColumn.dataset.sumid) {
-                                        if(response.matchHistory) {
-                                            historyColumn.insertAdjacentHTML('beforeend', response.matchHistory);
-                                        }
-                                    }
-                                }
-                            }
-                        };
+                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
+                        processResponseData($ajaxUniquifier)
+                        ."
                         xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-
                         if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
                             console.log('ALL PLAYERS FINISHED');
                         }
@@ -269,64 +160,10 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                 if(empty($tempAjaxMatchIDArray)){
                     echo "<script>console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
-
-                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';
-                    var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
-                    xhrAfter".$ajaxUniquifier.".open('POST', '/ajax/onSingleFinish.php', true);
-                    xhrAfter".$ajaxUniquifier.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                    xhrAfter".$ajaxUniquifier.".onreadystatechange = function() {
-                        if (xhrAfter".$ajaxUniquifier.".readyState === 4 && xhrAfter".$ajaxUniquifier.".status === 200) {
-                            var playerColumns = document.getElementsByClassName('single-player-column');
-                            var matchHistories = document.getElementsByClassName('single-player-match-history');
-                            var response = JSON.parse(xhrAfter".$ajaxUniquifier.".responseText);
-                            for (let item of playerColumns) {
-                                if(response.sumid === item.dataset.sumid) {
-                                    if(response.playerLanes) {
-                                        response.playerLanes.forEach(function(singleLane) {
-                                            if(singleLane != ''){
-                                                let laneContainerPath = item.children[1].children[0].children[1].children[1];
-                                                let newImage = document.createElement('img');
-                                                newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
-                                                newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
-                                                newImage.width = 32;
-                                                newImage.height = 32;
-                                                newImage.alt = 'A league of legends lane icon corresponding to a players main position';
-                                      
-                                                laneContainerPath.appendChild(newImage);
-                                                setTimeout(function() {
-                                                    for (let child of laneContainerPath.children) {
-                                                        child.classList.remove('opacity-0'); // Entferne die Klasse 'opacity-0'
-                                                    }
-                                                }, 100);
-                                            }
-                                        });
-                                    }
-                                    if(response.matchScores) {
-                                        let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
-                                        var scoresArray = Object.values(response.matchScores);
-                                        var sum = 0;
-                                        for (var i = 0; i < scoresArray.length; i++) {
-                                            sum += parseFloat(scoresArray[i]);
-                                        }
-                                        var averageScore = (sum / scoresArray.length).toFixed(2);
-                                        avgScorePath.innerText = averageScore;
-                                        setTimeout(function() {
-                                            avgScorePath.classList.remove('opacity-0');
-                                        }, 100);
-                                    }
-                                }
-                            }
-                            for (let historyColumn of matchHistories) {
-                                if(response.sumid === historyColumn.dataset.sumid) {
-                                    if(response.matchHistory) {
-                                        historyColumn.insertAdjacentHTML('beforeend', response.matchHistory);
-                                    }
-                                }
-                            }
-                        }
-                    };
+                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
+                    processResponseData($ajaxUniquifier)
+                    ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-
                     if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
                         console.log('ALL PLAYERS FINISHED');
                     }</script>";
@@ -347,64 +184,10 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                         var playerName = xhr".$requestIterator.".responseText;
                         console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
                         requests['".$sumid."'] = 'Done';
-
-                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';
-                        var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
-                        xhrAfter".$ajaxUniquifier.".open('POST', '/ajax/onSingleFinish.php', true);
-                        xhrAfter".$ajaxUniquifier.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-                        xhrAfter".$ajaxUniquifier.".onreadystatechange = function() {
-                            if (xhrAfter".$ajaxUniquifier.".readyState === 4 && xhrAfter".$ajaxUniquifier.".status === 200) {
-                                var playerColumns = document.getElementsByClassName('single-player-column');
-                                var matchHistories = document.getElementsByClassName('single-player-match-history');
-                                var response = JSON.parse(xhrAfter".$ajaxUniquifier.".responseText);
-                                for (let item of playerColumns) {
-                                    if(response.sumid === item.dataset.sumid) {
-                                        if(response.playerLanes) {
-                                            response.playerLanes.forEach(function(singleLane) {
-                                                if(singleLane != ''){
-                                                    let laneContainerPath = item.children[1].children[0].children[1].children[1];
-                                                    let newImage = document.createElement('img');
-                                                    newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
-                                                    newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
-                                                    newImage.width = 32;
-                                                    newImage.height = 32;
-                                                    newImage.alt = 'A league of legends lane icon corresponding to a players main position';
-                                          
-                                                    laneContainerPath.appendChild(newImage);
-                                                    setTimeout(function() {
-                                                        for (let child of laneContainerPath.children) {
-                                                            child.classList.remove('opacity-0'); // Entferne die Klasse 'opacity-0'
-                                                        }
-                                                    }, 100);
-                                                }
-                                            });
-                                        }
-                                        if(response.matchScores) {
-                                            let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
-                                            var scoresArray = Object.values(response.matchScores);
-                                            var sum = 0;
-                                            for (var i = 0; i < scoresArray.length; i++) {
-                                                sum += parseFloat(scoresArray[i]);
-                                            }
-                                            var averageScore = (sum / scoresArray.length).toFixed(2);
-                                            avgScorePath.innerText = averageScore;
-                                            setTimeout(function() {
-                                                avgScorePath.classList.remove('opacity-0');
-                                            }, 100);
-                                        }
-                                    }
-                                }
-                                for (let historyColumn of matchHistories) {
-                                    if(response.sumid === historyColumn.dataset.sumid) {
-                                        if(response.matchHistory) {
-                                            historyColumn.insertAdjacentHTML('beforeend', response.matchHistory);
-                                        }
-                                    }
-                                }
-                            }
-                        };
+                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
+                        processResponseData($ajaxUniquifier)
+                        ."
                         xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-
                         if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
                             console.log('ALL PLAYERS FINISHED');
                         }
@@ -421,6 +204,65 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
         }
     }
     $requestIterator++;
+}
+
+function processResponseData($ajaxUniquifier){
+    return "
+    var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
+    xhrAfter".$ajaxUniquifier.".open('POST', '/ajax/onSingleFinish.php', true);
+    xhrAfter".$ajaxUniquifier.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhrAfter".$ajaxUniquifier.".onreadystatechange = function() {
+        if (xhrAfter".$ajaxUniquifier.".readyState === 4 && xhrAfter".$ajaxUniquifier.".status === 200) {
+            xhrAfter".$ajaxUniquifier.".responseText;
+            var playerColumns = document.getElementsByClassName('single-player-column');
+            var matchHistories = document.getElementsByClassName('single-player-match-history');
+            var response = JSON.parse(xhrAfter".$ajaxUniquifier.".responseText);
+            for (let item of playerColumns) {
+                if(response.sumid === item.dataset.sumid) {
+                    if(response.playerLanes) {
+                        response.playerLanes.forEach(function(singleLane) {
+                            if(singleLane != ''){
+                                let laneContainerPath = item.children[1].children[0].children[1].children[1];
+                                let newImage = document.createElement('img');
+                                newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
+                                newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
+                                newImage.width = 32;
+                                newImage.height = 32;
+                                newImage.alt = 'A league of legends lane icon corresponding to a players main position';
+                      
+                                laneContainerPath.appendChild(newImage);
+                                setTimeout(function() {
+                                    for (let child of laneContainerPath.children) {
+                                        child.classList.remove('opacity-0');
+                                    }
+                                }, 100);
+                            }
+                        });
+                    }
+                    if(response.matchScores) {
+                        let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
+                        var scoresArray = Object.values(response.matchScores);
+                        var sum = 0;
+                        for (var i = 0; i < scoresArray.length; i++) {
+                            sum += parseFloat(scoresArray[i]);
+                        }
+                        var averageScore = (sum / scoresArray.length).toFixed(2);
+                        avgScorePath.innerText = averageScore;
+                        setTimeout(function() {
+                            avgScorePath.classList.remove('opacity-0');
+                        }, 100);
+                    }
+                }
+            }
+            for (let historyColumn of matchHistories) {
+                if(response.sumid === historyColumn.dataset.sumid) {
+                    if(response.matchHistory) {
+                        historyColumn.insertAdjacentHTML('beforeend', response.matchHistory);
+                    }
+                }
+            }
+        }
+    };";
 }
 
 ?>
