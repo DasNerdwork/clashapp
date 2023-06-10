@@ -102,19 +102,35 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                                     if(response.playerLanes) {
                                         response.playerLanes.forEach(function(singleLane) {
                                             if(singleLane != ''){
-                                                item.children[1].children[0].children[1].children[1].insertAdjacentHTML('beforeend', \"<img class=' transition-opacity duration-500 easy-in-out opacity-0' src='/clashapp/data/misc/lanes/\"+singleLane+\".webp' width='32' height='32' alt='A league of legends lane icon corresponding to a players main position'>\");
-                                                item.children[1].children[0].children[1].children[1].classList.remove('opacity-0');
+                                                let laneContainerPath = item.children[1].children[0].children[1].children[1];
+                                                let newImage = document.createElement('img');
+                                                newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
+                                                newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
+                                                newImage.width = 32;
+                                                newImage.height = 32;
+                                                newImage.alt = 'A league of legends lane icon corresponding to a players main position';
+                                      
+                                                laneContainerPath.appendChild(newImage);
+                                                setTimeout(function() {
+                                                    for (let child of laneContainerPath.children) {
+                                                        child.classList.remove('opacity-0'); // Entferne die Klasse 'opacity-0'
+                                                    }
+                                                }, 100);
                                             }
                                         });
                                     }
                                     if(response.matchScores) {
+                                        let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
                                         var scoresArray = Object.values(response.matchScores);
                                         var sum = 0;
-                                        for (var i = 0; i <script scoresArray.length; i++) {
+                                        for (var i = 0; i < scoresArray.length; i++) {
                                             sum += parseFloat(scoresArray[i]);
                                         }
                                         var averageScore = (sum / scoresArray.length).toFixed(2);
-                                        item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                        avgScorePath.innerText = averageScore;
+                                        setTimeout(function() {
+                                            avgScorePath.classList.remove('opacity-0');
+                                        }, 100);
                                     }
                                 }
                             }
@@ -164,19 +180,35 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                                         if(response.playerLanes) {
                                             response.playerLanes.forEach(function(singleLane) {
                                                 if(singleLane != ''){
-                                                    item.children[1].children[0].children[1].children[1].insertAdjacentHTML('beforeend', \"<img class='saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0' src='/clashapp/data/misc/lanes/\"+singleLane+\".webp' width='32' height='32' alt='A league of legends lane icon corresponding to a players main position'>\");
-                                                    item.children[1].children[0].children[1].children[1].classList.remove('opacity-0');
+                                                    let laneContainerPath = item.children[1].children[0].children[1].children[1];
+                                                    let newImage = document.createElement('img');
+                                                    newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
+                                                    newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
+                                                    newImage.width = 32;
+                                                    newImage.height = 32;
+                                                    newImage.alt = 'A league of legends lane icon corresponding to a players main position';
+                                          
+                                                    laneContainerPath.appendChild(newImage);
+                                                    setTimeout(function() {
+                                                        for (let child of laneContainerPath.children) {
+                                                            child.classList.remove('opacity-0'); // Entferne die Klasse 'opacity-0'
+                                                        }
+                                                    }, 100);
                                                 }
                                             });
                                         }
                                         if(response.matchScores) {
+                                            let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
                                             var scoresArray = Object.values(response.matchScores);
                                             var sum = 0;
                                             for (var i = 0; i < scoresArray.length; i++) {
                                                 sum += parseFloat(scoresArray[i]);
                                             }
                                             var averageScore = (sum / scoresArray.length).toFixed(2);
-                                            item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                            avgScorePath.innerText = averageScore;
+                                            setTimeout(function() {
+                                                avgScorePath.classList.remove('opacity-0');
+                                            }, 100);
                                         }
                                     }
                                 }
@@ -252,19 +284,35 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                                     if(response.playerLanes) {
                                         response.playerLanes.forEach(function(singleLane) {
                                             if(singleLane != ''){
-                                                item.children[1].children[0].children[1].children[1].insertAdjacentHTML('beforeend', \"<img class='saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0' src='/clashapp/data/misc/lanes/\"+singleLane+\".webp' width='32' height='32' alt='A league of legends lane icon corresponding to a players main position'>\");
-                                                item.children[1].children[0].children[1].children[1].classList.remove('opacity-0');
+                                                let laneContainerPath = item.children[1].children[0].children[1].children[1];
+                                                let newImage = document.createElement('img');
+                                                newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
+                                                newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
+                                                newImage.width = 32;
+                                                newImage.height = 32;
+                                                newImage.alt = 'A league of legends lane icon corresponding to a players main position';
+                                      
+                                                laneContainerPath.appendChild(newImage);
+                                                setTimeout(function() {
+                                                    for (let child of laneContainerPath.children) {
+                                                        child.classList.remove('opacity-0'); // Entferne die Klasse 'opacity-0'
+                                                    }
+                                                }, 100);
                                             }
                                         });
                                     }
                                     if(response.matchScores) {
+                                        let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
                                         var scoresArray = Object.values(response.matchScores);
                                         var sum = 0;
                                         for (var i = 0; i < scoresArray.length; i++) {
                                             sum += parseFloat(scoresArray[i]);
                                         }
                                         var averageScore = (sum / scoresArray.length).toFixed(2);
-                                        item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                        avgScorePath.innerText = averageScore;
+                                        setTimeout(function() {
+                                            avgScorePath.classList.remove('opacity-0');
+                                        }, 100);
                                     }
                                 }
                             }
@@ -314,19 +362,35 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                                         if(response.playerLanes) {
                                             response.playerLanes.forEach(function(singleLane) {
                                                 if(singleLane != ''){
-                                                    item.children[1].children[0].children[1].children[1].insertAdjacentHTML('beforeend', \"<img class='saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0' src='/clashapp/data/misc/lanes/\"+singleLane+\".webp' width='32' height='32' alt='A league of legends lane icon corresponding to a players main position'>\");
-                                                    item.children[1].children[0].children[1].children[1].classList.remove('opacity-0');
+                                                    let laneContainerPath = item.children[1].children[0].children[1].children[1];
+                                                    let newImage = document.createElement('img');
+                                                    newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
+                                                    newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
+                                                    newImage.width = 32;
+                                                    newImage.height = 32;
+                                                    newImage.alt = 'A league of legends lane icon corresponding to a players main position';
+                                          
+                                                    laneContainerPath.appendChild(newImage);
+                                                    setTimeout(function() {
+                                                        for (let child of laneContainerPath.children) {
+                                                            child.classList.remove('opacity-0'); // Entferne die Klasse 'opacity-0'
+                                                        }
+                                                    }, 100);
                                                 }
                                             });
                                         }
                                         if(response.matchScores) {
+                                            let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
                                             var scoresArray = Object.values(response.matchScores);
                                             var sum = 0;
                                             for (var i = 0; i < scoresArray.length; i++) {
                                                 sum += parseFloat(scoresArray[i]);
                                             }
                                             var averageScore = (sum / scoresArray.length).toFixed(2);
-                                            item.children[1].children[0].children[2].children[1].children[0].innerText = averageScore;
+                                            avgScorePath.innerText = averageScore;
+                                            setTimeout(function() {
+                                                avgScorePath.classList.remove('opacity-0');
+                                            }, 100);
                                         }
                                     }
                                 }
