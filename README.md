@@ -4,7 +4,7 @@ Dies ist das Backup & History Repository für die League of Legends Clash Webapp
 
 ## Intro
 
-Die DasNerdwork.net Clash Webapplikation, kurz Clashapp, ist ein Projekt welches hauptsächlich von 
+Die ClashScout.com Webapplikation, kurz ClashScout, ist ein Projekt welches hauptsächlich von 
 Florian "DasNerdwork" Falk und Pascal Gnadt entwickelt wurde.
 
 Sie stellt ein einfaches Tool zur Optimierung der Scouting- und Bannphase in League of Legends Clash
