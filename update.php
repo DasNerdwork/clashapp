@@ -280,7 +280,9 @@ function callAllFinish($requestIterator) {
     xhrFinal".$requestIterator.".onreadystatechange = function() {
         if (xhrFinal".$requestIterator.".readyState === 4 && xhrFinal".$requestIterator.".status === 200) {
             var finalResponse = xhrFinal".$requestIterator.".responseText;
-            console.log(JSON.parse(finalResponse));
+            var suggestedBanContainer = document.getElementById('suggestedBans');
+            suggestedBanContainer.innerHTML = finalResponse;
+            console.log('Suggested Bans generated dynamically');
         }
     };
     sumids = Object.keys(requests).join(',');
