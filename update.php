@@ -261,7 +261,7 @@ function processResponseData($ajaxUniquifier){
             for (let historyColumn of matchHistories) {
                 if(response.sumid === historyColumn.dataset.sumid) {
                     if(response.matchHistory) {
-                        historyColumn.insertAdjacentHTML('beforeend', response.matchHistory);
+                        historyColumn.innerHTML = response.matchHistory;
                     }
                 }
             }

@@ -544,11 +544,11 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     if($inhalt->info->participants[$in]->puuid == $puuid) {
                         $teamID = $inhalt->info->participants[$in]->teamId;
                         if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
-                            $returnString .= '<div class="w-full bg-gray-800 border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;">';
+                            $returnString .= '<div class="w-full bg-gray-800 border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$matchScore.'>';
                         } elseif ($inhalt->info->participants[$in]->win == false){
-                            $returnString .= '<div class="w-full bg-lose border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;">';
+                            $returnString .= '<div class="w-full bg-lose border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$matchScore.'>';
                         } else {
-                            $returnString .= '<div class="w-full bg-win border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;">';
+                            $returnString .= '<div class="w-full bg-win border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$matchScore.'>';
                         }
                             $returnString .= '<div id="match-header" class="inline-flex w-full gap-2 pt-2 px-2">';
                                 $returnString .= '<div class="match-result mb-2">';
@@ -2395,6 +2395,12 @@ function getMasteryColor($masteryPoints){
     } else if ($masteryPoints >= 1000000){
         return "threat-xxl";
     }
+}
+
+function generateCSRFToken() {
+    $token = bin2hex(random_bytes(32)); // Generiere einen zufälligen Token-Wert
+    $_SESSION['csrf_token'] = $token; // Speichere den Token in der Sitzungsvariablen
+    return $token; // Gib den Token-Wert zurück
 }
 
 /** Always active "function" to collect the teamID of a given Summoner Name
