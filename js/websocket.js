@@ -157,8 +157,8 @@ ws.onclose = (event) => { // Do this when the WS-Server stops
 }
 
 function addToFile(el){
-    var name = el.getElementsByTagName("span")[0].innerText;
-    var id = el.getElementsByTagName("img")[0].dataset.id;
+    let name = el.getElementsByTagName("span")[0].innerText;
+    let id = el.getElementsByTagName("img")[0].dataset.id;
     let sendInfo =  {
         champname: name,
         champid: id,
@@ -169,8 +169,8 @@ function addToFile(el){
 }
 
 function removeFromFile(el){
-    var name = el.getElementsByTagName("span")[0].innerText;
-    var id = el.getElementsByTagName("img")[0].dataset.id;
+    let name = el.getElementsByTagName("span")[0].innerText;
+    let id = el.getElementsByTagName("img")[0].dataset.id;
     let sendInfo =  {
         champname: name,
         champid: id,
