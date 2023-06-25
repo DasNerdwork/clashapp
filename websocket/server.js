@@ -2,8 +2,26 @@ import { createServer } from 'https';
 import { readFileSync } from 'fs';
 import { WebSocketServer } from 'ws';
 import fs from 'fs';
+import ansiRegex from 'ansi-regex';
+import util from 'util';
+import '/hdd1/clashapp/websocket/consoleHandler.js';
 
-// console.log("\x1b[1mBright\x1b[2mUnderscore\x1b[4m\x1b[5mBlink\x1b[7mReverse\x1b[8mHidden");
+// Create a write stream to the log file
+const logStream = fs.createWriteStream('/hdd1/clashapp/data/logs/server.log', { flags: 'a' });
+const logPath = '/hdd1/clashapp/data/logs/server.log';
+const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
+
+// Attach the uncaught exception handler
+process.on('uncaughtException', handleCrash);
+
+// Redirect console output to the log file
+const originalConsoleLog = console.log;
+console.log = function () {
+  trimLogFileIfNeeded();
+  const logMessage = `${util.format.apply(null, arguments)}`;
+  logStream.write(`${logMessage.replace(ansiRegex(), '')}\n`);
+  originalConsoleLog.apply(console, arguments);
+};
 
 const server = createServer({
   cert: readFileSync('/etc/letsencrypt/live/dasnerdwork.net/fullchain.pem'),
@@ -16,7 +34,7 @@ var lastClient = "";
 
 wss.on('connection', function connection(ws, req) {
   let d = new Date();
-  console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Client websocket connection initiated from \x1b[4m%s\x1b[0m:%d on %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, d.getDate()+"/"+d.getMonth()+1+"/"+d.getFullYear() % 100);
+  console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Client websocket connection initiated from \x1b[4m%s\x1b[0m:%d on %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear() % 100);
   console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Total clients connected: %d", new Date().toLocaleTimeString(), wss.clients.size);
 
   ws.on('message', function message(data) {
@@ -42,7 +60,12 @@ wss.on('connection', function connection(ws, req) {
           requestMessage = "\x1b[35mswap\x1b[0m";
           break;
       }
-      let message = '{"teamid":"'+dataAsJSON.teamid+'","name":"'+dataAsJSON.name+'","request":"'+requestMessage+'"}';
+      if (typeof dataAsJSON.champname === 'undefined') {
+        var nameForMessage = dataAsJSON.name;
+      } else {
+        var nameForMessage = dataAsJSON.champname;
+      }
+      let message = '{"teamid":"'+dataAsJSON.teamid+'","name":"'+nameForMessage+'","request":"'+requestMessage+'"}';
       if(newClient == lastClient){ // If the same client is still sending data no "Received following data from" text is necessary
         console.log('\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: %s', new Date().toLocaleTimeString(), message);
       } else {
@@ -325,7 +348,7 @@ wss.on('connection', function connection(ws, req) {
   ws.send('Handshake successful: Server received client request and answered.');
 
   ws.on('close', function close() {
-    console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Connection of client closed from %s:%d on %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, d.getDate()+"/"+d.getMonth()+1+"/"+d.getFullYear() % 100);
+    console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Connection of client closed from %s:%d on %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear() % 100);
     console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Total clients connected: %d", new Date().toLocaleTimeString(), wss.clients.size);
     wss.clients.forEach(function each(client) {
       if(client.location == ws.location && client != ws){
@@ -345,4 +368,32 @@ function broadcastUpdate(clientsTeamID){
       client.send(localTeamData);
     }
   });
+}
+
+// This function broadcasts a message to any client currently connected to any teams page 
+// (E.g. Client 1 and 2 are connected to /123456 and Client 3 ist connected to /666666 -> All will receive the message)
+export function broadcastAll(message){ 
+  wss.clients.forEach(function each(client) {
+    client.send(message);
+  });
+  console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Following message sent to all connected users: %s", new Date().toLocaleTimeString(), message);
+}
+
+function trimLogFileIfNeeded() {
+  const fileSize = fs.statSync(logPath).size;
+  if (fileSize > maxFileSize) {
+    const fileData = fs.readFileSync(logPath, 'utf8').split('\n');
+    const trimmedData = fileData.slice(Math.ceil(fileData.length / 2)).join('\n');
+    fs.writeFileSync(logPath, trimmedData, 'utf8');
+    console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Maximum logsize exceeded, removed first half of it.", new Date().toLocaleTimeString());
+  }
+}
+
+function handleCrash(error) {
+  const currentTime = new Date().toLocaleTimeString();
+  const crashMessage = `[${currentTime}] [Server Crash]: ${error.stack}\n`;
+  fs.appendFileSync(logPath, crashMessage, 'utf8');
+
+  // Terminate the application
+  process.exit(1);
 }
