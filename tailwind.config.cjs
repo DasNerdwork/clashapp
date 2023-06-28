@@ -51,6 +51,7 @@ module.exports = {
         'threat-xl': '#fbc1c1',
         'threat-xxl': '#ff0000',
         'lose': '#3c000f80',
+        'mid': '#2d364f80',
         'win': '#003c0f80',
         'offline': '#b31414',
         'online': '#1aa23a',
