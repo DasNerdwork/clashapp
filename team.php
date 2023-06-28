@@ -162,8 +162,8 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 </div>
                 <div class='flex flex-wrap justify-center rounded bg-[#141624] overflow-hidden h-fit fullhd:h-44 twok:h-56 pt-1.5'>
                     <div class='rotation-title -mb-1.5 flex w-full px-11 max-h-[27px]'>
-                        <div class='flex justify-center items-center font-bold w-3/5 bg-lose pb-[6.75rem] pt-4 rounded-l-md'>First Rotation</div>
-                        <div class='flex justify-center items-center font-bold w-2/5 bg-mid bg-opacity-10 pb-[6.75rem] pt-4 rounded-r-md'>Second Rotation</div>
+                        <div class='flex justify-center items-center font-bold w-3/5 bg-lose pb-[6.75rem] pt-4 rounded-l-md'>".__("First Rotation")."</div>
+                        <div class='flex justify-center items-center font-bold w-2/5 bg-mid bg-opacity-10 pb-[6.75rem] pt-4 rounded-r-md'>".__("Second Rotation")."</div>
                     </div>
                     <div id='selectedBans' class='w-full max-w-[40rem] h-[calc(100%_-_27px)] flex flex-wrap text-center twok:gap-x-4 twok:px-11 fullhd:pl-[3px] fullhd:gap-x-3'>
                     </div>
