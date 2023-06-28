@@ -96,9 +96,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         $memPageTop = memory_get_usage();
         // echo "TournamentID: ".$teamDataArray["TournamentID"]; // TODO: Add current tournament to view
         echo"
-        <div id='top-part' class='h-96 grid twok:grid-cols-topbartwok fullhd:grid-cols-topbarfullhd gap-4 mt-4 ml-4 mr-4 relative'>
-            <div id='team-info' class=' h-96 row-span-2'>
-                <div class='p-4 rounded bg-[#141624] h-96 grid grid-rows-teaminfo'>
+        <div id='top-part' class='h-[26rem] grid twok:grid-cols-topbartwok fullhd:grid-cols-topbarfullhd gap-4 mt-4 ml-4 mr-4 relative'>
+            <div id='team-info' class='h-[26rem] row-span-2'>
+                <div class='p-4 rounded bg-[#141624] h-[26rem] grid grid-rows-teaminfo'>
                     <h1 id='teamname' class='inline-flex items-center gap-4'>";
                     if(file_exists("/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp")){
                         echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>";
@@ -115,12 +115,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     "; /** ($teamDataArray); */ echo "
                 </div>
             </div>
-            <div class='row-span-2 h-96 flex items-center justify-center rounded bg-[#141624]'>
+            <div class='row-span-2 h-[26rem] flex items-center justify-center rounded bg-[#141624]'>
                 <div class='h-[21rem] w-[17.5rem] bg-black'>
                     <span class='h-[21rem] flex items-center justify-center'>".__("Advertisement")."</span> 
                 </div>
             </div>
-            <div class='row-span-2 h-96 grid rounded bg-[#141624]'>
+            <div class='row-span-2 h-[26rem] grid rounded bg-[#141624]'>
                 <span class='w-full h-8 flex justify-center items-center'>".__("Suggested Bans").":</span>
                 <div id='suggestedBans' class='w-full grid grid-cols-[64px_64px_64px_64px_64px] gap-y-8 p-2 justify-evenly rounded bg-[#141624] min-h-[180px]'></div>
                 "; if(isset($_SESSION['user']['email'])){ echo "
@@ -155,13 +155,18 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         </div>
                     </div>
                 </div>
-                <div class='row-span-2 h-96 flex items-center justify-center rounded bg-[#141624]'>
+                <div class='row-span-2 h-[26rem] flex items-center justify-center rounded bg-[#141624]'>
                     <div class='h-[21rem] w-[17.5rem] bg-black'>
                         <span class='h-[21rem] flex items-center justify-center'>".__("Advertisement")."</span>
                     </div>
                 </div>
-                <div class='flex justify-center rounded bg-[#141624] overflow-hidden h-fit fullhd:h-44 twok:h-48'>
-                    <div id='selectedBans' class='max-w-[40rem] flex flex-wrap text-center twok:gap-x-4 twok:pl-11 fullhd:pl-[3px] fullhd:gap-x-3'></div>
+                <div class='flex flex-wrap justify-center rounded bg-[#141624] overflow-hidden h-fit fullhd:h-44 twok:h-56 pt-1.5'>
+                    <div class='rotation-title -mb-1.5 flex w-full px-11 max-h-[27px]'>
+                        <div class='flex justify-center items-center font-bold w-3/5 bg-lose pb-[6.75rem] pt-4 rounded-l-md'>First Rotation</div>
+                        <div class='flex justify-center items-center font-bold w-2/5 bg-mid bg-opacity-10 pb-[6.75rem] pt-4 rounded-r-md'>Second Rotation</div>
+                    </div>
+                    <div id='selectedBans' class='w-full max-w-[40rem] h-[calc(100%_-_27px)] flex flex-wrap text-center twok:gap-x-4 twok:px-11 fullhd:pl-[3px] fullhd:gap-x-3'>
+                    </div>
                 </div>
                 <div class='flex justify-center rounded bg-[#141624] fullhd:h-48 twok:h-44'>
                     <form id='banSearch' class='m-0 pb-4 w-full' action='' onsubmit='return false;' method='GET' autocomplete='off'>
