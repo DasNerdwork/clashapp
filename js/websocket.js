@@ -41,7 +41,7 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                     
                     for (const element of messageAsJson["SuggestedBans"]) {
                         if(executeOnlyOnce){
-                            html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
+                            html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
                                         '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
                                             '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
                                             '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp">'+
@@ -52,9 +52,9 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                             
                         } else {
                             if(!(selectedBans.innerHTML.includes("/champion/" + element["id"] + ".webp"))){
-                                html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24" style="animation: .1s ease-in-out 0s 1 slideIn; animation-fill-mode: forwards;">';  
+                                html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24" style="animation: .1s ease-in-out 0s 1 slideIn; animation-fill-mode: forwards;">';  
                             } else {
-                                html += '<div class="selected-ban-champion fullhd:w-16 twok:w-24">';
+                                html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24">';
                             }
                             html += '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
                                         '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
@@ -66,6 +66,21 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                     }
                     executeOnlyOnce = false;
                     selectedBans.innerHTML = html;
+                    banSearchContainer = document.getElementById('banSearch').parentElement;
+                    champSelectorContainer = document.getElementById('champSelect');
+                    if(messageAsJson["SuggestedBans"].length >= 6){ // If our container exceeds one line of elements
+                        banSearchContainer.classList.replace('twok:h-[16.5rem]', 'twok:h-[10.5rem]');
+                        banSearchContainer.classList.replace('fullhd:h-[17rem]', 'fullhd:h-[12rem]');
+                        champSelectorContainer.classList.replace('twok:h-[13rem]', 'twok:h-[7.5rem]');
+                        champSelectorContainer.classList.replace('fullhd:h-[13.5rem]', 'fullhd:h-[9rem]');
+                        selectedBans.parentElement.classList.replace('pb-3', 'pb-1');
+                    } else {
+                        banSearchContainer.classList.replace('twok:h-[10.5rem]', 'twok:h-[16.5rem]');
+                        banSearchContainer.classList.replace('fullhd:h-[12rem]', 'fullhd:h-[17rem]');
+                        champSelectorContainer.classList.replace('twok:h-[7.5rem]', 'twok:h-[13rem]');
+                        champSelectorContainer.classList.replace('fullhd:h-[9rem]', 'fullhd:h-[13.5rem]');
+                        selectedBans.parentElement.classList.replace('pb-1', 'pb-3');
+                    }
                     makeDragDroppable();
                 });
             }
