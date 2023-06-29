@@ -18,6 +18,8 @@ module.exports = {
     'z-[8]',
     'z-[7]',
     'z-[6]',
+    '-mt-[54px]',
+    '-mt-[68px]',
     {
       pattern: /text-(silver|gold|bronze|platinum|iron|diamond|master|grandmaster|challenger)\/100/,
     },
