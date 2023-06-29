@@ -160,16 +160,16 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <span class='h-[21rem] flex items-center justify-center'>".__("Advertisement")."</span>
                     </div>
                 </div>
-                <div class='flex flex-wrap justify-center rounded bg-[#141624] overflow-hidden h-fit fullhd:h-44 twok:h-56 pt-1.5'>
-                    <div class='rotation-title -mb-1.5 flex w-full px-11 max-h-[27px]'>
-                        <div class='flex justify-center items-center font-bold w-3/5 bg-lose pb-[6.75rem] pt-4 rounded-l-md'>".__("First Rotation")."</div>
-                        <div class='flex justify-center items-center font-bold w-2/5 bg-mid bg-opacity-10 pb-[6.75rem] pt-4 rounded-r-md'>".__("Second Rotation")."</div>
+                <div class='flex flex-wrap justify-center rounded bg-[#141624] overflow-hidden h-fit pt-1.5 pb-3 transition-all ease-out'>
+                    <div class='rotation-title -mb-1.5 flex w-full fullhd:text-sm twok:text-base twok:px-11 max-h-[27px]'>
+                        <div class='flex justify-center items-center font-bold w-3/5 bg-lose twok:pb-[6.75rem] fullhd:pb-[6rem] pt-4 rounded-l-md'>".__("First Rotation")."</div>
+                        <div class='flex justify-center items-center font-bold w-2/5 bg-mid bg-opacity-10 twok:pb-[6.75rem] fullhd:pb-[6rem] pt-4 rounded-r-md'>".__("Second Rotation")."</div>
                     </div>
-                    <div id='selectedBans' class='w-full max-w-[40rem] h-[calc(100%_-_27px)] flex flex-wrap text-center twok:gap-x-4 twok:px-11 fullhd:pl-[3px] fullhd:gap-x-3'>
+                    <div id='selectedBans' class='w-full max-w-[40rem] h-fit flex flex-wrap text-center twok:gap-x-4 twok:px-11 fullhd:pl-[3px] fullhd:gap-x-3 gap-y-2 fullhd:min-h-[85px] twok:min-h-[97px]'>
                     </div>
                 </div>
-                <div class='flex justify-center rounded bg-[#141624] fullhd:h-48 twok:h-44'>
-                    <form id='banSearch' class='m-0 pb-4 w-full' action='' onsubmit='return false;' method='GET' autocomplete='off'>
+                <div class='flex justify-center rounded bg-[#141624] twok:h-[16.5rem] fullhd:h-[17rem] transition-all ease-out'>
+                    <form id='banSearch' class='m-0 pb-4 mb-4 w-full overflow-hidden' action='' onsubmit='return false;' method='GET' autocomplete='off'>
                         <div id='top-ban-bar' class='h-10 text-black'>
                             <div class='inline'>
                                 <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2 twok:pr-10' value='' placeholder='".__("Championname")."'>
@@ -181,7 +181,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/JUNGLE.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='jgl' alt='An icon for the jungle'>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/TOP.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='top' alt='An icon for the top lane'>
                         </div>
-                        <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] twok:max-h-[7.5rem] fullhd:max-h-[8.5rem] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1'>";
+                        <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1 twok:h-[13rem] fullhd:h-[13.5rem]'>";
                             showBanSelector(); echo "
                         </div>
                         <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/5 '><img src='/clashapp/data/misc/webp/empty_search.webp' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
