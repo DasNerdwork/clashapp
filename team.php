@@ -142,12 +142,12 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
                             <button type=\"button\" class=\"text-3xl text-[#0e0f18] p-0 w-8 cursor-default\">★</button>
-                            <span class='text-sm absolute top-[14.5rem]' x-show='showNotice' x-transition>".sprintf(__("Voting is only available for %slogged-in%s users"), "<a href='/login' class='underline'>", "</a>")."</span>
+                            <span class='text-sm absolute top-[16rem]' x-show='showNotice' x-transition>".sprintf(__("Voting is only available for %slogged-in%s users"), "<a href='/login' class='underline'>", "</a>")."</span>
                         </div>
                     </div>"; } echo "
                     <div class='flex justify-center items-center opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
                         <div class='group relative inline-block' x-data='{ tooltip: 0 }' x-cloak>
-                            <button onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-xl p-3 w-fit bg-[#0e0f18] rounded-xl' type='button' @click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'>".__("Click to Copy URL")."</button>
+                            <input type='text' value='https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."' onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-lg p-3 w-fit bg-[#0e0f18] rounded-xl' readonly @click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'></input>
                             <div class='w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition @click='tooltip = 0'>
                                 Copied to Clipboard
                                 <svg class='absolute text-black h-2 w-full left-0 top-full' x='0px' y='0px' viewBox='0 0 255 255' xml:space='preserve'><polygon class='fill-current' points='0,0 127.5,127.5 255,0'/></svg>
@@ -424,9 +424,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
                                                     if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
                                                         echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">
-                                                            <span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
-                                                            <div class="w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 -ml-16 -mt-[54px]" x-show="exclamation" x-transition x-cloak>
-                                                                This player did not queue on their main position
+                                                            <span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5 cursor-help px-1.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
+                                                            <div class="w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 -ml-16 '.__('exclang-mt').'" x-show="exclamation" x-transition x-cloak>
+                                                                '.__('This player did not queue on their main position').'
                                                                 <svg class="absolute text-black h-2 w-full left-0 ml-14 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
                                                             </div>';
                                                     } else {

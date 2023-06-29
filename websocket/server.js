@@ -32,6 +32,8 @@ const currentPatch = fs.readFileSync('/hdd1/clashapp/data/patch/version.txt', 'u
 const validChamps = JSON.parse(fs.readFileSync('/hdd1/clashapp/data/patch/'+currentPatch+'/data/de_DE/champion.json', 'utf-8'))["data"];
 var lastClient = "";
 
+console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully started the Websocket-Server!", new Date().toLocaleTimeString());
+
 wss.on('connection', function connection(ws, req) {
   let d = new Date();
   console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Client websocket connection initiated from \x1b[4m%s\x1b[0m:%d on %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear() % 100);
@@ -283,52 +285,56 @@ wss.on('connection', function connection(ws, req) {
        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       } else if(dataAsJSON.request == "firstConnect"){
-        ws.location = dataAsJSON.teamid;
-        var possibleColors = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
-        wss.clients.forEach(function each(client) {              
-          if(possibleColors.includes(client.color)){ // This removes every "already used" color from the array above
-            var colorIndex = possibleColors.indexOf(client.color);
-            if (colorIndex > -1) { // only splice array when item is found
-              possibleColors.splice(colorIndex, 1); // 2nd parameter means remove one item only
-            }
-          }
-        });
-        if(possibleColors.length >= 1){
-          ws.color = possibleColors[Math.floor(Math.random()*possibleColors.length)];
-        } else {
-          const colorList = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
-          ws.color = colorList[Math.floor(Math.random()*colorList.length)];
-        }
-        if(dataAsJSON.name == ""){
-          var possibleNames = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
-          // console.log(possibleNames[Math.floor(Math.random()*possibleNames.length)]);
-          wss.clients.forEach(function each(client) {
-            if(client.location == dataAsJSON.teamid){
-              if(possibleNames.includes(client.name)){ // This removes every "already used" name from the array above
-                var index = possibleNames.indexOf(client.name);
-                if (index > -1) { // only splice array when item is found
-                  possibleNames.splice(index, 1); // 2nd parameter means remove one item only
-                }
+        if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
+          ws.location = dataAsJSON.teamid;
+          var possibleColors = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
+          wss.clients.forEach(function each(client) {              
+            if(possibleColors.includes(client.color)){ // This removes every "already used" color from the array above
+              var colorIndex = possibleColors.indexOf(client.color);
+              if (colorIndex > -1) { // only splice array when item is found
+                possibleColors.splice(colorIndex, 1); // 2nd parameter means remove one item only
               }
             }
           });
-          if(possibleNames.length >= 1){
-            ws.name = possibleNames[Math.floor(Math.random()*possibleNames.length)];
+          if(possibleColors.length >= 1){
+            ws.color = possibleColors[Math.floor(Math.random()*possibleColors.length)];
           } else {
-            const nameList = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
-            ws.name = nameList[Math.floor(Math.random()*nameList.length)];
+            const colorList = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
+            ws.color = colorList[Math.floor(Math.random()*colorList.length)];
           }
+          if(dataAsJSON.name == ""){
+            var possibleNames = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
+            // console.log(possibleNames[Math.floor(Math.random()*possibleNames.length)]);
+            wss.clients.forEach(function each(client) {
+              if(client.location == dataAsJSON.teamid){
+                if(possibleNames.includes(client.name)){ // This removes every "already used" name from the array above
+                  var index = possibleNames.indexOf(client.name);
+                  if (index > -1) { // only splice array when item is found
+                    possibleNames.splice(index, 1); // 2nd parameter means remove one item only
+                  }
+                }
+              }
+            });
+            if(possibleNames.length >= 1){
+              ws.name = possibleNames[Math.floor(Math.random()*possibleNames.length)];
+            } else {
+              const nameList = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
+              ws.name = nameList[Math.floor(Math.random()*nameList.length)];
+            }
+          } else {
+            ws.name = dataAsJSON.name;
+          }
+          ws.send('{"status":"FirstConnect","name":"'+ws.name+'","color":"'+ws.color+'"}');
+          let localTeamData = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local teamdata and send to client
+          ws.send(localTeamData);
+          wss.clients.forEach(function each(client) {
+            if(client.location == dataAsJSON.teamid && client != ws){
+              client.send('{"status":"Message","message":"joined the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+            }
+          });
         } else {
-          ws.name = dataAsJSON.name;
+          return;
         }
-        ws.send('{"status":"FirstConnect","name":"'+ws.name+'","color":"'+ws.color+'"}');
-        let localTeamData = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local teamdata and send to client
-        ws.send(localTeamData);
-        wss.clients.forEach(function each(client) {
-          if(client.location == dataAsJSON.teamid && client != ws){
-            client.send('{"status":"Message","message":"joined the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
-          }
-        });
       } 
 
      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -390,7 +396,7 @@ function trimLogFileIfNeeded() {
 }
 
 function handleCrash(error) {
-  const currentTime = new Date().toLocaleTimeString();
+  var currentTime = new Date().toLocaleTimeString();
   const crashMessage = `[${currentTime}] [Server Crash]: ${error.stack}\n`;
   fs.appendFileSync(logPath, crashMessage, 'utf8');
 
