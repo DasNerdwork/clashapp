@@ -2403,6 +2403,120 @@ function generateCSRFToken() {
     return $token; // Gib den Token-Wert zurück
 }
 
+function calculateSmurfProbability($playerData, $rankData, $masteryData) {
+    $resultArray = array();
+
+    // Detect suspicion about last profile change (the longer no change the higher the suspicion)
+    $timestamp = intval($playerData["LastChange"] / 1000); // summoner name change, summoner level change, or profile icon change will trigger a reset of this timestamp/suspicion
+    switch ($timestamp){
+        case $timestamp < strtotime("-1 year"): // Über ein Jahr her
+            $resultArray["LastChangeSus"] = 1;
+            break;
+        case $timestamp < strtotime("-6 months"): // Über 6 Monate unter 1 Jahr
+            $resultArray["LastChangeSus"] = 0.8;
+            break;
+        case $timestamp < strtotime("-3 months"): // Über 3 Monate unter 6 Monate
+            $resultArray["LastChangeSus"] = 0.6;
+            break;
+        case $timestamp < strtotime("-1 months"): // Über einen Monat unter 3 Monate
+            $resultArray["LastChangeSus"] = 0.4;
+            break;
+        case $timestamp < strtotime("-2 weeks"): // Über zwei Wochen unter 1 Monat
+            $resultArray["LastChangeSus"] = 0.2;
+            break;
+        case $timestamp > strtotime("-2 weeks"): // Unter zwei Wochen her
+            $resultArray["LastChangeSus"] = 0;
+            break;
+    }
+
+    // Level suspicion detection
+    switch ($playerData["Level"]){
+        case $playerData["Level"] <= 30: // Level 30 oder niedriger
+            $resultArray["LevelSus"] = 1;
+            break;
+        case $playerData["Level"] <= 50: // Level 50 oder niedriger
+            $resultArray["LevelSus"] = 0.8;
+            break;
+        case $playerData["Level"] <= 70: // Level 70 oder niedriger
+            $resultArray["LevelSus"] = 0.6;
+            break;
+        case $playerData["Level"] <= 90: // Level 90 oder niedriger
+            $resultArray["LevelSus"] = 0.4;
+            break;
+        case $playerData["Level"] <= 110: // Level 110 oder niedriger
+            $resultArray["LevelSus"] = 0.2;
+            break;
+        case $playerData["Level"] > 110: // Level 111 oder höher
+            $resultArray["LevelSus"] = 0;
+            break;
+    }
+
+    // Ranked Game Count suspicion detection
+    $totalRankedMatches = 0;
+    if(empty($rankData) || empty(array_intersect(array("RANKED_SOLO_5x5", "RANKED_FLEX_SR"), array_column($rankData,"Queue")))){
+        $resultArray["LevelSus"] = 1;
+    } else {
+        foreach($rankData as $rankQueue){
+            if($rankQueue["Queue"] == "RANKED_SOLO_5x5"){
+                $totalRankedMatches += $rankQueue["Wins"] + $rankQueue["Losses"];
+            } else if($rankQueue["Queue"] == "RANKED_FLEX_SR"){
+                $totalRankedMatches += $rankQueue["Wins"] + $rankQueue["Losses"];
+            }
+        }
+    }
+    switch ($totalRankedMatches){
+        case $totalRankedMatches == 0: // Keine Ranked Games gespielt
+            $resultArray["RankedGameCountSus"] = 1;
+            break;
+        case $totalRankedMatches <= 20: // 20 oder weniger gespielt
+            $resultArray["RankedGameCountSus"] = 0.8;
+            break;
+        case $totalRankedMatches <= 40: // 40 oder weniger gespielt
+            $resultArray["RankedGameCountSus"] = 0.6;
+            break;
+        case $totalRankedMatches <= 60: // 60 oder weniger gespielt
+            $resultArray["RankedGameCountSus"] = 0.4;
+            break;
+        case $totalRankedMatches <= 80: // 80 oder weniger gespielt
+            $resultArray["RankedGameCountSus"] = 0.2;
+            break;
+        case $totalRankedMatches > 80: // 81 oder mehr gespielt
+            $resultArray["RankedGameCountSus"] = 0;
+            break;
+    }
+
+    // Mastery Data Point suspicion detection
+    $totalMastery = 0;
+    if(empty($masteryData)){
+        $resultArray["MasteryDataSus"] = 1;
+    } else {
+        foreach($masteryData as $champMastery){
+            $totalMastery += str_replace(',', '.', $champMastery["Points"]);
+        }
+    }
+    if ($totalMastery == 0) { // Keine Champion Mastery
+        $resultArray["MasteryDataSus"] = 1;
+    } elseif ($totalMastery <= 40) { // weniger als 40k Punkte
+        $resultArray["MasteryDataSus"] = 0.8;
+    } elseif ($totalMastery <= 80) { // weniger als 80k Punkte
+        $resultArray["MasteryDataSus"] = 0.6;
+    } elseif ($totalMastery <= 120) { // weniger als 120k Punkte
+        $resultArray["MasteryDataSus"] = 0.4;
+    } elseif ($totalMastery <= 160) { // weniger als 160k Punkte
+        $resultArray["MasteryDataSus"] = 0.2;
+    } elseif ($totalMastery > 160) { // mehr als 160k Punkte
+        $resultArray["MasteryDataSus"] = 0;
+    }
+
+    // Durchschnitt berechnen
+    $sum = 0;
+    $count = count($resultArray);
+    foreach ($resultArray as $susScore) {
+        $sum += $susScore;
+    }
+    return $sum / $count;
+}
+
 /** Always active "function" to collect the teamID of a given Summoner Name
  * This function calls an API request as soon as the sumname gets posted from the team.php
  * through the javascript sanitize(text) function.
