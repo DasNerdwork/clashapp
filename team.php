@@ -172,7 +172,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     <form id='banSearch' class='m-0 pb-4 mb-4 w-full overflow-hidden' action='' onsubmit='return false;' method='GET' autocomplete='off'>
                         <div id='top-ban-bar' class='h-10 text-black'>
                             <div class='inline'>
-                                <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2 twok:pr-10' value='' placeholder='".__("Championname")."'>
+                                <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2 twok:pr-10 fullhd:w-[55%]' value='' placeholder='".__("Championname")."'>
                                 <button id='champSelectorClear' class='bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none -ml-7 px-2 py-1' onclick='this.previousElementSibling.value=\"\";'>x</button>
                             </div>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer' src='/clashapp/data/misc/lanes/UTILITY.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='sup' alt='An icon for the support lane'>
@@ -184,7 +184,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1 twok:h-[13rem] fullhd:h-[13.5rem]'>";
                             showBanSelector(); echo "
                         </div>
-                        <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/5 '><img src='/clashapp/data/misc/webp/empty_search.webp' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
+                        <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/5 relative -top-48'><img src='/clashapp/data/misc/webp/empty_search.webp' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
                     </form>
                 </div>
             </div>";
@@ -366,30 +366,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             $matchids_sliced = array_slice($matchids, 0, 15); // Select first 15 MatchIDs of current player
                             $slicedPlayerDataMatchIDs = array_slice($playerDataJSON["MatchIDs"], 0, 15);
                             
-                            // if(!isset($matchRankingArray)) $matchRankingArray = getMatchRanking($matchids_sliced, $matchDaten, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE" // FIXME: Temp fix for testing
-                            // print_r($matchRankingArray["Scores"]);
-
-                            // print_r($matchRankingArray);
-                            //         if(!$execOnlyOnce) $startGetMatchRanking = microtime(true);
-                            //         $memGetMatchRanking = memory_get_usage();
-                            //         foreach($matchRankingArray as $matchRankingID => $matchScore){
-                            //             if($matchRankingID == $id){
-                            //                 $newMatchIDsData[$id] = $matchScore;
-                            //             }
-                            //         }
-                            //         // print_r($matchRankingArray["Reasons"]); // TODO: Implement Reasons array to tell player what they could've done to improve (Where rank 1-2 was good, where rank 9-10 should improve)
-                            //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchRanking"]["Time"] = number_format((microtime(true) - $startGetMatchRanking), 2, ',', '.')." s";
-                            //         if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetMatchRanking"]["Memory"] = number_format((memory_get_usage() - $memGetMatchRanking)/1024, 2, ',', '.')." kB";
-
-                            //         $playerDataJSON["MatchIDs"] = $newMatchIDsData;
-
-                            //         $fp = fopen('/hdd1/clashapp/data/player/'.$playerDataJSONPath, 'r+');
-                            //         fwrite($fp, json_encode($playerDataJSON));
-                            //         fclose($fp);
-                            //     }
-                            // }
-
-
                             if(!$execOnlyOnce) $startGetLanePercentages = microtime(true);
                             $memGetLanePercentages = memory_get_usage();
                             // print_r($playerLanes);
@@ -550,19 +526,25 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             <tr>
                                 <td class='text-center h-32'>
                                     <div class='inline-flex gap-8'>";
-                                        for($i=0; $i<3; $i++){
-                                            if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp')){ echo '
-                                                <div>
-                                                    <img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp" width="64" height="64" class="block relative z-0;" alt="A champion icon of the league of legends champion '.$masteryData[$i]["Champion"].'">
-                                                    <span>'.$masteryData[$i]["Champion"].'</span>
-                                                    <img src="/clashapp/data/misc/mastery-'.$masteryData[$i]["Lvl"].'.webp" width="32" height="32" class="relative -top-[5.75rem] -right-11 z-10" alt="A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher">';
-                                                    if(str_replace(',','', $masteryData[$i]["Points"]) > 999999){
-                                                        echo "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".str_replace(",",".",substr($masteryData[$i]["Points"],0,4))."m</div>";
-                                                    } else {
-                                                        echo "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".explode(",",$masteryData[$i]["Points"])[0]."k</div>";
-                                                    } echo "
-                                                </div>";
+                                        if(sizeof($masteryData) >= 3){
+                                            for($i=0; $i<3; $i++){
+                                                if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp')){ echo '
+                                                    <div>
+                                                        <img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp" width="64" height="64" class="block relative z-0;" alt="A champion icon of the league of legends champion '.$masteryData[$i]["Champion"].'">
+                                                        <span>'.$masteryData[$i]["Champion"].'</span>
+                                                        <img src="/clashapp/data/misc/mastery-'.$masteryData[$i]["Lvl"].'.webp" width="32" height="32" class="relative -top-[5.75rem] -right-11 z-10" alt="A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher">';
+                                                        if(str_replace(',','', $masteryData[$i]["Points"]) > 999999){
+                                                            echo "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".str_replace(",",".",substr($masteryData[$i]["Points"],0,4))."m</div>";
+                                                        } else {
+                                                            echo "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".explode(",",$masteryData[$i]["Points"])[0]."k</div>";
+                                                        } echo "
+                                                    </div>";
+                                                }
                                             }
+                                        } else { echo
+                                            "<div>".
+                                            '<img src="/clashapp/data/misc/webp/empty_search.webp" height="64" width="64" alt="A frog emoji with a questionmark"></div>'.
+                                            "</div>";
                                         } echo "
                                     </div>
                                 </td>
@@ -638,7 +620,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             $tempStoreArray[$key]["matchids_sliced"] = $matchids_sliced;
                             $tempStoreArray[$key]["puuid"] = $puuid;
                             $tempStoreArray[$key]["sumid"] = $sumid;
-                            $tempStoreArray[$key]["matchRankingArray"] = $matchRankingArray;
+                            $tempStoreArray[$key]["matchRankingArray"] = $playerDataJSON["MatchIDs"];
 
                             echo "
                         </table>
