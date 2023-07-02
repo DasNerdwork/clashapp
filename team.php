@@ -109,7 +109,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     </h1>
                     <div class='h-full w-full flex flex-col justify-end'>
                     <span class='ml-1 mb-0.5 text-base font-bold'>".__("History")."</span>
-                        <div id='historyContainer' class='bg-darker w-full h-32 p-2 flex flex-col-reverse overflow-auto'>
+                        <div id='historyContainer' class='bg-darker w-full h-32 p-2 flex flex-col-reverse overflow-auto twok:text-base fullhd:text-sm'>
                         </div>
                     </div>
                     "; /** ($teamDataArray); */ echo "
@@ -401,9 +401,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                     if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
                                                         echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">
                                                             <span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5 cursor-help px-1.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
-                                                            <div class="w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 px-3 -ml-16 '.__('exclang-mt').'" x-show="exclamation" x-transition x-cloak>
-                                                                '.__('This player did not queue on their main position').'
-                                                                <svg class="absolute text-black h-2 w-full left-0 ml-14 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                                                            <div class="bg-black/50 text-white text-center text-xs rounded-lg w-40 whitespace-pre-line py-2 px-3 absolute z-30 -ml-16 twok:bottom-[49.75rem] fullhd:bottom-[34.75rem]" x-show="exclamation" x-transition x-cloak>'.__("This player did not queue on their main position")
+                                                            .'<svg class="absolute text-black h-2 w-full left-0 ml-14 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve">
+                                                                <polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon>
+                                                            </svg>
                                                             </div>';
                                                     } else {
                                                         echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
