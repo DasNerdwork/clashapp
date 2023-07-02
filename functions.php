@@ -533,7 +533,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     $returnString .= "<button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full' 
             @click='open = !open' 
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
-    $returnString .= "<div class='smooth-transition w-full overflow-hidden min-h-[2300px]' x-show='open' x-transition x-cloak>";
+    $returnString .= "<div class='smooth-transition w-full overflow-hidden twok:min-h-[2300px] fullhd:min-h-[1868.75px]' x-show='open' x-transition x-cloak>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
         $handle = file_get_contents("/hdd1/clashapp/data/matches/".$matchIDJSON.".json");
         $inhalt = json_decode($handle);
@@ -590,7 +590,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 $returnString .= '</div>';
                                 
                                 // Display of the played champions icon
-                                $returnString .= '<div class="champion-data flex gap-2 h-[68px] justify-between px-2"><div class="champion-data-left inline-flex gap-2"><div class="champion-icon">';
+                                $returnString .= '<div class="champion-data flex gap-2 twok:h-[68px] fullhd:h-[56px] justify-between px-2"><div class="champion-data-left inline-flex gap-2"><div class="champion-icon">';
                                 if ($inhalt->info->participants[$in])
                                 $champion = $inhalt->info->participants[$in]->championName;
                                 if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** TODO: One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
@@ -645,7 +645,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $returnString .= "</div>";
                         
                         // Display summoner spells
-                        $returnString .= '<div class="summoner-spells grid grid-rows-2 gap-1">';
+                        $returnString .= '<div class="summoner-spells grid grid-rows-2 gap-1 twok:max-w-[32px] fullhd:max-w-[26px]">';
                         $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
                         $summoner2Id = $inhalt->info->participants[$in]->summoner2Id;
                         if(file_exists('/hdd1/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".webp")){
@@ -664,14 +664,14 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                         $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
                         if(file_exists('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp')){
-                            $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune">';
+                            $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                         } else {
-                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available">';
+                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                         }
                         if(file_exists('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp')){
-                            $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune">';
+                            $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                         } else {
-                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available">';
+                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                         }
                         $returnString .= "</div>";
 
@@ -709,7 +709,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $returnString .= "</div>";
 
                         // Display of the last items the user had at the end of the game in his inventory
-                        $returnString .= '<div class="items grid grid-rows-2 grid-cols-3 max-w-[104px] min-w-[104px] gap-1">';
+                        $returnString .= '<div class="items grid grid-rows-2 grid-cols-3 twok:max-w-[104px] twok:min-w-[104px] fullhd:max-w-[84.5px] fullhd:min-w-[84.5px] gap-1">';
                         $noItemCounter = 0;
                         // $lastItemSlot = 0;
                         for($b=0; $b<6; $b++){
@@ -751,7 +751,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                 }
 
                 $returnString .= '</div>';
-                $returnString .= '<div class="additional-info px-2" x-cloak x-show="advanced || advancedGlobal" x-transition><div class="additional-info-1 grid grid-cols-[1fr_1fr_1fr_1fr_46px_auto] grid-rows-3 justify-center items-center gap-1 mt-2 text-sm">';
+                $returnString .= '<div class="additional-info px-2" x-cloak x-show="advanced || advancedGlobal" x-transition><div class="additional-info-1 grid twok:grid-cols-[1fr_1fr_1fr_1fr_46px_auto] fullhd:twok:grid-cols-[1fr_1fr_1fr_1fr_37.375px_auto] twok:text-base fullhd:text-[13px] grid-rows-3 justify-center items-center gap-1 mt-2 text-sm">';
                 // Display of enemy champions icon in lane
                     for($i = 0; $i < 10; $i++){
                         if (($inhalt->info->participants[$i]->teamPosition == $matchLane) && ($inhalt->info->participants[$i]->championName != $champion)){
@@ -759,9 +759,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $enemyChamp = $inhalt->info->participants[$i]->championName;
                         if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
                         if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp')){
-                            $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp" width="32" height="32" class="max-w-[32px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
+                            $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
                         } else {
-                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" class="max-w-[32px]" loading="lazy" alt="This icon represents a value not being available"></div>';
+                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents a value not being available"></div>';
                         }
                         }
                         if ($inhalt->info->participants[$i]->teamId == $teamID){
@@ -770,13 +770,13 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     }
 
                     $returnString .= '<div class="damage-dealt col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Dealt.webp" width="24" height="26" loading="lazy" alt="An icon of a sword clashing through a bone">';
+                    $returnString .= '<img src="/clashapp/data/misc/icons/Dealt.webp" width="24" height="26" class="twok:max-w-[24px] fullhd:max-w-[19.5px]" loading="lazy" alt="An icon of a sword clashing through a bone">';
                     $returnString .= '<span>'.$dealt.'</span>';
                     $returnString .= '</div>';
 
                     
                     $returnString .= '<div class="kill-participation col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/KillParticipation.webp" width="32" height="26" loading="lazy" alt="An icon of two swords clashing with each other">';
+                    $returnString .= '<img src="/clashapp/data/misc/icons/KillParticipation.webp" width="32" height="26" class="max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="An icon of two swords clashing with each other">';
                         if($totalTeamTakedowns != 0){
                             $returnString .= "<span>".number_format(($ownTakedowns/$totalTeamTakedowns)*100, 0). "%</span>";
                         } else {
@@ -785,12 +785,12 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     $returnString .= '</div>';
 
                     $returnString .= '<div class="visionscore col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/VisionScore.webp" width="36" height="23" loading="lazy" alt="An icon of a vision ward from League of Legends">';
+                    $returnString .= '<img src="/clashapp/data/misc/icons/VisionScore.webp" width="36" height="23" class="max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a vision ward from League of Legends">';
                     $returnString .= '<span>'.$visionScore.'</span>';
                     $returnString .= "</div>";
 
                     $returnString .= '<div class="col-span-1 row-span-2 h-full flex justify-center items-center">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Turret.webp" width="36" height="76" loading="lazy" alt="An icon of a tower from League of Legends">';
+                    $returnString .= '<img src="/clashapp/data/misc/icons/Turret.webp" width="36" height="76" class="twok:max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a tower from League of Legends">';
                     $returnString .= '</div>';
 
                     $returnString .= '<div class="damage-to-objectives col-span-1 row-span-1 h-full flex justify-center items-center">';
@@ -798,22 +798,22 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     $returnString .= "</div>";
 
                     $returnString .= '<div class="creepscore col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Creepscore.webp" width="32" height="19" loading="lazy" alt="An icon of two coins">';
+                    $returnString .= '<img src="/clashapp/data/misc/icons/Creepscore.webp" width="32" height="19" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="An icon of two coins">';
                     $returnString .= '<span>'.$creepScore.'</span>';
                     $returnString .= "</div>";
 
                     $returnString .= '<div class="damage-tanked col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Tanked.webp" width="20.5" height="26" loading="lazy" alt="An icon of a shield with two cracks">';
+                    $returnString .= '<img src="/clashapp/data/misc/icons/Tanked.webp" width="20.5" height="26" class="twok:max-w-[20.5px] fullhd:max-w-[16.65625px]" loading="lazy" alt="An icon of a shield with two cracks">';
                     $returnString .= '<span>'.$tanked.'</span>';
                     $returnString .= '</div>';
 
                     $returnString .= '<div class="damage-healed-and-shielded col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Shealed.webp" width="27" height="28" loading="lazy" alt="An icon of a plus symbol converging into a shield">';
+                    $returnString .= '<img src="/clashapp/data/misc/icons/Shealed.webp" width="27" height="28" class="twok:max-w-[27px] fullhd:max-w-[21.9375px]" loading="lazy" alt="An icon of a plus symbol converging into a shield">';
                     $returnString .= '<span>'.$shealed.'</span>';
                     $returnString .= "</div>";
 
                     $returnString .= '<div class="control-wards col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/ControlWard.webp" width="36" height="25" loading="lazy" alt="An icon of a control ward from League of Legends">';
+                    $returnString .= '<img src="/clashapp/data/misc/icons/ControlWard.webp" width="36" height="25" class="twok:max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a control ward from League of Legends">';
                     $returnString .= '<span>'.$visionWards.'</span>';
                     $returnString .= "</div>";
 
