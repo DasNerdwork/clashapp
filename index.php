@@ -1,4 +1,5 @@
 <?php session_start(); 
+include_once('/hdd1/clashapp/functions.php');
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
@@ -15,6 +16,12 @@ document.body.style.backgroundPosition = "50% 20%";
 document.body.style.backgroundSize = "40%";
 </script>
 ';
+// print_r(getPlayerData("name", "Flokrastinator"));
+// $envVariables = getenv();
+
+// foreach ($envVariables as $key => $value) {
+//     echo $key . ' = ' . $value . "\n";
+// }
 ?>
 
 
