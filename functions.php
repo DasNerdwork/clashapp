@@ -18,6 +18,7 @@
  * @global int $currenttimestam The current time stamp usable as a global variable
  */
 
+putenv('API_KEY=***REMOVED***'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
 $apiKey = getenv('API_KEY');
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
@@ -483,7 +484,7 @@ function getMatchData($matchIDArray){
  * @param int $seconds The amount of seconds given that we wan't to convert to human-readable time words
  * 
  * Returnvalue:
- * @return string Depending on switch case as seen below, but string sentence
+ * @return string|void Depending on switch case as seen below, but string sentence
  */
 function secondsToTime($seconds) {
     switch ($seconds) {
@@ -507,7 +508,8 @@ function secondsToTime($seconds) {
             return __("1 years ago");
         case ($seconds>=63072000):
             return sprintf(__("%d years ago"), floor($seconds / 31536000));
-    }
+        }
+    return;
 }
 
 /** Detailed Team-Information about a specific clash team
@@ -520,7 +522,7 @@ function secondsToTime($seconds) {
  * @var int $count the countervalue to display the amount of locally stored files in which the player (PUUID) is part of
  *
  * Returnvalue:
- * @return void N/A, displaying on page via table
+ * @return string N/A, displaying on page via table
  * 
  * @todo possibility to make more beautiful
  */
@@ -887,7 +889,7 @@ function printMasteryInfo($masteryArray, $index){
  * @var array $data Content of the runesReforged.json containing any image path for any rune ID
  *
  * Returnvalue:
- * @return string $rune->icon Path of Iconimage
+ * @return string|void $rune->icon Path of Iconimage
  */
 function runeIconFetcher($id){
     global $currentPatch;
@@ -904,6 +906,7 @@ function runeIconFetcher($id){
             }
         }
     }
+    return;
 }
 
 /** Returning random icon ID between 1 - 28 except for the current given icon ID
@@ -932,7 +935,7 @@ function getRandomIcon($currentIconID){
  * @var array $data Content of the summoner.json containing any image path for any summoner icon ID
  *
  * Returnvalue:
- * @return string $summoner->id Path of Iconimage
+ * @return string|void $summoner->id Path of Iconimage
  */
 function summonerSpellFetcher($id){
     global $currentPatch;
@@ -943,6 +946,7 @@ function summonerSpellFetcher($id){
             return $summoner->id;
         }
     }
+    return;
 }
 
 /** Fetching runetree icon ID to image path
@@ -952,7 +956,7 @@ function summonerSpellFetcher($id){
  * @var array $data Content of the runesReforged.json containing any image path for any rune icon ID
  *
  * Returnvalue:
- * @return string $runetree->icon Path of Iconimage
+ * @return string|void $runetree->icon Path of Iconimage
  */
 function runeTreeIconFetcher($id){
     global $currentPatch;
@@ -963,6 +967,7 @@ function runeTreeIconFetcher($id){
             return $runetree->icon;
         }
     }
+    return;
 }
 
 /** Resolving a championid to the champions clean name
@@ -972,7 +977,7 @@ function runeTreeIconFetcher($id){
  * @var array $data Content of the champion.json containing all necessary champion data like their clear names and IDs
  *
  * Returnvalue:
- * @return string $champion->name The clean name of the champion
+ * @return string|void $champion->name The clean name of the champion
  */
 function championIdToName($id){
     global $currentPatch;
@@ -983,6 +988,7 @@ function championIdToName($id){
             return $champion->name;
         }
     }
+    return;
 }
 
 /** Resolving a championid to the champions filename
@@ -992,7 +998,7 @@ function championIdToName($id){
  * @var array $data Content of the champion.json containing all necessary champion data like their clear names and IDs
  *
  * Returnvalue:
- * @return string $champion->id The filename of the champion
+ * @return string|void $champion->id The filename of the champion
  */
 function championIdToFilename($id){
     global $currentPatch;
@@ -1003,6 +1009,7 @@ function championIdToFilename($id){
             return $champion->id;
         }
     }
+    return;
 }
 
 /** Fetches the 3 most common values of specific attributes
@@ -1740,7 +1747,7 @@ function unique_multidim_array($array, $key) {
  * @var string $dataId The ID of a specific champion retrieved from the champion.json
  *
  * Returnvalue:
- * @return array $teamDataArray with keys "TeamID", "TournamentID", "Name", "Tag", "Icon", "Tier", "Captain" and the array itself of "Players"
+ * @return void $teamDataArray with keys "TeamID", "TournamentID", "Name", "Tag", "Icon", "Tier", "Captain" and the array itself of "Players"
  */
 function showBanSelector(){
     global $currentPatch;
@@ -1776,6 +1783,7 @@ function showBanSelector(){
             }
         }
     }
+    return;
 }
 
 /** This function collects the JSON formatted data in the abbreviations.json and maps every champion to it's own abbreviations. To make the .json more readable it is allowed
@@ -1803,22 +1811,16 @@ function timeDiffToText($timestamp){
     switch ($timestamp){
         case $timestamp < strtotime("-1 year"): // Über ein Jahr her
             return "over a year ago";
-            break;
         case $timestamp < strtotime("-6 months"): // Über 6 Monate unter 1 Jahr
             return "over 6 months ago";
-            break;
         case $timestamp < strtotime("-3 months"): // Über 3 Monate unter 6 Monate
             return "over 3 months ago";
-            break;
         case $timestamp < strtotime("-1 months"): // Über einen Monat unter 3 Monate
             return "over a month ago";
-            break;
         case $timestamp < strtotime("-2 weeks"): // Über zwei Wochen unter 1 Monat
             return "over two weeks ago";
-            break;
         case $timestamp > strtotime("-2 weeks"): // Unter zwei Wochen her
             return "under two weeks ago";
-            break;
     }
 }
 
@@ -2260,7 +2262,8 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
     }
 
     // Sort the final info by FinalScore
-    array_multisort(array_column($banExplainArray, "FinalScore"), SORT_DESC, $banExplainArray);
+    $finalScores = array_column($banExplainArray, "FinalScore");
+    array_multisort($finalScores, SORT_DESC, $banExplainArray);
 
     // $returnAndExplainArray["Return"] = $returnArray;
     // $returnAndExplainArray["Explain"] = $banExplainArray;
@@ -2413,7 +2416,7 @@ function getRankOrLevel($rankData, $playerData){
  * @param $currentRank The current rank as capslocked string
  * 
  * Returnvalue:
- * @return string A hexadecimal color code
+ * @return string|void A hexadecimal color code
  */
 function getMasteryColor($masteryPoints){
     if ($masteryPoints < 100000){
@@ -2430,6 +2433,8 @@ function getMasteryColor($masteryPoints){
         return "threat-xl";
     } else if ($masteryPoints >= 1000000){
         return "threat-xxl";
+    } else {
+        return;
     }
 }
 
