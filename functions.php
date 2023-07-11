@@ -1,7 +1,7 @@
 <?php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
 
 
 /** Main functions.php containing overall used functions throughout different php files
@@ -17,6 +17,7 @@ error_reporting(E_ALL);
  * @global array $headers The headers required or at least recommended for the CURL request
  * @global int $currenttimestam The current time stamp usable as a global variable
  */
+
 $apiKey = getenv('API_KEY');
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
@@ -75,6 +76,7 @@ function getPlayerData($type, $id){
     // 403 Access forbidden -> Outdated API Key
     if($httpCode == "403"){
         echo "<h2>403 Forbidden GetPlayerData</h2>";
+        // print_r(curl_getinfo($ch));
     }
 
     // 429 Too Many Requests
