@@ -131,7 +131,6 @@ function getMasteryScores($sumid){
     $output = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    echo "<script>masteryScoresCalls++;</script>";
 
     // 403 Forbidden
     if($httpCode == "403"){
@@ -147,7 +146,6 @@ function getMasteryScores($sumid){
         $output = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        echo "<script>masteryScoresCalls++;</script>";
     }
 
     
@@ -197,7 +195,6 @@ function getCurrentRank($sumid){
     $output = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    echo "<script>currentRankCalls++;</script>";
 
     // 403 Forbidden
     if($httpCode == "403"){
@@ -214,7 +211,6 @@ function getCurrentRank($sumid){
         $output = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        echo "<script>currentRankCalls++;</script>";
     }
 
     // Resolving return values
@@ -266,7 +262,6 @@ function getMatchIDs($puuid, $maxMatchIDs){
         $clashidOutput = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        echo "<script>matchIdCalls++;</script>";
 
         // 429 Too Many Requests
         if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
@@ -277,7 +272,6 @@ function getMatchIDs($puuid, $maxMatchIDs){
             $clashidOutput = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-            echo "<script>matchIdCalls++;</script>";
         }
 
         // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -290,7 +284,6 @@ function getMatchIDs($puuid, $maxMatchIDs){
         $matchidOutput = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        echo "<script>matchIdCalls++;</script>";
 
         // 429 Too Many Requests
         if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
@@ -333,12 +326,11 @@ function getMatchIDs($puuid, $maxMatchIDs){
  * INFO: clearstatcache(); necessary for correct filesize statements as filesize() is a cached function
  *
  * Returnvalue:
- * @return void N/A, file saving & logging instead
+ * @return boolean N/A, file saving & logging instead
  */
 function downloadMatchesByID($matchids, $username = null){
     global $headers, $counter;
     $logPath = '/hdd1/clashapp/data/logs/matchDownloader.log';
-    $errorFile = null;
 
     foreach($matchids as $matchid){
 
@@ -422,7 +414,7 @@ function downloadMatchesByID($matchids, $username = null){
         }
     }
     // return array("Status" => "Success", "ErrorFile" => $errorFile);
-    return;
+    return true;
 }
 
 /** Important performance-saving function to collect locally stored matchdata into dynamically used array
