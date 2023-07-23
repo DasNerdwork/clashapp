@@ -18,7 +18,7 @@
  * @global int $currenttimestam The current time stamp usable as a global variable
  */
 
-putenv('API_KEY=***REMOVED***'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
+// putenv('API_KEY=***REMOVED***'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
 $apiKey = getenv('API_KEY');
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
@@ -276,9 +276,9 @@ function getMatchIDs($puuid, $maxMatchIDs){
 
         // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-        // Curl API request for of ranked matches
+        // Curl API request for flex matches
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
+        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $matchidOutput = curl_exec($ch);
@@ -288,7 +288,30 @@ function getMatchIDs($puuid, $maxMatchIDs){
         // 429 Too Many Requests
         if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
             sleep(5);
-            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
+            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            $matchidOutput = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            echo "<script>matchIdCalls++;</script>";
+        }
+
+        // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+        // Curl API request for solo duo matches
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $matchidOutput = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        // 429 Too Many Requests
+        if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
+            sleep(5);
+            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             $matchidOutput = curl_exec($ch);
