@@ -49,6 +49,7 @@ if(isset($_POST['sumids'])){
     $suggestedBanMatchData = getMatchData($matchIDTeamArray);
     $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
     $currentTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
+    $currentTeamJSON["LastUpdate"] = time();
     $currentTeamJSON["SuggestedBanData"] = $suggestedBanArray;
     $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'w+');
     fwrite($fp, json_encode($currentTeamJSON));
