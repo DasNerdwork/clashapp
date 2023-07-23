@@ -567,9 +567,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 <td>
                                     <div class='max-h-[5.7rem] overflow-hidden mb-2 flex flex-wrap px-4 justify-evenly gap-1'>";
                                     $smurfProbability = calculateSmurfProbability($playerData, $rankData, $masteryData);
-                                    if($smurfProbability >= 0.2 && $smurfProbability < 0.4){
-                                        echo "<div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#5c4c18] cursor-help'>".__("Smurf")."</div>";
-                                    } else if ($smurfProbability >= 0.4 && $smurfProbability < 0.6){
+                                    if ($smurfProbability >= 0.4 && $smurfProbability < 0.6){
                                         echo "<div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#855e16] cursor-help'>".__("Smurf")."</div>";
                                     } else if ($smurfProbability >= 0.6 && $smurfProbability <= 0.8){
                                         echo "<div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#9c3515] cursor-help'>".__("Smurf")."</div>";
