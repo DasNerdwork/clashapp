@@ -18,7 +18,7 @@
  * @global int $currenttimestam The current time stamp usable as a global variable
  */
 
-// putenv('API_KEY=***REMOVED***'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
+putenv('API_KEY=***REMOVED***'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
 $apiKey = getenv('API_KEY');
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
@@ -215,13 +215,15 @@ function getCurrentRank($sumid){
 
     // Resolving return values
     foreach(json_decode($output, true) as $requestArray){
-        $rankDataArray["Queue"] = $requestArray["queueType"];
-        $rankDataArray["Tier"] = $requestArray["tier"];
-        $rankDataArray["Rank"] = $requestArray["rank"];
-        $rankDataArray["LP"] = $requestArray["leaguePoints"];
-        $rankDataArray["Wins"] = $requestArray["wins"];
-        $rankDataArray["Losses"] = $requestArray["losses"];
-        $rankReturnArray[] = $rankDataArray;
+        if($requestArray["queueType"] == "RANKED_SOLO_5x5" || $requestArray["queueType"] == "RANKED_FLEX_SR"){
+            $rankDataArray["Queue"] = $requestArray["queueType"];
+            $rankDataArray["Tier"] = $requestArray["tier"];
+            $rankDataArray["Rank"] = $requestArray["rank"];
+            $rankDataArray["LP"] = $requestArray["leaguePoints"];
+            $rankDataArray["Wins"] = $requestArray["wins"];
+            $rankDataArray["Losses"] = $requestArray["losses"];
+            $rankReturnArray[] = $rankDataArray;
+        }
     }
     return $rankReturnArray;
 }
@@ -503,6 +505,10 @@ function getMatchData($matchIDArray){
  */
 function secondsToTime($seconds) {
     switch ($seconds) {
+        case ($seconds<0):
+            return __("1 minute ago");
+        case ($seconds==0):
+            return __("1 minute ago");
         case ($seconds<120):
             return __("1 minute ago");
         case ($seconds>=120 && $seconds<3600):
@@ -513,16 +519,16 @@ function secondsToTime($seconds) {
             return sprintf(__("%d hours ago"), floor($seconds / 3600));
         case ($seconds>=86400 && $seconds<172800):
             return __("1 day ago");
-        case ($seconds>=172800 && $seconds<2630000):
+        case ($seconds>=172800 && $seconds<2592000):
             return sprintf(__("%d days ago"), floor($seconds / 86400));
-        case ($seconds>=2630000 && $seconds<5260000):
+        case ($seconds>=2592000 && $seconds<5260000):
             return __("1 month ago");
-        case ($seconds>=5260000 && $seconds<31536000):
-            return sprintf(__("%d months ago"), floor($seconds / 2630000));
-        case ($seconds>=31536000 && $seconds<63072000):
-            return __("1 years ago");
-        case ($seconds>=63072000):
-            return sprintf(__("%d years ago"), floor($seconds / 31536000));
+        case ($seconds>=5260000 && $seconds<31104000):
+            return sprintf(__("%d months ago"), floor($seconds / 2592000));
+        case ($seconds>=31104000 && $seconds<62208000):
+            return __("1 year ago");
+        case ($seconds>=62208000):
+            return sprintf(__("%d years ago"), floor($seconds / 31104000));
         }
     return;
 }
@@ -539,7 +545,7 @@ function secondsToTime($seconds) {
  * Returnvalue:
  * @return string N/A, displaying on page via table
  * 
- * @todo possibility to make more beautiful
+ * @todo possibility to make more beautiful and/or write a testcase?
  */
 function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
     global $currentPatch;
@@ -846,18 +852,6 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Verspeisen Sie Arsch?</div>';
                     $returnString .= "</div>";
 
-
-                    
-                    
-                    // $returnString .= '<div class="matchid">';
-                    // $returnString .= $inhalt->metadata->matchId;
-                    // $returnString .= '</div>';
-                    
-                    // $returnString .= '<div class="matchscore">';
-                    // $returnString .= $matchScore;
-                    // $returnString .= "</div></div>";
-
-
                     $returnString .= '</div></div>';
                     $returnString .= '<button type="button" class="collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4" @click="advanced = !advanced" x-text="advanced ? \'&#11165;\' : \'&#11167;\'"></button>';
                     $returnString .= '</div>';
@@ -880,7 +874,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
  * @param int $index Index of the masterychamp (0 = first & highest mastery champ, 1 = second, etc.)
  *
  * Returnvalue:
- * @return void N/A, just printing values to page
+ * @return void N/A, just printing values to page TODO: Write possible testcase for this
  */
 function printMasteryInfo($masteryArray, $index){
     global $currentPatch;
@@ -895,6 +889,7 @@ function printMasteryInfo($masteryArray, $index){
     echo "<br>Mastery Level: ".$masteryArray[$index]["Lvl"]."<br>";
     echo "Points: ".$masteryArray[$index]["Points"]."<br>";
     echo "Last played: ".date('d.m.Y', $masteryArray[$index]["LastPlayed"]);
+    return;
 }
 
 /** Fetching rune icon ID to image path
@@ -908,7 +903,7 @@ function printMasteryInfo($masteryArray, $index){
  */
 function runeIconFetcher($id){
     global $currentPatch;
-    $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json');
+    $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/en_US/runesReforged.json');
     $json = json_decode($data);
     foreach($json as $runetree){
         foreach($runetree->slots as $keyRunes){
@@ -1037,7 +1032,7 @@ function championIdToFilename($id){
  * @param int $counter An input counter used for getting the selected data in the second part of this function
  *
  * Returnvalue:
- * @return array $mostCommonReturn Array containing the sorted most common of specific attributes
+ * @return array $mostCommonReturn Array containing the sorted most common of specific attributes TODO: Testcases for this function and/or implement from profile into team
  */
 function getMostCommon($attributesArray, $matchDataArray, $puuid, $counter){
     $mostCommonArray = array();
@@ -1122,7 +1117,7 @@ function getLanePercentages($matchDaten, $puuid){
  * @var array $averageArray The returnvalue array but not printed
  *
  * Returnvalue:
- * @return void N/A, only direct printing to page
+ * @return void N/A, only direct printing to page TODO: testfunction for printing function
  */
 function getAverage($attributesArray, $matchDataArray, $puuid, $lane){
     $averageArray = array();

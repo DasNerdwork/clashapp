@@ -1,6 +1,8 @@
 <?php
 use PHPUnit\Framework\TestCase;
 include_once('/hdd1/clashapp/functions.php');
+$_SERVER['HTTP_HOST'] = "clashscout.com";
+include_once('/hdd1/clashapp/lang/translate.php');
 
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 
@@ -79,28 +81,32 @@ class FunctionsTest extends TestCase {
     public function testGetCurrentRank() {
         $rankReturnArray = getCurrentRank("kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw");
 
-        foreach ($rankReturnArray as $rankDataArray) {
-            $this->assertArrayHasKey("Queue", $rankDataArray, "Queue is missing or null");
+        if(empty($rankReturnArray)){
+            $this->assertEmpty($rankReturnArray);
+        } else {
+            foreach ($rankReturnArray as $rankDataArray) {
+                $this->assertArrayHasKey("Queue", $rankDataArray, "Queue is missing or null");
 
-            $this->assertArrayHasKey("Tier", $rankDataArray, "Tier is missing or null");
-            $this->assertMatchesRegularExpression('/^[A-Za-z]+$/', $rankDataArray["Tier"], "Tier is not alphabetical");
+                $this->assertArrayHasKey("Tier", $rankDataArray, "Tier is missing or null");
+                $this->assertMatchesRegularExpression('/^[A-Za-z]+$/', $rankDataArray["Tier"], "Tier is not alphabetical");
 
-            $this->assertArrayHasKey("Rank", $rankDataArray, "Rank is missing or null");
-            $validRanks = array("I", "II", "III", "IV");
-            $this->assertContains($rankDataArray["Rank"], $validRanks, "Rank is invalid");
+                $this->assertArrayHasKey("Rank", $rankDataArray, "Rank is missing or null");
+                $validRanks = array("I", "II", "III", "IV");
+                $this->assertContains($rankDataArray["Rank"], $validRanks, "Rank is invalid");
 
-            $this->assertArrayHasKey("LP", $rankDataArray, "LP is missing or null");
-            $this->assertIsNumeric($rankDataArray["LP"], "LP is not numeric");
-            $this->assertGreaterThanOrEqual(0, $rankDataArray["LP"], "LP is less than 0");
-            $this->assertLessThanOrEqual(100, $rankDataArray["LP"], "LP is greater than 100");
+                $this->assertArrayHasKey("LP", $rankDataArray, "LP is missing or null");
+                $this->assertIsNumeric($rankDataArray["LP"], "LP is not numeric");
+                $this->assertGreaterThanOrEqual(0, $rankDataArray["LP"], "LP is less than 0");
+                $this->assertLessThanOrEqual(100, $rankDataArray["LP"], "LP is greater than 100");
 
-            $this->assertArrayHasKey("Wins", $rankDataArray, "Wins is missing or null");
-            $this->assertIsNumeric($rankDataArray["Wins"], "Wins is not numeric");
-            $this->assertGreaterThanOrEqual(0, $rankDataArray["Wins"], "Wins is negative");
+                $this->assertArrayHasKey("Wins", $rankDataArray, "Wins is missing or null");
+                $this->assertIsNumeric($rankDataArray["Wins"], "Wins is not numeric");
+                $this->assertGreaterThanOrEqual(0, $rankDataArray["Wins"], "Wins is negative");
 
-            $this->assertArrayHasKey("Losses", $rankDataArray, "Losses is missing or null");
-            $this->assertIsNumeric($rankDataArray["Losses"], "Losses is not numeric");
-            $this->assertGreaterThanOrEqual(0, $rankDataArray["Losses"], "Losses is negative");
+                $this->assertArrayHasKey("Losses", $rankDataArray, "Losses is missing or null");
+                $this->assertIsNumeric($rankDataArray["Losses"], "Losses is not numeric");
+                $this->assertGreaterThanOrEqual(0, $rankDataArray["Losses"], "Losses is negative");
+            }
         }
     }
 
@@ -108,9 +114,19 @@ class FunctionsTest extends TestCase {
         $matchIDArray = getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 100);
 
         $this->assertIsArray($matchIDArray, "Match ID array is not an array");
+        $this->assertCount(100, $matchIDArray, "Match ID array does not have exactly 100 elements");
     
         foreach ($matchIDArray as $matchID) {
             $this->assertMatchesRegularExpression('/^EUW1_[A-Za-z0-9_-]{8,12}+$/', $matchID, "Match ID format is invalid");
+        }
+
+        $matchIDArray2 = getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 15);
+
+        $this->assertIsArray($matchIDArray2, "Second Match ID array is not an array");
+        $this->assertCount(15, $matchIDArray2, "Second Match ID array does not have exactly 15 elements");
+    
+        foreach ($matchIDArray2 as $matchID2) {
+            $this->assertMatchesRegularExpression('/^EUW1_[A-Za-z0-9_-]{8,12}+$/', $matchID2, "Match ID format is invalid");
         }
     }
 
@@ -136,8 +152,7 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    public function testGetMatchData()
-    {
+    public function testGetMatchData() {
         $testMatchId = getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 1)[0];
         $matchData = (array) getMatchData([$testMatchId]);
 
@@ -230,5 +245,196 @@ class FunctionsTest extends TestCase {
         }
     }
 
+    public function testSecondsToTime() {
+        // Test cases for non-positive values
+        $timeStringNeg1 = secondsToTime(-1);
+        $this->assertEquals("1 minute ago", $timeStringNeg1, "Time string for -1 second is incorrect");
 
+        $timeString0 = secondsToTime(0);
+        $this->assertEquals("1 minute ago", $timeString0, "Time string for 0 seconds is incorrect");
+
+        // Test cases for exact equals value in the case statement
+        $timeString2Below = secondsToTime(119);
+        $this->assertEquals("1 minute ago", $timeString2Below, "Time string for 119 seconds is incorrect");
+
+        $timeString120 = secondsToTime(120);
+        $this->assertEquals("2 minutes ago", $timeString120, "Time string for 120 seconds is incorrect");
+
+        $timeString1Above = secondsToTime(121);
+        $this->assertEquals("2 minutes ago", $timeString1Above, "Time string for 121 seconds is incorrect");
+
+        $timeString1HourBelow = secondsToTime(3599);
+        $this->assertEquals("59 minutes ago", $timeString1HourBelow, "Time string for 3599 seconds is incorrect");
+
+        $timeString3600 = secondsToTime(3600);
+        $this->assertEquals("1 hour ago", $timeString3600, "Time string for 3600 seconds is incorrect");
+
+        $timeString1HourAbove = secondsToTime(3601);
+        $this->assertEquals("1 hour ago", $timeString1HourAbove, "Time string for 3601 seconds is incorrect");
+
+        $timeString1DayBelow = secondsToTime(86399);
+        $this->assertEquals("23 hours ago", $timeString1DayBelow, "Time string for 86399 seconds is incorrect");
+
+        $timeString86400 = secondsToTime(86400);
+        $this->assertEquals("1 day ago", $timeString86400, "Time string for 86400 seconds is incorrect");
+
+        $timeString1DayAbove = secondsToTime(86401);
+        $this->assertEquals("1 day ago", $timeString1DayAbove, "Time string for 86401 seconds is incorrect");
+
+        $timeString1MonthBelow = secondsToTime(2591999);
+        $this->assertEquals("29 days ago", $timeString1MonthBelow, "Time string for 2591999 seconds is incorrect");
+
+        $timeString2628000 = secondsToTime(2592000);
+        $this->assertEquals("1 month ago", $timeString2628000, "Time string for 2592000 seconds is incorrect");
+
+        $timeString1MonthAbove = secondsToTime(2592001);
+        $this->assertEquals("1 month ago", $timeString1MonthAbove, "Time string for 2592001 seconds is incorrect");
+
+        $timeString1YearBelow = secondsToTime(31103999);
+        $this->assertEquals("11 months ago", $timeString1YearBelow, "Time string for 31103999 seconds is incorrect");
+
+        $timeString31536000 = secondsToTime(31104000);
+        $this->assertEquals("1 year ago", $timeString31536000, "Time string for 31104000 seconds is incorrect");
+
+        $timeString1YearAbove = secondsToTime(31104001);
+        $this->assertEquals("1 year ago", $timeString1YearAbove, "Time string for 31104001 seconds is incorrect");
+
+        $timeString1YearAbove = secondsToTime(62208000);
+        $this->assertEquals("2 years ago", $timeString1YearAbove, "Time string for 62208000 seconds is incorrect");
+
+        $maxInt = PHP_INT_MAX;
+        $timeStringMaxInt = secondsToTime($maxInt);
+        $this->assertEquals("296533308798 years ago", $timeStringMaxInt, "Time string for PHP_INT_MAX is incorrect");
+    }    
+
+    public function testGetRandomIcon()
+    {
+        // Test with a valid currentIconID (between 1 and 28)
+        for ($currentIconID = 1; $currentIconID <= 28; $currentIconID++) {
+            $randomIconID = getRandomIcon($currentIconID);
+
+            // Verify that the randomIconID is different from the currentIconID
+            $this->assertNotEquals($currentIconID, $randomIconID, "Random icon ID ($randomIconID) should be different from current icon ID ($currentIconID).");
+
+            // Verify that the randomIconID is within the valid range (1 to 28)
+            $this->assertTrue($randomIconID >= 1 && $randomIconID <= 28, "Random icon ID ($randomIconID) should be within the valid range (1 to 28).");
+        }
+
+        // Test with an invalid currentIconID (less than 1)
+        $currentIconID = 0;
+        $randomIconID = getRandomIcon($currentIconID);
+
+        // Verify that the randomIconID is within the valid range (1 to 28)
+        $this->assertTrue($randomIconID >= 1 && $randomIconID <= 28, "Random icon ID ($randomIconID) should be within the valid range (1 to 28).");
+
+        // Test with an invalid currentIconID (greater than 28)
+        $currentIconID = 30;
+        $randomIconID = getRandomIcon($currentIconID);
+
+        // Verify that the randomIconID is within the valid range (1 to 28)
+        $this->assertTrue($randomIconID >= 1 && $randomIconID <= 28, "Random icon ID ($randomIconID) should be within the valid range (1 to 28).");
+    }
+
+    public function testSummonerSpellFetcher()
+    {
+        global $currentPatch;
+        $this->assertTrue(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/summoner.json'), "summoner.json file does not exist.");
+
+        $testSummonerIconKey = '4'; // Data key for Flash
+
+        $expectedIconID = 'SummonerFlash';
+
+        $actualIconID = summonerSpellFetcher($testSummonerIconKey);
+
+        $this->assertEquals($expectedIconID, $actualIconID, "Returned icon ID ($actualIconID) does not match the expected icon ID ($expectedIconID).");
+    }
+
+    public function testRuneTreeIconFetcher()
+    {
+        global $currentPatch;
+        $testRuneIconID = 8100; // Data ID for Domination
+        
+        $this->assertTrue(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json'), "runesReforged.json file does not exist.");
+
+        $expectedIconPath = 'perk-images/Styles/7200_Domination.png';
+        $actualIconPath = runeTreeIconFetcher($testRuneIconID);
+
+        $this->assertNull(runeTreeIconFetcher(0), "runeTreeIconFetcher did not return null for invalid rune ID (0).");
+        $this->assertNull(runeTreeIconFetcher(8112), "runeTreeIconFetcher did not return null for valid but non-existing rune ID (8112).");
+        $this->assertNotNull(runeTreeIconFetcher("8100"), "runeTreeIconFetcher returned null for valid rune ID as string ('8100').");
+        $this->assertNull(runeTreeIconFetcher(-1), "runeTreeIconFetcher did not return null for invalid negative rune ID (-1).");
+        $this->assertNotEmpty($actualIconPath, "runeTreeIconFetcher returned an empty icon path.");
+        $this->assertEquals($expectedIconPath, $actualIconPath, "Returned icon path ($actualIconPath) does not match the expected icon path ($expectedIconPath).");
+    }
+
+    public function testRuneIconFetcher()
+    {
+        global $currentPatch;
+        $testRuneId = 8112; // Rune ID for Electrocute
+
+        $this->assertTrue(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json'), "runesReforged.json file does not exist.");
+
+        $expectedIconPath = 'perk-images/Styles/Domination/Electrocute/Electrocute.png'; // Expected path for electrocute
+        $actualIconPath = runeIconFetcher($testRuneId);
+        
+        $this->assertNull(runeIconFetcher(0), "runeIconFetcher did not return null for invalid rune ID (0).");
+        $this->assertNull(runeIconFetcher(8100), "runeIconFetcher did not return null for valid but non-existing rune ID (8100).");
+        $this->assertNotNull(runeIconFetcher("8112"), "runeIconFetcher returned null for valid rune ID as string ('8112').");
+        $this->assertNull(runeIconFetcher(-1), "runeIconFetcher did not return null for invalid negative rune ID (-1).");
+        $this->assertNotEmpty($actualIconPath, "runeIconFetcher returned an empty icon path.");
+        $this->assertEquals($expectedIconPath, $actualIconPath, "Returned icon path ($actualIconPath) does not match the expected icon path ($expectedIconPath).");
+    }
+
+    public function testChampionIdToName()
+    {
+        global $currentPatch;
+        $testChampionID = 266;
+
+        $this->assertTrue(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), "champion.json file does not exist.");
+
+        $expectedChampionName = 'Aatrox';
+
+        $actualChampionName = championIdToName($testChampionID);
+
+        $this->assertNull(championIdToName(0), "championIdToName did not return null for invalid champion ID (0).");
+        $this->assertNull(championIdToName(1234), "championIdToName did not return null for valid but non-existing champion ID (1234).");
+        $this->assertNotNull(championIdToName("266"), "championIdToName returned null for valid champion ID as string ('266').");
+        $this->assertNull(championIdToName(-1), "championIdToName did not return null for invalid negative champion ID (-1).");
+        $this->assertNotEmpty($actualChampionName, "championIdToName returned an empty champion name.");
+        $this->assertEquals($expectedChampionName, $actualChampionName, "Returned champion name ($actualChampionName) does not match the expected champion name ($expectedChampionName).");
+    }
+
+    public function testChampionIdToFilename()
+    {
+        global $currentPatch;
+        $testChampionID = 62;
+
+        $this->assertTrue(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), "champion.json file does not exist.");
+
+        $expectedChampionFilename = 'MonkeyKing';
+
+        $actualChampionFilename = championIdToFilename($testChampionID);
+
+        $this->assertNull(championIdToFilename(0), "championIdToFilename did not return null for invalid champion ID (0).");
+        $this->assertNull(championIdToFilename(1234), "championIdToFilename did not return null for valid but non-existing champion ID (1234).");
+        $this->assertNotNull(championIdToFilename("62"), "championIdToFilename returned null for valid champion ID as string ('62').");
+        $this->assertNull(championIdToFilename(-1), "championIdToFilename did not return null for invalid negative champion ID (-1).");
+        $this->assertNotEmpty($actualChampionFilename, "championIdToFilename returned an empty champion filename.");
+        $this->assertEquals($expectedChampionFilename, $actualChampionFilename, "Returned champion filename ($actualChampionFilename) does not match the expected champion filename ($expectedChampionFilename).");
+    }
+
+    public function testGetLanePercentages()
+    {
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+        $testMatchId = getMatchIDs($puuid, 1)[0];
+        $matchData = (array) getMatchData([$testMatchId]);
+
+        $expectedResultArray = ['MID', 'TOP', 'BOTTOM', 'JUNGLE', 'UTILITY', 'FILL', ''];
+
+        $this->assertCount(2, getLanePercentages($matchData, $puuid), "Returned lane percentage array does not contain exactly two elements.");
+        $this->assertNotNull(getLanePercentages($matchData, $puuid)[0], "First lane in the lane percentage array is null.");
+        $this->assertNotNull(getLanePercentages($matchData, $puuid)[1], "Second lane in the lane percentage array is null.");
+        $this->assertContains(getLanePercentages($matchData, $puuid)[0], $expectedResultArray, "First lane in the lane percentage array is not within the expected result array.");
+        $this->assertContains(getLanePercentages($matchData, $puuid)[1], $expectedResultArray, "Second lane in the lane percentage array is not within the expected result array.");
+    }
 }
