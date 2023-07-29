@@ -1820,17 +1820,17 @@ function abbreviationFetcher($champName){
 function timeDiffToText($timestamp){
     switch ($timestamp){
         case $timestamp < strtotime("-1 year"): // Über ein Jahr her
-            return "over a year ago";
+            return __("over a year ago");
         case $timestamp < strtotime("-6 months"): // Über 6 Monate unter 1 Jahr
-            return "over 6 months ago";
+            return __("over 6 months ago");
         case $timestamp < strtotime("-3 months"): // Über 3 Monate unter 6 Monate
-            return "over 3 months ago";
+            return __("over 3 months ago");
         case $timestamp < strtotime("-1 months"): // Über einen Monat unter 3 Monate
-            return "over a month ago";
+            return __("over a month ago");
         case $timestamp < strtotime("-2 weeks"): // Über zwei Wochen unter 1 Monat
-            return "over two weeks ago";
+            return __("over two weeks ago");
         case $timestamp > strtotime("-2 weeks"): // Unter zwei Wochen her
-            return "under two weeks ago";
+            return __("under two weeks ago");
     }
 }
 
