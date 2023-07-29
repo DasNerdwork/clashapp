@@ -223,6 +223,48 @@ function copyToClipboard(text){
   });
 }
 
+function showTooltip(element, text, delay, direction) {
+  const positions = {
+    'top': 'bottom-full',
+    'bottom': 'top-full',
+    'left': 'right-full',
+    'right': 'left-full',
+    'top-left': 'bottom-full right-2/4',
+    'top-right': 'bottom-full left-2/4 ',
+    'bottom-left': 'top-full right-0',
+    'bottom-right': 'top-full left-0',
+    'left-top': 'right-full bottom-0',
+    'left-bottom': 'right-full top-0',
+    'right-top': 'left-full bottom-0',
+    'right-bottom': 'left-full top-0',
+  };
+
+  element.insertAdjacentHTML(
+    'beforeend',
+    `<div class="w-auto backdrop-filter backdrop-blur-xl bg-opacity-65 bg-black text-white text-center text-xs p-2 rounded-lg absolute ${positions[direction]} hidden z-10"
+      id="tooltip">${text}</div>`
+  );
+
+  const tooltip = document.getElementById('tooltip');
+  setTimeout(() => {
+    if (tooltip) {
+      tooltip.classList.remove('hidden'); // Show the tooltip after adding it to the DOM
+      tooltip.style.opacity = '1'; // Set opacity after a brief delay for the fade-in effect
+    }
+  }, delay);
+}
+
+function hideTooltip(element) {
+  const tooltip = document.getElementById('tooltip');
+  if (tooltip) {
+    tooltip.style.opacity = '0';
+    tooltip.classList.add('hidden'); // Add 'hidden' class to hide the tooltip
+    setTimeout(() => {
+      tooltip.remove(); // Remove the tooltip after the fade-out effect
+    }, 300); // Delay before removing the tooltip to allow fade-out effect
+  }
+}
+
 var playerDataCalls = 0;
 var masteryScoresCalls = 0;
 var currentRankCalls = 0;
