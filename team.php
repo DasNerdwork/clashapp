@@ -569,8 +569,10 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                     <span class='block text-".strtolower($rankQueue["Tier"])."/100'>".__(ucfirst(strtolower($rankQueue["Tier"]))). " " . $rankQueue["Rank"];
                                             } 
                                             if(($rankQueue["Queue"] == "RANKED_SOLO_5x5") || ($rankQueue["Queue"] == "RANKED_FLEX_SR")){
-                                                echo " / " . $rankQueue["LP"] . " ".__("LP")."</span><span class='block'>
-                                                    ".__("WR").": " . round((($rankQueue["Wins"]/($rankQueue["Wins"]+$rankQueue["Losses"]))*100),2) . "%</span>
+                                                echo " / " . $rankQueue["LP"] . " ".__("LP")."</span><div class='flex justify-center gap-x-1'><span class='relative block cursor-help'
+                                                    onmouseenter='showTooltip(this, \"".__('Winrate')."\", 500, \"top-right\")'
+                                                    onmouseleave='hideTooltip(this)'>
+                                                    ".__("WR").": </span><span class='inline-block'>" . round((($rankQueue["Wins"]/($rankQueue["Wins"]+$rankQueue["Losses"]))*100),2) . "%</span></div>
                                                         <span class='text-[0.75rem]'>(".$rankQueue["Wins"]+$rankQueue["Losses"]." ".__("Games").")</span>
                                                     </div>";
                                             }
