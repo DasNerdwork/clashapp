@@ -56,6 +56,7 @@ $recalculateSuggestedBanData = false;
 $matchAlpineCounter = 0;
 $currentPlayerNumber = 1;
 $upToDate = false;
+$allUpToDate = 0;
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 echo "<script>const requests = {};</script>";
 
@@ -225,6 +226,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                     $tempTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
                                                     $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                                                     isset($_GET["reload"]) ? $forceReload = true : $forceReload = false;
+                                                    // echo "<script>console.log('Time: ".time()." LastUpdate: ".$tempTeamJSON["LastUpdate"]." Difference: ".(time() - $tempTeamJSON["LastUpdate"])."')</script>";
                                                     if(((time() - $tempTeamJSON["LastUpdate"]) > 600) || ($tempTeamJSON["LastUpdate"] == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
                                                         $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
                                                         if(array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
@@ -282,8 +284,11 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                                 ";
                                                                 $currentPlayerNumber++;
                                                             } else {
-                                                                $upToDate = true; // FIXME: As soon as update.php is changed to add via javascript -> remove this
-                                                                $tempTeamJSON["LastUpdate"] = time();
+                                                                $upToDate = true;
+                                                                $allUpToDate++;
+                                                                if($allUpToDate == count($teamDataArray["Players"])){ // Reset anti-request timer if all people are up to date and onAllFinish not called
+                                                                    $tempTeamJSON["LastUpdate"] = time();
+                                                                }
                                                                 $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'w+');
                                                                 fwrite($fp, json_encode($tempTeamJSON));
                                                                 fclose($fp);
@@ -868,13 +873,7 @@ $timeAndMemoryArray["Total"]["Memory"] = number_format((memory_get_usage() - $me
 
     // --------------------------------------------------------------------------------------------------v- DEBUG  -v-------------------------------------------------------------------------------------------------- //
 
-// echo "
-// <script>console.log(".json_encode($timeAndMemoryArray).");
-// console.log({
-//     PlayerData: playerDataCalls,
-//     MasteryScore: masteryScoresCalls,
-//     CurrentRank: currentRankCalls,
-//     MatchIDs: matchIdCalls,
-//     MatchDownload: matchDownloadCalls,
-//     TotalCalls: playerDataCalls+masteryScoresCalls+currentRankCalls+matchIdCalls+matchDownloadCalls});</script>";
+// console.log(".json_encode($timeAndMemoryArray).");
+$apiRequests["total"] = array_sum($apiRequests);
+echo "<script>console.log('API Request Array:', ".json_encode($apiRequests).")</script>";
 ?>

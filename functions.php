@@ -28,7 +28,17 @@ $headers = array(
     "Accept-Charset: application/x-www-form-urlencoded; charset=UTF-8",
     "Origin: https://clashscout.com/",
     "X-Riot-Token: ".$apiKey
- );
+);
+$apiRequests = array(
+    "total" => 0,
+    "getPlayerData" => 0,
+    "getMatchIDs" => 0,
+    "getMasteryScores" => 0,
+    "getCurrentRank" => 0,
+    "downloadMatchesByID" => 0,
+    "getTeamByTeamID" => 0,
+    "postSubmit" => 0
+);
 $currentTimestamp = time();
 $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns", 
 "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
@@ -49,7 +59,7 @@ $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipa
  * @return array $playerDataArray with keys "Icon", "Name", "Level", "PUUID", "SumID", "AccountID" and "LastChange" of the summoners profile
  */
 function getPlayerData($type, $id){
-    global $headers;
+    global $headers, $apiRequests;
     $playerDataArray = array();
 
     switch ($type) {
@@ -69,7 +79,7 @@ function getPlayerData($type, $id){
     curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $id);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $output = curl_exec($ch);
+    $output = curl_exec($ch); $apiRequests["getPlayerData"]++;
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     // echo "<script>playerDataCalls++;</script>";
@@ -86,7 +96,7 @@ function getPlayerData($type, $id){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $id);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
+        $output = curl_exec($ch); $apiRequests["getPlayerData"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         // echo "<script>playerDataCalls++;</script>";
@@ -119,16 +129,16 @@ function getPlayerData($type, $id){
  * @return array $masteryReturnArray The full return array including all single champion arrays
  */
 function getMasteryScores($sumid){
+    global $headers, $apiRequests;
     $masteryDataArray = array();
     $masteryReturnArray = array();
-    global $headers;
 
     // Curl API request block
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $output = curl_exec($ch);
+    $output = curl_exec($ch); $apiRequests["getMasteryScores"]++;
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
@@ -143,7 +153,7 @@ function getMasteryScores($sumid){
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $output = curl_exec($ch);
+        $output = curl_exec($ch); $apiRequests["getMasteryScores"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
@@ -183,16 +193,16 @@ function getMasteryScores($sumid){
  * @return array $rankReturnArray Just a rename of the $rankDataArray
  */
 function getCurrentRank($sumid){
+    global $headers, $apiRequests;
     $rankDataArray = array();
     $rankReturnArray = array();
-    global $headers;
 
     // Curl API request block
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $output = curl_exec($ch);
+    $output = curl_exec($ch); $apiRequests["getCurrentRank"]++;
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
@@ -208,7 +218,7 @@ function getCurrentRank($sumid){
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $output = curl_exec($ch);
+        $output = curl_exec($ch); $apiRequests["getCurrentRank"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
@@ -243,7 +253,7 @@ function getCurrentRank($sumid){
  * @return array $matchIDArray with all MatchIDs as separate entries
  */
 function getMatchIDs($puuid, $maxMatchIDs){
-    global $headers;
+    global $headers, $apiRequests;
     $matchIDArray = array();
     $clashIDArray = array();
     $gameType = "ranked";
@@ -261,7 +271,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=700&type=normal&start=" . $start . "&count=" . $matchCount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $clashidOutput = curl_exec($ch);
+        $clashidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
@@ -271,7 +281,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=700&type=normal&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $clashidOutput = curl_exec($ch);
+            $clashidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
         }
@@ -283,7 +293,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $matchidOutput = curl_exec($ch);
+        $matchidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
@@ -293,7 +303,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $matchidOutput = curl_exec($ch);
+            $matchidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             echo "<script>matchIdCalls++;</script>";
@@ -306,7 +316,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $matchidOutput = curl_exec($ch);
+        $matchidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
@@ -316,7 +326,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $matchidOutput = curl_exec($ch);
+            $matchidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             echo "<script>matchIdCalls++;</script>";
@@ -354,7 +364,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
  * @return boolean N/A, file saving & logging instead
  */
 function downloadMatchesByID($matchids, $username = null){
-    global $headers, $counter;
+    global $headers, $counter, $apiRequests;
     $logPath = '/hdd1/clashapp/data/logs/matchDownloader.log';
 
     foreach($matchids as $matchid){
@@ -378,7 +388,7 @@ function downloadMatchesByID($matchids, $username = null){
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $matchOutput = curl_exec($ch);
+            $matchOutput = curl_exec($ch); $apiRequests["downloadMatchesByID"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
 
@@ -392,7 +402,7 @@ function downloadMatchesByID($matchids, $username = null){
                 curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                $matchOutput = curl_exec($ch);
+                $matchOutput = curl_exec($ch); $apiRequests["downloadMatchesByID"]++;
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
 
@@ -405,7 +415,7 @@ function downloadMatchesByID($matchids, $username = null){
                     curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
                     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    $matchOutput = curl_exec($ch);
+                    $matchOutput = curl_exec($ch); $apiRequests["downloadMatchesByID"]++;
                     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                     curl_close($ch);
                 }
@@ -1685,7 +1695,7 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
  */
 function getTeamByTeamID($teamID){
     if($teamID != "test"){
-        global $headers;
+        global $headers, $apiRequests;
         $teamDataArray = array();
         $logPath = '/hdd1/clashapp/data/logs/teamDownloader.log';
         
@@ -1694,7 +1704,7 @@ function getTeamByTeamID($teamID){
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $teamOutput = curl_exec($ch);
+        $teamOutput = curl_exec($ch); $apiRequests["getTeamByTeamID"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         
@@ -1709,7 +1719,7 @@ function getTeamByTeamID($teamID){
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            $teamOutput = curl_exec($ch);
+            $teamOutput = curl_exec($ch); $apiRequests["getTeamByTeamID"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
         }
@@ -2587,7 +2597,7 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
  * @return void None, echo'ing teamID back to javascript to open new windows with it appended
  */
 if(isset($_POST['sumname'])){
-    global $headers;
+    global $headers, $apiRequests;
     $playerName = preg_replace('/\s+/', '+', $_POST['sumname']);
     $playerData = getPlayerData("name",$playerName);
 
@@ -2596,7 +2606,7 @@ if(isset($_POST['sumname'])){
     curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $clashOutput = curl_exec($ch);
+    $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
@@ -2606,7 +2616,7 @@ if(isset($_POST['sumname'])){
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $clashOutput = curl_exec($ch);
+        $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
     }
