@@ -117,24 +117,5 @@ if(isset($_POST['sumids'])){
             }
 
     echo $returnString;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 ?>
