@@ -401,18 +401,20 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
                                             if($rankOrLevelArray["Type"] === "Rank"){ // If user has a rank
                                                 // Print the profile border image url for current highest rank
-                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/*'.strtolower($rankOrLevelArray["HighestRank"]).'_base.ls_ch.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+                                                $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/wings_*'.strtolower($rankOrLevelArray["HighestRank"]).'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
                                                 $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
                                                 if(file_exists($profileBorderPath)){
-                                                    echo '<img src="'.$webBorderPath.'" width="384" height="384" class="max-w-[384px] -top-32 absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 20%, transparent 33%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
+                                                    echo '<img src="'.$webBorderPath.'" width="384" height="384" class="max-w-[110%] top-[-8.25rem] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
                                                 }
                                                 // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
                                                 if ($rankOrLevelArray["HighEloLP"] != ""){
+                                                    echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="30" height="18" class="absolute z-20 mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
                                                     echo "<div class='font-bold color-[#e8dfcc] absolute -mt-2 text-xs z-20'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
                                                 } else {
+                                                    echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="30" height="18" class="absolute z-20 mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
                                                     echo "<div class='font-bold color-[#e8dfcc] absolute mt-[0.85rem] text-xs z-20'>".$rankOrLevelArray["RankNumber"]."</div>";
                                                 }
-                                                
+                                                echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="38" height="26" class="absolute z-20 mt-[6.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
                                                 echo "<div class='color-[#e8dfcc] absolute mt-[6.8rem] text-xs z-20'>".$playerData["Level"]."</div>"; // Always current lvl at the bottom
                                             } else if($rankOrLevelArray["Type"] === "Level") { // Else set to current level border
                                                 $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
