@@ -230,7 +230,7 @@ function showTooltip(element, text, delay, direction) {
     'left': 'right-full',
     'right': 'left-full',
     'top-left': 'bottom-full right-2/4',
-    'top-right': 'bottom-full left-2/4 ',
+    'top-right': 'ml-4 -mt-14',
     'bottom-left': 'top-full right-0',
     'bottom-right': 'top-full left-0',
     'left-top': 'right-full bottom-0',
