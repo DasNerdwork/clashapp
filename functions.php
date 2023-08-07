@@ -2578,6 +2578,26 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
     return $sum / $count;
 }
 
+/**
+ * This function generates a Tag with a specific background color aswell as a tooltip when hovering over
+ * 
+ * @param string $tagText The displayed text content of the tag
+ * @param string $bgColor The background color of the tag-button
+ * @param string $tooltipText The tooltip text shown when hovering over the tag
+ * 
+ * @return string A generated html tag as a div element with a tooltop hover function
+ * 
+ */
+function generateTag($tagText, $bgColor, $tooltipText) {
+    $translatedTagText = __($tagText);
+    $translatedTooltipText = __($tooltipText);
+    return "<div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] $bgColor cursor-help'
+            onmouseenter='showTooltip(this, \"$translatedTooltipText\", 500, \"top-right\")'
+            onmouseleave='hideTooltip(this)'>
+            $translatedTagText
+        </div>";
+}
+
 /** Always active "function" to collect the teamID of a given Summoner Name
  * This function calls an API request as soon as the sumname gets posted from the team.php
  * through the javascript sanitize(text) function.
