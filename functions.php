@@ -501,7 +501,9 @@ function getMatchData($matchIDArray){
             unset($matchData[$matchIDJSON]->info->queueId); // E.g. 440 / Solo_Duo_Queue
             unset($matchData[$matchIDJSON]->info->teams);
             unset($matchData[$matchIDJSON]->info->tournamentCode);
-        }        
+        }  else {
+            echo "File does not exist: ".$matchIDJSON;
+        }     
     }
     return $matchData;
 }

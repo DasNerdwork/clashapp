@@ -79,7 +79,7 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                 // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
                 $return = true;
                 foreach($matchIDs as $checkSingleMatch){
-                    if(!in_array($checkSingleMatch, array_keys($existingJson["MatchIDs"]))){
+                    if(!in_array($checkSingleMatch, array_keys($existingJson["MatchIDs"])) || !file_exists('/hdd1/clashapp/data/matches/'.$checkSingleMatch.'.json')){
                         $tempAjaxMatchIDArray[] = $checkSingleMatch;
                     }
                 }
@@ -160,7 +160,7 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
             
             if($existingJson == ""){
                 if(empty($tempAjaxMatchIDArray)){
-                    echo "<script>console.log('All matches of ".$playerName." already local.');
+                    echo "<script>console.log('All matches of ".$playerName." already local.2');
                     requests['".$sumid."'] = 'Done';
                     xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
                     processResponseData($ajaxUniquifier)
