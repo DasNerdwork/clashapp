@@ -13,34 +13,19 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
 		</div>
 		<nav class="m-2.5 p-1">
 			<ul class="flex">
-				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-                    <a href="https://clashscout.com/profile">
-						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Profile')?></span>
-					</a>
-				</li>
                 <li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-                    <a href="https://clashscout.com/patch-notes"> 
-						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Patchnotes')?></span>
+                    <a target="_blank" rel="noopener" href="https://discord.gg/GghR7geCFg"> 
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('News')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-					<a href="https://clashscout.com/stats" onclick="return false;">
-						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Stats')?></span>
-					</a>
-				</li>
-				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-					<a href="https://clashscout.com/docs" onclick="return false;">
-						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Docs')?></span>
-					</a>
-				</li>
-				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
-					<a href="https://clashscout.com/counters" onclick="return false;">
-						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Counters')?></span>
+					<a href="https://clashscout.com/graphs-and-formulas">
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Graphs & Formulas')?></span>
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
 					<a href="https://clashscout.com/team/test">
-						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Test')?></span>
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Example')?></span>
 					</a>
 				</li>
 			</ul>
