@@ -2,9 +2,9 @@
 
 // IF THIS COMES FROM UPDATE PHP ALSO HAVE TO JS ADD LANES
 
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 include_once('/hdd1/clashapp/functions.php');
 

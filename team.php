@@ -229,7 +229,13 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                     // echo "<script>console.log('Time: ".time()." LastUpdate: ".$tempTeamJSON["LastUpdate"]." Difference: ".(time() - $tempTeamJSON["LastUpdate"])."')</script>";
                                                     if(((time() - $tempTeamJSON["LastUpdate"]) > 600) || ($tempTeamJSON["LastUpdate"] == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
                                                         $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
-                                                        if(array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
+                                                        $matchInPlayerJsonButNotExistent = false;
+                                                        foreach(array_keys($playerDataJSON["MatchIDs"]) as $matchid) {
+                                                            if(!file_exists('/hdd1/clashapp/data/matches/'.$matchid.'.json')){
+                                                                $matchInPlayerJsonButNotExistent = true;
+                                                            }
+                                                        }
+                                                        if((array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]) || $matchInPlayerJsonButNotExistent){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
                                                             echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Force updating.'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
                                                             $newMatchesDownloaded = true;
                                                             break;
