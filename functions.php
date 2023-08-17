@@ -18,7 +18,7 @@
  * @global int $currenttimestam The current time stamp usable as a global variable
  */
 
-putenv('API_KEY=RGAPI-9b672bbc-d75e-49e6-a112-4c2660f4d5de'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
+// putenv('API_KEY=RGAPI-9b672bbc-d75e-49e6-a112-4c2660f4d5de'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
 $apiKey = getenv('API_KEY');
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
