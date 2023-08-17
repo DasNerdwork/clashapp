@@ -676,7 +676,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $returnString .= "<div class='champion-lane flex relative w-4 h-4 twok:max-w-[16px] twok:min-w-[16px] z-20 -ml-4 twok:bottom-[33px] twok:-right-[66px] fullhd:max-w-[14px] fullhd:min-w-[14px] fullhd:bottom-[25px] fullhd:-right-[56px] justify-center items-center'>";
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
                         if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
-                            $returnString .= '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" height="16"  loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0 brightness-150" alt="Icon of a league of legends position for '.$matchLane.'">';
+                            $returnString .= '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" height="16"  loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0" alt="Icon of a league of legends position for '.$matchLane.'">';
                         }
                         $returnString .= "</div>";
                         $returnString .= "</div>";
