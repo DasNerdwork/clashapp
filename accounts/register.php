@@ -76,7 +76,7 @@ if (isset($_POST['submit'])) {
         if ($response['status'] == 'success') {
             if(isset($_POST['stay-logged-in'])) {
                 $stayCode = bin2hex(random_bytes(5));
-                if($db->set_stay_code($_SESSION['user']['email'], $stayCode)){
+                if($db->set_stay_code($stayCode, $_SESSION['user']['email'])){
                     setcookie("stay-logged-in", $stayCode, time() + (86400 * 30), "/"); // 86400 = 1 day | Set cookie for 30 days
                 }
             }
