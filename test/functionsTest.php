@@ -429,7 +429,7 @@ class FunctionsTest extends TestCase {
         $testMatchId = getMatchIDs($puuid, 1)[0];
         $matchData = (array) getMatchData([$testMatchId]);
 
-        $expectedResultArray = ['MID', 'TOP', 'BOTTOM', 'JUNGLE', 'UTILITY', 'FILL', ''];
+        $expectedResultArray = ['MIDDLE', 'TOP', 'BOTTOM', 'JUNGLE', 'UTILITY', 'FILL', ''];
 
         $this->assertCount(2, getLanePercentages($matchData, $puuid), "Returned lane percentage array does not contain exactly two elements.");
         $this->assertNotNull(getLanePercentages($matchData, $puuid)[0], "First lane in the lane percentage array is null.");

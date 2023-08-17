@@ -85,7 +85,7 @@ class DB {
         }
     } 
 
-    public function connect_account($username = '', $sumid) {
+    public function connect_account($sumid, $username = '') {
         $sql = $this->db->prepare("UPDATE users SET sumid = ? WHERE username = ?");
         $sql->bind_param('ss', $sumid, $username);
         $sql->execute();
@@ -98,7 +98,7 @@ class DB {
         }
     } 
 
-    public function set_stay_code($mailorname = '', $staycode) {
+    public function set_stay_code($staycode, $mailorname = '') {
         if(str_contains($mailorname, '@')){
             $sql = $this->db->prepare("UPDATE users SET staycode = ? WHERE email = ?");
         } else {
@@ -129,7 +129,7 @@ class DB {
         }
     } 
 
-    public function disconnect_account($username = '', $sumid) {
+    public function disconnect_account($sumid, $username = '') {
         $sql = $this->db->prepare("UPDATE users SET sumid = NULL WHERE username = ? AND sumid = ?");
         $sql->bind_param('ss', $username, $sumid);
         $sql->execute();

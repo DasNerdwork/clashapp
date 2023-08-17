@@ -89,7 +89,7 @@ if (isset($_GET['remove2FA'])){
 if (isset($_POST['dcpassword'])) {
     $response = $db->check_credentials($_SESSION['user']['username'], $_POST['dcpassword']);
     if ($response['status'] == 'success') {
-        if($db->disconnect_account($_SESSION['user']['username'], $_SESSION['user']["sumid"])){
+        if($db->disconnect_account($_SESSION['user']["sumid"], $_SESSION['user']['username'])){
             unset($_SESSION['user']["sumid"]);
             Header('Location: https://clashscout.com/settings?verified=false');
         } else {
