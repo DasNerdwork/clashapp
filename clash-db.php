@@ -222,7 +222,8 @@ class DB {
         } else {
             $sql = $this->db->prepare("UPDATE users SET resetdate = ?, resetter = ? WHERE username = ?");
         }
-        $sql->bind_param('sss', time(), $reset, $mailorname);
+        $currentTime = time();
+        $sql->bind_param('sss', $currentTime, $reset, $mailorname);
         $sql->execute();
         $result = $sql->affected_rows;
 
@@ -282,9 +283,10 @@ class DB {
 
     public function delete_account($id, $username, $region, $email, $password) { // Accounts will be set to inactive for 48-72 hours and then automatically deleted by a mysql event
         $check = $this->check_credentials($email, $password);
+        $currentTime = time();
         if($check['status'] == 'success'){
             $sql = $this->db->prepare("UPDATE users SET deldate = ?, status = '0' WHERE id = ? AND username = ? AND region = ? AND email = ? AND (status = '1' OR status = '2')");
-            $sql->bind_param('issss', time(), $id, $username, $region, $email);
+            $sql->bind_param('issss', $currentTime, $id, $username, $region, $email);
             $sql->execute();
             $result = $sql->affected_rows;
 
