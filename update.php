@@ -245,7 +245,7 @@ function processResponseData($ajaxUniquifier){
                     }
                     if(response.matchScores) {
                         let avgScorePath = item.children[1].children[0].children[2].children[1].children[0];
-                        var scoresArray = Object.values(response.matchScores);
+                        var scoresArray = Object.values(response.matchScores).filter(score => !isNaN(parseFloat(score)));
                         var sum = 0;
                         for (var i = 0; i < scoresArray.length; i++) {
                             sum += parseFloat(scoresArray[i]);
