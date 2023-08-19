@@ -410,7 +410,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/wings_*'.strtolower($rankOrLevelArray["HighestRank"]).'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
                                                 $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
                                                 if(file_exists($profileBorderPath)){
-                                                    echo '<img src="'.$webBorderPath.'" width="384" height="384" class="max-w-[110%] top-[-8.25rem] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
+                                                    echo '<img src="'.$webBorderPath.'" width="384" height="384" class="twok:max-w-[110%] fullhd:max-w-[148%] twok:top-[-8.25rem] fullhd:top-[-130px] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
                                                 }
                                                 // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
                                                 if ($rankOrLevelArray["HighEloLP"] != ""){
@@ -500,11 +500,11 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             if(!$execOnlyOnce) $startPrintAverageMatchscore = microtime(true);
                                             $memPrintAverageMatchscore = memory_get_usage(); echo "
                                             <div class='flex h-8 items-center justify-between'>
-                                                <span>".__("Avg. Score").":</span>
+                                                <span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Average Matchscore of all ranked & clash games (without remakes or <10min games)")."\", 500, \"top-center\", \"".__("adjScoreTooltipMargin")."\")' onmouseleave='hideTooltip(this)'>".__("Avg. Score").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center'>
                                                     <span class='transition-opacity duration-500 easy-in-out'>";
                                                     if($upToDate){
-                                                        echo number_format((array_sum(array_values($playerDataJSON["MatchIDs"]))/count(array_values($playerDataJSON["MatchIDs"]))), 2);
+                                                        echo number_format(array_sum(array_filter($playerDataJSON["MatchIDs"], 'is_numeric')) / count(array_filter($playerDataJSON["MatchIDs"], 'is_numeric')), 2);
                                                     } echo "</span>
                                                 </div>
                                             </div>"; // TODO: Add avg. matchscore in file
@@ -531,7 +531,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 </div>
                                             </div>
                                             <div class='flex h-8 items-center justify-between'>
-                                                <span>".__("Avg. Score").":</span>
+                                                <span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Average Matchscore of all ranked & clash games (without remakes or <10min games)")."\", 500, \"top-center\", \"".__("adjScoreTooltipMargin")."\")' onmouseleave='hideTooltip(this)'>".__("Avg. Score").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center'>
                                                     <span class='transition-opacity duration-500 easy-in-out opacity-0'></span>
                                                 </div>
