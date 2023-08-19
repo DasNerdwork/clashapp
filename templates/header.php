@@ -19,6 +19,11 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
 					</a>
 				</li>
 				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
+					<a href="https://clashscout.com/minigames">
+						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Minigames')?></span>
+					</a>
+				</li>
+				<li class="ml-1.5 mr-1.5 block p-2 no-underline text-white">
 					<a href="https://clashscout.com/graphs-and-formulas">
 						<span class="text-xl leading-4 active:text-[#ccc]"><?=__('Graphs & Formulas')?></span>
 					</a>
