@@ -603,15 +603,12 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 // Display of Ranked Queuetype & Gamelength
                                 switch ($inhalt->info->queueId) {
                                     case 420:
-                                        $matchType = "Solo/Duo";
                                         $returnString .= "<span>".__("Solo/Duo")." ";
                                         break;
                                     case 440:
-                                        $matchType = "Flex 5v5";
                                         $returnString .= "<span>".__("Flex")." ";
                                         break;
                                     case 700:
-                                        $matchType = "Clash";
                                         $returnString .= "<span>".__("Clash")." ";
                                         break;
                                 }
@@ -676,7 +673,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $returnString .= "<div class='champion-lane flex relative w-4 h-4 twok:max-w-[16px] twok:min-w-[16px] z-20 -ml-4 twok:bottom-[33px] twok:-right-[66px] fullhd:max-w-[14px] fullhd:min-w-[14px] fullhd:bottom-[25px] fullhd:-right-[56px] justify-center items-center'>";
                         $matchLane = $inhalt->info->participants[$in]->teamPosition;
                         if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
-                            $returnString .= '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" height="16"  loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0" alt="Icon of a league of legends position for '.$matchLane.'">';
+                            $returnString .= '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" height="16"  loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0 brightness-150" alt="Icon of a league of legends position for '.$matchLane.'">';
                         }
                         $returnString .= "</div>";
                         $returnString .= "</div>";
@@ -722,8 +719,8 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
                         // Display Matchscore
                         $returnString .= '<div class="matchscore-container flex row-span-1 col-span-2 justify-center items-center">';
-                        if($matchScore == ""){
-                            $returnString .= '<span>&Oslash; N/A</span>';
+                        if($matchScore == "" || $matchScore == "N/A"){
+                            $returnString .= "<span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Game length below minimum of 10min")."\", 500, \"top-right\")' onmouseleave='hideTooltip(this)'>&Oslash; N/A</span>";
                         } else {
                             $returnString .= '<span>&Oslash; '.$matchScore.'</span>';
                         }
@@ -1457,230 +1454,234 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
         unset($mainArray);
         unset($reasonArray);
         //going through all matches to save all data in array per sumid
-        if(isset($matchData[$matchID])){ // FIXME: No clue why necessary
-            foreach ($matchData[$matchID]->info as $player) {
-                for ($i = 0; $i < 10; $i++){
-                    if (isset($player[$i]->summonerId)) { // Necessary to loop over every player to get comparable results
-                        // echo $i."<br>";
-                        // Ternary Operator == if(isset(playerStat)) then set "Attribute" to the playerStat else set the "Attribute" to 0
-                        isset($player[$i]->kills) ? $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills : $mainArray[$player[$i]->summonerId]["Kills"] = 0;
-                        isset($player[$i]->deaths) ? $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths : $mainArray[$player[$i]->summonerId]["Deaths"] = 0;
-                        isset($player[$i]->assists) ? $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists : $mainArray[$player[$i]->summonerId]["Assists"] = 0;
-                        isset($player[$i]->challenges->kda) ? $mainArray[$player[$i]->summonerId]["KDA"] = $player[$i]->challenges->kda : $mainArray[$player[$i]->summonerId]["KDA"] = 0;
-                        isset($player[$i]->challenges->killParticipation) ? $mainArray[$player[$i]->summonerId]["KillParticipation"] = $player[$i]->challenges->killParticipation : $mainArray[$player[$i]->summonerId]["KillParticipation"] = 0;
-                        isset($player[$i]->totalMinionsKilled) ? $mainArray[$player[$i]->summonerId]["CS"] = $player[$i]->totalMinionsKilled+$player[$i]->neutralMinionsKilled : $mainArray[$player[$i]->summonerId]["CS"] = 0;
-                        isset($player[$i]->goldEarned) ? $mainArray[$player[$i]->summonerId]["Gold"] = $player[$i]->goldEarned : $mainArray[$player[$i]->summonerId]["Gold"] = 0;
-                        isset($player[$i]->visionScore) ? $mainArray[$player[$i]->summonerId]["VisionScore"] = $player[$i]->visionScore : $mainArray[$player[$i]->summonerId]["VisionScore"] = 0;
-                        isset($player[$i]->challenges->wardTakedowns) ? $mainArray[$player[$i]->summonerId]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns : $mainArray[$player[$i]->summonerId]["WardTakedowns"] = 0;
-                        isset($player[$i]->wardsPlaced) ? $mainArray[$player[$i]->summonerId]["WardsPlaced"] = $player[$i]->wardsPlaced : $mainArray[$player[$i]->summonerId]["WardsPlaced"] = 0;
-                        isset($player[$i]->challenges->wardsGuarded) ? $mainArray[$player[$i]->summonerId]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded : $mainArray[$player[$i]->summonerId]["WardsGuarded"] = 0;
-                        isset($player[$i]->detectorWardsPlaced) ? $mainArray[$player[$i]->summonerId]["VisionWards"] = $player[$i]->detectorWardsPlaced : $mainArray[$player[$i]->summonerId]["VisionWards"] = 0;
-                        isset($player[$i]->consumablesPurchased) ? $mainArray[$player[$i]->summonerId]["Consumables"] = $player[$i]->consumablesPurchased : $mainArray[$player[$i]->summonerId]["Consumables"] = 0;
-                        isset($player[$i]->challenges->turretPlatesTaken) ? $mainArray[$player[$i]->summonerId]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken : $mainArray[$player[$i]->summonerId]["TurretPlates"] = 0;
-                        isset($player[$i]->challenges->takedowns) ? $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = $player[$i]->challenges->takedowns : $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = 0;
-                        isset($player[$i]->turretTakedowns) ? $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = $player[$i]->turretTakedowns : $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = 0;
-                        isset($player[$i]->inhibitorTakedowns) ? $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns : $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = 0;
-                        isset($player[$i]->challenges->dragonTakedowns) ? $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns : $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = 0;
-                        isset($player[$i]->challenges->riftHeraldTakedowns) ? $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns : $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = 0;
-                        isset($player[$i]->damageDealtToBuildings) ? $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings : $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = 0;
-                        isset($player[$i]->damageDealtToObjectives) ? $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives : $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = 0;
-                        isset($player[$i]->damageSelfMitigated) ? $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated : $mainArray[$player[$i]->summonerId]["DamageMitigated"] = 0;
-                        isset($player[$i]->totalDamageDealtToChampions) ? $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions : $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = 0;
-                        isset($player[$i]->totalDamageTaken) ? $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken : $mainArray[$player[$i]->summonerId]["DamageTaken"] = 0;
-                        isset($player[$i]->totalDamageShieldedOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates : $mainArray[$player[$i]->summonerId]["TeamShielded"] = 0;
-                        isset($player[$i]->totalHealsOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates : $mainArray[$player[$i]->summonerId]["TeamHealed"] = 0;
-                        isset($player[$i]->totalTimeCCDealt) ? $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt : $mainArray[$player[$i]->summonerId]["TimeCC"] = 0;
-                        isset($player[$i]->totalTimeSpentDead) ? $mainArray[$player[$i]->summonerId]["DeathTime"] = $player[$i]->totalTimeSpentDead : $mainArray[$player[$i]->summonerId]["DeathTime"] = 0;
-                        isset($player[$i]->challenges->skillshotsDodged) ? $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged : $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = 0;
-                        isset($player[$i]->challenges->skillshotsHit) ? $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit : $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = 0;
-                        if($player[$i]->summonerId == $sumid){
-                            $reasonArray[$matchID]["Sumid"] = $sumid;
-                            foreach($cleanNameArray as $attributeName){
-                                $reasonArray[$matchID][$attributeName]["Value"] = $mainArray[$player[$i]->summonerId][$attributeName];
+        if(isset($matchData[$matchID])){ // Necessary check to secure that we have the matchdata of a matchid
+            if($matchData[$matchID]->info->gameDuration > 600){
+                foreach ($matchData[$matchID]->info as $player) {
+                    for ($i = 0; $i < 10; $i++){
+                        if (isset($player[$i]->summonerId)) { // Necessary to loop over every player to get comparable results
+                            // echo $i."<br>";
+                            // Ternary Operator == if(isset(playerStat)) then set "Attribute" to the playerStat else set the "Attribute" to 0
+                            isset($player[$i]->kills) ? $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills : $mainArray[$player[$i]->summonerId]["Kills"] = 0;
+                            isset($player[$i]->deaths) ? $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths : $mainArray[$player[$i]->summonerId]["Deaths"] = 0;
+                            isset($player[$i]->assists) ? $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists : $mainArray[$player[$i]->summonerId]["Assists"] = 0;
+                            isset($player[$i]->challenges->kda) ? $mainArray[$player[$i]->summonerId]["KDA"] = $player[$i]->challenges->kda : $mainArray[$player[$i]->summonerId]["KDA"] = 0;
+                            isset($player[$i]->challenges->killParticipation) ? $mainArray[$player[$i]->summonerId]["KillParticipation"] = $player[$i]->challenges->killParticipation : $mainArray[$player[$i]->summonerId]["KillParticipation"] = 0;
+                            isset($player[$i]->totalMinionsKilled) ? $mainArray[$player[$i]->summonerId]["CS"] = $player[$i]->totalMinionsKilled+$player[$i]->neutralMinionsKilled : $mainArray[$player[$i]->summonerId]["CS"] = 0;
+                            isset($player[$i]->goldEarned) ? $mainArray[$player[$i]->summonerId]["Gold"] = $player[$i]->goldEarned : $mainArray[$player[$i]->summonerId]["Gold"] = 0;
+                            isset($player[$i]->visionScore) ? $mainArray[$player[$i]->summonerId]["VisionScore"] = $player[$i]->visionScore : $mainArray[$player[$i]->summonerId]["VisionScore"] = 0;
+                            isset($player[$i]->challenges->wardTakedowns) ? $mainArray[$player[$i]->summonerId]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns : $mainArray[$player[$i]->summonerId]["WardTakedowns"] = 0;
+                            isset($player[$i]->wardsPlaced) ? $mainArray[$player[$i]->summonerId]["WardsPlaced"] = $player[$i]->wardsPlaced : $mainArray[$player[$i]->summonerId]["WardsPlaced"] = 0;
+                            isset($player[$i]->challenges->wardsGuarded) ? $mainArray[$player[$i]->summonerId]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded : $mainArray[$player[$i]->summonerId]["WardsGuarded"] = 0;
+                            isset($player[$i]->detectorWardsPlaced) ? $mainArray[$player[$i]->summonerId]["VisionWards"] = $player[$i]->detectorWardsPlaced : $mainArray[$player[$i]->summonerId]["VisionWards"] = 0;
+                            isset($player[$i]->consumablesPurchased) ? $mainArray[$player[$i]->summonerId]["Consumables"] = $player[$i]->consumablesPurchased : $mainArray[$player[$i]->summonerId]["Consumables"] = 0;
+                            isset($player[$i]->challenges->turretPlatesTaken) ? $mainArray[$player[$i]->summonerId]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken : $mainArray[$player[$i]->summonerId]["TurretPlates"] = 0;
+                            isset($player[$i]->challenges->takedowns) ? $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = $player[$i]->challenges->takedowns : $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = 0;
+                            isset($player[$i]->turretTakedowns) ? $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = $player[$i]->turretTakedowns : $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = 0;
+                            isset($player[$i]->inhibitorTakedowns) ? $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns : $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = 0;
+                            isset($player[$i]->challenges->dragonTakedowns) ? $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns : $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = 0;
+                            isset($player[$i]->challenges->riftHeraldTakedowns) ? $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns : $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = 0;
+                            isset($player[$i]->damageDealtToBuildings) ? $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings : $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = 0;
+                            isset($player[$i]->damageDealtToObjectives) ? $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives : $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = 0;
+                            isset($player[$i]->damageSelfMitigated) ? $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated : $mainArray[$player[$i]->summonerId]["DamageMitigated"] = 0;
+                            isset($player[$i]->totalDamageDealtToChampions) ? $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions : $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = 0;
+                            isset($player[$i]->totalDamageTaken) ? $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken : $mainArray[$player[$i]->summonerId]["DamageTaken"] = 0;
+                            isset($player[$i]->totalDamageShieldedOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates : $mainArray[$player[$i]->summonerId]["TeamShielded"] = 0;
+                            isset($player[$i]->totalHealsOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates : $mainArray[$player[$i]->summonerId]["TeamHealed"] = 0;
+                            isset($player[$i]->totalTimeCCDealt) ? $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt : $mainArray[$player[$i]->summonerId]["TimeCC"] = 0;
+                            isset($player[$i]->totalTimeSpentDead) ? $mainArray[$player[$i]->summonerId]["DeathTime"] = $player[$i]->totalTimeSpentDead : $mainArray[$player[$i]->summonerId]["DeathTime"] = 0;
+                            isset($player[$i]->challenges->skillshotsDodged) ? $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged : $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = 0;
+                            isset($player[$i]->challenges->skillshotsHit) ? $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit : $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = 0;
+                            if($player[$i]->summonerId == $sumid){
+                                $reasonArray[$matchID]["Sumid"] = $sumid;
+                                foreach($cleanNameArray as $attributeName){
+                                    $reasonArray[$matchID][$attributeName]["Value"] = $mainArray[$player[$i]->summonerId][$attributeName];
+                                }
                             }
                         }
                     }
                 }
-            }
-        }
-        // print "<pre>";print_r($mainArray);print "</pre>";
-        // echo mb_strlen(serialize((array)$mainArray), '8bit');
-        foreach ($rankingAttributeArray as $attribute){
+                // print "<pre>";print_r($mainArray);print "</pre>";
+                // echo mb_strlen(serialize((array)$mainArray), '8bit');
+                foreach ($rankingAttributeArray as $attribute){
 
-            foreach ($mainArray as $key => $playersumid) {
+                    foreach ($mainArray as $key => $playersumid) {
 
-                $tempArray[] = array (
-                    "SumID" => $key,
-                    $attribute => $playersumid[$attribute],
-                );
-            }
-            if ($attribute == "Deaths" || $attribute == "DeathTime") {
-                usort($tempArray, function($a, $b) use($attribute){
-                    return $b[$attribute] <=> $a[$attribute];
-                });
-            } else if (in_array($attribute, $rankingAttributeArray)){
-                usort($tempArray, function($a, $b) use($attribute){
-                    return $a[$attribute] <=> $b[$attribute];
-                });
-            }
-            
-            // print_r($tempArray);
-            
-            foreach($tempArray as $rank => $value){
-                if ($value["SumID"] == $sumid){
-                    switch ($attribute){
-                        case "Kills":
-                            $maxRankScore += (($rank+1)*7);
-                            $reasonArray[$matchID]["Kills"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["Kills"]["Points"] = ($rank+1)*7;
-                            break;
-                        case "Deaths":
-                            $maxRankScore += (($rank+1)*10);
-                            $reasonArray[$matchID]["Deaths"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["Deaths"]["Points"] = ($rank+1)*10;
-                            break;
-                        case "Assists":
-                            $maxRankScore += (($rank+1)*7);
-                            $reasonArray[$matchID]["Assists"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["Assists"]["Points"] = ($rank+1)*7;
-                            break;
-                        case "KDA":
-                            $maxRankScore += (($rank+1)*20);
-                            $reasonArray[$matchID]["KDA"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["KDA"]["Points"] = ($rank+1)*20;
-                            break;
-                        case "CS":
-                            $maxRankScore += (($rank+1)*5);
-                            $reasonArray[$matchID]["CS"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["CS"]["Points"] = ($rank+1)*5;
-                            break;
-                        case "Gold":
-                            $maxRankScore += (($rank+1)*6);
-                            $reasonArray[$matchID]["Gold"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["Gold"]["Points"] = ($rank+1)*6;
-                            break;
-                        case "VisionScore":
-                            $maxRankScore += (($rank+1)*20);
-                            $reasonArray[$matchID]["VisionScore"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["VisionScore"]["Points"] = ($rank+1)*20;
-                            break;
-                        case "WardTakedowns":
-                            $maxRankScore += (($rank+1)*4);
-                            $reasonArray[$matchID]["WardTakedowns"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["WardTakedowns"]["Points"] = ($rank+1)*4;
-                            break;
-                        case "WardsPlaced":
-                            $maxRankScore += (($rank+1)*2);
-                            $reasonArray[$matchID]["WardsPlaced"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["WardsPlaced"]["Points"] = ($rank+1)*2;
-                            break;
-                        case "WardsGuarded":
-                            $maxRankScore += (($rank+1)*4);
-                            $reasonArray[$matchID]["WardsGuarded"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["WardsGuarded"]["Points"] = ($rank+1)*4;
-                            break;
-                        case "VisionWards":
-                            $maxRankScore += (($rank+1)*8);
-                            $reasonArray[$matchID]["VisionWards"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["VisionWards"]["Points"] = ($rank+1)*8;
-                            break;
-                        case "Consumables":
-                            $maxRankScore += (($rank+1)*1);
-                            $reasonArray[$matchID]["Consumables"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["Consumables"]["Points"] = ($rank+1)*1;
-                            break;
-                        case "TurretPlates":
-                            $maxRankScore += (($rank+1)*5);
-                            $reasonArray[$matchID]["TurretPlates"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["TurretPlates"]["Points"] = ($rank+1)*5;
-                            break;
-                        case "TotalTakedowns":
-                            $maxRankScore += (($rank+1)*20);
-                            $reasonArray[$matchID]["TotalTakedowns"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["TotalTakedowns"]["Points"] = ($rank+1)*20;
-                            break;
-                        case "TurretTakedowns":
-                            $maxRankScore += (($rank+1)*8);
-                            $reasonArray[$matchID]["TurretTakedowns"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["TurretTakedowns"]["Points"] = ($rank+1)*8;
-                            break;
-                        case "InhibitorTakedowns":
-                            $maxRankScore += (($rank+1)*8);
-                            $reasonArray[$matchID]["InhibitorTakedowns"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["InhibitorTakedowns"]["Points"] = ($rank+1)*8;
-                            break;
-                        case "DragonTakedowns":
-                            $maxRankScore += (($rank+1)*7);
-                            $reasonArray[$matchID]["DragonTakedowns"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["DragonTakedowns"]["Points"] = ($rank+1)*7;
-                            break;
-                        case "HeraldTakedowns":
-                            $maxRankScore += (($rank+1)*8);
-                            $reasonArray[$matchID]["HeraldTakedowns"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["HeraldTakedowns"]["Points"] = ($rank+1)*8;
-                            break;
-                        case "DamageToBuildings":
-                            $maxRankScore += (($rank+1)*3);
-                            $reasonArray[$matchID]["DamageToBuildings"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["DamageToBuildings"]["Points"] = ($rank+1)*3;
-                            break;
-                        case "DamageToObjectives":
-                            $maxRankScore += (($rank+1)*4);
-                            $reasonArray[$matchID]["DamageToObjectives"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["DamageToObjectives"]["Points"] = ($rank+1)*4;
-                            break;
-                        case "DamageMitigated":
-                            $maxRankScore += (($rank+1)*3);
-                            $reasonArray[$matchID]["DamageMitigated"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["DamageMitigated"]["Points"] = ($rank+1)*3;
-                            break;
-                        case "DamageDealtToChampions":
-                            $maxRankScore += (($rank+1)*15);
-                            $reasonArray[$matchID]["DamageDealtToChampions"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["DamageDealtToChampions"]["Points"] = ($rank+1)*15;
-                            break;
-                        case "DamageTaken":      
-                            $maxRankScore += (($rank+1)*8);
-                            $reasonArray[$matchID]["DamageTaken"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["DamageTaken"]["Points"] = ($rank+1)*8;
-                            break;
-                        case "TeamShielded":                 
-                            $maxRankScore += (($rank+1)*8);
-                            $reasonArray[$matchID]["TeamShielded"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["TeamShielded"]["Points"] = ($rank+1)*8;
-                            break;
-                        case "TeamHealed":                   
-                            $maxRankScore += (($rank+1)*7);
-                            $reasonArray[$matchID]["TeamHealed"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["TeamHealed"]["Points"] = ($rank+1)*7;
-                            break;
-                        case "TimeCC":
-                            $maxRankScore += (($rank+1)*8);
-                            $reasonArray[$matchID]["TimeCC"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["TimeCC"]["Points"] = ($rank+1)*5;
-                            break;
-                        case "DeathTime":                   
-                            $maxRankScore += (($rank+1)*20);
-                            $reasonArray[$matchID]["DeathTime"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["DeathTime"]["Points"] = ($rank+1)*20;
-                            break;
-                        case "SkillshotsDodged":                      
-                            $maxRankScore += (($rank+1)*20);
-                            $reasonArray[$matchID]["SkillshotsDodged"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["SkillshotsDodged"]["Points"] = ($rank+1)*20;
-                            break;
-                        case "SkillshotsHit":                   
-                            $maxRankScore += (($rank+1)*1);
-                            $reasonArray[$matchID]["SkillshotsHit"]["Rank"] = 10-$rank;
-                            $reasonArray[$matchID]["SkillshotsHit"]["Points"] = ($rank+1)*1;
-                            break;
+                        $tempArray[] = array (
+                            "SumID" => $key,
+                            $attribute => $playersumid[$attribute],
+                        );
                     }
+                    if ($attribute == "Deaths" || $attribute == "DeathTime") {
+                        usort($tempArray, function($a, $b) use($attribute){
+                            return $b[$attribute] <=> $a[$attribute];
+                        });
+                    } else if (in_array($attribute, $rankingAttributeArray)){
+                        usort($tempArray, function($a, $b) use($attribute){
+                            return $a[$attribute] <=> $b[$attribute];
+                        });
+                    }
+                    
+                    // print_r($tempArray);
+                    
+                    foreach($tempArray as $rank => $value){
+                        if ($value["SumID"] == $sumid){
+                            switch ($attribute){
+                                case "Kills":
+                                    $maxRankScore += (($rank+1)*7);
+                                    $reasonArray[$matchID]["Kills"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["Kills"]["Points"] = ($rank+1)*7;
+                                    break;
+                                case "Deaths":
+                                    $maxRankScore += (($rank+1)*10);
+                                    $reasonArray[$matchID]["Deaths"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["Deaths"]["Points"] = ($rank+1)*10;
+                                    break;
+                                case "Assists":
+                                    $maxRankScore += (($rank+1)*7);
+                                    $reasonArray[$matchID]["Assists"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["Assists"]["Points"] = ($rank+1)*7;
+                                    break;
+                                case "KDA":
+                                    $maxRankScore += (($rank+1)*20);
+                                    $reasonArray[$matchID]["KDA"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["KDA"]["Points"] = ($rank+1)*20;
+                                    break;
+                                case "CS":
+                                    $maxRankScore += (($rank+1)*5);
+                                    $reasonArray[$matchID]["CS"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["CS"]["Points"] = ($rank+1)*5;
+                                    break;
+                                case "Gold":
+                                    $maxRankScore += (($rank+1)*6);
+                                    $reasonArray[$matchID]["Gold"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["Gold"]["Points"] = ($rank+1)*6;
+                                    break;
+                                case "VisionScore":
+                                    $maxRankScore += (($rank+1)*20);
+                                    $reasonArray[$matchID]["VisionScore"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["VisionScore"]["Points"] = ($rank+1)*20;
+                                    break;
+                                case "WardTakedowns":
+                                    $maxRankScore += (($rank+1)*4);
+                                    $reasonArray[$matchID]["WardTakedowns"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["WardTakedowns"]["Points"] = ($rank+1)*4;
+                                    break;
+                                case "WardsPlaced":
+                                    $maxRankScore += (($rank+1)*2);
+                                    $reasonArray[$matchID]["WardsPlaced"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["WardsPlaced"]["Points"] = ($rank+1)*2;
+                                    break;
+                                case "WardsGuarded":
+                                    $maxRankScore += (($rank+1)*4);
+                                    $reasonArray[$matchID]["WardsGuarded"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["WardsGuarded"]["Points"] = ($rank+1)*4;
+                                    break;
+                                case "VisionWards":
+                                    $maxRankScore += (($rank+1)*8);
+                                    $reasonArray[$matchID]["VisionWards"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["VisionWards"]["Points"] = ($rank+1)*8;
+                                    break;
+                                case "Consumables":
+                                    $maxRankScore += (($rank+1)*1);
+                                    $reasonArray[$matchID]["Consumables"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["Consumables"]["Points"] = ($rank+1)*1;
+                                    break;
+                                case "TurretPlates":
+                                    $maxRankScore += (($rank+1)*5);
+                                    $reasonArray[$matchID]["TurretPlates"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["TurretPlates"]["Points"] = ($rank+1)*5;
+                                    break;
+                                case "TotalTakedowns":
+                                    $maxRankScore += (($rank+1)*20);
+                                    $reasonArray[$matchID]["TotalTakedowns"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["TotalTakedowns"]["Points"] = ($rank+1)*20;
+                                    break;
+                                case "TurretTakedowns":
+                                    $maxRankScore += (($rank+1)*8);
+                                    $reasonArray[$matchID]["TurretTakedowns"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["TurretTakedowns"]["Points"] = ($rank+1)*8;
+                                    break;
+                                case "InhibitorTakedowns":
+                                    $maxRankScore += (($rank+1)*8);
+                                    $reasonArray[$matchID]["InhibitorTakedowns"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["InhibitorTakedowns"]["Points"] = ($rank+1)*8;
+                                    break;
+                                case "DragonTakedowns":
+                                    $maxRankScore += (($rank+1)*7);
+                                    $reasonArray[$matchID]["DragonTakedowns"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["DragonTakedowns"]["Points"] = ($rank+1)*7;
+                                    break;
+                                case "HeraldTakedowns":
+                                    $maxRankScore += (($rank+1)*8);
+                                    $reasonArray[$matchID]["HeraldTakedowns"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["HeraldTakedowns"]["Points"] = ($rank+1)*8;
+                                    break;
+                                case "DamageToBuildings":
+                                    $maxRankScore += (($rank+1)*3);
+                                    $reasonArray[$matchID]["DamageToBuildings"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["DamageToBuildings"]["Points"] = ($rank+1)*3;
+                                    break;
+                                case "DamageToObjectives":
+                                    $maxRankScore += (($rank+1)*4);
+                                    $reasonArray[$matchID]["DamageToObjectives"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["DamageToObjectives"]["Points"] = ($rank+1)*4;
+                                    break;
+                                case "DamageMitigated":
+                                    $maxRankScore += (($rank+1)*3);
+                                    $reasonArray[$matchID]["DamageMitigated"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["DamageMitigated"]["Points"] = ($rank+1)*3;
+                                    break;
+                                case "DamageDealtToChampions":
+                                    $maxRankScore += (($rank+1)*15);
+                                    $reasonArray[$matchID]["DamageDealtToChampions"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["DamageDealtToChampions"]["Points"] = ($rank+1)*15;
+                                    break;
+                                case "DamageTaken":      
+                                    $maxRankScore += (($rank+1)*8);
+                                    $reasonArray[$matchID]["DamageTaken"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["DamageTaken"]["Points"] = ($rank+1)*8;
+                                    break;
+                                case "TeamShielded":                 
+                                    $maxRankScore += (($rank+1)*8);
+                                    $reasonArray[$matchID]["TeamShielded"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["TeamShielded"]["Points"] = ($rank+1)*8;
+                                    break;
+                                case "TeamHealed":                   
+                                    $maxRankScore += (($rank+1)*7);
+                                    $reasonArray[$matchID]["TeamHealed"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["TeamHealed"]["Points"] = ($rank+1)*7;
+                                    break;
+                                case "TimeCC":
+                                    $maxRankScore += (($rank+1)*8);
+                                    $reasonArray[$matchID]["TimeCC"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["TimeCC"]["Points"] = ($rank+1)*5;
+                                    break;
+                                case "DeathTime":                   
+                                    $maxRankScore += (($rank+1)*20);
+                                    $reasonArray[$matchID]["DeathTime"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["DeathTime"]["Points"] = ($rank+1)*20;
+                                    break;
+                                case "SkillshotsDodged":                      
+                                    $maxRankScore += (($rank+1)*20);
+                                    $reasonArray[$matchID]["SkillshotsDodged"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["SkillshotsDodged"]["Points"] = ($rank+1)*20;
+                                    break;
+                                case "SkillshotsHit":                   
+                                    $maxRankScore += (($rank+1)*1);
+                                    $reasonArray[$matchID]["SkillshotsHit"]["Rank"] = 10-$rank;
+                                    $reasonArray[$matchID]["SkillshotsHit"]["Points"] = ($rank+1)*1;
+                                    break;
+                            }
+                        }
+                    }
+                    unset($tempArray);
                 }
+                $returnArray[$matchID] = number_format(($maxRankScore/247), 2);
+                // $returnArray["Reasons"][$matchID] = $reasonArray[$matchID];
+            } else {
+                $returnArray[$matchID] = "N/A";
             }
-            unset($tempArray);
         }
-        $returnArray[$matchID] = number_format(($maxRankScore/247), 2);
-        // $returnArray["Reasons"][$matchID] = $reasonArray[$matchID];
     }
     return $returnArray;
 }

@@ -223,25 +223,15 @@ function copyToClipboard(text){
   });
 }
 
-function showTooltip(element, text, delay, direction) {
+function showTooltip(element, text, delay, direction, additionalCSS = '') {
   const positions = {
-    'top': 'bottom-full',
-    'bottom': 'top-full',
-    'left': 'right-full',
-    'right': 'left-full',
-    'top-left': 'bottom-full right-2/4',
+    'top-center': 'max-w-[10%] -ml-20 twok:-mt-24 fullhd:-mt-28',
     'top-right': 'ml-4 -mt-14',
-    'bottom-left': 'top-full right-0',
-    'bottom-right': 'top-full left-0',
-    'left-top': 'right-full bottom-0',
-    'left-bottom': 'right-full top-0',
-    'right-top': 'left-full bottom-0',
-    'right-bottom': 'left-full top-0',
   };
 
   element.insertAdjacentHTML(
     'beforeend',
-    `<div class="w-auto backdrop-filter backdrop-blur-xl bg-opacity-65 bg-black text-white text-center text-xs p-2 rounded-lg absolute ${positions[direction]} hidden z-10"
+    `<div class="w-auto bg-opacity-65 bg-black text-white text-center text-xs p-2 rounded-lg absolute ${positions[direction]} hidden z-10 ${additionalCSS}"
       id="tooltip">${text}</div>`
   );
 
