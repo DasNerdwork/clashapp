@@ -254,9 +254,3 @@ function hideTooltip(element) {
     }, 300); // Delay before removing the tooltip to allow fade-out effect
   }
 }
-
-var playerDataCalls = 0;
-var masteryScoresCalls = 0;
-var currentRankCalls = 0;
-var matchIdCalls = 0;
-var matchDownloadCalls = 0;
