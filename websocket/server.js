@@ -10,6 +10,7 @@ import '/hdd1/clashapp/websocket/consoleHandler.js';
 const logStream = fs.createWriteStream('/hdd1/clashapp/data/logs/server.log', { flags: 'a' });
 const logPath = '/hdd1/clashapp/data/logs/server.log';
 const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
+const roomPlayers = {}; // Initializes an object to store connected players for each room
 
 // Attach the uncaught exception handler
 process.on('uncaughtException', handleCrash);
@@ -45,34 +46,36 @@ wss.on('connection', function connection(ws, req) {
     if(Array.from(dataAsString)[0] == "{"){        // If data is an [Object object]
       var dataAsJSON = JSON.parse(dataAsString);
       let requestMessage = "";
-      switch (dataAsJSON.request) {
-        case "firstConnect":
-          requestMessage = "\x1b[36mfirstConnect\x1b[0m";
-          break;
-        case "add":
-          requestMessage = "\x1b[32madd\x1b[0m";
-          break;
-        case "remove":
-          requestMessage = "\x1b[31mremove\x1b[0m";
-          break;
-        case "rate":
-          requestMessage = "\x1b[33mrate\x1b[0m";
-          break;
-        case "swap":
-          requestMessage = "\x1b[35mswap\x1b[0m";
-          break;
-      }
-      if (typeof dataAsJSON.champname === 'undefined') {
-        var nameForMessage = dataAsJSON.name;
-      } else {
-        var nameForMessage = dataAsJSON.champname;
-      }
-      let message = '{"teamid":"'+dataAsJSON.teamid+'","name":"'+nameForMessage+'","request":"'+requestMessage+'"}';
-      if(newClient == lastClient){ // If the same client is still sending data no "Received following data from" text is necessary
-        console.log('\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: %s', new Date().toLocaleTimeString(), message);
-      } else {
-        console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Received following data from %s\n\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: %s', new Date().toLocaleTimeString(), newClient, new Date().toLocaleTimeString(), message);
-        lastClient = newClient;
+      if(dataAsJSON.request != "minigames"){
+        switch (dataAsJSON.request) {
+          case "firstConnect":
+            requestMessage = "\x1b[36mfirstConnect\x1b[0m";
+            break;
+          case "add":
+            requestMessage = "\x1b[32madd\x1b[0m";
+            break;
+          case "remove":
+            requestMessage = "\x1b[31mremove\x1b[0m";
+            break;
+          case "rate":
+            requestMessage = "\x1b[33mrate\x1b[0m";
+            break;
+          case "swap":
+            requestMessage = "\x1b[35mswap\x1b[0m";
+            break;
+        }
+        if (typeof dataAsJSON.champname === 'undefined') {
+          var nameForMessage = dataAsJSON.name;
+        } else {
+          var nameForMessage = dataAsJSON.champname;
+        }
+        let message = '{"teamid":"'+dataAsJSON.teamid+'","name":"'+nameForMessage+'","request":"'+requestMessage+'"}';
+        if(newClient == lastClient){ // If the same client is still sending data no "Received following data from" text is necessary
+          console.log('\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: %s', new Date().toLocaleTimeString(), message);
+        } else {
+          console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Received following data from %s\n\x1b[2m[%s]\x1b[0m [\x1b[36mWS-Client\x1b[0m]: %s', new Date().toLocaleTimeString(), newClient, new Date().toLocaleTimeString(), message);
+          lastClient = newClient;
+        }
       }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -335,8 +338,62 @@ wss.on('connection', function connection(ws, req) {
         } else {
           return;
         }
-      } 
 
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////// MINIGAMES // ////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+      } else if(dataAsJSON.request == "minigames"){
+        ws.location = dataAsJSON.roomid;
+
+        // When a new player joins a room
+        if (!roomPlayers[dataAsJSON.roomid]) {
+          roomPlayers[dataAsJSON.roomid] = [];
+        }
+
+        if(dataAsJSON.name == ""){
+          var possibleNames = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
+          wss.clients.forEach(function each(client) {
+            if(client.location == dataAsJSON.roomid){
+              if(possibleNames.includes(client.name)){ // This removes every "already used" name from the array above
+                var index = possibleNames.indexOf(client.name);
+                if (index > -1) { // only splice array when item is found
+                  possibleNames.splice(index, 1); // 2nd parameter means remove one item only
+                }
+              }
+            }
+          });
+          if(possibleNames.length >= 1){
+            ws.name = possibleNames[Math.floor(Math.random()*possibleNames.length)];
+          } else {
+            const nameList = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
+            ws.name = nameList[Math.floor(Math.random()*nameList.length)];
+          }
+        } else {
+          ws.name = dataAsJSON.name;
+        }
+        ws.send('{"status":"RoomJoined","name":"'+ws.name+'","location":"'+ws.location+'","message":"joined the session."}');
+        wss.clients.forEach(function each(client) {
+          if(client.location == dataAsJSON.roomid && client != ws){
+            client.send('{"status":"Message","message":"joined the session.","name":"'+ws.name+'"}');
+          }
+        });
+
+        // Add the new player to the connected players array for the specific room
+        roomPlayers[dataAsJSON.roomid].push(ws.name);
+
+        // Send the updated player list for the specific room to all players in that room
+        const playerListUpdate = {
+          status: 'PlayerListUpdate',
+          players: roomPlayers[dataAsJSON.roomid]
+        };
+
+        wss.clients.forEach(function each(client) {
+          if (client.location == dataAsJSON.roomid) {
+            client.send(JSON.stringify(playerListUpdate));
+          }
+        });
+      }
      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
      ////////////////////////////////////////////////// ON TEXT MESSAGE ///////////////////////////////////////////////////
      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -356,9 +413,29 @@ wss.on('connection', function connection(ws, req) {
   ws.on('close', function close() {
     console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Connection of client closed from %s:%d on %s', new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0], ws._socket.remotePort, d.getDate()+"/"+(d.getMonth()+1)+"/"+d.getFullYear() % 100);
     console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Total clients connected: %d", new Date().toLocaleTimeString(), wss.clients.size);
+
+    // Find the room (location) of the closing client
+    const closedRoom = ws.location;
+
+    // Remove the closed client's name from the roomPlayers object
+    if (roomPlayers[closedRoom]) {
+        roomPlayers[closedRoom] = roomPlayers[closedRoom].filter(player => player !== ws.name);
+    }
+
+    // Send the updated player list for the specific room to all players in that room
+    const playerListUpdate = {
+      status: 'PlayerListUpdate',
+      players: roomPlayers[closedRoom]
+    };
+
     wss.clients.forEach(function each(client) {
       if(client.location == ws.location && client != ws){
-        client.send('{"status":"Message","message":"left the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+        if(ws.color){
+          client.send('{"status":"Message","message":"left the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+        } else {
+          client.send('{"status":"Message","message":"left the session.","name":"'+ws.name+'"}');
+          client.send(JSON.stringify(playerListUpdate));
+        }
       }
     });
   });
