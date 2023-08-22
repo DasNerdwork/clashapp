@@ -72,31 +72,29 @@ ready(function() {
     // }
     // console.log("Users browser language: "+timezone)
 
-  }
-  });
+    ready(function(){
+      var suggestedBans = document.getElementsByClassName("suggested-ban-champion");
+      for(var i = 0; i < suggestedBans.length;i++){
+        document.getElementById("suggestedBans").appendChild(suggestedBans[i])
+      }
+    });
 
-ready(function(){
-  var suggestedBans = document.getElementsByClassName("suggested-ban-champion");
-  for(var i = 0; i < suggestedBans.length;i++){
-    document.getElementById("suggestedBans").appendChild(suggestedBans[i])
+    ready(function(){
+      // Event-Listener für die Checkbox
+      let matchExpander = document.getElementById("expand-all-matches");
+      matchExpander.addEventListener('change', function() {
+        if(matchExpander.checked){
+          setCookie("matches-expanded", true);
+        } else {
+          deleteCookie("matches-expanded");
+        }
+      });
+      if(getCookie("matches-expanded")){
+        matchExpander.checked = true;
+      }
+    });
   }
 });
-
-ready(function(){
-  // Event-Listener für die Checkbox
-  let matchExpander = document.getElementById("expand-all-matches");
-  matchExpander.addEventListener('change', function() {
-    if(matchExpander.checked){
-      setCookie("matches-expanded", true);
-    } else {
-      deleteCookie("matches-expanded");
-    }
-  });
-  if(getCookie("matches-expanded")){
-    matchExpander.checked = true;
-  }
-});
-
 // FROM MAIN PAGE
 
 function showLoader(){
@@ -236,21 +234,35 @@ function showTooltip(element, text, delay, direction, additionalCSS = '') {
   );
 
   const tooltip = document.getElementById('tooltip');
+  const timestamp = new Date().getTime(); // Get a unique timestamp
+  tooltip.id = `tooltip-${timestamp}`; // Set a unique ID for the tooltip
   setTimeout(() => {
     if (tooltip) {
       tooltip.classList.remove('hidden'); // Show the tooltip after adding it to the DOM
       tooltip.style.opacity = '1'; // Set opacity after a brief delay for the fade-in effect
     }
   }, delay);
+  return tooltip.id;
 }
 
-function hideTooltip(element) {
-  const tooltip = document.getElementById('tooltip');
+function hideTooltip(tooltipId) {
+  if(tooltipId){
+    var tooltip = document.getElementById(tooltipId);
+  } else {
+    var tooltip = document.getElementById("tooltip");
+  }
   if (tooltip) {
     tooltip.style.opacity = '0';
-    tooltip.classList.add('hidden'); // Add 'hidden' class to hide the tooltip
-    setTimeout(() => {
-      tooltip.remove(); // Remove the tooltip after the fade-out effect
-    }, 300); // Delay before removing the tooltip to allow fade-out effect
+    tooltip.classList.add('hidden');
+    tooltip.remove();
   }
+}
+
+
+function copyInviteLink(element, text, delay, direction, additionalCSS = '') {
+  copyToClipboard(window.location.href + '?join=' + getCookie('roomCode'));
+  var elementId = showTooltip(element, text, delay, direction, additionalCSS);
+  setTimeout(() => {
+    hideTooltip(elementId);
+  }, 1000);
 }

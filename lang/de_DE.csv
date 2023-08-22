@@ -56,7 +56,11 @@ Test,Test
 %d years ago,vor %d Jahren
 Handshake successful: Server received client request and answered.,Handschlag erfolgreich: Server erhielt Klientenanfrage und antwortete.
 joined the session.,trat der Sitzung bei.
+(You) joined the session.,(Du) ist der Sitzung beigetreten.
+joined the room.,trat dem Raum bei.
+(You) joined the room.,(Du) ist dem Raum beigetreten.
 left the session.,verließ die Sitzung.
+left the room.,hat den Raum verlassen.
 added %1.,hat %1 hinzugefügt.
 removed %1.,hat %1 entfernt.
 swapped %1 with %2.,tauschte %1 mit %2.
@@ -134,4 +138,10 @@ Finalscore,Finalwertung
 "Medium","Mittel"
 "Hard","Schwer"
 "Bonus Points: ","Bonuspunkte: "
+"Points: ","Punkte: "
 "Users inside this room:","Nutzer in diesem Raum:"
+"Copy Invite Link","Einladungslink kopieren"
+"invLink","min-w-[18rem]"
+"Copied","Kopiert"
+"You","Du"
+"guessed the correct answer: %1","hat die richtige Antwort erraten: %1"

@@ -20,6 +20,7 @@ module.exports = {
     'z-[6]',
     '-mt-[54px]',
     '-mt-[68px]',
+    'min-w-[18rem]',
     {
       pattern: /text-(silver|gold|bronze|platinum|iron|diamond|master|grandmaster|challenger)\/100/,
     },
@@ -91,10 +92,15 @@ module.exports = {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
         },
+        moveUpAndFadeOut: {
+          '0%': { transform: 'translateY(0)', opacity: '1' },
+          '100%': { transform: 'translateY(-10px)', opacity: '0' },
+        },
       },
       animation: {
         'slideAndFadeIn': '.5s ease-in-out 0s 1 slideAndFadeIn',
         'fadeIn': '.5s ease-in-out 0s 1 fadeIn',
+        'moveUpAndFadeOut': 'moveUpAndFadeOut 1s ease-in-out',
       },
     },
     screens: {
