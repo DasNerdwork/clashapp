@@ -352,6 +352,40 @@ class DB {
         }
     }
 
+    public function addPoints($username, $points) {
+        $sql = $this->db->prepare("UPDATE minigames SET points = points + ? WHERE username = ?");
+        $sql->bind_param('is', $points, $username);
+        if ($sql->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getPoints($username) {
+        $sql = $this->db->prepare("SELECT points FROM minigames WHERE username = ?");
+        $sql->bind_param('s', $username);
+        $sql->execute();
+        $result = $sql->get_result();
+
+        if ($result->num_rows) {
+            $row = $result->fetch_assoc();
+            return $row['points'];
+        } else {
+            return false;
+        }
+    }
+
+    public function removePoints($username, $points) {
+        $sql = $this->db->prepare("UPDATE minigames SET points = GREATEST(0, points - ?) WHERE username = ?");
+        $sql->bind_param('is', $points, $username);
+        if ($sql->execute()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /** MySQL Event that runs every 24 hours and deletes any deactivated account (status = 0) which has been deactivated more than 2 days ago (deldate < DATE_SUB(NOW(), INTERVAL 2 DAY))
      *  ==> Accounts stay deactivated min. 48 hours - max. 72 hours
      * 

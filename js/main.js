@@ -78,7 +78,9 @@ function __(string) {
             for (var i = 0; i < lines.length; i++) {
               var parts = lines[i].split(",");
               if (parts.length >= 2) {
-                translations[parts[0]] = parts[1];
+                var key = parts[0].replace(/^"(.*)"$/, '$1'); // Remove quotes from the key
+                var value = parts[1].replace(/^"(.*)"$/, '$1'); // Remove quotes from the value
+                translations[key] = value;
               }
             }
 
@@ -109,6 +111,7 @@ function __(string) {
     }
   });
 }
+
 
 function getCookie(name) {
     var value = '; ' + document.cookie;

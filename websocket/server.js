@@ -2,6 +2,7 @@ import { createServer } from 'https';
 import { readFileSync } from 'fs';
 import { WebSocketServer } from 'ws';
 import fs from 'fs';
+import { promises as fsPromises } from 'fs';
 import ansiRegex from 'ansi-regex';
 import util from 'util';
 import '/hdd1/clashapp/websocket/consoleHandler.js';
@@ -11,6 +12,8 @@ const logStream = fs.createWriteStream('/hdd1/clashapp/data/logs/server.log', { 
 const logPath = '/hdd1/clashapp/data/logs/server.log';
 const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
 const roomPlayers = {}; // Initializes an object to store connected players for each room
+const roomSettings = {};
+const correctAnswerTimers  = {};
 
 // Attach the uncaught exception handler
 process.on('uncaughtException', handleCrash);
@@ -340,17 +343,92 @@ wss.on('connection', function connection(ws, req) {
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////// MINIGAMES // ////////////////////////////////////////////////////
+        //////////////////////////////////////////////////// MINIGAMES ///////////////////////////////////////////////////////
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
       } else if(dataAsJSON.request == "minigames"){
-        ws.location = dataAsJSON.roomid;
+          ws.location = dataAsJSON.roomid;
 
-        // When a new player joins a room
-        if (!roomPlayers[dataAsJSON.roomid]) {
-          roomPlayers[dataAsJSON.roomid] = [];
+          // When a new player joins a room
+          if (!roomPlayers[dataAsJSON.roomid]) {
+            roomPlayers[dataAsJSON.roomid] = [];
+          }
+
+          // Initialize roomSettings if it doesn't exist for the current room
+          if (!roomSettings[dataAsJSON.roomid]) {
+            roomSettings[dataAsJSON.roomid] = {};
+          }
+
+          // Save room difficulty
+          if(!roomSettings[dataAsJSON.roomid]["Difficulty"]){
+            roomSettings[dataAsJSON.roomid]["Difficulty"] = dataAsJSON.difficulty;
+          }
+
+          if(dataAsJSON.action == "generate"){
+            async function loadChampionData() {
+              const championDataPath = `/hdd1/clashapp/data/patch/${currentPatch}/data/en_US/champion.json`;
+              try {
+                  const championData = await fsPromises.readFile(championDataPath, 'utf8');
+                  return JSON.parse(championData);
+              } catch (error) {
+                  console.error('Error reading champion data:', error);
+                  return null;
+              }
+            }
+          
+            async function getRandomChampion() {
+              const championData = await loadChampionData();
+              if (!championData) {
+                console.log('Error loading champion data');
+                return null;
+              }
+          
+              const championKeys = Object.keys(championData.data);
+              const randomChampionKey = championKeys[Math.floor(Math.random() * championKeys.length)];
+              const randomChampion = championData.data[randomChampionKey];
+              return randomChampion;
+            }
+          
+            async function generateRandomChampion() {
+              const randomChampion = await getRandomChampion();
+              if (!randomChampion) {
+                  console.log('Error getting random champion data');
+                  return;
+              }
+          
+              const championName = randomChampion.name;
+              const imagePath = `/clashapp/data/patch/${currentPatch}/img/champion/${randomChampion.image.full}`;
+          
+              // Sending pixelation settings and image path to the new player
+              const pixelationSettings = {
+                status: 'PixelateAndGenerate',
+                pixelationDifficulty: roomSettings[dataAsJSON.roomid]["Difficulty"],
+                imagePath: Buffer.from(imagePath).toString('base64'),
+                championName: Buffer.from(championName).toString('base64')
+              };
+              wss.clients.forEach(function each(client) {
+                if (client.location == dataAsJSON.roomid) {
+                  client.send(JSON.stringify(pixelationSettings));
+                }
+              });
+            }
+            generateRandomChampion();
+          }
+        var possibleColors = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
+        wss.clients.forEach(function each(client) {              
+          if(possibleColors.includes(client.color)){ // This removes every "already used" color from the array above
+            var colorIndex = possibleColors.indexOf(client.color);
+            if (colorIndex > -1) { // only splice array when item is found
+              possibleColors.splice(colorIndex, 1); // 2nd parameter means remove one item only
+            }
+          }
+        });
+        if(possibleColors.length >= 1){
+          ws.color = possibleColors[Math.floor(Math.random()*possibleColors.length)];
+        } else {
+          const colorList = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
+          ws.color = colorList[Math.floor(Math.random()*colorList.length)];
         }
-
         if(dataAsJSON.name == ""){
           var possibleNames = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
           wss.clients.forEach(function each(client) {
@@ -372,10 +450,10 @@ wss.on('connection', function connection(ws, req) {
         } else {
           ws.name = dataAsJSON.name;
         }
-        ws.send('{"status":"RoomJoined","name":"'+ws.name+'","location":"'+ws.location+'","message":"joined the session."}');
+        ws.send('{"status":"RoomJoined","name":"'+ws.name+'","location":"'+ws.location+'","message":"(You) joined the room.","color":"'+ws.color+'","difficulty":"'+roomSettings[dataAsJSON.roomid]["Difficulty"]+'"}');
         wss.clients.forEach(function each(client) {
           if(client.location == dataAsJSON.roomid && client != ws){
-            client.send('{"status":"Message","message":"joined the session.","name":"'+ws.name+'"}');
+            client.send('{"status":"Message","message":"joined the room.","name":"'+ws.name+'","color":"'+ws.color+'"}');
           }
         });
 
@@ -385,7 +463,8 @@ wss.on('connection', function connection(ws, req) {
         // Send the updated player list for the specific room to all players in that room
         const playerListUpdate = {
           status: 'PlayerListUpdate',
-          players: roomPlayers[dataAsJSON.roomid]
+          players: roomPlayers[dataAsJSON.roomid],
+          color: ws.color
         };
 
         wss.clients.forEach(function each(client) {
@@ -393,6 +472,95 @@ wss.on('connection', function connection(ws, req) {
             client.send(JSON.stringify(playerListUpdate));
           }
         });
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///////////////////////////////////////////////// CORRECT ANSWER  ////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      } else if(dataAsJSON.request == "correctAnswer"){  
+        async function loadChampionData() {
+          const championDataPath = `/hdd1/clashapp/data/patch/${currentPatch}/data/en_US/champion.json`;
+          try {
+              const championData = await fsPromises.readFile(championDataPath, 'utf8');
+              return JSON.parse(championData);
+          } catch (error) {
+              console.error('Error reading champion data:', error);
+              return null;
+          }
+        }
+        async function getRandomChampion() {
+          const championData = await loadChampionData();
+          if (!championData) {
+            console.log('Error loading champion data');
+            return null;
+          }
+      
+          const championKeys = Object.keys(championData.data);
+          const randomChampionKey = championKeys[Math.floor(Math.random() * championKeys.length)];
+          const randomChampion = championData.data[randomChampionKey];
+          return randomChampion;
+        }
+
+        if (!correctAnswerTimers[dataAsJSON.roomid]) {
+          // Initialize a timestamp for this room
+          correctAnswerTimers[dataAsJSON.roomid] = 0;
+        }
+    
+        const currentTime = Date.now();
+    
+        if (currentTime - correctAnswerTimers[dataAsJSON.roomid] >= 4000) {
+            // Record the current timestamp
+            correctAnswerTimers[dataAsJSON.roomid] = currentTime;
+    
+            wss.clients.forEach(function each(client) {
+                if (client.location == dataAsJSON.roomid) {
+                    client.send('{"status":"Message","message":"guessed the correct answer: %1","answer":"' + dataAsJSON.answer + '","name":"' + ws.name + '","color":"'+ws.color+'"}');
+                }
+            });
+    
+            async function generateNewRandomChampionAndNotify() {
+                const randomChampion = await getRandomChampion();
+                if (!randomChampion) {
+                    console.log('Error getting random champion data');
+                    return;
+                }
+    
+                const championName = randomChampion.name;
+                const imagePath = `/clashapp/data/patch/${currentPatch}/img/champion/${randomChampion.image.full}`;
+    
+                // Sending pixelation settings and image path to the new player
+                const pixelationSettings = {
+                    status: 'PixelateAndGenerateNew',
+                    pixelationDifficulty: roomSettings[dataAsJSON.roomid]["Difficulty"],
+                    imagePath: Buffer.from(imagePath).toString('base64'),
+                    championName: Buffer.from(championName).toString('base64')
+                };
+                wss.clients.forEach(function each(client) {
+                    if (client.location == dataAsJSON.roomid) {
+                        client.send(JSON.stringify(pixelationSettings));
+                    }
+                });
+            }
+            generateNewRandomChampionAndNotify();
+          }
+
+     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+     ///////////////////////////////////////////////// CHANGE DIFFICULTY///////////////////////////////////////////////////
+     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      } else if(dataAsJSON.request == "changeDifficulty"){
+        const validDifficulties = ['easy', 'medium', 'hard'];
+        if (validDifficulties.includes(dataAsJSON.difficulty)) {
+          if (roomSettings.hasOwnProperty(dataAsJSON.roomid)) {
+            if (!roomSettings[dataAsJSON.roomid].hasOwnProperty('Difficulty')) {
+                console.error(`Room ${dataAsJSON.roomid} does not have the 'Difficulty' attribute`);
+            } else {
+                roomSettings[dataAsJSON.roomid]['Difficulty'] = dataAsJSON.difficulty;
+            }
+          } else {
+              console.error(`Room ${dataAsJSON.roomid} does not exist`);
+          }
+        }
       }
      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
      ////////////////////////////////////////////////// ON TEXT MESSAGE ///////////////////////////////////////////////////
@@ -425,16 +593,17 @@ wss.on('connection', function connection(ws, req) {
     // Send the updated player list for the specific room to all players in that room
     const playerListUpdate = {
       status: 'PlayerListUpdate',
-      players: roomPlayers[closedRoom]
+      players: roomPlayers[closedRoom],
+      color: ws.color
     };
 
     wss.clients.forEach(function each(client) {
       if(client.location == ws.location && client != ws){
-        if(ws.color){
-          client.send('{"status":"Message","message":"left the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+        if (roomPlayers[closedRoom]) {
+          client.send('{"status":"Message","message":"left the room.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+          client.send(JSON.stringify(playerListUpdate));        
         } else {
-          client.send('{"status":"Message","message":"left the session.","name":"'+ws.name+'"}');
-          client.send(JSON.stringify(playerListUpdate));
+          client.send('{"status":"Message","message":"left the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
         }
       }
     });
