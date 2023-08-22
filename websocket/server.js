@@ -464,8 +464,15 @@ wss.on('connection', function connection(ws, req) {
         const playerListUpdate = {
           status: 'PlayerListUpdate',
           players: roomPlayers[dataAsJSON.roomid],
-          color: ws.color
+          colors: {} // Use an object for mapping names to colors
         };
+
+        // Collect the colors of all players in the room using a mapping
+        wss.clients.forEach(function each(client) {
+          if (client.location == dataAsJSON.roomid) {
+            playerListUpdate.colors[client.name] = client.color;
+          }
+        });
 
         wss.clients.forEach(function each(client) {
           if (client.location == dataAsJSON.roomid) {
@@ -514,7 +521,7 @@ wss.on('connection', function connection(ws, req) {
     
             wss.clients.forEach(function each(client) {
                 if (client.location == dataAsJSON.roomid) {
-                    client.send('{"status":"Message","message":"guessed the correct answer: %1","answer":"' + dataAsJSON.answer + '","name":"' + ws.name + '","color":"'+ws.color+'"}');
+                    client.send('{"status":"Message","message":"guessed the correct answer: %1","answer":"' + dataAsJSON.answer + '","name":"' + ws.name + '","color":"'+ws.color+'","bonuspoints":"'+dataAsJSON.bonuspoints+'"}');
                 }
             });
     
@@ -590,11 +597,19 @@ wss.on('connection', function connection(ws, req) {
         roomPlayers[closedRoom] = roomPlayers[closedRoom].filter(player => player !== ws.name);
     }
 
+    // Collect the colors of the remaining players in the room using a mapping
+    const remainingPlayerColors = {};
+    wss.clients.forEach(function each(client) {
+      if (client.location === closedRoom && client !== ws) {
+        remainingPlayerColors[client.name] = client.color;
+      }
+    });
+
     // Send the updated player list for the specific room to all players in that room
     const playerListUpdate = {
       status: 'PlayerListUpdate',
       players: roomPlayers[closedRoom],
-      color: ws.color
+      colors: remainingPlayerColors
     };
 
     wss.clients.forEach(function each(client) {
