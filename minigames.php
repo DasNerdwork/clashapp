@@ -1,5 +1,7 @@
 <?php session_start(); 
 include_once('/hdd1/clashapp/functions.php');
+require_once '/hdd1/clashapp/clash-db.php';
+
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -26,15 +28,12 @@ foreach ($championData['data'] as $key => $champion) {
 $randomChampionKey = $championKeys[array_rand($championKeys)];
 $randomChampion = $championData['data'][$randomChampionKey];
 $championName = $randomChampion['name'];
-$imagePath = "/clashapp/data/patch/13.16.1/img/champion/{$randomChampion['image']['full']}";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $userInput = $_POST['champion_input'];
     $isCorrect = strtolower($userInput) === strtolower($championName);
 }
-
-
-
+$db = new DB();
 ?>
 <style>
     .correct-border {
@@ -88,13 +87,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transform: scaleX(0);
         }
     }
-    
 
     .bonus-bar.stopped {
         animation: none;
     }
 </style>
 <script>
+    let championName = "";
+    let fullImageSource = "";
+    var ownUsername = "";
+    let isFormSubmissionBlocked = false;
     checkAndSetRoomCodeCookie();
 
     function checkAndSetRoomCodeCookie() {
@@ -106,14 +108,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    function addChatMessage(name, message){
+    function addChatMessage(name, message, color, arg1 = ''){
+        arg1 = arg1 || "";
         const chatContainer = document.getElementById("chatContainer");
         const textMessage = document.createElement("span");
-        textMessage.classList.add("text-[#333344]");
+        // textMessage.classList.add("text-[#333344]");
         __(message).then(function (result) {
-            textMessage.innerText = name + ' ' + message;
+            textMessage.innerHTML = "<span class='text-"+color+"/100'>"+name+"</span> "+result.replace("%1", arg1);
             if (chatContainer.children.length > 0) {
-                chatContainer.insertBefore(textMessage, chatContainer.children[1]);
+                chatContainer.insertBefore(textMessage, chatContainer.children[0]);
             } else {
                 chatContainer.appendChild(textMessage);
             }
@@ -128,10 +131,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             var name = "";
         }
+        const pixelChampDifficulty = getCookie("pixelChamp") || "easy";
         let sendInfo =  {
             roomid: getCookie("roomCode"),
             name: name,
-            request: "minigames"
+            difficulty: pixelChampDifficulty,
+            request: "minigames",
+            action: "generate"
         };
         ws.send(JSON.stringify(sendInfo))
     };
@@ -141,31 +147,153 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             var messageAsJson = JSON.parse(event.data);
             var userList = document.getElementById("userList");
             if (messageAsJson.status == "RoomJoined") {
-                addChatMessage(messageAsJson.name, messageAsJson.message);
+                addChatMessage(messageAsJson.name, messageAsJson.message, messageAsJson.color);
+                ownUsername = messageAsJson.name;
             } else if (messageAsJson.status == "Message") {
-                addChatMessage(messageAsJson.name, messageAsJson.message);
-            } else if (messageAsJson.status == "PlayerListUpdate"){
+                if(messageAsJson.answer){
+                    const username = "<?= isset($_SESSION['user']['username']) ? $_SESSION['user']['username'] : ''; ?>";
+                    if(username != ""){
+                        postAjax('../ajax/pixelGuesser.php', { username: username, points: 100 }, function(responseText) {
+                            if (responseText === 'success') {
+                                addChatMessage(messageAsJson.name, messageAsJson.message, messageAsJson.color, messageAsJson.answer);
+                                if(ownUsername === messageAsJson.name){
+                                    let points = document.getElementById('gamePoints');
+                                    points.innerHTML = parseInt(points.innerHTML, 10)+100;
+                                    // Create the pointIndicator element
+                                    const pointIndicator = document.createElement('span');
+                                    pointIndicator.className = 'text-sm opacity-0 absolute text-[#00FF00] animate-moveUpAndFadeOut';
+                                    pointIndicator.textContent = ' +100';
+                                    points.insertAdjacentElement('afterEnd', pointIndicator);
+                                    pointIndicator.addEventListener('animationend', function () {
+                                        // points.parentElement.removeChild(pointIndicator);
+                                    });
+                                }
+                            } else {
+                                console.error('Error adding points');
+                            }
+                        });
+                    } else {
+                        addChatMessage(messageAsJson.name, messageAsJson.message, messageAsJson.color, messageAsJson.answer);
+                    }
+                } else {
+                    addChatMessage(messageAsJson.name, messageAsJson.message, messageAsJson.color);
+                }
+            } else if (messageAsJson.status == "PlayerListUpdate") {
                 let playerList = messageAsJson.players;
                 const existingUserLis = Array.from(userList.children[1].children);
 
                 // Remove <li> elements that are not in the current player list
                 existingUserLis.forEach(existingUserLi => {
                     const liText = existingUserLi.textContent.trim();
-                    if (!playerList.includes(liText)) {
-                        existingUserLi.remove();
+                    if (!playerList.includes(liText) && !liText.includes(ownUsername)) {
+                    existingUserLi.remove();
                     }
                 });
 
+                // Find and remove the existing (You) entry for your name
+                const existingYouLi = existingUserLis.find(li => li.textContent.includes(ownUsername));
+                if (existingYouLi) {
+                    existingYouLi.remove();
+                }
+
                 // Add new <li> elements for players in the current player list
                 playerList.forEach(playerName => {
-                    const existingUserLi = Array.from(userList.children[1].children).find(li => li.textContent.trim() === playerName);
+                    const existingUserLi = existingUserLis.find(li => li.textContent.trim() === playerName);
                     if (!existingUserLi) {
-                        const userName = document.createElement('li');
-                        userName.innerText = playerName;
-                        userName.classList.add("overflow-hidden", "text-ellipsis", "whitespace-nowrap");
+                    const userName = document.createElement('li');
+                    userName.innerText = playerName;
+
+                    if (playerName === ownUsername) {
+                        userName.innerHTML = "<span class='text-"+messageAsJson.color+"/100'>"+playerName+"</span> " + " (<?= __("You") ?>)";
+                        userName.classList.add("overflow-hidden", "text-ellipsis", "whitespace-nowrap", "text-white", "font-bold");
+                        userList.children[1].insertBefore(userName, userList.children[1].firstChild);
+                    } else {
+                        userName.classList.add("overflow-hidden", "text-ellipsis", "whitespace-nowrap", "text-gray");
                         userList.children[1].appendChild(userName);
                     }
+                    }
                 });
+                }
+                else if (messageAsJson.status === "PixelateAndGenerate") {
+                const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+                pixelationDifficulty = messageAsJson.pixelationDifficulty;
+                imagePath = messageAsJson.imagePath;
+                difficultySelector.value = pixelationDifficulty;
+                setCookie("pixelChamp", pixelationDifficulty, expirationDate.toUTCString());
+                const options = difficultySelector.getElementsByTagName("option");
+                for (const option of options) {
+                    if(option.value === pixelationDifficulty){
+                        option.setAttribute("hidden", "");
+                    } else {
+                        option.removeAttribute("hidden");
+                    }
+                }
+
+                // Save variables
+                fullImageSource = imagePath;
+                championName = messageAsJson.championName;
+
+                switch (pixelationDifficulty) {
+                    case "easy":
+                        pixelateImage(imagePath, 25); // Adjust blockSize as needed
+                        break;
+                    case "medium":
+                        pixelateImage(imagePath, 33); // Adjust blockSize as needed
+                        break;
+                    case "hard":
+                        pixelateImage(imagePath, 50); // Adjust blockSize as needed
+                        break;
+                    default:
+                        pixelateImage(imagePath, 25); // Adjust blockSize as needed
+                        break;
+                }
+            } else if (messageAsJson.status === "PixelateAndGenerateNew") {
+                setTimeout(() => {
+                    userInput.value = "";
+                    userInput.select();
+                    const champName = document.getElementById("championName");
+                    const fullImage = document.getElementById("fullImage");
+                    const expirationDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+                    champName.innerText = "";
+                    fullImage.style.transition = "none"
+                    fullImage.style.opacity = 0;
+                    fullImage.src = "";
+                    pixelationDifficulty = messageAsJson.pixelationDifficulty;
+                    imagePath = messageAsJson.imagePath;
+                    if (userInput.classList.contains("correct-border")) {
+                        userInput.classList.remove("correct-border");
+                    }
+                    difficultySelector.value = pixelationDifficulty;
+                    setCookie("pixelChamp", pixelationDifficulty, expirationDate.toUTCString());
+                    const options = difficultySelector.getElementsByTagName("option");
+                    for (const option of options) {
+                        if(option.value === pixelationDifficulty){
+                            option.setAttribute("hidden", "");
+                        } else {
+                            option.removeAttribute("hidden");
+                        }
+                    }
+
+                    // Save variables
+                    fullImageSource = imagePath;
+                    championName = messageAsJson.championName;
+
+                    switch (pixelationDifficulty) {
+                        case "easy":
+                            pixelateImage(imagePath, 25); // Adjust blockSize as needed
+                            break;
+                        case "medium":
+                            pixelateImage(imagePath, 33); // Adjust blockSize as needed
+                            break;
+                        case "hard":
+                            pixelateImage(imagePath, 50); // Adjust blockSize as needed
+                            break;
+                        default:
+                            pixelateImage(imagePath, 25); // Adjust blockSize as needed
+                            break;
+                    }
+                    isFormSubmissionBlocked = false; // Unblock form submission
+                }, 4000);
             }
         }
     }
@@ -176,15 +304,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </script>
 <div class="w-full flex justify-center">
-    <div class="absolute right-0 bg-dark m-4 p-4 rounded max-w-[256px]" id="userList">
-        <h1 class="font-bold"><?= __("Users inside this room:") ?></h1>
-        <ol class="list-decimal list-inside"></ol>
+    <div class="absolute right-0 max-w-[256px] flex flex-col <?= __("invLink") ?>">
+        <button 
+            id="inviteLink"
+            class="bg-tag-navy flex justify-center m-4 p-4 rounded cursor-pointer hover:opacity-80 active:opacity-70"
+            onclick="copyInviteLink(this, '<?= __('Copied') ?>', 0, 'top-right', '-mt-8 animate-moveUpAndFadeOut');">
+
+            <h1 class="font-bold text-center">&#128279; <?= __("Copy Invite Link") ?></h1>
+        </button>
+        <div id="userList" class="bg-dark mx-4 mb-4 p-4 rounded">
+            <h1 class="font-bold"><?= __("Users inside this room:") ?></h1>
+            <ol class="list-decimal list-inside"></ol>
+        </div>
     </div>
     <div class="flex justify-center gap-x-8 mt-40 bg-dark rounded w-fit p-4">
-        <div class="text-center mb-4 flex justify-center flex-col items-center w-72">
+        <div id="canvasContainer" class="text-center mb-4 flex justify-center flex-col items-center w-72">
             <h1 class="text-3xl font-bold mb-4"><?= __("Pixel Guesser") ?></h1>
             <canvas id="pixelatedCanvas" width="256" height="256"></canvas>
-            <img id="fullImage" src="<?= $imagePath ?>" alt="Full Image" width="256" height="256" class="mt-[-6.5rem]">
+            <img id="fullImage" src="" alt="Full Image" width="256" height="256" class="mt-[-6.5rem]">
             <span class="text-xl h-4 mt-4 animate-fadeIn opacity-0" id="championName"></span>
             <form method="post" class="text-center flex mt-8" id="championForm" onsubmit="checkChamp(); return false;" autocomplete="off">
                 <input  type="text" 
@@ -199,18 +336,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <select id="difficulty-selector" 
                         class="text-center h-8 w-28 align-middle mr-2.5 ml-2.5 text-base bg-[#eee] text-black active:bg-[#ccc] focus:outline-none border-none"
                         onchange="setCookie('pixelChamp', this.value); this.disabled = true; location.reload();">
-                    <option value="easy" <?= (!isset($_COOKIE["pixelChamp"]) || $_COOKIE["pixelChamp"] == "easy") ? "selected disabled hidden" : ""; ?>><?= __("Easy") ?></option>
-                    <option value="medium" <?= (isset($_COOKIE["pixelChamp"]) && $_COOKIE["pixelChamp"] == "medium") ? "selected disabled hidden" : ""; ?>><?= __("Medium") ?></option>
-                    <option value="hard" <?= (isset($_COOKIE["pixelChamp"]) && $_COOKIE["pixelChamp"] == "hard") ? "selected disabled hidden" : ""; ?>><?= __("Hard") ?></option>
+                    <option value="easy" <?= (!isset($_COOKIE["pixelChamp"]) || $_COOKIE["pixelChamp"] == "easy") ? "hidden" : ""; ?>><?= __("Easy") ?></option>
+                    <option value="medium" <?= (isset($_COOKIE["pixelChamp"]) && $_COOKIE["pixelChamp"] == "medium") ? "hidden" : ""; ?>><?= __("Medium") ?></option>
+                    <option value="hard" <?= (isset($_COOKIE["pixelChamp"]) && $_COOKIE["pixelChamp"] == "hard") ? "hidden" : ""; ?>><?= __("Hard") ?></option>
                 </select>
             </div>
         </div>
         <div class="flex items-center flex-col justify-start w-96 gap-y-4">
             <span class="text-xl"><?= __("Bonus Points: ") ?></span>
             <div id="bonus-bar" class="bonus-bar"></div>
-            <div id='chatContainer' class='bg-darker w-full h-64 p-2 flex flex-col-reverse overflow-auto twok:text-base fullhd:text-sm'></div>
+            <div id='chatContainer' class='bg-darker w-full max-h-80 h-full p-2 flex flex-col-reverse overflow-auto twok:text-base fullhd:text-sm'></div>
+            <div class="text-xl"><?php echo __("Points: "); if(isset($_SESSION['user']['email'], $_SESSION['user']['username'])){ $points = $db->getPoints($_SESSION['user']['username']); if($points !== false) { echo "<span id='gamePoints' class='font-bold'>".$points."</span>"; } } ?></div>
         </div>
     </div>
+    <?php 
+    // if(isset($_SESSION['user']['email'])){ echo'
+    // <div class="flex items-center flex-col justify-start w-96 gap-y-4">
+    // <span>Points: '; 
+    // if(isset($_SESSION['user']['username'])){
+    //     $points = $db->getPoints($_SESSION['user']['username']);
+    //     if($points !== false) {
+    //         echo $points;
+    //     }
+    // }
+    // echo '</span>
+    // </div>
+    // ';
+    //} 
+    ?>
 </div>
 
     <script>
@@ -226,23 +379,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             clearSuggestions();
         }
     });
-
-    switch (getCookie("pixelChamp")) {
-        case "easy":
-            pixelateImage("<?= $imagePath ?>", 25); // Adjust blockSize as needed
-            break;
-        case "medium":
-            pixelateImage("<?= $imagePath ?>", 33); // Adjust blockSize as needed
-            break;
-        case "hard":
-            pixelateImage("<?= $imagePath ?>", 50); // Adjust blockSize as needed
-            break;
-        default:
-            pixelateImage("<?= $imagePath ?>", 25); // Adjust blockSize as needed
-            break;
-    }
-
-    userInput.select();
 
     function handleInput(event) {
         const inputText = event.target.value.toLowerCase();
@@ -296,30 +432,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (event.key === "Enter") {
             event.preventDefault();
             checkChamp(); // Trigger the checkChamp function on Enter key press
-        } else {
-            updateInputBorder(false); // Update the input border when any key is released
         }
     }
 
     function pixelateImage(imagePath, blockSize) {
-        const canvas = document.getElementById("pixelatedCanvas");
-        const context = canvas.getContext("2d");
-        const image = new Image();
-
-        image.onload = function() {
-            const scaledWidth = canvas.width / blockSize;
-            const scaledHeight = canvas.height / blockSize;
-            context.drawImage(image, 0, 0, scaledWidth, scaledHeight);
-            context.mozImageSmoothingEnabled = false;
-            context.webkitImageSmoothingEnabled = false;
-            context.imageSmoothingEnabled = false;
-            context.drawImage(canvas, 0, 0, scaledWidth, scaledHeight, 0, 0, canvas.width, canvas.height);
-        };
-
-        image.src = imagePath;
+    // Remove the old canvas if it exists
+    const oldCanvas = document.getElementById("pixelatedCanvas");
+    if (oldCanvas) {
+        oldCanvas.parentNode.removeChild(oldCanvas);
     }
 
+    // Create a new canvas element
+    const canvas = document.createElement("canvas");
+    canvas.id = "pixelatedCanvas";
+    canvas.width = 256; // Set the desired width
+    canvas.height = 256; // Set the desired height
+    document.getElementById("canvasContainer").insertBefore(canvas, document.getElementById("canvasContainer").children[1]); // Append the new canvas to the body
 
+    const context = canvas.getContext("2d");
+    const image = new Image();
+
+    image.onload = function() {
+        const scaledWidth = canvas.width / blockSize;
+        const scaledHeight = canvas.height / blockSize;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, scaledWidth, scaledHeight);
+        context.mozImageSmoothingEnabled = false;
+        context.webkitImageSmoothingEnabled = false;
+        context.imageSmoothingEnabled = false;
+        context.drawImage(canvas, 0, 0, scaledWidth, scaledHeight, 0, 0, canvas.width, canvas.height);
+    };
+
+    image.src = atob(imagePath);
+}
 
     function updateInputBorder(isCorrect) {
         const userInput = document.querySelector("input[name='champion_input']");
@@ -341,37 +486,67 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     function checkChamp() {
+        if (isFormSubmissionBlocked) {
+            return; // Don't process the form if submission is blocked
+        }
         const userInput = document.querySelector("input[name='champion_input']");
-        const championName = "<?= strtolower($championName) ?>".replace(/'/g, '');
+        const correctAnswer = championName;
         const userAnswer = userInput.value.toLowerCase().replace(/'/g, '');
 
-        const isCorrect = userAnswer === championName;
+        const isCorrect = userAnswer === atob(correctAnswer).toLowerCase().replace(/'/g, '');
         updateInputBorder(isCorrect);
 
         if (isCorrect) {
+            // Send a message to the WebSocket server indicating the correct answer
+            isFormSubmissionBlocked = true;
+            let correctAnswerMessage =  {
+                roomid: getCookie("roomCode"),
+                name: name,
+                difficulty: getCookie("pixelChamp"),
+                request: "correctAnswer",
+                answer: atob(correctAnswer)
+            };
+            ws.send(JSON.stringify(correctAnswerMessage))
+
             const startTime = performance.now();
-            const champName = document.getElementById("championName")
-            champName.innerText = "<?= __("Correct Answer: ").$championName ?>";
+            const champName = document.getElementById("championName");
+            const fullImage = document.getElementById("fullImage");
+            champName.innerText = "<?= __("Correct Answer: ") ?>"+atob(championName);
+            fullImage.src = atob(fullImageSource);
 
             function revealFullImage(timestamp) {
                 const elapsedTime = timestamp - startTime;
                 const progress = Math.min(elapsedTime / 1000, 1);
-
                 document.getElementById("fullImage").style.opacity = progress;
 
                 if (progress < 1) {
                     requestAnimationFrame(revealFullImage);
                 } else {
-                    champName.classList.replace("opacity-0", "opacity-100")
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
+                    champName.style.opacity = 1;
                 }
             }
 
             requestAnimationFrame(revealFullImage);
         }
     }
+
+        // Select element for difficulty
+        const difficultySelector = document.getElementById('difficulty-selector');
+
+        // Event listener for select menu change
+        difficultySelector.addEventListener('change', function () {
+            const newDifficulty = this.value;
+
+            // Construct the message to send
+            const message = {
+                request: 'changeDifficulty',
+                roomid: getCookie('roomCode'),
+                difficulty: newDifficulty
+            };
+
+            // Send the message to the websocket server
+            ws.send(JSON.stringify(message));
+        });
     </script>
 <?php
 include('/hdd1/clashapp/templates/footer.php');
