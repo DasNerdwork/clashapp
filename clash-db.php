@@ -386,6 +386,29 @@ class DB {
         }
     }
 
+    public function getTopPlayers() {
+        $sql = "SELECT username, points FROM minigames ORDER BY points DESC LIMIT 10";
+        $stmt = $this->db->prepare($sql);
+    
+        if ($stmt) {
+            $stmt->execute();
+            $result = $stmt->get_result();
+    
+            if ($result) {
+                $topPlayers = array();
+                while ($row = $result->fetch_assoc()) {
+                    $topPlayers[] = array('username' => $row['username'], 'points' => $row['points']);
+                }
+                return $topPlayers;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+    
+
     /** MySQL Event that runs every 24 hours and deletes any deactivated account (status = 0) which has been deactivated more than 2 days ago (deldate < DATE_SUB(NOW(), INTERVAL 2 DAY))
      *  ==> Accounts stay deactivated min. 48 hours - max. 72 hours
      * 
