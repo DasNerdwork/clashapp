@@ -33,6 +33,10 @@ input, input:focus, button {
   outline: none;
   border: 0;
   font-size: 14;
+}
+
+input[type="text"][name="champion_input"],
+input[type="text"][name="champion_input"]:focus {
   &:-webkit-autofill {
     color: #000 !important;
     -webkit-text-fill-color: #000 !important;

@@ -6,6 +6,8 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// print_r($_SESSION);
+
 if(isset($_GET['join'])){ // Used for invite codes via ?join=roomCode
     $sanitizedRoom = filter_input(INPUT_GET, 'join', FILTER_SANITIZE_NUMBER_INT);
     if ($sanitizedRoom !== false) {
@@ -16,7 +18,7 @@ if(isset($_GET['join'])){ // Used for invite codes via ?join=roomCode
 }
 
 include('/hdd1/clashapp/templates/head.php');
-setCodeHeader('Clash', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
+setCodeHeader('Clash', $css = true, $javascript = true, $alpinejs = true, $websocket = false);
 include('/hdd1/clashapp/templates/header.php');
 
 $championData = json_decode(file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/en_US/champion.json'), true);
@@ -126,8 +128,17 @@ $db = new DB();
     const ws = new WebSocket('wss://websocket.dasnerdwork.net/');
 
     ws.onopen = (event) => { // Do this on client opening the webpage
-        if (document.getElementById("highlighter") != null) {
-            var name = document.getElementById("highlighter").innerText
+        let highlighterElem = document.getElementById("highlighter");
+        if (highlighterElem != null) {
+            if(highlighterElem.dataset.username){
+                if(highlighterElem.dataset.username != ""){
+                    var name = highlighterElem.dataset.username;
+                } else {
+                    var name = document.getElementById("highlighter").innerText
+                }
+            } else {
+                var name = document.getElementById("highlighter").innerText
+            }
         } else {
             var name = "";
         }
@@ -153,16 +164,16 @@ $db = new DB();
                 if(messageAsJson.answer){
                     const username = "<?= isset($_SESSION['user']['username']) ? $_SESSION['user']['username'] : ''; ?>";
                     if(username != ""){
-                        postAjax('../ajax/pixelGuesser.php', { username: username, points: 100 }, function(responseText) {
+                        postAjax('../ajax/pixelGuesser.php', { username: username, points: (100+parseInt(messageAsJson.bonuspoints, 10)) }, function(responseText) {
                             if (responseText === 'success') {
                                 addChatMessage(messageAsJson.name, messageAsJson.message, messageAsJson.color, messageAsJson.answer);
                                 if(ownUsername === messageAsJson.name){
                                     let points = document.getElementById('gamePoints');
-                                    points.innerHTML = parseInt(points.innerHTML, 10)+100;
+                                    points.innerHTML = parseInt(points.innerHTML, 10)+100+parseInt(messageAsJson.bonuspoints, 10);
                                     // Create the pointIndicator element
                                     const pointIndicator = document.createElement('span');
                                     pointIndicator.className = 'text-sm opacity-0 absolute text-[#00FF00] animate-moveUpAndFadeOut';
-                                    pointIndicator.textContent = ' +100';
+                                    pointIndicator.textContent = '  +'+(100+parseInt(messageAsJson.bonuspoints, 10));
                                     points.insertAdjacentElement('afterEnd', pointIndicator);
                                     pointIndicator.addEventListener('animationend', function () {
                                         // points.parentElement.removeChild(pointIndicator);
@@ -175,6 +186,37 @@ $db = new DB();
                     } else {
                         addChatMessage(messageAsJson.name, messageAsJson.message, messageAsJson.color, messageAsJson.answer);
                     }
+                    // Dynamically update leaderboard points
+                    let leaderboardListItems = document.getElementById('leaderboardList').getElementsByTagName('li');
+                    for (let i = 0; i < leaderboardListItems.length; i++) {
+                        let playersNameDiv = leaderboardListItems[i].getElementsByTagName('div')[0];
+                        if (playersNameDiv.textContent.includes(messageAsJson.name)) {
+                            let playerPointsSpan = leaderboardListItems[i].getElementsByTagName('span')[0];
+                            let currentPoints = parseInt(playerPointsSpan.textContent.match(/\d+/)[0]);
+                            playerPointsSpan.textContent = "(" + (currentPoints + 100 + parseInt(messageAsJson.bonuspoints, 10)) + ")";
+                            break; // Once the player is found, exit the loop
+                        }
+                    }
+                    // Unveil image and text
+                    const startTime = performance.now();
+                    const champName = document.getElementById("championName");
+                    const fullImage = document.getElementById("fullImage");
+                    champName.innerText = "<?= __("It was: ") ?>"+atob(championName);
+                    fullImage.src = atob(fullImageSource);
+
+                    function revealFullImage(timestamp) {
+                        const elapsedTime = timestamp - startTime;
+                        const progress = Math.min(elapsedTime / 1000, 1);
+                        document.getElementById("fullImage").style.opacity = progress;
+
+                        if (progress < 1) {
+                            requestAnimationFrame(revealFullImage);
+                        } else {
+                            champName.style.opacity = 1;
+                        }
+                    }
+
+                    requestAnimationFrame(revealFullImage);
                 } else {
                     addChatMessage(messageAsJson.name, messageAsJson.message, messageAsJson.color);
                 }
@@ -204,10 +246,11 @@ $db = new DB();
                     userName.innerText = playerName;
 
                     if (playerName === ownUsername) {
-                        userName.innerHTML = "<span class='text-"+messageAsJson.color+"/100'>"+playerName+"</span> " + " (<?= __("You") ?>)";
+                        userName.innerHTML = "<span class='text-"+messageAsJson.colors[playerName]+"/100'>"+playerName+"</span> " + " (<?= __("You") ?>)";
                         userName.classList.add("overflow-hidden", "text-ellipsis", "whitespace-nowrap", "text-white", "font-bold");
                         userList.children[1].insertBefore(userName, userList.children[1].firstChild);
                     } else {
+                        userName.innerHTML = "<span class='text-"+messageAsJson.colors[playerName]+"/100'>"+playerName+"</span>";
                         userName.classList.add("overflow-hidden", "text-ellipsis", "whitespace-nowrap", "text-gray");
                         userList.children[1].appendChild(userName);
                     }
@@ -228,6 +271,7 @@ $db = new DB();
                         option.removeAttribute("hidden");
                     }
                 }
+                resetBonusBar();
 
                 // Save variables
                 fullImageSource = imagePath;
@@ -273,6 +317,7 @@ $db = new DB();
                             option.removeAttribute("hidden");
                         }
                     }
+                    resetBonusBar();
 
                     // Save variables
                     fullImageSource = imagePath;
@@ -317,6 +362,24 @@ $db = new DB();
             <ol class="list-decimal list-inside"></ol>
         </div>
     </div>
+    <div class="absolute left-0 max-w-[256px] flex flex-col">
+        <div id="leaderboard" class="bg-dark m-4 p-4 rounded">
+            <h1 class="font-bold text-xl pb-2 text-center"><?= __("Leaderboard:") ?></h1>
+            <ol class="list-decimal list-inside" id="leaderboardList">
+                <?php 
+                $leaderboard = $db->getTopPlayers();
+                if ($leaderboard !== false) {
+                    foreach ($leaderboard as $index => $player) {
+                        echo "<li class='pt-2 pb-1 border-b border-dashed border-[#21222c] flex items-center'>";
+                        echo "<div class='w-40 truncate'>" . $index+1 . ". " .  $player["username"] . "</div>";
+                        echo "<span class='ml-auto'>(" . $player["points"] . ")</span>";
+                        echo "</li>";
+                    }
+                }
+                ?>
+            </ol>
+        </div>
+    </div>
     <div class="flex justify-center gap-x-8 mt-40 bg-dark rounded w-fit p-4">
         <div id="canvasContainer" class="text-center mb-4 flex justify-center flex-col items-center w-72">
             <h1 class="text-3xl font-bold mb-4"><?= __("Pixel Guesser") ?></h1>
@@ -326,6 +389,7 @@ $db = new DB();
             <form method="post" class="text-center flex mt-8" id="championForm" onsubmit="checkChamp(); return false;" autocomplete="off">
                 <input  type="text" 
                         name="champion_input"
+                        placeholder="Aatrox, Ahri, etc."
                         class="autofill:text-black text-black border border-2 border-solid border-white p-2 focus:border focus:border-2 focus:border-solid focus:border-white <?php if (isset($isCorrect)) echo $isCorrect ? 'correct-border' : 'incorrect-border'; ?>"
                         onkeyup="handleInputKeyUp(event)">
                 <div id="suggestions"></div>
@@ -342,11 +406,27 @@ $db = new DB();
                 </select>
             </div>
         </div>
-        <div class="flex items-center flex-col justify-start w-96 gap-y-4">
+        <div class="flex items-center flex-col justify-start w-[420px] gap-y-4">
             <span class="text-xl"><?= __("Bonus Points: ") ?></span>
             <div id="bonus-bar" class="bonus-bar"></div>
             <div id='chatContainer' class='bg-darker w-full max-h-80 h-full p-2 flex flex-col-reverse overflow-auto twok:text-base fullhd:text-sm'></div>
-            <div class="text-xl"><?php echo __("Points: "); if(isset($_SESSION['user']['email'], $_SESSION['user']['username'])){ $points = $db->getPoints($_SESSION['user']['username']); if($points !== false) { echo "<span id='gamePoints' class='font-bold'>".$points."</span>"; } } ?></div>
+            <?php 
+            if(isset($_SESSION['user']['email'], $_SESSION['user']['username'])){ 
+                echo '<div class="text-xl">'.__("Points: "); 
+                $points = $db->getPoints($_SESSION['user']['username']); 
+                if($points !== false) { 
+                    echo "<span id='gamePoints' class='font-bold'>".$points."</span>"; 
+                }
+                echo '</div>';
+            } else {
+                echo "<div class='text-xl cursor-help' x-data=\"{ showNotice: false }\" x-cloak @mouseover='showNotice = true' @mouseout='showNotice = false'>".__('Points: ')."???
+                        <div class='flex justify-center gap-x-0 -mt-8' x-cloak>
+                            <span class='text-sm absolute backdrop-blur-2xl bg-black/80 p-2 rounded' x-show='showNotice' x-transition>".sprintf(__("Please %slogin%s or %sregister%s to see and save your score"), "<a href='/login' class='underline'>", "</a>", "<a href='/register' class='underline'>", "</a>")."</span>
+                        </div></div>";
+
+
+            }
+            ?>
         </div>
     </div>
     <?php 
@@ -464,7 +544,7 @@ $db = new DB();
     };
 
     image.src = atob(imagePath);
-}
+    }
 
     function updateInputBorder(isCorrect) {
         const userInput = document.querySelector("input[name='champion_input']");
@@ -483,6 +563,36 @@ $db = new DB();
                 }, 500);
             }, 500); // Remove incorrect-border class immediately without fade out
         }
+    }
+
+    function calculateBonusPoints() {
+        const bonusBar = document.getElementById('bonus-bar');
+        const scaleXValue = window.getComputedStyle(bonusBar).transform.split(',')[0].split('(')[1];
+        const scaleXPercentage = parseFloat(scaleXValue) * 100;
+
+        // Calculate bonus points proportional to the scaleX percentage
+        const bonusPoints = Math.floor(scaleXPercentage);
+
+        return Math.min(bonusPoints, 100); // Cap bonusPoints at 100
+    }
+
+    function resetBonusBar() {
+        const bonusBar = document.getElementById('bonus-bar');
+
+        // Add the stopped class to stop the animation
+        bonusBar.classList.add('stopped');
+
+        // Remove the animation class to reset the animation
+        bonusBar.classList.remove('decreaseBonus');
+
+        // Force a reflow to ensure the animation class is removed before reapplying it
+        void bonusBar.offsetWidth;
+
+        // Remove the stopped class to restart the animation from full width
+        bonusBar.classList.remove('stopped');
+
+        // Reapply the animation class to restart the animation
+        bonusBar.classList.add('decreaseBonus');
     }
 
     function checkChamp() {
@@ -504,14 +614,15 @@ $db = new DB();
                 name: name,
                 difficulty: getCookie("pixelChamp"),
                 request: "correctAnswer",
-                answer: atob(correctAnswer)
+                answer: atob(correctAnswer),
+                bonuspoints: calculateBonusPoints()
             };
             ws.send(JSON.stringify(correctAnswerMessage))
 
             const startTime = performance.now();
             const champName = document.getElementById("championName");
             const fullImage = document.getElementById("fullImage");
-            champName.innerText = "<?= __("Correct Answer: ") ?>"+atob(championName);
+            champName.innerText = "<?= __("It was: ") ?>"+atob(championName);
             fullImage.src = atob(fullImageSource);
 
             function revealFullImage(timestamp) {

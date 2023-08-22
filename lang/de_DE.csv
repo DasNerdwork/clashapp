@@ -132,7 +132,7 @@ Finalscore,Finalwertung
 "Game length below minimum of 10min","Spieldauer unter Minimum von 10min"
 "Average Matchscore of all ranked & clash games (without remakes or <10min games)","Durchschnittliche Wertung von allen Ranglisten- oder Clashspielen (Ohne Remakes oder <10min Spiele)"
 "adjScoreTooltipMargin","-mt-24"
-"Correct Answer: ","Richtige Antwort: "
+"It was: ","Es war: "
 "Difficulty: ","Schwierigkeit: "
 "Easy","Einfach"
 "Medium","Mittel"
@@ -145,3 +145,4 @@ Finalscore,Finalwertung
 "Copied","Kopiert"
 "You","Du"
 "guessed the correct answer: %1","hat die richtige Antwort erraten: %1"
+"Leaderboard:","Bestenliste:"
