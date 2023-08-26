@@ -391,7 +391,7 @@ $db = new DB();
                         name="champion_input"
                         placeholder="Aatrox, Ahri, etc."
                         class="autofill:text-black text-black border border-2 border-solid border-white p-2 focus:border focus:border-2 focus:border-solid focus:border-white <?php if (isset($isCorrect)) echo $isCorrect ? 'correct-border' : 'incorrect-border'; ?>"
-                        onkeyup="handleInputKeyUp(event)">
+                        onkeydown="handleInputKeyDown(event)">
                 <div id="suggestions"></div>
                 <button type="submit" class="bg-tag-navy text-white px-4 py-2 border-2 border-solid border-tag-navy">&#10148;</button>
             </form>
@@ -474,9 +474,19 @@ $db = new DB();
         }
     }
 
+    let highlightedIndex = -1;
+    let arrowKeyPressed = false;
+    let emptySuggestions = true;
+
     function displaySuggestions(championList) {
         suggestionsContainer.innerHTML = "";
-        const maxSuggestions = 5; // Limit the number of displayed suggestions
+        arrowKeyPressed = false;
+        emptySuggestions = false;
+        const maxSuggestions = 5;
+
+        suggestionsContainer.addEventListener("mouseenter", () => {
+            arrowKeyPressed = false;
+        });
 
         const sortedChampionList = championList.sort((a, b) => {
             const aStartsWithInput = a.toLowerCase().startsWith(userInput.value.toLowerCase());
@@ -493,26 +503,83 @@ $db = new DB();
 
         for (let i = 0; i < Math.min(championList.length, maxSuggestions); i++) {
             const suggestion = document.createElement("div");
-            suggestion.textContent = championList[i]; // Using the original champion name from championKeys
+            suggestion.textContent = championList[i];
             suggestion.classList.add("suggestion");
+
+            suggestion.addEventListener("mouseenter", () => {
+                removeHighlight();
+            });
+
             suggestion.addEventListener("click", () => {
-                userInput.value = championList[i]; // Populate the input with the selected suggestion
+                userInput.value = championList[i];
                 clearSuggestions();
             });
 
             suggestionsContainer.appendChild(suggestion);
+
+            if(championList.length == 1){
+                highlightSuggestion(0);
+            }
         }
     }
+
+    function highlightSuggestion(index) {
+        removeHighlight();
+        if (index >= 0 && index < suggestionsContainer.children.length) {
+            highlightedIndex = index;
+            suggestionsContainer.children[index].style.backgroundColor = "#ccc";
+        }
+    }
+
+    function removeHighlight() {
+        if (highlightedIndex !== -1) {
+            suggestionsContainer.children[highlightedIndex].style.backgroundColor = "";
+            highlightedIndex = -1;
+        }
+    }
+
+    function handleInputKeyDown(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            if (highlightedIndex !== -1 && !emptySuggestions) {
+                userInput.value = suggestionsContainer.children[highlightedIndex].textContent;
+                clearSuggestions();
+            } else {
+                checkChamp();
+            }
+        } else if (event.key === "ArrowDown" || event.key === "Tab") {
+            event.preventDefault();
+            if (!arrowKeyPressed) {
+                arrowKeyPressed = true;
+                highlightSuggestion(0); // Highlight the first suggestion on the first arrow key press
+            } else if (highlightedIndex < suggestionsContainer.children.length - 1) {
+                highlightSuggestion(highlightedIndex + 1);
+            }
+        } else if (event.key === "ArrowUp") {
+            event.preventDefault();
+            if (!arrowKeyPressed) {
+                arrowKeyPressed = true;
+                highlightSuggestion(suggestionsContainer.children.length - 1); // Highlight the last suggestion on the first arrow key press
+            } else if (highlightedIndex > 0) {
+                highlightSuggestion(highlightedIndex - 1);
+            }
+        }
+    }
+
+    // Add this event listener to start highlighting on the first arrow key press
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            if (highlightedIndex === -1) {
+                highlightSuggestion(0);
+            }
+        }
+    });
 
     function clearSuggestions() {
         suggestionsContainer.innerHTML = "";
-    }
-
-    function handleInputKeyUp(event) {
-        if (event.key === "Enter") {
-            event.preventDefault();
-            checkChamp(); // Trigger the checkChamp function on Enter key press
-        }
+        arrowKeyPressed = false;
+        emptySuggestions = true;
     }
 
     function pixelateImage(imagePath, blockSize) {
