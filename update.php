@@ -160,7 +160,7 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
             
             if($existingJson == ""){
                 if(empty($tempAjaxMatchIDArray)){
-                    echo "<script>console.log('All matches of ".$playerName." already local.2');
+                    echo "<script>console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
                     xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
                     processResponseData($ajaxUniquifier)
