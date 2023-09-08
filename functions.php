@@ -8,7 +8,7 @@
  * @author Florian Falk <dasnerdwork@gmail.com>
  * @author Pascal Gnadt <p.gnadt@gmx.de>
  * @copyright Copyright (c) date("Y"), Florian Falk
- * 
+ *
  * Initializing of global variables used throughout all functions below
  *
  * @global mixed $apiKey The API Key necessary to communicate with the Riot API, to edit: nano /etc/nginx/fastcgi_params then service nginx restart
@@ -40,7 +40,7 @@ $apiRequests = array(
     "postSubmit" => 0
 );
 $currentTimestamp = time();
-$rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns", 
+$rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns",
 "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
 $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
 "takedowns", "turretTakedowns", "inhibitorTakedowns", "dragonTakedowns", "riftHeraldTakedowns", "damageDealtToBuildings", "damageDealtToObjectives", "damageSelfMitigated", "totalDamageDealtToChampions", "totalDamageTaken", "totalDamageShieldedOnTeammates",
@@ -158,7 +158,7 @@ function getMasteryScores($sumid){
         curl_close($ch);
     }
 
-    
+
 
     // Resolving return values
     foreach(json_decode($output, true) as $masteryArray){
@@ -188,7 +188,7 @@ function getMasteryScores($sumid){
  * @var array $rankDataArray Just a rename and rearrange of the API request return values
  * @var array $output Contains the output of the curl request as string which we later convert using json_decode
  * @var string $httpCode Contains the returncode of the curl request (e.g. 404 not found)
- * 
+ *
  * Returnvalue:
  * @return array $rankReturnArray Just a rename of the $rankDataArray
  */
@@ -254,7 +254,8 @@ function getCurrentRank($sumid){
  */
 function getMatchIDs($puuid, $maxMatchIDs){
     global $headers, $apiRequests;
-    $matchIDArray = array();
+    $soloduoIDArray = array();
+    $flexIDArray = array();
     $clashIDArray = array();
     $gameType = "ranked";
     $start = 0;
@@ -293,7 +294,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $matchidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
+        $flexidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
@@ -303,7 +304,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $matchidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
+            $flexidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             echo "<script>matchIdCalls++;</script>";
@@ -316,7 +317,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
         curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $matchidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
+        $soloduoidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
@@ -326,15 +327,18 @@ function getMatchIDs($puuid, $maxMatchIDs){
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $matchidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
+            $soloduoidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
             echo "<script>matchIdCalls++;</script>";
         }
 
         // Add each matchID to return array
-        foreach (json_decode($matchidOutput) as $rankedMatch) {
-            $matchIDArray[] = $rankedMatch;
+        foreach (json_decode($soloduoidOutput) as $soloduoMatch) {
+            $soloduoIDArray[] = $soloduoMatch;
+        }
+        foreach (json_decode($flexidOutput) as $flexMatch) {
+            $flexIDArray[] = $flexMatch;
         }
         foreach (json_decode($clashidOutput) as $clashMatch) {
             $clashIDArray[] = $clashMatch;
@@ -343,10 +347,10 @@ function getMatchIDs($puuid, $maxMatchIDs){
     }
 
     // Merge and sort clash matchids and ranked match ids
-    $returnArray = array_merge($matchIDArray, $clashIDArray);
+    $returnArray = array_merge($flexIDArray, $soloduoIDArray, $clashIDArray);
     rsort($returnArray);
     $returnArray = array_slice($returnArray,0 ,$maxMatchIDs);
-    
+
     return $returnArray;
 }
 
@@ -471,7 +475,7 @@ function getMatchData($matchIDArray){
     foreach ($matchIDArray as $key => $matchIDJSON) {
         if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
         if(file_exists('/hdd1/clashapp/data/matches/'.$matchIDJSON.'.json')){
-           $matchData[$matchIDJSON] = json_decode(file_get_contents('/hdd1/clashapp/data/matches/'.$matchIDJSON.'.json')); 
+           $matchData[$matchIDJSON] = json_decode(file_get_contents('/hdd1/clashapp/data/matches/'.$matchIDJSON.'.json'));
            unset($matchData[$matchIDJSON]->metadata);
            unset($matchData[$matchIDJSON]->info->gameId);
            unset($matchData[$matchIDJSON]->info->gameMode);
@@ -503,15 +507,15 @@ function getMatchData($matchIDArray){
             unset($matchData[$matchIDJSON]->info->tournamentCode);
         }  else {
             echo "File does not exist: ".$matchIDJSON;
-        }     
+        }
     }
     return $matchData;
 }
 
 /** Function to convert seconds to readable time
- * 
+ *
  * @param int $seconds The amount of seconds given that we wan't to convert to human-readable time words
- * 
+ *
  * Returnvalue:
  * @return string|void Depending on switch case as seen below, but string sentence
  */
@@ -556,7 +560,7 @@ function secondsToTime($seconds) {
  *
  * Returnvalue:
  * @return string N/A, displaying on page via table
- * 
+ *
  * @todo possibility to make more beautiful and/or write a testcase?
  */
 function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
@@ -567,8 +571,8 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     $returnString = "";
 
     // Initiating Matchdetail Table
-    $returnString .= "<button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full' 
-            @click='open = !open' 
+    $returnString .= "<button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full'
+            @click='open = !open'
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
     $returnString .= "<div class='smooth-transition w-full overflow-hidden twok:min-h-[2300px] fullhd:min-h-[1868.75px]' x-show='open' x-transition x-cloak>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
@@ -614,15 +618,15 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 }
                                 $returnString .= gmdate("i:s", $inhalt->info->gameDuration)."</span>";
                                 $returnString .= "</div>";
-                                
+
                                 // $returnString .= "<div class='match-id hidden'>".$matchIDJSON."</div>";
-                                
+
                                 $returnString .= '<div id="match-time-ago" class="ml-auto">';
-                                            
+
                                 // Display when the game date was, if > than 23h -> day format, if > than 30d -> month format, etc.
                                 $returnString .= "<span>".secondsToTime(strtotime('now')-intdiv($inhalt->info->gameEndTimestamp, 1000))."</span></div>";
                                 $returnString .= '</div>';
-                                
+
                                 // Display of the played champions icon
                                 $returnString .= '<div class="champion-data flex gap-2 twok:h-[68px] fullhd:h-[56px] justify-between px-2"><div class="champion-data-left inline-flex gap-2"><div class="champion-icon">';
                                 if ($inhalt->info->participants[$in])
@@ -653,7 +657,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                         $returnString .= '<img src="/clashapp/data/misc/na.webp" width="68" height="68" class="align-middle twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] rounded" loading="lazy" alt="This icon represents a value not being available">';
                                     }
                                 }
-                                
+
                                 // Save values dealt for later print below
                                 $dealt = number_format($inhalt->info->participants[$in]->totalDamageDealtToChampions, 0);
                                 $tanked = number_format($inhalt->info->participants[$in]->totalDamageTaken, 0);
@@ -677,7 +681,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         }
                         $returnString .= "</div>";
                         $returnString .= "</div>";
-                        
+
                         // Display summoner spells
                         $returnString .= '<div class="summoner-spells grid grid-rows-2 gap-1 twok:max-w-[32px] fullhd:max-w-[26px]">';
                         $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
@@ -808,7 +812,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     $returnString .= '<span>'.$dealt.'</span>';
                     $returnString .= '</div>';
 
-                    
+
                     $returnString .= '<div class="kill-participation col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
                     $returnString .= '<img src="/clashapp/data/misc/icons/KillParticipation.webp" width="32" height="26" class="max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="An icon of two swords clashing with each other">';
                         if($totalTeamTakedowns != 0){
@@ -854,7 +858,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     $returnString .= '<div class="turret-platings col-span-1 row-span-1 h-full flex justify-center items-center">';
                     $returnString .= __("Platings").': '.$turretPlatings;
                     $returnString .= "</div>";
-                    
+
                     $returnString .= '<div class="match-tag-container col-span-6 row-span-1 h-full flex justify-start items-center gap-4 ">';
                     $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Tag 1</div>';
                     $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Testtag 2</div>';
@@ -864,7 +868,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     $returnString .= '</div></div>';
                     $returnString .= '<button type="button" class="collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4" @click="advanced = !advanced" x-text="advanced ? \'&#11165;\' : \'&#11167;\'"></button>';
                     $returnString .= '</div>';
-                
+
                 $totalTeamTakedowns = 0; // Necessary to reset Kill Participation
             }
         }
@@ -1113,6 +1117,106 @@ function getLanePercentages($matchDaten, $puuid){
     $laneReturnArray[1] = $secondaryLane;
 
     return $laneReturnArray;
+}
+
+
+/**
+ * This function fetches the tags of a player generated by comparing them with our calculated average stats
+ * @param array $matchDaten The compacted information of all matches of a user in a single array (performance reasons)
+ * @param string $puuid The personal users ID set by Riot Games and fetched either from the players own json file or via an API request
+ * @param array $playerLanes The two most played lanes of a player
+ *
+ * Returnvalue:
+ * @return array $tagReturnArray An array containing all fitting tags of a player
+ */
+function getPlayerTags($matchDaten, $puuid, $playerLanes){
+    $tagReturnArray = array();
+    $tempAverageArray = array();
+    $generalKey = array();
+    $statNameArray = array("assists","consumablesPurchased","damageDealtToBuildings","damageDealtToObjectives","damageSelfMitigated","deaths","detectorWardsPlaced","goldEarned","inhibitorTakedowns",
+    "kills","neutralMinionsKilled","totalDamageDealtToChampions","totalDamageShieldedOnTeammates","totalDamageTaken","totalHealsOnTeammates","totalMinionsKilled","totalTimeCCDealt","totalTimeSpentDead",
+    "turretTakedowns","visionScore","wardsPlaced");
+
+    // Step 1: Fetch average stats over all match data
+
+    foreach($matchDaten as $singleMatch){                            // For every match
+        foreach ($singleMatch->info->participants as $participant) { // For every player
+            if ($participant->puuid === $puuid) {                    // That is us
+                if(!isset($tempAverageArray[$participant->teamPosition])){ // Preinitialize the specific played lanes for further comparison later on
+                    $tempAverageArray[$participant->teamPosition] = array();
+                }
+                if (isset($tempAverageArray[$participant->teamPosition]["gameCount"])) { // Set & increment gameCount for every match played as $lane
+                    $tempAverageArray[$participant->teamPosition]["gameCount"]++;
+                } else {
+                    $tempAverageArray[$participant->teamPosition]["gameCount"] = 1;
+                }                
+                foreach($participant->challenges as $challenge => $value) { // Get all challenge sums
+                    if(!isset($tempAverageArray[$participant->teamPosition][$challenge])){
+                        $tempAverageArray[$participant->teamPosition][$challenge] = $value;
+                    } else {
+                        $tempAverageArray[$participant->teamPosition][$challenge] += $value;
+                    }
+                }
+                foreach($participant as $statName => $statValue){ // Get all stat sums
+                    if(in_array($statName, $statNameArray)){
+                        if(!isset($tempAverageArray[$participant->teamPosition][$statName])){
+                            $tempAverageArray[$participant->teamPosition][$statName] = $statValue;
+                        } else {
+                            $tempAverageArray[$participant->teamPosition][$statName] += $statValue;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Step 2: Generate GENERAL array
+
+    foreach ($tempAverageArray as $lane) {
+        foreach ($lane as $key => $value) {
+            if (!isset($generalKey[$key])) {
+                $generalKey[$key] = $value;
+            } else {
+                $generalKey[$key] += $value;
+            }
+        }
+    }
+    $tempAverageArray["GENERAL"] = $generalKey;
+
+    // Step 3: Calculate averages over gameCount
+
+    foreach ($tempAverageArray as $lane => $data) {
+        foreach ($data as $key => $value) {
+            if ($key != "gameCount" && $data["gameCount"] != 0) {
+                $finalValue = $value / $data["gameCount"];
+                if (preg_match('/\.\d{2,}$/', $finalValue)) { // If the number has 2 or more decimals
+                    $tempAverageArray[$lane][$key] = number_format($finalValue, 2, ".", "");
+                } else {
+                    $tempAverageArray[$lane][$key] = $value / $data["gameCount"];
+                }
+            }
+        }
+    }
+
+    // Step 4: Compare averages with averageStats.json (fetched in scripts/statFetcher.py)
+    $averageStats = json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true);
+
+    // Loop through tempAverageArray and compare with averageStats
+    foreach ($tempAverageArray as $lane => $data) {
+        foreach ($data as $key => $value) {
+            if ($key != "gameCount" && isset($averageStats[$lane][$key])) {
+                if($value != 0){
+                    $averageValue = $averageStats[$lane][$key];
+                    $difference = (($value - $averageValue) / abs($averageValue));
+                    if ($difference <= -0.5 || $difference >= 0.5) { // Only save difference if relevant
+                        $tagReturnArray[$lane][$key] = number_format($difference, 2);
+                    } 
+                }
+            }
+        }
+    }
+
+    return $tagReturnArray; // TODO: Add Lane differentiating
 }
 
 /** Fetches the average value of specific attributes
@@ -1432,7 +1536,7 @@ function getHighestWinrateWith($lane, $matchDataArray, $puuid){
 
 /** Game Ranking Function to identify the places 1-10 in a match
  * This function returns an array of 2-decimal numbers (e.g. 8,74) which arrange from best player with highest score to worst one with lowest
- * 
+ *
  * @param array $matchIDArray An array containing all matchIDs of a player
  * @param array $matchDataArray Inputarray of all MatchIDs of the user (PUUID) over which we iterate
  * @param string $sumid The summoners SumID necessary to evaluate the player specific data
@@ -1520,9 +1624,9 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                             return $a[$attribute] <=> $b[$attribute];
                         });
                     }
-                    
+
                     // print_r($tempArray);
-                    
+
                     foreach($tempArray as $rank => $value){
                         if ($value["SumID"] == $sumid){
                             switch ($attribute){
@@ -1636,17 +1740,17 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                                     $reasonArray[$matchID]["DamageDealtToChampions"]["Rank"] = 10-$rank;
                                     $reasonArray[$matchID]["DamageDealtToChampions"]["Points"] = ($rank+1)*15;
                                     break;
-                                case "DamageTaken":      
+                                case "DamageTaken":
                                     $maxRankScore += (($rank+1)*8);
                                     $reasonArray[$matchID]["DamageTaken"]["Rank"] = 10-$rank;
                                     $reasonArray[$matchID]["DamageTaken"]["Points"] = ($rank+1)*8;
                                     break;
-                                case "TeamShielded":                 
+                                case "TeamShielded":
                                     $maxRankScore += (($rank+1)*8);
                                     $reasonArray[$matchID]["TeamShielded"]["Rank"] = 10-$rank;
                                     $reasonArray[$matchID]["TeamShielded"]["Points"] = ($rank+1)*8;
                                     break;
-                                case "TeamHealed":                   
+                                case "TeamHealed":
                                     $maxRankScore += (($rank+1)*7);
                                     $reasonArray[$matchID]["TeamHealed"]["Rank"] = 10-$rank;
                                     $reasonArray[$matchID]["TeamHealed"]["Points"] = ($rank+1)*7;
@@ -1656,17 +1760,17 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                                     $reasonArray[$matchID]["TimeCC"]["Rank"] = 10-$rank;
                                     $reasonArray[$matchID]["TimeCC"]["Points"] = ($rank+1)*5;
                                     break;
-                                case "DeathTime":                   
+                                case "DeathTime":
                                     $maxRankScore += (($rank+1)*20);
                                     $reasonArray[$matchID]["DeathTime"]["Rank"] = 10-$rank;
                                     $reasonArray[$matchID]["DeathTime"]["Points"] = ($rank+1)*20;
                                     break;
-                                case "SkillshotsDodged":                      
+                                case "SkillshotsDodged":
                                     $maxRankScore += (($rank+1)*20);
                                     $reasonArray[$matchID]["SkillshotsDodged"]["Rank"] = 10-$rank;
                                     $reasonArray[$matchID]["SkillshotsDodged"]["Points"] = ($rank+1)*20;
                                     break;
-                                case "SkillshotsHit":                   
+                                case "SkillshotsHit":
                                     $maxRankScore += (($rank+1)*1);
                                     $reasonArray[$matchID]["SkillshotsHit"]["Rank"] = 10-$rank;
                                     $reasonArray[$matchID]["SkillshotsHit"]["Points"] = ($rank+1)*1;
@@ -1701,7 +1805,7 @@ function getTeamByTeamID($teamID){
         global $headers, $apiRequests;
         $teamDataArray = array();
         $logPath = '/hdd1/clashapp/data/logs/teamDownloader.log';
-        
+
         // Curl API request block
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/teams/" . $teamID);
@@ -1710,12 +1814,12 @@ function getTeamByTeamID($teamID){
         $teamOutput = curl_exec($ch); $apiRequests["getTeamByTeamID"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
-        
+
         // 403 Access forbidden -> Outdated API Key
         if($httpCode == "403"){
             echo "<h2>403 Forbidden TeamByTeamID</h2>";
         }
-        
+
         // 429 Too Many Requests
         if($httpCode == "429"){
             sleep(5);
@@ -1731,7 +1835,7 @@ function getTeamByTeamID($teamID){
         $httpCode = "200";
         $teamOutput = file_get_contents('/hdd1/clashapp/data/misc/test.json');
     }
-    
+
     // Collect requested values in returnarray
     $teamDataArray["Status"] = $httpCode;
     $teamDataArray["TeamID"] = json_decode($teamOutput)->id;
@@ -1751,7 +1855,7 @@ function unique_multidim_array($array, $key) {
     $temp_array = array();
     $i = 0;
     $key_array = array();
-   
+
     foreach($array as $val) {
         if (!in_array($val[$key], $key_array)) {
             $key_array[$i] = $val[$key];
@@ -1921,7 +2025,7 @@ function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
     $returnArray["Teamstats"]["Winrate"] = number_format(($counter2/($counter+$counter2))*100, 2, '.', ' ');
 
     $weakAgainstArray = array_slice($sortArray, 0, 20); // Recommended Picks - Team is weak against those champions
-    
+
     $strongAgainstArray = array_slice($sortArray, count($sortArray)-20, count($sortArray)); // Discommended Picks - Team is strong against those champions
 
     usort($strongAgainstArray, function($a, $b){
@@ -1964,27 +2068,27 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
         $b["Points"] = str_replace(',', '', $b["Points"]);
         return $b["Points"] <=> $a["Points"];
     });
-    
+
     // Remove any duplicates and always choose the highest one (select combined data and remove single data from array)
     foreach($sortedMasteryArray as $key1 => $champData1){ // Total Teampoints = Grouped mastery points of specific champion for the whole team e.g. two people play one champion -> mastery scores combined for that champ
         $sortedMasteryArray[$key1]["TotalTeamPoints"] = 0;
         $banExplainArray[$champData1["Champion"]]["TotalTeamPoints"]["Value"] = 0;
         foreach($sortedMasteryArray as $key2 => $champData2){
-            if(($champData1 != $champData2) && ($champData1["Champion"] == $champData2["Champion"])){ 
+            if(($champData1 != $champData2) && ($champData1["Champion"] == $champData2["Champion"])){
                 $sortedMasteryArray[$key1]["TotalTeamPoints"] += str_replace(',', '.', $champData2["Points"]);
                 $banExplainArray[$champData1["Champion"]]["TotalTeamPoints"]["Value"] += str_replace(',', '.', $champData2["Points"]);
             }
         }
     }
-    
+
     // Delete unnecessary information from remaining array
     foreach(array_keys($sortedMasteryArray) as $championData){
-        unset($sortedMasteryArray[$championData]["Lvl"]); 
-        unset($sortedMasteryArray[$championData]["LvlUpTokens"]); 
+        unset($sortedMasteryArray[$championData]["Lvl"]);
+        unset($sortedMasteryArray[$championData]["LvlUpTokens"]);
         $sortedMasteryArray[$championData]["MatchingLanersPrio"] = 0;
     }
     // print_r($sortedMasteryArray); // This is now the sorted team mastery data array
-    
+
     // Count how many people play a champion by adding their sumid if they have at least 20k mastery points on a champ (eq. to average understanding and not just played once)
     foreach($masterDataArray as $sumid => $playersMasteryData){
         foreach($playersMasteryData as $data){
@@ -1994,20 +2098,20 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
             }
         }
     }
-    
+
     // Remove all if a champ only got played by one person -> useless info
     foreach($countArray as $champion => $players){
         if(count($players)<2){
             unset($countArray[$champion]);
         }
     }
-    
+
     // Sort the array of how many people played what champion from 5per champ highest to 2per champ lowest
     uasort($countArray, function($a, $b){
         return count($b) <=> count($a);
     });
     // print_r($countArray); // This is now an array of total player capable to play a champion
-    
+
     foreach($countArray as $champion => $players){ // For every champion that is played by more than 2 people with each more than 20k mastery
         foreach($players as $comparePlayer1){ // Take comparePlayer1
             foreach($players as $comparePlayer2){ // And comparePlayer 2
@@ -2109,10 +2213,10 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
      * Mainrole TOP eq. Secrole JGLTOP +1                                       Mainrole SUPP eq. Secrole MIDSUPP +1
      * Mainrole JGLTOP eq. Mainrole JGL +1                                      Secrole MIDSUPP eq. Mainrole SUPP +0.5
      * Mainrole JGL eq. Mainrole JGLTOP +1                                      ---------------------------------> 1.5
-     * Secrole JGLTOP eq. Mainrole TOP +0.5                                     
+     * Secrole JGLTOP eq. Mainrole TOP +0.5
      * ---------------------------------> 3.5
-     */ 
-    
+     */
+
     // Count how many players have +20k Mastery on a champion without any matching lanes (Everyone could play some games Leona, but that doesnt mean it's as important as 2x supp mains on leona)
     $playerCountOfChampionArray = array_count_values(array_column($sortedMasteryArray, "Champion"));
     foreach($sortedMasteryArray as $key => $championData){
@@ -2122,7 +2226,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
             }
         }
     }
-    // print_r($sortedMasteryArray); // Array now contains information about how many players of the team can play a specific champion (not as important as when they match with their lanes as 3+ twitch players on random roles != 3+ twitch jgl) 
+    // print_r($sortedMasteryArray); // Array now contains information about how many players of the team can play a specific champion (not as important as when they match with their lanes as 3+ twitch players on random roles != 3+ twitch jgl)
 
     // Calculate the occurences of a champion in the last fetched games (E.g. Viktor played in 7 of 15 games is important information, many points on irelia too, but 0 occurences in 15 last games of that player less important)
     foreach($matchIDArray as $matchID){
@@ -2140,7 +2244,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
             }
         }
     }
-    
+
     // This block saves all matchscores achieved per champion per match if there were occurences in the last games. E.g. Kayn was played 3 times with scores [0] => 5.23, [1] => 6.77 [2] => 4.34
     foreach($matchData as $mainKey => $inhalt){
         foreach($inhalt->info->participants as $player){
@@ -2164,7 +2268,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
     // print_r($sortedMasteryArray); // Array now contains the average matchscore on a champion if there were occurences in the last games
 
     $sortedMasteryArray = unique_multidim_array($sortedMasteryArray, "Champion"); // Remove any duplicates
-    
+
     foreach($sortedMasteryArray as $key => $championData){
         if(!isset($sortedMasteryArray[$key]["OccurencesInLastGames"])) $sortedMasteryArray[$key]["OccurencesInLastGames"] = 0; // Handle empty occurences
         if(!isset($sortedMasteryArray[$key]["AverageMatchScore"])) $sortedMasteryArray[$key]["AverageMatchScore"] = 0; // Handle empty Scores
@@ -2177,8 +2281,8 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
         if(isset($sortedMasteryArray[$key]["TotalTeamPoints"])){
             $sortedMasteryArray[$key]["FinalScore"] += number_format((str_replace('.', '', $sortedMasteryArray[$key]["TotalTeamPoints"])**1.1)/(398107/(0.02*$sortedMasteryArray[$key]["CapablePlayers"])),2,'.','');
             $banExplainArray[$championData["Champion"]]["TotalTeamPoints"]["Add"] = number_format((str_replace('.', '', $sortedMasteryArray[$key]["TotalTeamPoints"])**1.1)/(398107/(0.02*$sortedMasteryArray[$key]["CapablePlayers"])),2,'.','');
-        }    
-        
+        }
+
         switch ($sortedMasteryArray[$key]["LastPlayed"]){
             case $sortedMasteryArray[$key]["LastPlayed"] < strtotime("-1 year"): // Über ein Jahr her
                 $sortedMasteryArray[$key]["FinalScore"] += 0.16;
@@ -2220,7 +2324,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
          * 10 -> 1.23
          * 15 -> 1.63
          * 20 -> 2.00
-         * 
+         *
          */
 
 
@@ -2231,29 +2335,29 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
 
         /**
          * Linear:          Exponentiell:
-         * 1  -> 0.30       1  -> 0.05      
-         * 2  -> 0.60       2  -> 0.17      
-         * 3  -> 0.90       3  -> 0.36      
-         * 4  -> 1.20       4  -> 0.60      
-         * 5  -> 1.50       5  -> 0.89      
-         * 6  -> 1.80       6  -> 1.22      
-         * 7  -> 2.10       7  -> 1.60      
-         * 8  -> 2.40       8  -> 2.02      
-         * 9  -> 2.70       9  -> 2.49      
-         * 10 -> 3.00       10 -> 2.99      
-         * 
+         * 1  -> 0.30       1  -> 0.05
+         * 2  -> 0.60       2  -> 0.17
+         * 3  -> 0.90       3  -> 0.36
+         * 4  -> 1.20       4  -> 0.60
+         * 5  -> 1.50       5  -> 0.89
+         * 6  -> 1.80       6  -> 1.22
+         * 7  -> 2.10       7  -> 1.60
+         * 8  -> 2.40       8  -> 2.02
+         * 9  -> 2.70       9  -> 2.49
+         * 10 -> 3.00       10 -> 2.99
+         *
          */
 
          $sortedMasteryArray[$key]["FinalScore"] = number_format($sortedMasteryArray[$key]["FinalScore"],2 ,".", "");
     }
 
-    
+
     $returnArray = $sortedMasteryArray;
-    
+
     usort($returnArray, function($a, $b){
         return $b["FinalScore"] <=> $a["FinalScore"];
     });
-    
+
     $returnArray = array_slice($returnArray, 0, 10);
 
     // Fetch which player contributes most to single mastery points
@@ -2290,19 +2394,19 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
 
     // $returnAndExplainArray["Return"] = $returnArray;
     // $returnAndExplainArray["Explain"] = $banExplainArray;
-    
-    return $banExplainArray; 
+
+    return $banExplainArray;
 }
 
 /** This function the necessary information for a correct profile icon + border display
  * @param array $rankData A players stored information about his rank, viewable in his sumid.json
- * 
+ *
  * @var int $rankVal The valuater, which saves a score to later determine the highest rank of a player if multiple are present
  * @var string $highestRank A playeholder variable which will be overwritten if another $rankVal is higher than the previous $rankVel
  *             This one holds the current highest rank tier, e.g. PLATINUM
  * @var string $rankNumber The roman form number of a give rank, e.g. IV
  * @var string $highEloLP Just to store the LP count in case the rank is high elo (Master+)
- * 
+ *
  * Returnvalue:
  * @return array The custom return array consists of a type which is either Rank or Level to determine the icon border
  *              Additionally it receives the necessary level filename or whole ranked data to further do stuff with it -> see team.php
@@ -2311,7 +2415,7 @@ function getRankOrLevel($rankData, $playerData){
     $rankVal = 0; // This score is used to find the highest Rank from both Flex and Solo Queue | Local Variable
     $highEloLP = ""; // If the user has reached high elo the LP count is important (just for Master, Grandmaster and Challenger)
 
-    foreach($rankData as $rankedQueue){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution) 
+    foreach($rankData as $rankedQueue){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution)
         if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
             if($rankedQueue["Tier"] == "SILVER" && $rankVal < 3){
                 $rankVal = 3;
@@ -2407,10 +2511,10 @@ function getRankOrLevel($rankData, $playerData){
 
 /** This function simply returns a color code corresponding to a textual rank input, e.g. "PLATINUM"
  * @param $currentRank The current rank as capslocked string
- * 
+ *
  * Returnvalue:
  * @return string A hexadecimal color code
- * 
+ *
  * function getRankColor($currentRank){
  *     switch ($currentRank){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution)
  *         case "SILVER":
@@ -2437,7 +2541,7 @@ function getRankOrLevel($rankData, $playerData){
 
 /** This function simply returns a color code corresponding to a textual rank input, e.g. "PLATINUM"
  * @param $currentRank The current rank as capslocked string
- * 
+ *
  * Returnvalue:
  * @return string|void A hexadecimal color code
  */
@@ -2583,13 +2687,13 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
 
 /**
  * This function generates a Tag with a specific background color aswell as a tooltip when hovering over
- * 
+ *
  * @param string $tagText The displayed text content of the tag
  * @param string $bgColor The background color of the tag-button
  * @param string $tooltipText The tooltip text shown when hovering over the tag
- * 
+ *
  * @return string A generated html tag as a div element with a tooltop hover function
- * 
+ *
  */
 function generateTag($tagText, $bgColor, $tooltipText) {
     $translatedTagText = __($tagText);
@@ -2612,7 +2716,7 @@ function generateTag($tagText, $bgColor, $tooltipText) {
  *
  * No other data has to be saved or transferred as all the data we get from this API request is also received during the
  * following steps and e.g. the getTeamByTeamID($teamID) function.
- * 
+ *
  * @var string $playerName A summoners ingame name, fetched by the POST (last part of URL)
  * @var array $playerData Either the API requested playerdata or the locally stored one, used to retrieve the SumID
  *

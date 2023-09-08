@@ -23,6 +23,7 @@ if(isset($_POST['mode'])){
         $playerLanes = getLanePercentages($matchData, $puuid); // Retrieves the two most played lanes of the give puuid
         $playerDataJSON["LanePercentages"] = $playerLanes;
         $response['playerLanes'] = $playerDataJSON["LanePercentages"];
+        $playerDataJSON["Tags"] = getPlayerTags($matchData, $puuid, $playerLanes);
     } 
     
     if($_POST['mode'] == "both" || $_POST['mode'] == "scores"){
