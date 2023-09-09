@@ -227,42 +227,38 @@ function showTooltip(element, text, delay, direction, additionalCSS = '') {
     'top-right': 'ml-4 -mt-14',
   };
 
+  const timestamp = new Date().getTime(); // Get a unique timestamp
+
   element.insertAdjacentHTML(
     'beforeend',
-    `<div class="w-auto bg-opacity-65 bg-black text-white text-center text-xs p-2 rounded-lg absolute ${positions[direction]} hidden z-10 ${additionalCSS}"
+    `<div data-tooltip-id="${timestamp}" class="w-auto bg-opacity-65 bg-black text-white text-center text-xs p-2 rounded-lg absolute ${positions[direction]} hidden z-10 ${additionalCSS}"
       id="tooltip">${text}</div>`
   );
 
   const tooltip = document.getElementById('tooltip');
-  const timestamp = new Date().getTime(); // Get a unique timestamp
-  tooltip.id = `tooltip-${timestamp}`; // Set a unique ID for the tooltip
   setTimeout(() => {
     if (tooltip) {
       tooltip.classList.remove('hidden'); // Show the tooltip after adding it to the DOM
       tooltip.style.opacity = '1'; // Set opacity after a brief delay for the fade-in effect
     }
   }, delay);
-  return tooltip.id;
+  return tooltip;
 }
 
-function hideTooltip(tooltipId) {
-  if(tooltipId){
-    var tooltip = document.getElementById(tooltipId);
-  } else {
-    var tooltip = document.getElementById("tooltip");
-  }
-  if (tooltip) {
-    tooltip.style.opacity = '0';
-    tooltip.classList.add('hidden');
-    tooltip.remove();
+function hideTooltip(tooltipParent) {
+  var firstTooltip = tooltipParent.querySelector('div[data-tooltip-id]');
+  if (firstTooltip) {
+    firstTooltip.style.opacity = '0';
+    firstTooltip.classList.add('hidden');
+    firstTooltip.remove();
   }
 }
 
 
 function copyInviteLink(element, text, delay, direction, additionalCSS = '') {
   copyToClipboard(window.location.href + '?join=' + getCookie('roomCode'));
-  var elementId = showTooltip(element, text, delay, direction, additionalCSS);
+  var tooltipElement = showTooltip(element, text, delay, direction, additionalCSS);
   setTimeout(() => {
-    hideTooltip(elementId);
+    hideTooltip(tooltipElement);
   }, 1000);
 }
