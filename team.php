@@ -211,7 +211,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     $startFetchPlayer[$key] = microtime(true);
                     $memFetchPlayer[$key] = memory_get_usage();
                     echo "
-                    <td class='align-top w-1/5 max-w-[19.25vw] opacity-0' style='animation: .5s ease-in-out ".$playerSpawnDelay."s 1 fadeIn; animation-fill-mode: forwards;'>
+                    <td class='align-top w-1/5 opacity-0 z-20 relative' style='animation: .5s ease-in-out ".$playerSpawnDelay."s 1 fadeIn; animation-fill-mode: forwards;'>
                         <table class='rounded bg-[#141624]'>
                             <tr>
                                 <td class='w-1/5 text-center'>";
@@ -500,7 +500,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             if(!$execOnlyOnce) $startPrintAverageMatchscore = microtime(true);
                                             $memPrintAverageMatchscore = memory_get_usage(); echo "
                                             <div class='flex h-8 items-center justify-between'>
-                                                <span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Average Matchscore of all ranked & clash games (without remakes or <10min games)")."\", 500, \"top-center\", \"".__("adjScoreTooltipMargin")."\")' onmouseleave='hideTooltip(this)'>".__("Avg. Score").":</span>
+                                                <span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Average Matchscore of all ranked & clash games (without remakes or <10min games)")."\", 500, \"top-right\", \"".__("adjScoreTooltipMargin")."\")' onmouseleave='hideTooltip(this)'>".__("Avg. Score").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center'>
                                                     <span class='transition-opacity duration-500 easy-in-out'>";
                                                     if($upToDate){
@@ -531,7 +531,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 </div>
                                             </div>
                                             <div class='flex h-8 items-center justify-between'>
-                                                <span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Average Matchscore of all ranked & clash games (without remakes or <10min games)")."\", 500, \"top-center\", \"".__("adjScoreTooltipMargin")."\")' onmouseleave='hideTooltip(this)'>".__("Avg. Score").":</span>
+                                                <span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Average Matchscore of all ranked & clash games (without remakes or <10min games)")."\", 500, \"top-right\", \"".__("adjScoreTooltipMargin")."\")' onmouseleave='hideTooltip(this)'>".__("Avg. Score").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center'>
                                                     <span class='transition-opacity duration-500 easy-in-out opacity-0'></span>
                                                 </div>
@@ -641,9 +641,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             
 
                             echo "
-                            <tr>
+                            <tr class='mt-2'>
                                 <td>
-                                    <div class='max-h-[5.7rem] overflow-hidden mb-2 flex flex-wrap px-4 justify-evenly gap-1'>";
+                                    <div class='max-h-[5.7rem] overflow-hidden mb-2 flex flex-wrap px-4 gap-2 min-h-[6rem] justify-center'>";
                                     $smurfProbability = calculateSmurfProbability($playerData, $rankData, $masteryData);
                                     if ($smurfProbability >= 0.4 && $smurfProbability < 0.6){
                                         echo generateTag("Smurf", "bg-tag-yellow", "Low probability");
@@ -652,33 +652,16 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                     } else if ($smurfProbability > 0.8){
                                         echo generateTag("Smurf", "bg-tag-red", "Very high probability");
                                     }
+                                    if(isset($playerDataJSON["Tags"], $playerDataJSON["LanePercentages"])){
+                                        if(isset($playerDataJSON["LanePercentages"][0]) && $playerDataJSON["LanePercentages"][0] != ""){
+                                            if($playerDataJSON["LanePercentages"][0] != "FILL"){
+                                                tagSelector($playerDataJSON["Tags"][$playerDataJSON["LanePercentages"][0]]);
+                                            } else {
+                                                tagSelector($playerDataJSON["Tags"]["GENERAL"]);
+                                            }
+                                        }
+                                    }
                                     echo "
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("MVP")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Dragonkiller")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Newly")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Invader")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Lowbob")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Captain")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Premate")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test1")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>
-                                            <div class='list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help'>".__("Test")."</div>";
-                                        echo "
                                     </div>
                                 </td>
                             </tr>";
@@ -762,7 +745,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 if(!$execOnlyOnce) $startPrintMatchHistory = microtime(true);
                 $memPrintMatchHistory = memory_get_usage(); 
                 echo "
-                <td class='align-top w-1/5 max-w-[19.25vw] opacity-0' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
+                <td class='align-top w-1/5 opacity-0' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
                     <table class='rounded-b bg-[#141624] w-full'>
                         <tr>
                             <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")' class='single-player-match-history' data-puuid='".$player["puuid"]."' data-sumid='".$player["sumid"]."'>";
