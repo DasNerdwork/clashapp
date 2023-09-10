@@ -223,7 +223,7 @@ function copyToClipboard(text){
 
 function showTooltip(element, text, delay, direction, additionalCSS = '') {
   const positions = {
-    'top-center': 'max-w-[10%] -ml-20 twok:-mt-24 fullhd:-mt-28',
+    'top-center': '-ml-20 twok:-mt-24 fullhd:-mt-20',
     'top-right': 'ml-4 -mt-14',
   };
 
@@ -231,7 +231,7 @@ function showTooltip(element, text, delay, direction, additionalCSS = '') {
 
   element.insertAdjacentHTML(
     'beforeend',
-    `<div data-tooltip-id="${timestamp}" class="w-auto bg-opacity-65 bg-black text-white text-center text-xs p-2 rounded-lg absolute ${positions[direction]} hidden z-10 ${additionalCSS}"
+    `<div data-tooltip-id="${timestamp}" class="w-auto z-30 bg-opacity-65 bg-black text-white text-center text-xs p-2 rounded-lg absolute ${positions[direction]} hidden ${additionalCSS}"
       id="tooltip">${text}</div>`
   );
 
