@@ -254,7 +254,6 @@ function hideTooltip(tooltipParent) {
   }
 }
 
-
 function copyInviteLink(element, text, delay, direction, additionalCSS = '') {
   copyToClipboard(window.location.href + '?join=' + getCookie('roomCode'));
   var tooltipElement = showTooltip(element, text, delay, direction, additionalCSS);
@@ -262,3 +261,33 @@ function copyInviteLink(element, text, delay, direction, additionalCSS = '') {
     hideTooltip(tooltipElement);
   }, 1000);
 }
+
+function updateTagColor(checkbox) {
+  const playerTags = document.querySelectorAll('.playerTag');
+  
+  if (getCookie("tagOptions") === "two-colored") {
+    playerTags.forEach(tag => {
+      let currentBgClass = tag.dataset.color;
+      let newClass = "";
+      
+      // Ändere die Hintergrundklasse basierend auf data-type
+      if (tag.dataset.type === 'positive') {
+        newClass = 'bg-tag-lime';
+      } else {
+        newClass = 'bg-tag-red';
+      }
+      
+      tag.classList.replace(currentBgClass, newClass);
+      console.log("Current: " + currentBgClass + ", New: " + newClass);
+    });
+  } else {
+    playerTags.forEach(tag => {
+      Array.from(tag.classList).forEach(className => {
+        if (className.startsWith('bg-tag-')) {
+          tag.classList.replace(className, tag.dataset.color);
+        }
+      });
+    });
+  }
+}
+
