@@ -2691,6 +2691,7 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
  * @param string $tagText The displayed text content of the tag
  * @param string $bgColor The background color of the tag-button
  * @param string $tooltipText The tooltip text shown when hovering over the tag
+ * @param string $additionalData Possible additiona data like the determination of positive or negative
  *
  * @return string A generated html tag as a div element with a tooltop hover function
  *
@@ -2698,12 +2699,24 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
 function generateTag($tagText, $bgColor, $tooltipText, $additionalData = "") {
     $translatedTagText = __($tagText);
     $translatedTooltipText = __($tooltipText);
-    return "<div class='list-none border border-solid border-[#141624] py-2 px-3 rounded h-fit text-[#cccccc] $bgColor cursor-help'
-            onmouseenter='showTooltip(this, \"$translatedTooltipText\", 500, \"top-right\")'
-            onmouseleave='hideTooltip(this)' 
-            $additionalData>
-            $translatedTagText
-        </div>";
+    if(isset($_COOKIE["tagOptions"], $additionalData)){ 
+        if($_COOKIE["tagOptions"] == "two-colored"){
+            $bgClass = ($additionalData == "positive") ? "bg-tag-lime" : "bg-tag-red";
+            return "<div class='playerTag list-none border border-solid border-[#141624] py-2 px-3 rounded h-fit text-[#cccccc] $bgClass cursor-help'
+                    onmouseenter='showTooltip(this, \"$translatedTooltipText\", 500, \"top-right\")'
+                    onmouseleave='hideTooltip(this)' data-type=\"$additionalData\" data-color=\"$bgColor\">
+                    $translatedTagText
+                    </div>";
+        } else {
+            return "Unknown tag option";
+        }
+    } else {
+        return "<div class='playerTag list-none border border-solid border-[#141624] py-2 px-3 rounded h-fit text-[#cccccc] $bgColor cursor-help'
+                onmouseenter='showTooltip(this, \"$translatedTooltipText\", 500, \"top-right\")'
+                onmouseleave='hideTooltip(this)' data-type=\"$additionalData\" data-color=\"$bgColor\">
+                $translatedTagText
+                </div>";
+    }
 }
 
 /**
@@ -2719,219 +2732,219 @@ function tagSelector($tagArray) {
         switch ($tag) {
             case 'dragonTakedowns':
                 if ($value > 0) {
-                    echo generateTag(__("Dragonmaster"), "bg-tag-navy", sprintf(__("%s more likely to take down drakes"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Dragonmaster"), "bg-tag-navy", sprintf(__("%s more likely to take down drakes"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Dragonfumbler"), "bg-tag-blue", sprintf(__("%s less likely to take down drakes"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Dragonfumbler"), "bg-tag-blue", sprintf(__("%s less likely to take down drakes"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'kda':
                 if ($value > 0) {
-                    echo generateTag(__("K/DA"), "bg-tag-pink", sprintf(__("The KDA of this player is %s better than usual"), number_format($value * 100) . '%'));
+                    echo generateTag(__("K/DA"), "bg-tag-pink", sprintf(__("The KDA of this player is %s better than usual"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Careless"), "bg-tag-yellow", sprintf(__("The KDA of this player is %s worse than usual"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Careless"), "bg-tag-yellow", sprintf(__("The KDA of this player is %s worse than usual"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'killParticipation':
                 if ($value > 0) {
-                    echo generateTag(__("Relevant"), "bg-tag-purple", sprintf(__("%s better kill participation than usual"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Relevant"), "bg-tag-purple", sprintf(__("%s better kill participation than usual"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Irrelevant"), "bg-tag-cyan", sprintf(__("%s worse kill participation than usual"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Irrelevant"), "bg-tag-cyan", sprintf(__("%s worse kill participation than usual"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'riftHeraldTakedowns':
                 if ($value > 0) {
-                    echo generateTag(__("Harbinger"), "bg-tag-purple", sprintf(__("%s more likely to take down heralds"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Harbinger"), "bg-tag-purple", sprintf(__("%s more likely to take down heralds"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Scared"), "bg-tag-purple", sprintf(__("%s less likely to take down heralds"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Scared"), "bg-tag-purple", sprintf(__("%s less likely to take down heralds"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'skillshotsDodged':
                 if ($value > 0) {
-                    echo generateTag(__("Evasive"), "bg-tag-cyan", sprintf(__("Dodges %s more often"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Evasive"), "bg-tag-cyan", sprintf(__("Dodges %s more often"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Target"), "bg-tag-green", sprintf(__("Gets hit %s more often"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Target"), "bg-tag-green", sprintf(__("Gets hit %s more often"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'skillshotsHit':
                 if ($value > 0) {
-                    echo generateTag(__("Precision"), "bg-tag-red", sprintf(__("Hits %s more skillshots"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Precision"), "bg-tag-red", sprintf(__("Hits %s more skillshots"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("One-Eyed"), "bg-tag-blue", sprintf(__("Misses %s more skillshots"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("One-Eyed"), "bg-tag-blue", sprintf(__("Misses %s more skillshots"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'takedowns':
                 if ($value > 0) {
-                    echo generateTag(__("Slayer"), "bg-tag-red", sprintf(__("%s more takedowns than usual"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Slayer"), "bg-tag-red", sprintf(__("%s more takedowns than usual"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Retired"), "bg-tag-red", sprintf(__("%s less takedowns than usual"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Retired"), "bg-tag-red", sprintf(__("%s less takedowns than usual"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'turretPlatesTaken':
                 if ($value > 0) {
-                    echo generateTag(__("Hammer"), "bg-tag-yellow", sprintf(__("%s more turret plates taken"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Hammer"), "bg-tag-yellow", sprintf(__("%s more turret plates taken"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Hesitator"), "bg-tag-navy", sprintf(__("%s fewer turret plates taken"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Hesitator"), "bg-tag-navy", sprintf(__("%s fewer turret plates taken"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'turretTakedowns':
                 if ($value > 0) {
-                    echo generateTag(__("Sieger"), "bg-tag-orange", sprintf(__("%s more turrets demolished than usual"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Sieger"), "bg-tag-orange", sprintf(__("%s more turrets demolished than usual"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Bystander"), "bg-tag-purple", sprintf(__("%s fewer turrets demolished than usual"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Bystander"), "bg-tag-purple", sprintf(__("%s fewer turrets demolished than usual"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'wardTakedowns':
                 if ($value > 0) {
-                    echo generateTag(__("Obfuscator"), "bg-tag-cyan", sprintf(__("Eliminates %s more wards than usual"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Obfuscator"), "bg-tag-cyan", sprintf(__("Eliminates %s more wards than usual"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Flare"), "bg-tag-yellow", sprintf(__("Clears %s less wards than usual"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Flare"), "bg-tag-yellow", sprintf(__("Clears %s less wards than usual"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'wardsGuarded':
                 if ($value > 0) {
-                    echo generateTag(__("Protector"), "bg-tag-pink", sprintf(__("Protects %s more wards than usual"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Protector"), "bg-tag-pink", sprintf(__("Protects %s more wards than usual"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Eye-Opener"), "bg-tag-cyan", sprintf(__("Ignores enemies trying to take down wards %s more likely"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Eye-Opener"), "bg-tag-cyan", sprintf(__("Ignores enemies trying to take down wards %s more likely"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'assists':
                 if ($value > 0) {
-                    echo generateTag(__("Advocate"), "bg-tag-red", sprintf(__("Playstyle is %s more assist-heavy"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Advocate"), "bg-tag-red", sprintf(__("Playstyle is %s more assist-heavy"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Loner"), "bg-tag-green", sprintf(__("Playstyle is %s less assist-heavy"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Loner"), "bg-tag-green", sprintf(__("Playstyle is %s less assist-heavy"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'consumablesPurchased':
                 if ($value > 0) {
-                    echo generateTag(__("Prepared"), "bg-tag-orange", sprintf(__("%s more frequent consumable purchases"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Prepared"), "bg-tag-orange", sprintf(__("%s more frequent consumable purchases"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Ill"), "bg-tag-orange", sprintf(__("%s less frequent consumable purchases"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Ill"), "bg-tag-orange", sprintf(__("%s less frequent consumable purchases"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'damageDealtToBuildings':
                 if ($value > 0) {
-                    echo generateTag(__("Demolisher"), "bg-tag-purple", sprintf(__("%s higher damage to buildings"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Demolisher"), "bg-tag-purple", sprintf(__("%s higher damage to buildings"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Architect"), "bg-tag-navy", sprintf(__("%s lower damage to buildings"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Architect"), "bg-tag-navy", sprintf(__("%s lower damage to buildings"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'damageDealtToObjectives':
                 if ($value > 0) {
-                    echo generateTag(__("Controller"), "bg-tag-red", sprintf(__("%s higher objective damage"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Controller"), "bg-tag-red", sprintf(__("%s higher objective damage"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Primate"), "bg-tag-blue", sprintf(__("%s lower objective damage"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Primate"), "bg-tag-blue", sprintf(__("%s lower objective damage"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'damageSelfMitigated':
                 if ($value > 0) {
-                    echo generateTag(__("Mitigator"), "bg-tag-lime", sprintf(__("%s more self-mitigated damage"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Mitigator"), "bg-tag-lime", sprintf(__("%s more self-mitigated damage"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Amplifier"), "bg-tag-orange", sprintf(__("%s less self-mitigated damage"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Amplifier"), "bg-tag-orange", sprintf(__("%s less self-mitigated damage"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'deaths':
                 if ($value > 0) {
-                    echo generateTag(__("Survivor"), "bg-tag-cyan", sprintf(__("%s fewer deaths"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Survivor"), "bg-tag-cyan", sprintf(__("%s fewer deaths"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Fragile"), "bg-tag-red", sprintf(__("%s more deaths"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Fragile"), "bg-tag-red", sprintf(__("%s more deaths"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'detectorWardsPlaced':
                 if ($value > 0) {
-                    echo generateTag(__("Detector"), "bg-tag-pink", sprintf(__("%s more detector wards placed"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Detector"), "bg-tag-pink", sprintf(__("%s more detector wards placed"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Thriftly"), "bg-tag-yellow", sprintf(__("%s less detector wards placed"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Thriftly"), "bg-tag-yellow", sprintf(__("%s less detector wards placed"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'goldEarned':
                 if ($value > 0) {
-                    echo generateTag(__("Hoarder"), "bg-tag-gold", sprintf(__("%s more gold earned"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Hoarder"), "bg-tag-gold", sprintf(__("%s more gold earned"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Broke"), "bg-tag-navy", sprintf(__("%s less gold earned"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Broke"), "bg-tag-navy", sprintf(__("%s less gold earned"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'inhibitorTakedowns':
                 if ($value > 0) {
-                    echo generateTag(__("Conqueror"), "bg-tag-purple", sprintf(__("%s more successful inhibitor takedowns"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Conqueror"), "bg-tag-purple", sprintf(__("%s more successful inhibitor takedowns"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Struggler"), "bg-tag-red", sprintf(__("%s more failed inhibitor takedowns"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Struggler"), "bg-tag-red", sprintf(__("%s more failed inhibitor takedowns"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'kills':
                 if ($value > 0) {
-                    echo generateTag(__("Killer"), "bg-tag-red", sprintf(__("%s more kills"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Killer"), "bg-tag-red", sprintf(__("%s more kills"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Pacifist"), "bg-tag-cyan", sprintf(__("%s fewer kills"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Pacifist"), "bg-tag-cyan", sprintf(__("%s fewer kills"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'neutralMinionsKilled':
                 if ($value > 0) {
-                    echo generateTag(__("Advantage"), "bg-tag-lime", sprintf(__("%s more neutral objectives killed (Scuttles, Dragons, Barons, Heralds)"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Advantage"), "bg-tag-lime", sprintf(__("%s more neutral objectives killed (Scuttles, Dragons, Barons, Heralds)"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Null"), "bg-tag-navy", sprintf(__("%s more likely to neglect neutral objectives (Scuttles, Dragons, Barons, Heralds)"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Null"), "bg-tag-navy", sprintf(__("%s more likely to neglect neutral objectives (Scuttles, Dragons, Barons, Heralds)"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'totalDamageDealtToChampions':
                 if ($value > 0) {
-                    echo generateTag(__("Chainsaw"), "bg-tag-red", sprintf(__("%s higher damage to champions"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Chainsaw"), "bg-tag-red", sprintf(__("%s higher damage to champions"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Cautious"), "bg-tag-lime", sprintf(__("%s lower damage to champions"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Cautious"), "bg-tag-lime", sprintf(__("%s lower damage to champions"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'totalDamageShieldedOnTeammates':
                 if ($value > 0) {
-                    echo generateTag(__("Angel"), "bg-tag-cyan", sprintf(__("%s more damage shielded on teammates"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Angel"), "bg-tag-cyan", sprintf(__("%s more damage shielded on teammates"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Neglectful"), "bg-tag-yellow", sprintf(__("%s less damage shielded on teammates"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Neglectful"), "bg-tag-yellow", sprintf(__("%s less damage shielded on teammates"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'totalDamageTaken':
                 if ($value > 0) {
-                    echo generateTag(__("Soaker"), "bg-tag-green", sprintf(__("%s more damage taken"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Soaker"), "bg-tag-green", sprintf(__("%s more damage taken"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Porcelain"), "bg-tag-blue", sprintf(__("%s fewer damage taken"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Porcelain"), "bg-tag-blue", sprintf(__("%s fewer damage taken"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'totalHealsOnTeammates':
                 if ($value > 0) {
-                    echo generateTag(__("Nurse"), "bg-tag-pink", sprintf(__("%s more heals on teammates"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Nurse"), "bg-tag-pink", sprintf(__("%s more heals on teammates"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Mortician"), "bg-tag-navy", sprintf(__("%s less heals on teammates"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Mortician"), "bg-tag-navy", sprintf(__("%s less heals on teammates"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'totalMinionsKilled':
                 if ($value > 0) {
-                    echo generateTag(__("Collector"), "bg-tag-yellow", sprintf(__("%s more minion kills"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Collector"), "bg-tag-yellow", sprintf(__("%s more minion kills"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Sparing"), "bg-tag-blue", sprintf(__("%s fewer minion kills"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Sparing"), "bg-tag-blue", sprintf(__("%s fewer minion kills"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'totalTimeCCDealt':
                 if ($value > 0) {
-                    echo generateTag(__("Crowd Controller"), "bg-tag-cyan", sprintf(__("%s more crowd controlling"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Crowd Controller"), "bg-tag-cyan", sprintf(__("%s more crowd controlling"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Crowd Avoider"), "bg-tag-navy", sprintf(__("%s less crowd controlling"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Crowd Avoider"), "bg-tag-navy", sprintf(__("%s less crowd controlling"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'totalTimeSpentDead':
                 if ($value > 0) {
-                    echo generateTag(__("AFK"), "bg-tag-red", sprintf(__("Time spent dead is %s longer/higher"), number_format($value * 100) . '%'));
+                    echo generateTag(__("AFK"), "bg-tag-red", sprintf(__("Time spent dead is %s longer/higher"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Undead"), "bg-tag-cyan", sprintf(__("Time spent dead is %s shorter/lower"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Undead"), "bg-tag-cyan", sprintf(__("Time spent dead is %s shorter/lower"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'visionScore':
                 if ($value > 0) {
-                    echo generateTag(__("Visionary"), "bg-tag-yellow", sprintf(__("Vision score is %s higher"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Visionary"), "bg-tag-yellow", sprintf(__("Vision score is %s higher"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Blind"), "bg-tag-red", sprintf(__("Vision score is %s lower"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Blind"), "bg-tag-red", sprintf(__("Vision score is %s lower"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             case 'wardsPlaced':
                 if ($value > 0) {
-                    echo generateTag(__("Planter"), "bg-tag-lime", sprintf(__("Places %s more wards"), number_format($value * 100) . '%'));
+                    echo generateTag(__("Planter"), "bg-tag-lime", sprintf(__("Places %s more wards"), number_format($value * 100) . '%'), "positive");
                 } else {
-                    echo generateTag(__("Lazy"), "bg-tag-orange", sprintf(__("Places %s fewer wards"), number_format(($value*-1) * 100) . '%'));
+                    echo generateTag(__("Lazy"), "bg-tag-orange", sprintf(__("Places %s fewer wards"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
             default:
