@@ -211,7 +211,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     $startFetchPlayer[$key] = microtime(true);
                     $memFetchPlayer[$key] = memory_get_usage();
                     echo "
-                    <td class='align-top w-1/5 opacity-0 z-20 relative' style='animation: .5s ease-in-out ".$playerSpawnDelay."s 1 fadeIn; animation-fill-mode: forwards;'>
+                    <td class='align-top w-1/5 opacity-0 relative' style='animation: .5s ease-in-out ".$playerSpawnDelay."s 1 fadeIn; animation-fill-mode: forwards;'>
                         <table class='rounded bg-[#141624]'>
                             <tr>
                                 <td class='w-1/5 text-center'>";
@@ -722,10 +722,13 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 </div>
                             </div>
                             <div class='grid rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max items-center'>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='tagOptions' id='tagOptions' 
+                                @change='document.getElementById(\"tagOptions\").checked ? setCookie(\"tagOptions\", \"two-colored\") : deleteCookie(\"tagOptions\");
+                                updateTagColor(this)'"; 
+                                if(isset($_COOKIE["tagOptions"])){ if($_COOKIE["tagOptions"] == "two-colored"){ echo "checked"; }} echo " ></input><label for='tagOptions'> ".__("Two-Colored Tags")."</label></div>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='expand-all-matches' id='expand-all-matches' @change='document.getElementById(\"expand-all-matches\").checked ? advancedGlobal = true : advancedGlobal = false'></input><label for='expand-all-matches'> ".__("Expand all matches")."</label></div>
-                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting' id='additional-setting' disabled></input><label for='additional-setting'> ".__("Additional setting")."</label></div>
-                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting2' id='additional-setting2' disabled></input><label for='additional-setting2'> ".__("Additional setting")."</label></div>
-                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='additional-setting3' id='additional-setting3' disabled></input><label for='additional-setting3'> ".__("Additional setting")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-not-allowed accent-[#27358b]' name='additional-setting2' id='additional-setting2' disabled></input><label for='additional-setting2'> ".__("Additional setting")."</label></div>
+                                <div class='cursor-default h-fit'><input type='checkbox' class='cursor-not-allowed accent-[#27358b]' name='additional-setting3' id='additional-setting3' disabled></input><label for='additional-setting3'> ".__("Additional setting")."</label></div>
                             </div>
                         </div>
                         </div>
