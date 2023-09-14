@@ -1919,19 +1919,19 @@ function showBanSelector(){
  * search terms have to be written into the abbreviations.json (like -> "abbr": "frel, frelj, freljo, freljor, freljord").
  *
  * @param string $champName The provided name of a champion, NOT the ID and has to be exactly written both as param here aswell as in the abbreviations.json
- * @var array $bbrArray This array contains the decoded (as object) contents of the abbreviations.json
+ * @var array $abbrArray This array contains the decoded (as object) contents of the abbreviations.json
  *
  * Returnvalue:
  * @return string $abbreviations is the return string that will get split by "," separator and added into the data-abbr attribute in the html code above
  */
 function abbreviationFetcher($champName){
+    $abbreviations = [];
     $abbrArray = json_decode(file_get_contents('/hdd1/clashapp/data/misc/abbreviations.json'));
-    foreach($abbrArray as $champFileName => $element){
-        if($champFileName === $champName){
-            $abbreviations = str_replace('_', ' ', str_replace(' ', '', $element->abbr));
-        }
+    if (isset($abbrArray->{$champName})) {
+        $abbreviations = $abbrArray->{$champName}->abbr;
     }
-  return $abbreviations;
+    $abbreviationString = implode(',', $abbreviations);
+    return $abbreviationString;
 }
 
 function timeDiffToText($timestamp){
