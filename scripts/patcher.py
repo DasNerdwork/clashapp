@@ -6,6 +6,7 @@ from PIL import Image
 import logging
 import logging.handlers as handlers
 import json
+import subprocess
 import requests
 import os, sys
 import tarfile
@@ -36,6 +37,49 @@ def convert_to_webp(source):
 
     return destination
 
+# Function to update abbreviations.json based on champion.json
+def update_abbreviations(newPatch):
+    abbreviations_path = "/hdd1/clashapp/data/misc/abbreviations.json"
+    champions_path = "/hdd1/clashapp/data/patch/"+newPatch+"/data/en_US/champion.json"
+
+    with open(abbreviations_path, "r", encoding="utf-8") as abbr_file:
+        abbreviations_data = json.load(abbr_file)
+
+    with open(champions_path, "r") as champions_file:
+        champions_data = json.load(champions_file)
+
+    # Iterate through champions in champion.json
+    for champion_id, champion_info in champions_data["data"].items():
+        # Use the "name" as the key for abbreviations
+        champion_name = champion_info["name"]
+
+        # Ensure each champion has an entry in abbreviations.json
+        if champion_name not in abbreviations_data:
+            abbreviations_data[champion_name] = {"abbr": []}
+
+        # Convert champion tags to lowercase and add ", " between tags
+        tags = [tag.lower() for tag in champion_info["tags"]]
+
+        # Update abbreviations.json if tags are not already present
+        for tag in tags:
+            if tag not in abbreviations_data[champion_name]["abbr"]:
+                abbreviations_data[champion_name]["abbr"].append(tag)
+
+    # Sort champions alphabetically
+    abbreviations_data = dict(sorted(abbreviations_data.items()))
+
+    # Move "Last Updated" to the end and update the version
+    last_updated = abbreviations_data.pop("Last Updated", None)
+    if last_updated:
+        abbreviations_data["Last Updated"] = {"Patch": newPatch}  # Set to the latest version
+
+    # Write updated abbreviations.json with proper encoding
+    with open(abbreviations_path, "w", encoding="utf-8") as abbr_file:
+        json.dump(abbreviations_data, abbr_file, separators=(",", ":"), ensure_ascii=False) # seperators attribute to reduce filesize
+
+    return True
+
+
 # Start count of whole program time
 start_patcher = time.time() 
 # Preparing code statements for logging, formatting of log and 2 rotating log files with max 10MB filesize
@@ -56,10 +100,17 @@ folder = "/hdd1/clashapp/data/patch/"
 logger.info("Comparing locale with live patch version") # Comparing locale with live patch version
 with open('/hdd1/clashapp/data/patch/version.txt', 'r') as v:
     version = v.read()
+dryRun = False
+# Check for exec parameters
+if __name__ == "__main__":
+    if "--abbr" in sys.argv:
+        logger.info("Dry Abbreviation Generation")
+        abbr_updated = update_abbreviations(version)
+        sys.exit()
 
-if (version == variables[0]): # If locale version equals live version
+if (version == variables[0] and not dryRun): # If locale version equals live version
     logger.info("Up-to-date. Current live patch: " + version)
-elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lolpatch_" + variables[0][:-2])): # If new patch folders don't already exist, upgrade
+elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lolpatch_" + variables[0][:-2]) or dryRun): # If new patch folders don't already exist, upgrade
     logger.info("Found new live patch: " + variables[0] + " - Old: " + version)
     logger.info("Starting download of database upgrade...")
     start_download = time.time() # Start time calculation of tgz archive download
@@ -119,6 +170,25 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     logger.info("Updating version.txt to current live patch")
     with open('/hdd1/clashapp/data/patch/version.txt', 'w') as f:
         f.write(variables[0])
+
+    # Update abbreviations.json with newest information from champion.json of new patch
+    abbr_updated = update_abbreviations(variables[0])
+    if(abbr_updated):
+        logger.info("Abbreviations.json updated successfully")
+    else:
+        logger.info("Warning: Failed updating Abbreviations.json")
+
+    # Restart WebSocket Server after update
+    try:
+        subprocess.run("screen -r 'WS-Server' -X quit", shell=True, check=True)
+        logger.info("WebSocket server stopped successfully.")
+        try:
+            subprocess.run("screen -AmdS 'WS-Server' node /hdd1/clashapp/websocket/server.js", shell=True, check=True)
+            logger.info("WebSocket server started successfully.")
+        except subprocess.CalledProcessError as e:
+            logger.info(f"Error starting WebSocket server: {e}")
+    except subprocess.CalledProcessError as e:
+        logger.info(f"Error stopping WebSocket server: {e}")
 else:
     # Only update version.txt with newest patch
     logger.info("Outdated version.txt although database up-to-date")
