@@ -655,9 +655,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                     if(isset($playerDataJSON["Tags"], $playerDataJSON["LanePercentages"])){
                                         if(isset($playerDataJSON["LanePercentages"][0]) && $playerDataJSON["LanePercentages"][0] != ""){
                                             if($playerDataJSON["LanePercentages"][0] != "FILL"){
-                                                tagSelector($playerDataJSON["Tags"][$playerDataJSON["LanePercentages"][0]]);
+                                                echo tagSelector($playerDataJSON["Tags"][$playerDataJSON["LanePercentages"][0]]);
                                             } else {
-                                                tagSelector($playerDataJSON["Tags"]["GENERAL"]);
+                                                echo tagSelector($playerDataJSON["Tags"]["GENERAL"]);
                                             }
                                         }
                                     }
