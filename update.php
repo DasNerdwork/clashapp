@@ -256,6 +256,14 @@ function processResponseData($ajaxUniquifier){
                             avgScorePath.classList.remove('opacity-0');
                         }, 100);
                     }
+                    if(response.playerTags) {
+                        let tagContainer = item.parentElement.parentElement.nextElementSibling.nextElementSibling.nextElementSibling.children[0].children[0];
+                        tagContainer.classList.add('opacity-100');
+                        tagContainer.innerHTML = response.playerTags;
+                        setTimeout(function() {
+                            tagContainer.classList.remove('opacity-0');
+                        }, 100);
+                    }
                 }
             }
             for (let historyColumn of matchHistories) {
