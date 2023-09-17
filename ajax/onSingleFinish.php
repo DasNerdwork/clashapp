@@ -24,6 +24,8 @@ if(isset($_POST['mode'])){
         $playerDataJSON["LanePercentages"] = $playerLanes;
         $response['playerLanes'] = $playerDataJSON["LanePercentages"];
         $playerDataJSON["Tags"] = getPlayerTags($matchData, $puuid, $playerLanes);
+        $tagContainerContent = tagSelector($playerDataJSON["Tags"][$playerDataJSON["LanePercentages"][0]]);
+        $response['playerTags'] = $tagContainerContent;
     } 
     
     if($_POST['mode'] == "both" || $_POST['mode'] == "scores"){
