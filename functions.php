@@ -2433,26 +2433,30 @@ function getRankOrLevel($rankData, $playerData){
                 $rankVal = 5;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
+            } else if($rankedQueue["Tier"] == "EMERALD" && $rankVal < 6){
+                $rankVal = 6;
+                $rankNumber = $rankedQueue["Rank"];
+                $highestRank = $rankedQueue["Tier"];
             } else if($rankedQueue["Tier"] == "IRON" && $rankVal < 1){
                 $rankVal = 1;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
-            } else if($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 6){
-                $rankVal = 6;
+            } else if($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 7){
+                $rankVal = 7;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
-            } else if($rankedQueue["Tier"] == "MASTER" && $rankVal < 7){
-                $rankVal = 7;
-                $rankNumber = "";
-                $highestRank = $rankedQueue["Tier"];
-                $highEloLP = $rankedQueue["LP"];
-            } else if($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 8){
+            } else if($rankedQueue["Tier"] == "MASTER" && $rankVal < 8){
                 $rankVal = 8;
                 $rankNumber = "";
                 $highestRank = $rankedQueue["Tier"];
                 $highEloLP = $rankedQueue["LP"];
-            } else if($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 9){
+            } else if($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 9){
                 $rankVal = 9;
+                $rankNumber = "";
+                $highestRank = $rankedQueue["Tier"];
+                $highEloLP = $rankedQueue["LP"];
+            } else if($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 10){
+                $rankVal = 10;
                 $rankNumber = "";
                 $highestRank = $rankedQueue["Tier"];
                 $highEloLP = $rankedQueue["LP"];
