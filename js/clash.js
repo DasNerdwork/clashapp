@@ -278,7 +278,7 @@ function updateTagColor(checkbox) {
       }
       
       tag.classList.replace(currentBgClass, newClass);
-      console.log("Current: " + currentBgClass + ", New: " + newClass);
+      // console.log("Current: " + currentBgClass + ", New: " + newClass);
     });
   } else {
     playerTags.forEach(tag => {
