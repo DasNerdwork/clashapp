@@ -22,7 +22,7 @@ module.exports = {
     '-mt-[68px]',
     'min-w-[18rem]',
     {
-      pattern: /text-(silver|gold|bronze|platinum|iron|diamond|master|grandmaster|challenger)\/100/,
+      pattern: /text-(silver|gold|bronze|platinum|iron|emerald|diamond|master|grandmaster|challenger)\/100/,
     },
     {
       pattern: /text-(threat-xxs|threat-xs|threat-s|threat-m|threat-l|threat-xl|threat-xxl)\/100/,
@@ -44,7 +44,7 @@ module.exports = {
         'bronze': '#cd8d7f',
         'silver': '#99a0b5',
         'gold': '#d79c5d',
-        'platinum': '#369aae',
+        'platinum': '#77c9d9',
         'emerald': '#46a678',
         'diamond': '#6487c1',
         'master': '#b160f3',
