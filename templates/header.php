@@ -44,13 +44,17 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
                 </div>
             </form>';
         } else { echo '
-            <form class="h-10 flex absolute left-2/4 -translate-x-2/4 translate-y-1/4" action="" onsubmit="return false;" method="GET" autocomplete="off">
-                <input type="text" name="name" class="pl-2.5 text-base text-black focus:pl-2.5 focus:text-base" value="" placeholder='.__("Summonername").' autocomplete="off">
-                <input type="submit" name="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="'.__('Search').'" onclick="sanitize(this.form.name.value);">
-                <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
-                <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
+            <div class="flex absolute left-2/4 -translate-x-2/4 translate-y-1/4 flex-col z-50 bg-black">
+                <form class="h-10 flex" action="" onsubmit="return false;" method="GET" autocomplete="off">
+                    <input id="main-input" type="text" name="name" class="px-2.5 text-base w-80 !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-base" value="" placeholder='.__("Enter a Summonername").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false">
+                    <input type="submit" name="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="'.__('Search').'" onclick="sanitize(this.form.name.value);">
+                    <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
+                    <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
+                    </div>
+                </form>
+                <div id="autosuggest-container" class="absolute w-[25rem] mt-12 text-whiteblue hidden">
                 </div>
-            </form>';
+            </div>';
         } 
         // TODO: Design and find usage for update button and/or remove: <button type="button" id="updateBtn" class="w-20 text-base bg-white text-black hidden cursor-pointer focus:text-base active:bg-[#ccc]" onclick="showLoader();" disabled>Update</button>
         ?>
