@@ -58,7 +58,21 @@ $currentPlayerNumber = 1;
 $upToDate = false;
 $allUpToDate = 0;
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
-echo "<script>const requests = {};</script>";
+$autosuggestData = json_decode(file_get_contents("/hdd1/clashapp/data/player/autosuggest.json"), true);
+$championDataArray = json_decode(file_get_contents("/hdd1/clashapp/data/patch/".$currentPatch."/data/en_US/champion.json"), true);
+$championArray = array();
+foreach ($championDataArray['data'] as $championKey => $championInfo) {
+    $championArray["{$championInfo['name']}"] = "{$championInfo['image']['full']}";
+}
+echo "
+<script>
+const requests = {};
+const autosuggestData = " . json_encode(array_map('trim', $autosuggestData)) . ";
+const currentPatch = " . json_encode($currentPatch) . ";
+const championData = " . json_encode($championArray) . ";
+const containerTitle = '" . __("Summoner") . "';
+</script>";
+
 
 // -----------------------------------------------------------v- SANITIZE & CHECK TEAM ID -v----------------------------------------------------------- //
 
