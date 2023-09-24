@@ -291,30 +291,11 @@ function updateTagColor(checkbox) {
   }
 }
 
-async function getAutosuggestPreview() {
-  try {
-    const containerTitle = await __("Summoner");
 
-    const [autosuggestResponse, currentPatchResponse] = await Promise.all([
-      fetch("https://clashscout.com/clashapp/data/player/autosuggest.json"),
-      fetch("https://clashscout.com/clashapp/data/patch/version.txt"),
-    ]);
-
-    if (!autosuggestResponse.ok || !currentPatchResponse.ok) {
-      throw new Error("Fehler beim Abrufen der Daten");
-    }
-
-    const autosuggestData = await autosuggestResponse.json();
-    const currentPatch = await currentPatchResponse.text();
-
-    searchAutosuggestData(autosuggestData, currentPatch, containerTitle);
-
-    // Jetzt kannst du die Daten weiterverarbeiten oder deine Suche starten
-    // searchAutosuggestData();
-  } catch (err) {
-    console.error(err);
-  }
-}
+ready(function(){
+  searchAutosuggestData(autosuggestData, currentPatch, containerTitle);
+  console.log(championData);
+});
 
 function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
     const inputElement = document.getElementById('main-input');
@@ -345,19 +326,39 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
       if (inputElement.value.length > 2) {
         const inputValue = inputElement.value.trim().toLowerCase();
         const normalizedInputValue = normalizeString(inputValue);
-        const currentInputLi = createAutosuggestItem(inputElement.value, '9', currentPatch);
+        const currentInputLi = createAutosuggestItem(inputElement.value, '9', currentPatch, 'player');
         ulElement.appendChild(currentInputLi);
-
-        for (const key in autosuggestData) {
-          const normalizedKey = normalizeString(key);
-          if (normalizedKey.includes(normalizedInputValue)) {
-            const liElement = createAutosuggestItem(key, autosuggestData[key], currentPatch);
+        for (let key in autosuggestData) {
+          const normalizedUserKey = normalizeString(key);
+          if (normalizedUserKey.includes(normalizedInputValue)) {
+            const liElement = createAutosuggestItem(key, autosuggestData[key], currentPatch, 'player');
             ulElement.appendChild(liElement);
+          }
+        }
+        for (let key in championData) {
+          if (key.trim().toLowerCase().includes(normalizedInputValue)) {
+            const liElement = createAutosuggestItem(key, championData[key], currentPatch, 'champion');
+            const championUlElement = document.getElementById("autosuggest-champion-parent");
+            if(!championUlElement){
+              const championTitleDiv = document.createElement('div');
+              championTitleDiv.className = 'p-1.5 bg-searchtitle';
+              const championTitleSpan = document.createElement('span');
+              championTitleSpan.textContent = "Champion";
+              championTitleSpan.className = 'font-bold';
+              const championUlElement = document.createElement('ul');
+              championUlElement.id = 'autosuggest-champion-parent';
+              championTitleDiv.appendChild(championTitleSpan);
+              ulElement.parentElement.appendChild(championTitleDiv);
+              championUlElement.appendChild(liElement);
+              ulElement.parentElement.appendChild(championUlElement);
+            } else {
+              championUlElement.appendChild(liElement);
+            }
           }
         }
       } else if(inputElement.value.length > 0) {
         ulElement.innerHTML = '';
-        const currentInputLi = createAutosuggestItem(inputElement.value, '9', currentPatch);
+        const currentInputLi = createAutosuggestItem(inputElement.value, '9', currentPatch, 'player');
         ulElement.appendChild(currentInputLi);
       } else {
         autosuggestContainer.innerHTML = '';
@@ -384,7 +385,7 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
     }
 }
 
-function createAutosuggestItem(key, icon, currentPatch) {
+function createAutosuggestItem(key, icon, currentPatch, variant) {
   const liElement = document.createElement('li');
   liElement.classList.add('p-1.5', 'hover:bg-darker', 'cursor-pointer');
 
@@ -394,8 +395,13 @@ function createAutosuggestItem(key, icon, currentPatch) {
   const imgElement = document.createElement('img');
   imgElement.width = 28;
   imgElement.height = 28;
-  imgElement.src = `/clashapp/data/patch/${currentPatch}/img/profileicon/${icon}.webp`;
-  imgElement.alt = `Current League of Legends Summoner Icon of ${key}`;
+  if(variant == 'player'){
+    imgElement.src = `/clashapp/data/patch/${currentPatch}/img/profileicon/${icon}.webp`;
+    imgElement.alt = `Current League of Legends Summoner Icon of ${key}`;
+  } else if(variant == 'champion'){
+    imgElement.src = `/clashapp/data/patch/${currentPatch}/img/champion/${icon.replace("png", "webp")}`;
+    imgElement.alt = `Current League of Legends Champion Icon of ${key}`;
+  }
 
   const spanElement = document.createElement('span');
   spanElement.classList.add('text-sm');
@@ -405,21 +411,26 @@ function createAutosuggestItem(key, icon, currentPatch) {
   divElement.appendChild(spanElement);
   liElement.appendChild(divElement);
 
-  liElement.addEventListener('click', function() {
-    if(key == "Flokrastinator" || key == "jNNsTV" || key == "5 Min Deathtimer" || key == "ILEALORI" || key == "Vollbard"){
-      window.location.href="https://clashscout.com/team/test";
-    } else {
-      postAjax(`${window.location.protocol}//${window.location.hostname}/clashapp/functions.php`, { sumname: key }, function(data){
-          if(data == "404"){
-              window.location.href="https://clashscout.com/404";
-          } else {
-              window.location.href="https://clashscout.com/team/" + data;
-          }
-      });
-    }
-  });
+  if(variant == 'player'){
+    liElement.addEventListener('click', function() {
+      if(key == "Flokrastinator" || key == "jNNsTV" || key == "5 Min Deathtimer" || key == "ILEALORI" || key == "Vollbard"){
+        window.location.href="https://clashscout.com/team/test";
+      } else {
+        postAjax(`${window.location.protocol}//${window.location.hostname}/clashapp/functions.php`, { sumname: key }, function(data){
+            if(data == "404"){
+                window.location.href="https://clashscout.com/404";
+            } else {
+                window.location.href="https://clashscout.com/team/" + data;
+            }
+        });
+      }
+    });
+  } else if(variant == 'champion'){
+    liElement.addEventListener('click', function() {
+      // window.location.href="https://clashscout.com/team/test";
+      alert("Error: Champion pages not implemented yet.");
+    });
+  }
 
   return liElement;
 }
-
-getAutosuggestPreview();
