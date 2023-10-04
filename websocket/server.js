@@ -6,14 +6,17 @@ import { promises as fsPromises } from 'fs';
 import ansiRegex from 'ansi-regex';
 import util from 'util';
 import '/hdd1/clashapp/websocket/consoleHandler.js';
+import mongodb from 'mongodb';
 
-// Create a write stream to the log file
+const mongoURL = 'mongodb://clashapp:F-))%23pp!dat7g%26MO@dasnerdwork.net:17171/?authMechanism=SCRAM-SHA-1&authSource=clashappdb&tls=true&tlsCAFile=/etc/ssl/mongodb.pem';
 const logStream = fs.createWriteStream('/hdd1/clashapp/data/logs/server.log', { flags: 'a' });
 const logPath = '/hdd1/clashapp/data/logs/server.log';
 const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
 const roomPlayers = {}; // Initializes an object to store connected players for each room
 const roomSettings = {};
 const correctAnswerTimers  = {};
+
+const mongoClient = new mongodb.MongoClient(mongoURL);
 
 // Attach the uncaught exception handler
 process.on('uncaughtException', handleCrash);
@@ -27,6 +30,7 @@ console.log = function () {
   originalConsoleLog.apply(console, arguments);
 };
 
+// Start and create Websocket Server
 const server = createServer({
   cert: readFileSync('/etc/letsencrypt/live/dasnerdwork.net/fullchain.pem'),
   key: readFileSync('/etc/letsencrypt/live/dasnerdwork.net/privkey.pem')
@@ -37,6 +41,162 @@ const validChamps = JSON.parse(fs.readFileSync('/hdd1/clashapp/data/patch/'+curr
 var lastClient = "";
 
 console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully started the Websocket-Server!", new Date().toLocaleTimeString());
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// DATABASE OPERATION FUNCTIONS ////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function updateTeamRating(teamId, hash, rating) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await mongoClient.connect(); // establish database connection
+      const db = mongoClient.db('clashappdb');
+      const teamsCollection = db.collection('teams');
+      const filter = { TeamID: teamId };
+      const update = {
+        $set: { [`Rating.${hash}`]: rating },
+        $inc: { 'Status': 1 } // Increment Status
+      };
+      const result = await teamsCollection.updateOne(filter, update); // Update document
+      if (result.modifiedCount === 1) {
+        if(rating == 0){
+          console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: A client removed their rating score from %s", new Date().toLocaleTimeString(), teamId);
+        } else {
+          console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: A client rated %s with a score of %d", new Date().toLocaleTimeString(), teamId, rating);
+        }
+        resolve(true);
+      } else {
+        console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Database document for ${teamId} not found or unable to update`, new Date().toLocaleTimeString());
+        resolve(false);
+      }
+    } catch (error) {
+      console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error updating team rating: ${error}`, new Date().toLocaleTimeString());
+      reject(error);
+    }
+  });
+}
+
+function addToFile(teamId, champId, champName) {
+  return new Promise((resolve, reject) => {
+    mongoClient.connect()
+      .then(() => {
+        const db = mongoClient.db('clashappdb');
+        const teamsCollection = db.collection('teams');
+        const filter = { TeamID: teamId };
+        const update = {
+          $addToSet: {
+            'SuggestedBans': { id: champId, name: champName }
+          },
+          $inc: { Status: 1 }
+        };
+        return teamsCollection.updateOne(filter, update);
+      })
+      .then((result) => {
+        if (result.modifiedCount === 1) {
+          broadcastUpdate(teamId);
+          resolve({ status: 'Success', champid: champId, champname: champName });
+        } else {
+          console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Team document for ${teamId} not found or unable to update`, new Date().toLocaleTimeString());
+          resolve({ status: 'Error' });
+        }
+      })
+      .catch((error) => {
+        if(error == "MongoServerError: Document failed validation"){
+          console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Maximum elements in array (Document Validation Error)`, new Date().toLocaleTimeString());
+          resolve({ status: 'Error' });
+        } else {
+          console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error adding champion to team file: ${error}`, new Date().toLocaleTimeString());
+          reject({ status: 'Error' });
+        }
+      })
+  });
+}
+
+function removeFromFile(teamId, champId, champName) {
+  return new Promise((resolve, reject) => {
+    mongoClient.connect()
+      .then(() => {
+        const db = mongoClient.db('clashappdb');
+        const teamsCollection = db.collection('teams');
+        const filter = { TeamID: teamId };
+        const update = {
+          $pull: { 'SuggestedBans': { id: champId } },
+          $inc: { Status: 1 }
+        };
+        return teamsCollection.updateOne(filter, update);
+      })
+      .then((result) => {
+        if (result.modifiedCount === 1) {
+          broadcastUpdate(teamId);
+          resolve({ status: 'Success', champid: champId, champname: champName });
+        } else {
+          console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Team document for ${teamId} not found or unable to update`, new Date().toLocaleTimeString());
+          resolve({ status: 'Error' });
+        }
+      })
+      .catch((error) => {
+        console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error removing champion from team file: ${error}`, new Date().toLocaleTimeString());
+        reject({ status: 'Error' });
+      })
+  });
+}
+
+function swapInFile(teamId, fromId, toId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await mongoClient.connect();
+      const db = mongoClient.db('clashappdb');
+      const teamsCollection = db.collection('teams');
+      const filter = { TeamID: teamId };
+      const teamDocument = await teamsCollection.findOne(filter);
+      const suggestedBans = teamDocument.SuggestedBans;
+      const fromIndex = suggestedBans.findIndex(champion => champion.id === fromId);
+      const toIndex = suggestedBans.findIndex(champion => champion.id === toId);
+      // Check if both champions were found
+      if (fromIndex === -1 || toIndex === -1) {
+        console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Champions not found in ${teamId}.json`, new Date().toLocaleTimeString());
+        resolve({ status: 'Champions not found' });
+        return;
+      }
+      // Swap the elements at fromIndex and toIndex
+      const temp = suggestedBans[fromIndex];
+      suggestedBans[fromIndex] = suggestedBans[toIndex];
+      suggestedBans[toIndex] = temp;
+      // Update the document with the modified SuggestedBans array
+      await teamsCollection.updateOne(filter, { $set: { SuggestedBans: suggestedBans } });
+      broadcastUpdate(teamId);
+      resolve({ status: 'Success' });
+    } catch (error) {
+      console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error swapping elements in team file: ${error}`, new Date().toLocaleTimeString());
+      reject({ status: 'Error' });
+    }
+  });
+}
+
+function readTeamData(teamId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await mongoClient.connect();
+      const db = mongoClient.db('clashappdb');
+      const teamsCollection = db.collection('teams');
+      const filter = { TeamID: teamId };
+      const teamData = await teamsCollection.findOne(filter);
+      if (teamData) {
+        resolve(teamData);
+      } else {
+        console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Team document for ${teamId} not found`, new Date().toLocaleTimeString());
+        resolve([]);
+      }
+    } catch (error) {
+      console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error reading team data: ${error}`, new Date().toLocaleTimeString());
+      reject(error);
+    }
+  });
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////// WEBSOCKET SERVER OPERATIONS /////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 wss.on('connection', function connection(ws, req) {
   let d = new Date();
@@ -81,9 +241,9 @@ wss.on('connection', function connection(ws, req) {
         }
       }
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////////////// ADD TO FILE ///////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////// ADD TO FILE ///////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       if(dataAsJSON.request == "add"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
@@ -102,68 +262,52 @@ wss.on('connection', function connection(ws, req) {
           if(checkForInjection){ // if the var is still true (shouldn't be if id AND name found in champion.json)
             console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Code Injection Deteced, either champname or champid is invalid -> Logging IP (%s)", new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]); // TODO: Log and Save IP adress of attacker
             ws.send('{"status":"CodeInjectionDetected"}');
-          } else {       
-            if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-              var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
-              var localDataAsJson = JSON.parse(dataFromFile)["SuggestedBans"];
-              var elementInArray = false;
-              for (var key in localDataAsJson) { // loop through every current local champ
-                if (localDataAsJson.hasOwnProperty(key)) { // necessary js stuff
-                  if(dataAsJSON.champid == localDataAsJson[key].id){
-                    elementInArray = true;
-                    break;
-                  }
-                }
-              }
-              if(elementInArray){
-                console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Provided element already exists in local file -> skipping", new Date().toLocaleTimeString());
-                ws.send('{"status":"ElementAlreadyInArray"}');
-              } else {
-                if(Object.keys(localDataAsJson).length >= 10){
-                  console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Maximum elements exceeded -> skipping", new Date().toLocaleTimeString());
-                  ws.send('{"status":"MaximumElementsExceeded"}');
-                } else {
-                  var newChamp = {
-                    id: dataAsJSON.champid,
-                    name: dataAsJSON.champname
-                  }
-                  dataFromFile = JSON.parse(dataFromFile);
-                  dataFromFile.SuggestedBans.push(newChamp);
-                  dataFromFile.Status++;
-                  // console.log(dataFromFile);
-                  fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(dataFromFile));
-                  console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully added %s to %s.json", new Date().toLocaleTimeString(), dataAsJSON.champname, dataAsJSON.teamid);
-                  broadcastUpdate(dataAsJSON.teamid);
-                  ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
-                  wss.clients.forEach(function each(client) {
-                    if(client.location == dataAsJSON.teamid && client != ws){
-                      // client.send(ws.name+' added '+dataAsJSON.champname);
-                      client.send('{"status":"Message","message":"added %1.","champ":"'+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
+          } else {
+            readTeamData(dataAsJSON.teamid)
+              .then((localDataAsJson) => {
+                var elementInArray = false;
+                for (var key in localDataAsJson["SuggestedBans"]) {
+                  if (localDataAsJson["SuggestedBans"].hasOwnProperty(key)) {
+                    if (dataAsJSON.champid == localDataAsJson["SuggestedBans"][key].id) {
+                      elementInArray = true;
+                      break;
                     }
-                  });
-                }
-              }
-            } else {
-              var fileContent = {
-                SuggestedBans: [
-                  {
-                    id: dataAsJSON.champid,
-                    name: dataAsJSON.champname
                   }
-                ],
-                Status: 1
+                }
+                if (elementInArray) {
+                  console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Provided element already exists in local file -> skipping", new Date().toLocaleTimeString());
+                  ws.send('{"status":"ElementAlreadyInArray"}');
+                  return Promise.resolve({ status: 'Skipping' });
+                } else {
+                  if (Object.keys(localDataAsJson).length >= 10) {
+                    console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Maximum elements exceeded -> skipping", new Date().toLocaleTimeString());
+                    ws.send('{"status":"MaximumElementsExceeded"}');
+                  } else {
+                    return addToFile(dataAsJSON.teamid, dataAsJSON.champid, dataAsJSON.champname);
+                  }
+                }
+              }).then((response) => {
+              if (response.status === 'Success') {
+                console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully added ${dataAsJSON.champname} to ${dataAsJSON.teamid}.json`, new Date().toLocaleTimeString());
+              } else if (response.status === 'Error') {
+                console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Skipping add of champion`, new Date().toLocaleTimeString());
               }
-              fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(fileContent), function() {
-                console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: File did not exists -> created %s.json", new Date().toLocaleTimeString(), dataAsJSON.teamid);
-                ws.send('{"status":"FileDidNotExist"}');
-              });
-            }
+            })
+            .catch((error) => {
+              console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Unexpected error: ${error}`, new Date().toLocaleTimeString());
+            });
+            ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
+            wss.clients.forEach(function each(client) {
+              if(client.location == dataAsJSON.teamid && client != ws){
+                client.send('{"status":"Message","message":"added %1.","champ":"'+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
+              }
+            });
           }
         }
 
-       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-       ///////////////////////////////////////////// REMOVE FROM FILE //////////////////////////////////////////////////
-       /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ///////////////////////////////////////////// REMOVE FROM FILE //////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       } else if(dataAsJSON.request == "remove"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
@@ -182,108 +326,96 @@ wss.on('connection', function connection(ws, req) {
           if(checkForInjection){ // if the var is still true (shouldn't be if id AND name found in champion.json)
             console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Code Injection Deteced, either champname or champid is invalid -> Logging IP (%s)", new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]); // TODO: Log and Save IP adress of attacker
             ws.send('{"status":"CodeInjectionDetected"}');
-          } else {       
-            if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-              var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
-              var localDataAsJson = JSON.parse(dataFromFile)["SuggestedBans"];
-              var elementInArray = false;
-              for (var key in localDataAsJson) { // loop through every current local champ
-                if (localDataAsJson.hasOwnProperty(key)) { // necessary js stuff
-                  if(dataAsJSON.champid == localDataAsJson[key].id){
-                    elementInArray = true;
-                    break;
+          } else {    
+              readTeamData(dataAsJSON.teamid)
+              .then((localDataAsJson) => {
+                var elementInArray = false;
+                for (var key in localDataAsJson["SuggestedBans"]) {
+                  if (localDataAsJson["SuggestedBans"].hasOwnProperty(key)) {
+                    if (dataAsJSON.champid == localDataAsJson["SuggestedBans"][key].id) {
+                      elementInArray = true;
+                      break;
+                    }
                   }
                 }
-              }
-              if(!elementInArray){
-                console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Provided element does not exists in local file -> skipping", new Date().toLocaleTimeString());
-                ws.send('{"status":"ElementNotInArray"}');
-              } else {
-                let newData = JSON.parse(dataFromFile);
-                let elementIndex = 0;
-                newData.SuggestedBans.forEach(element => { // Find object element in array
-                    if(element.id == dataAsJSON.champid){
-                      elementIndex = newData.SuggestedBans.indexOf(element);
-                    }
-                  });
-                newData.SuggestedBans.splice(elementIndex, 1); // remove object from array
-                newData.Status++;
-                fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
-                console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully removed %s from %s.json", new Date().toLocaleTimeString(), dataAsJSON.champname, dataAsJSON.teamid);
+                if (!elementInArray) {
+                  console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Provided element does not exists in local file -> skipping", new Date().toLocaleTimeString());
+                  ws.send('{"status":"ElementNotInArray"}');
+                } else {
+                  return removeFromFile(dataAsJSON.teamid, dataAsJSON.champid, dataAsJSON.champname);
+                }
+              })
+              .then((response) => {
+                if (response.status === 'Success') {
+                  console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully removed ${dataAsJSON.champname} from ${dataAsJSON.teamid}.json`, new Date().toLocaleTimeString());
+                } else {
+                  console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error removing champion: ${response.status}`, new Date().toLocaleTimeString());
+                }
+              })
+              .catch((error) => {
+                console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Unexpected error: ${error}`, new Date().toLocaleTimeString());
+              });
                 broadcastUpdate(dataAsJSON.teamid);
                 ws.send('{"status":"Success","champid":"'+dataAsJSON.champid+'","champname":"'+dataAsJSON.champname+'"}');
                 wss.clients.forEach(function each(client) {
                   if(client.location == dataAsJSON.teamid && client != ws){
-                    // client.send(ws.name+' removed '+dataAsJSON.champname);
                     client.send('{"status":"Message","message":"removed %1.","champ":"'+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
                   }
                 });
-              }
-            }
           }
         }
         
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////// SWAP IN FILE //////////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ///////////////////////////////////////////// SWAP IN FILE //////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       } else if(dataAsJSON.request == "swap"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
           console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Forbidden teamid provided", new Date().toLocaleTimeString());
           ws.send('{"status":"InvalidTeamID"}');
         } else {
-          if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-            var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
-            var localDataSuggestedBanArray = JSON.parse(dataFromFile);
-            let fromId = 0;
-            let toId= 0;
-            localDataSuggestedBanArray.SuggestedBans.forEach(element => { // Find object element in array
-              if(element.id == dataAsJSON.fromID){
-                fromId = localDataSuggestedBanArray.SuggestedBans.indexOf(element);
-              } else if(element.id == dataAsJSON.toID){
-                toId = localDataSuggestedBanArray.SuggestedBans.indexOf(element);
+          swapInFile(dataAsJSON.teamid, dataAsJSON.fromID, dataAsJSON.toID)
+            .then((response) => {
+              if (response.status === 'Success') {
+                console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully swapped champions in ${dataAsJSON.teamid}.json`, new Date().toLocaleTimeString());
+              } else {
+                console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error swapping champions: ${response.status}`, new Date().toLocaleTimeString());
               }
+            })
+            .catch((error) => {
+              console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Unexpected error: ${error}`);
             });
-            let temp = localDataSuggestedBanArray.SuggestedBans[fromId];
-            localDataSuggestedBanArray.SuggestedBans[fromId] = localDataSuggestedBanArray.SuggestedBans[toId];
-            localDataSuggestedBanArray.SuggestedBans[toId] = temp;
-            localDataSuggestedBanArray.Status++;
-            fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(localDataSuggestedBanArray));
-            console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Successfully swapped %s with %s in %s.json", new Date().toLocaleTimeString(), dataAsJSON.fromName, dataAsJSON.toName, dataAsJSON.teamid);
-            broadcastUpdate(dataAsJSON.teamid);
-            ws.send('{"status":"Success"}');
-            wss.clients.forEach(function each(client) {
-              if(client.location == dataAsJSON.teamid && client != ws){
-                // client.send(ws.name+' swapped '+dataAsJSON.fromName+' with '+dataAsJSON.toName);
-                client.send('{"status":"Message","message":"swapped %1 with %2.","champ1":"'+dataAsJSON.fromName+'","champ2":"'+dataAsJSON.toName+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
-              }
-            });
-          }
+          broadcastUpdate(dataAsJSON.teamid);
+          ws.send('{"status":"Success"}');
+          wss.clients.forEach(function each(client) {
+            if(client.location == dataAsJSON.teamid && client != ws){
+              client.send('{"status":"Message","message":"swapped %1 with %2.","champ1":"'+dataAsJSON.fromName+'","champ2":"'+dataAsJSON.toName+'","name":"'+ws.name+'","color":"'+ws.color+'"}');
+            }
+          });
         }
         
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////// MODIFY TEAM RATING ////////////////////////////////////////////////
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ///////////////////////////////////////////// MODIFY TEAM RATING ////////////////////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       } else if(dataAsJSON.request == "rate"){
         if(dataAsJSON.teamid == "" || dataAsJSON.teamid == "/"){
           console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Forbidden teamid provided", new Date().toLocaleTimeString());
           ws.send('{"status":"InvalidTeamID"}');
         } else {
-          if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-            var dataFromFile = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local file
-            var newData = JSON.parse(dataFromFile);
-            if(dataAsJSON.rating == 0){
-              console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Client removed rating score of %d from %s.json", new Date().toLocaleTimeString(), newData.Rating[String(dataAsJSON.hash)], dataAsJSON.teamid);
-              delete newData.Rating[String(dataAsJSON.hash)];
+          updateTeamRating(dataAsJSON.teamid, dataAsJSON.hash, dataAsJSON.rating)
+          .then(success => {
+            if (success) {
+              ws.send('{"status":"Success"}');
             } else {
-              newData.Rating[String(dataAsJSON.hash)] = dataAsJSON.rating;
-              console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Client rated %s.json with a score of %d", new Date().toLocaleTimeString(), dataAsJSON.teamid, dataAsJSON.rating);
+              ws.send('{"status":"Error"}');
             }
-            fs.writeFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', JSON.stringify(newData));
-            broadcastUpdate(dataAsJSON.teamid);
-            ws.send('{"status":"Success"}');
-          }
+          })
+          .catch(error => {
+            ws.send('{"status":"Error"}');
+          });
+          broadcastUpdate(dataAsJSON.teamid);
+          ws.send('{"status":"Success"}');
         }
 
        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -291,74 +423,70 @@ wss.on('connection', function connection(ws, req) {
        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       } else if(dataAsJSON.request == "firstConnect"){
-        if (fs.existsSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json')){
-          ws.location = dataAsJSON.teamid;
-          var possibleColors = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
-          wss.clients.forEach(function each(client) {              
-            if(possibleColors.includes(client.color)){ // This removes every "already used" color from the array above
-              var colorIndex = possibleColors.indexOf(client.color);
-              if (colorIndex > -1) { // only splice array when item is found
-                possibleColors.splice(colorIndex, 1); // 2nd parameter means remove one item only
-              }
+        ws.location = dataAsJSON.teamid;
+        var possibleColors = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
+        wss.clients.forEach(function each(client) {              
+          if(possibleColors.includes(client.color)){ // This removes every "already used" color from the array above
+            var colorIndex = possibleColors.indexOf(client.color);
+            if (colorIndex > -1) { // only splice array when item is found
+              possibleColors.splice(colorIndex, 1); // 2nd parameter means remove one item only
             }
-          });
-          if(possibleColors.length >= 1){
-            ws.color = possibleColors[Math.floor(Math.random()*possibleColors.length)];
-          } else {
-            const colorList = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
-            ws.color = colorList[Math.floor(Math.random()*colorList.length)];
           }
-          if(dataAsJSON.name == ""){
-            var possibleNames = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
-            // console.log(possibleNames[Math.floor(Math.random()*possibleNames.length)]);
-            wss.clients.forEach(function each(client) {
-              if(client.location == dataAsJSON.teamid){
-                if(possibleNames.includes(client.name)){ // This removes every "already used" name from the array above
-                  var index = possibleNames.indexOf(client.name);
-                  if (index > -1) { // only splice array when item is found
-                    possibleNames.splice(index, 1); // 2nd parameter means remove one item only
-                  }
+        });
+        if(possibleColors.length >= 1){
+          ws.color = possibleColors[Math.floor(Math.random()*possibleColors.length)];
+        } else {
+          const colorList = ["red-700","green-800","blue-800","pink-700","lime-500","cyan-600","amber-600","yellow-400","purple-700","rose-400"];
+          ws.color = colorList[Math.floor(Math.random()*colorList.length)];
+        }
+        if(dataAsJSON.name == ""){
+          var possibleNames = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
+          wss.clients.forEach(function each(client) {
+            if(client.location == dataAsJSON.teamid){
+              if(possibleNames.includes(client.name)){ // This removes every "already used" name from the array above
+                var index = possibleNames.indexOf(client.name);
+                if (index > -1) { // only splice array when item is found
+                  possibleNames.splice(index, 1); // 2nd parameter means remove one item only
                 }
               }
-            });
-            if(possibleNames.length >= 1){
-              ws.name = possibleNames[Math.floor(Math.random()*possibleNames.length)];
-            } else {
-              const nameList = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
-              ws.name = nameList[Math.floor(Math.random()*nameList.length)];
-            }
-          } else {
-            ws.name = dataAsJSON.name;
-          }
-          ws.send('{"status":"FirstConnect","name":"'+ws.name+'","color":"'+ws.color+'"}');
-          let localTeamData = fs.readFileSync('/hdd1/clashapp/data/teams/' + dataAsJSON.teamid + '.json', 'utf-8'); // read local teamdata and send to client
-          ws.send(localTeamData);
-          wss.clients.forEach(function each(client) {
-            if(client.location == dataAsJSON.teamid && client != ws){
-              client.send('{"status":"Message","message":"joined the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
             }
           });
+          if(possibleNames.length >= 1){
+            ws.name = possibleNames[Math.floor(Math.random()*possibleNames.length)];
+          } else {
+            const nameList = ["Krug","Gromp","Sentinel","Brambleback","Raptor","Scuttler","Wolf","Herald","Nashor","Minion"];
+            ws.name = nameList[Math.floor(Math.random()*nameList.length)];
+          }
         } else {
-          return;
+          ws.name = dataAsJSON.name;
         }
+        ws.send('{"status":"FirstConnect","name":"'+ws.name+'","color":"'+ws.color+'"}');
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        //////////////////////////////////////////////////// MINIGAMES ///////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        readTeamData(dataAsJSON.teamid)
+        .then((localDataAsJson) => {
+          ws.send(JSON.stringify(localDataAsJson));
+        });
+
+        wss.clients.forEach(function each(client) {
+          if(client.location == dataAsJSON.teamid && client != ws){
+            client.send('{"status":"Message","message":"joined the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
+          }
+        });
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////// MINIGAMES ///////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
       } else if(dataAsJSON.request == "minigames"){
           ws.location = dataAsJSON.roomid;
-
           // When a new player joins a room
           if (!roomPlayers[dataAsJSON.roomid]) {
             roomPlayers[dataAsJSON.roomid] = [];
           }
-
           // Initialize roomSettings if it doesn't exist for the current room
           if (!roomSettings[dataAsJSON.roomid]) {
             roomSettings[dataAsJSON.roomid] = {};
           }
-
           // Save room difficulty
           if(!roomSettings[dataAsJSON.roomid]["Difficulty"]){
             roomSettings[dataAsJSON.roomid]["Difficulty"] = dataAsJSON.difficulty;
@@ -382,7 +510,6 @@ wss.on('connection', function connection(ws, req) {
                 console.log('Error loading champion data');
                 return null;
               }
-          
               const championKeys = Object.keys(championData.data);
               const randomChampionKey = championKeys[Math.floor(Math.random() * championKeys.length)];
               const randomChampion = championData.data[randomChampionKey];
@@ -395,7 +522,6 @@ wss.on('connection', function connection(ws, req) {
                   console.log('Error getting random champion data');
                   return;
               }
-          
               const championName = randomChampion.name;
               const imagePath = `/clashapp/data/patch/${currentPatch}/img/champion/${randomChampion.image.full}`;
           
@@ -480,9 +606,9 @@ wss.on('connection', function connection(ws, req) {
           }
         });
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        ///////////////////////////////////////////////// CORRECT ANSWER  ////////////////////////////////////////////////////
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ///////////////////////////////////////////////// CORRECT ANSWER  ////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       } else if(dataAsJSON.request == "correctAnswer"){  
         async function loadChampionData() {
@@ -569,9 +695,9 @@ wss.on('connection', function connection(ws, req) {
           }
         }
       }
-     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-     ////////////////////////////////////////////////// ON TEXT MESSAGE ///////////////////////////////////////////////////
-     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////// ON TEXT MESSAGE ///////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     } else {
       if(newClient == lastClient){ // If the same client is still sending data no "Received following data from" text is necessary
@@ -628,13 +754,21 @@ wss.on('connection', function connection(ws, req) {
 
 // This function broadcasts new teamdata to any client currently connected to the teams page 
 // (E.g. Client 1 and 2 are connected to /123456 and Client 3 ist connected to /666666 -> Only Client 1 and 2 will receive new data)
-function broadcastUpdate(clientsTeamID){ 
-  wss.clients.forEach(function each(client) {
-    if(client.location == clientsTeamID){
-      let localTeamData = fs.readFileSync('/hdd1/clashapp/data/teams/' + clientsTeamID + '.json', 'utf-8'); // read local file
-      client.send(localTeamData);
-    }
-  });
+function broadcastUpdate(clientsTeamID) {
+  const teamsCollection = mongoClient.db('clashappdb').collection('teams');
+
+  readTeamData(clientsTeamID)
+    .then((localDataAsJson) => {
+      wss.clients.forEach(function each(client) {
+        if (client.location == clientsTeamID) {
+          client.send(JSON.stringify(localDataAsJson));
+        }
+      });
+    })
+    .catch((error) => {
+      // Handle any errors that occur when fetching data from MongoDB
+      console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error broadcasting update: ${error}`, new Date().toLocaleTimeString());
+    });
 }
 
 // This function broadcasts a message to any client currently connected to any teams page 
@@ -660,7 +794,5 @@ function handleCrash(error) {
   var currentTime = new Date().toLocaleTimeString();
   const crashMessage = `[${currentTime}] [Server Crash]: ${error.stack}\n`;
   fs.appendFileSync(logPath, crashMessage, 'utf8');
-
-  // Terminate the application
   process.exit(1);
 }

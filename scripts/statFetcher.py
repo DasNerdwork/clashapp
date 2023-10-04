@@ -1,13 +1,14 @@
+#!/usr/bin/env python3.10
 # Necessary import block
 from datetime import datetime
 from pathlib import Path
+from pymongo import MongoClient
 import logging
 import logging.handlers as handlers
 import json
 import os, sys
 import time
 import glob
-import array
 
 # Start count of whole program time
 start_fetcher = time.time() 
@@ -20,6 +21,27 @@ logHandler.setLevel(logging.INFO)
 logHandler.setFormatter(formatter)
 logger.addHandler(logHandler)
 logger.info("Starting statFetcher and initializing dicts, vars and arrays of stat names")
+
+class MongoDBHelper:
+    def __init__(self):
+        self.host = 'dasnerdwork.net'
+        self.port = 17171
+        self.username = 'clashapp'
+        self.password = '***REMOVED***MO'
+        self.auth_source = 'clashappdb'
+        self.tls_ca_file = '/etc/ssl/mongodb.pem'
+        self.database_name = 'clashappdb'
+        self.client = self._connect_to_mongodb()
+        self.mdb = self.database_name
+
+    def _connect_to_mongodb(self):
+        connection_uri = f"mongodb://{self.username}:{self.password}@{self.host}:{self.port}/{self.auth_source}?authMechanism=SCRAM-SHA-1&tls=true&tlsCAFile={self.tls_ca_file}"
+        return MongoClient(connection_uri)
+
+    def get_collection(self, collection_name):
+        return self.client[self.database_name][collection_name]
+
+mongo_helper = MongoDBHelper()
 
 # Initializing dicts, vars and arrays
 averageJsonDict = dict.fromkeys(['GENERAL', 'TOP', 'JUNGLE', 'MIDDLE', 'UTILITY', 'BOTTOM'])
@@ -57,7 +79,6 @@ championStatNameArray = [
     'trueDamageDealtToChampions', 'trueDamageTaken', 'turretKills', 'turretTakedowns', 'turretsLost']
 championDict = {}
 sortedChampionDict = {}
-matchesPath = '/hdd1/clashapp/data/matches/'
 currentPatch = Path('/hdd1/clashapp/data/patch/version.txt').read_text()
 championJsonPath = '/hdd1/clashapp/data/patch/' + currentPatch + '/data/de_DE/champion.json'
 counter = 1
@@ -66,10 +87,10 @@ counter = 1
 def statIterator(lane):
     challengeDict = {}
     sortedChallengeDict = {}
-    for filename in glob.glob(os.path.join(matchesPath, 'EUW1_*.json')): #only process .JSON files in folder.
-        with open(filename, encoding='utf-8', mode='r') as currentFile:
-            fileJson = currentFile.read()
-            jdata = json.loads(fileJson)
+    match_collection = mongo_helper.get_collection('matches')
+    cursor = match_collection.find({})
+    for document in cursor:
+        jdata = document
         if("info" not in jdata):
             continue
         for player in jdata['info']['participants']:
@@ -109,10 +130,10 @@ with open(championJsonPath, encoding='utf-8', mode='r') as championData:
 
 def championStatIterator():
     logger.info("Starting fetching of champion specific average data")  
-    for filename in glob.glob(os.path.join(matchesPath, 'EUW1_*.json')):
-        with open(filename, encoding='utf-8', mode='r') as currentFile:
-            fileJson = currentFile.read()
-            jdata = json.loads(fileJson)
+    match_collection = mongo_helper.get_collection('matches')
+    cursor = match_collection.find({})
+    for document in cursor:
+        jdata = document
         if("info" not in jdata):
             continue
         for player in jdata['info']['participants']:
