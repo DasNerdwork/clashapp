@@ -28,6 +28,7 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
     if(Array.from(event.data)[0] == "{"){
         var messageAsJson = JSON.parse(event.data);
         var selectedBans = document.getElementById("selectedBans");
+        // console.log(messageAsJson);
         if(messageAsJson.hasOwnProperty("SuggestedBans")){
             var status = 0;
             // console.log(messageAsJson);
@@ -99,8 +100,6 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                 alert("[" + d.toLocaleTimeString() + "] Die Anfrage für diese Team ID ist nicht gültig.\n");
             } else if (messageAsJson.status == "FileDidNotExist") {
                 window.location.reload();
-            } else if (messageAsJson.status == "Success") {
-                // if successful
             } else if (messageAsJson.status == "Update") {
                 // if update
             } else if (messageAsJson.status == "FirstConnect") {
