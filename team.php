@@ -13,6 +13,7 @@ $memInitialTime = memory_get_usage();
 include_once('/hdd1/clashapp/functions.php');
 include_once('/hdd1/clashapp/update.php');
 require_once '/hdd1/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/mongo-db.php';
 
 /**
  * @author Florian Falk <dasnerdwork@gmail.com>
@@ -91,15 +92,15 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
         $startCheckBanFile = microtime(true);
         $memCheckBanFile = memory_get_usage();
-        if(!file_exists('/hdd1/clashapp/data/teams/'.$teamID.'.json')){
-            $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'c');
-            $suggestedBanFileContent["SuggestedBans"] = [] ;
+        $mdb = new MongoDBHelper();
+        if(!$mdb->findDocumentByField('teams', 'TeamID', $teamID)["success"]){
+            $suggestedBanFileContent["TeamID"] = $teamID;
+            $suggestedBanFileContent["SuggestedBans"] = [];
             $suggestedBanFileContent["Status"] = 0;
             $suggestedBanFileContent["LastUpdate"] = 0;
-            $suggestedBanFileContent["Rating"] = [];
-            fwrite($fp, json_encode($suggestedBanFileContent));
-            fclose($fp);
-        } 
+            $suggestedBanFileContent["Rating"] = (object) [];
+            $mdb->insertDocument('teams', $suggestedBanFileContent);
+        }
         $timeAndMemoryArray["CheckBanFile"]["Time"] = number_format((microtime(true) - $startCheckBanFile), 2, ',', '.')." s";
         $timeAndMemoryArray["CheckBanFile"]["Memory"] = number_format((memory_get_usage() - $memCheckBanFile)/1024, 2, ',', '.')." kB";
 
@@ -236,16 +237,16 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
                                             // echo str_replace(".json", "", $playerDataJSONPath) ." - ". $player["summonerId"];
                                             if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
-                                                if(file_exists('/hdd1/clashapp/data/teams/'.$teamID.'.json')){
-                                                    $tempTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
+                                                if($mdb->findDocumentByField('teams', 'TeamID', $teamID)["success"]){
+                                                    $tempTeamJSON = $mdb->findDocumentByField('teams', 'TeamID', $teamID)["document"];
                                                     $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
                                                     isset($_GET["reload"]) ? $forceReload = true : $forceReload = false;
-                                                    // echo "<script>console.log('Time: ".time()." LastUpdate: ".$tempTeamJSON["LastUpdate"]." Difference: ".(time() - $tempTeamJSON["LastUpdate"])."')</script>";
-                                                    if(((time() - $tempTeamJSON["LastUpdate"]) > 600) || ($tempTeamJSON["LastUpdate"] == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
+                                                    // echo "<script>console.log('Time: ".time()." LastUpdate: ".$tempTeamJSON->LastUpdate." Difference: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
+                                                    if(((time() - $tempTeamJSON->LastUpdate) > 600) || ($tempTeamJSON->LastUpdate == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
                                                         $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
                                                         $matchInPlayerJsonButNotExistent = false;
                                                         foreach(array_keys($playerDataJSON["MatchIDs"]) as $matchid) {
-                                                            if(!file_exists('/hdd1/clashapp/data/matches/'.$matchid.'.json')){
+                                                            if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $matchid)["success"]){
                                                                 $matchInPlayerJsonButNotExistent = true;
                                                             }
                                                         }
@@ -263,7 +264,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                             $matchids = array_keys($playerDataJSON["MatchIDs"]);
 
                                                             echo "<script>console.log('".$playerName." already up to date.'); requests['".$player["summonerId"]."'] = 'Done';</script>";
-                                                            // echo "<script>console.log('DEBUG: New Teamupdate: ".(time() - $tempTeamJSON["LastUpdate"])."')</script>";
+                                                            // echo "<script>console.log('DEBUG: New Teamupdate: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
                                                             // HIERNACH MATCHIDS SENDEN
                                                             $recalculateMatchIDs = false;
                                                             $recalculatePlayerLanes = false;
@@ -307,11 +308,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                                 $upToDate = true;
                                                                 $allUpToDate++;
                                                                 if($allUpToDate == count($teamDataArray["Players"])){ // Reset anti-request timer if all people are up to date and onAllFinish not called
-                                                                    $tempTeamJSON["LastUpdate"] = time();
+                                                                    $tempTeamJSON->LastUpdate = time();
                                                                 }
-                                                                $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'w+');
-                                                                fwrite($fp, json_encode($tempTeamJSON));
-                                                                fclose($fp);
+                                                                $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
                                                             }
                                                             break;
                                                         }
@@ -325,7 +324,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                         $matchids = array_keys($playerDataJSON["MatchIDs"]);
 
                                                         echo "<script>console.log('".$playerName." already up to date.'); requests['".$player["summonerId"]."'] = 'Done';</script>";
-                                                        // echo "<script>console.log('DEBUG: Last Teamupdate < 10mins ago: ".(time() - $tempTeamJSON["LastUpdate"])."')</script>";
+                                                        // echo "<script>console.log('DEBUG: Last Teamupdate < 10mins ago: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
                                                         // HIERNACH MATCHIDS SENDEN
                                                         $recalculateMatchIDs = false;
                                                         $recalculatePlayerLanes = false;
@@ -558,22 +557,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
 
-
-
-
-
-                            // ------------------------------------------------------------------v- AGAIN DOWNLOAD? -v------------------------------------------------------------------ //
-
-                            // if(!$execOnlyOnce) $startAgainDownload = microtime(true);
-                            // $memAgainDownload = memory_get_usage();
-                            // foreach($matchids_sliced as $matchid){
-                            //     if(!file_exists('/hdd1/clashapp/data/matches/' . $matchid . ".json")){
-                            //         downloadMatchByID($matchid, $playerName);
-                            //     }
-                            // }
-                            // if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["StartAgainDownload"]["Time"] = number_format((microtime(true) - $startAgainDownload), 2, ',', '.')." s";
-                            // if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["StartAgainDownload"]["Memory"] = number_format((memory_get_usage() - $memAgainDownload)/1024, 2, ',', '.')." kB";
-
                             // ------------------------------------------------------------------v- PRINT RANKED STATS -v------------------------------------------------------------------ //
 
                             if(!$execOnlyOnce) $startPrintRankedStats = microtime(true);
@@ -787,63 +770,69 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
     // $recalculateSuggestedBanData = true; // uncomment to force recalc
     // Check if suggested ban data is already locally stored
-    $currentTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
+    $currentTeamJSON = $mdb->findDocumentByField('teams', 'TeamID', $teamID, true)["document"];
     if(isset($currentTeamJSON["SuggestedBanData"])){
         $suggestedBanArray = $currentTeamJSON["SuggestedBanData"];
         $timer = 0;
         $zIndex = 10;
         foreach($suggestedBanArray as $champname => $banChampion){
-                echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0 relative" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards; z-index: '.$zIndex.';" x-data="{ showExplanation: false }">
-                    <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);" @mouseover="showExplanation=true" @mouseout="showExplanation=false">
-                        <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion["Filename"] . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion["Filename"]) . '.webp" alt="A league of legends champion icon of '.$champname.'"></div>
-                    <span class="suggested-ban-caption w-16 block">' . $champname . '</span>
-                    <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3" x-show="showExplanation" x-transition x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
-                    <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark text-end">'.__('Category').'</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Addition').'</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">'.__('Explanation').'</div>';
-                    if(isset($suggestedBanArray[$champname]["Points"]["Value"])){
-                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["Points"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$playerSumidTeamArray[$suggestedBanArray[$champname]["Points"]["Cause"]].' '.__('achieved a mastery score of').' '.$suggestedBanArray[$champname]["Points"]["Value"].' '.__('on').' '.$champname.'.</div>';
+            echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0 relative" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards; z-index: '.$zIndex.';" x-data="{ showExplanation: false }">
+            <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);" @mouseover="showExplanation=true" @mouseout="showExplanation=false">
+                <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion->Filename . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.webp" alt="A league of legends champion icon of ' . $champname . '"></div>
+            <span class="suggested-ban-caption w-16 block">' . $champname . '</span>
+            <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3" x-show="showExplanation" x-transition x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
+            <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark text-end">'.__('Category').'</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Addition').'</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">'.__('Explanation').'</div>';
+            if (isset($suggestedBanArray->{$champname}->Points->Value)) {
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->Points->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">' . $playerSumidTeamArray[$suggestedBanArray->{$champname}->Points->Cause] . ' ' . __('achieved a mastery score of') . ' ' . $suggestedBanArray->{$champname}->Points->Value . ' ' . __('on') . ' ' . $champname . '.</div>';
+            }
+            if (isset($suggestedBanArray->{$champname}->TotalTeamPoints->Value)) {
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Total Team Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->TotalTeamPoints->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('This team has a combined mastery score of').' '.str_replace(".", ",", $suggestedBanArray->{$champname}->TotalTeamPoints->Value).' '.__('on').' '.$champname.'.</div>';
+            }
+            if (isset($suggestedBanArray->{$champname}->CapablePlayers->Value)) {
+                if ($suggestedBanArray->{$champname}->CapablePlayers->Value > 1) {
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Capable Player').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->CapablePlayers->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">' . $suggestedBanArray->{$champname}->CapablePlayers->Value . ' ' . __('summoners of this team are able to play') . ' ' . $champname . '.</div>';
+                } else {
+                    echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Capable Player').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->CapablePlayers->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">' . $suggestedBanArray->{$champname}->CapablePlayers->Value . ' ' . __('summoner of this team is able to play') . ' ' . $champname . '.</div>';
+                }
+            }
+            if (isset($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause)) {
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Matching Laners').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->MatchingLanersPrio->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">';
+                foreach ($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause as $laner) {
+                    if ($laner == reset($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause)) {
+                        echo $playerSumidTeamArray[$laner];
+                    } else if ($laner == end($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause)) {
+                        echo " & " . $playerSumidTeamArray[$laner];
+                    } else {
+                        echo ", " . $playerSumidTeamArray[$laner];
                     }
-                    if(isset($suggestedBanArray[$champname]["TotalTeamPoints"]["Value"])){
-                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Total Team Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["TotalTeamPoints"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('This team has a combined mastery score of').' '.str_replace(".", ",", $suggestedBanArray[$champname]["TotalTeamPoints"]["Value"]).' '.__('on').' '.$champname.'.</div>';
+                }
+                echo ' '.__('are able to perform with').' '.$champname.' '.__('while matching lanes').' (';
+                foreach ($suggestedBanArray->{$champname}->MatchingLanersPrio->Lanes as $lane) {
+                    if ($lane == reset($suggestedBanArray->{$champname}->MatchingLanersPrio->Lanes)) {
+                        echo ucfirst(strtolower($lane));
+                    } else if ($lane == end($suggestedBanArray->{$champname}->MatchingLanersPrio->Lanes)) {
+                        echo " & " . ucfirst(strtolower($lane));
+                    } else {
+                        echo ", " . ucfirst(strtolower($lane));
                     }
-                    if(isset($suggestedBanArray[$champname]["CapablePlayers"]["Value"])){
-                        if($suggestedBanArray[$champname]["CapablePlayers"]["Value"] > 1){
-                            echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Capable Player').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["CapablePlayers"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$suggestedBanArray[$champname]["CapablePlayers"]["Value"].' '.__('summoners of this team are able to play').' '.$champname.'.</div>';
-                        } else {
-                            echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Capable Player').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["CapablePlayers"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$suggestedBanArray[$champname]["CapablePlayers"]["Value"].' '.__('summoner of this team is able to play').' '.$champname.'.</div>';
-                        }
-                    }
-                    if(isset($suggestedBanArray[$champname]["MatchingLanersPrio"]["Cause"])){
-                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Matching Laners').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["MatchingLanersPrio"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">';
-                    foreach($suggestedBanArray[$champname]["MatchingLanersPrio"]["Cause"] as $laner){
-                        if($laner == reset($suggestedBanArray[$champname]["MatchingLanersPrio"]["Cause"])){
-                            echo $playerSumidTeamArray[$laner];
-                        } else if($laner == end($suggestedBanArray[$champname]["MatchingLanersPrio"]["Cause"])){
-                            echo " & ".$playerSumidTeamArray[$laner];
-                        } else {
-                            echo ", ".$playerSumidTeamArray[$laner];
-                        }
-                    } echo ' '.__('are able to perform with').' '.$champname.' '.__('while matching lanes').' ('; 
-                    foreach($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"] as $lane){
-                        if($lane == reset($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"])){
-                            echo ucfirst(strtolower($lane));
-                        } else if($laner == end($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"])){
-                            echo " & ".ucfirst(strtolower($lane));
-                        } else {
-                            echo ", ".ucfirst(strtolower($lane));
-                        }
-                    } echo').</div>  '; } echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Last Played').':</div>
-                    <div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["LastPlayed"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('The last time someone played').' '.$champname.' '.__('was').' '.timeDiffToText($suggestedBanArray[$champname]["LastPlayed"]["Value"]).'.</div>';
-                    if(isset($suggestedBanArray[$champname]["OccurencesInLastGames"]["Count"])){
-                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">'.__('Occurences').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["OccurencesInLastGames"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$champname.' '.__('was played').' ';
-                        echo $suggestedBanArray[$champname]["OccurencesInLastGames"]["Count"] > 1 ? $suggestedBanArray[$champname]["OccurencesInLastGames"]["Count"].' '.__('times').' ' : ' '.__('once').' ';
-                        echo __('in the teams').' '.$suggestedBanArray[$champname]["OccurencesInLastGames"]["Games"].' '.__('unique fetched Flex or Clash games').'.</div>';
-                    } 
-                    if(isset($suggestedBanArray[$champname]["AverageMatchScore"]["Add"])){
-                        echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-dark text-end">'.__('Average Matchscore').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["AverageMatchScore"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left">'.__('The average matchscore achieved on').' '.$champname.' '.__('is').' '.$suggestedBanArray[$champname]["AverageMatchScore"]["Value"].'.</div>';
-                    } echo '
-                    <div class="py-3 px-2 flex justify-end items-center font-bold border-solid border-r-2 border-t-2 border-dark text-end">'.__('Finalscore').':</div><div class="py-3 px-2 flex justify-center items-center underline decoration-double font-bold border-solid border-r-2 border-t-2 border-dark text-base underline-offset-2">'.number_format($suggestedBanArray[$champname]["FinalScore"],2,'.','').'</div><div class="flex justify-end items-end text-gray-600 border-solid border-t-2 border-dark"><a href="/docs" onclick="return false;">&#187; '.__('Graphs & Formulas').'</a></div>
-                    <svg class="absolute text-black/90 h-4 -ml-4 mt-5 rotate-90" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
-                    </div>';
+                }
+                echo ').</div>  ';
+            }
+            echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Last Played').':</div>
+            <div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->LastPlayed->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('The last time someone played').' '.$champname.' '.__('was').' '.timeDiffToText($suggestedBanArray->{$champname}->LastPlayed->Value).'.</div>';
+            if (isset($suggestedBanArray->{$champname}->OccurencesInLastGames->Count)) {
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">'.__('Occurences').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->OccurencesInLastGames->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$champname.' '.__('was played').' ';
+                echo $suggestedBanArray->{$champname}->OccurencesInLastGames->Count > 1 ? $suggestedBanArray->{$champname}->OccurencesInLastGames->Count.' '.__('times').' ' : ' '.__('once').' ';
+                echo __('in the teams').' '.$suggestedBanArray->{$champname}->OccurencesInLastGames->Games.' '.__('unique fetched Flex or Clash games').'.</div>';
+            } 
+            if (isset($suggestedBanArray->{$champname}->AverageMatchScore->Add)) {
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-dark text-end">'.__('Average Matchscore').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->AverageMatchScore->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left">'.__('The average matchscore achieved on').' '.$champname.' '.__('is').' '.$suggestedBanArray->{$champname}->AverageMatchScore->Value.'.</div>';
+            }
+            echo '
+            <div class="py-3 px-2 flex justify-end items-center font-bold border-solid border-r-2 border-t-2 border-dark text-end">'.__('Finalscore').':</div><div class="py-3 px-2 flex justify-center items-center underline decoration-double font-bold border-solid border-r-2 border-t-2 border-dark text-base underline-offset-2">'.number_format($suggestedBanArray->{$champname}->FinalScore, 2, '.', '').'</div><div class="flex justify-end items-end text-gray-600 border-solid border-t-2 border-dark"><a href="/docs" onclick="return false;">&#187; '.__('Graphs & Formulas').'</a></div>
+            <svg class="absolute text-black/90 h-4 -ml-4 mt-5 rotate-90" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
+            </div>';
+        
                     echo '</div>';
                     $timer += 0.1;
                     $zIndex--;

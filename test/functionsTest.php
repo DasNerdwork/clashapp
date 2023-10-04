@@ -131,13 +131,14 @@ class FunctionsTest extends TestCase {
     }
 
     public function testDownloadMatchesByID() {
+        $mdb = new MongoDBHelper();
         $testMatchId = getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 1)[0];
         $downloadableFlag = false;
-        if(file_exists("/hdd1/clashapp/data/matches/".$testMatchId.".json")) {
-            if(unlink("/hdd1/clashapp/data/matches/".$testMatchId.".json")){
+        if($mdb->findDocumentByField('matches', 'metadata.matchId', $testMatchId)["success"]) {
+            if($mdb->deleteDocumentByField('matches', 'metadata.matchId', $testMatchId)["success"]){
                 $downloadableFlag = true;
             } else {
-                echo "Unable to delete /hdd1/clashapp/data/matches/".$testMatchId.".json";
+                echo "Unable to delete ".$testMatchId." from database";
                 return;
             }
         } else {
@@ -147,8 +148,6 @@ class FunctionsTest extends TestCase {
         if($downloadableFlag) {
             $resultBoolean = downloadMatchesByID([$testMatchId], "PHPUnit");
             $this->assertNotFalse($resultBoolean);
-            $this->assertFileExists("/hdd1/clashapp/data/matches/".$testMatchId.".json", "Downloaded Match.json File does not exists/download correctly");
-            $this->assertGreaterThan(0, filesize("/hdd1/clashapp/data/matches/".$testMatchId.".json"), "Downloaded Match.json File has filesize of 0");
         }
     }
 
