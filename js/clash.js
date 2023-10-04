@@ -294,7 +294,6 @@ function updateTagColor(checkbox) {
 
 ready(function(){
   searchAutosuggestData(autosuggestData, currentPatch, containerTitle);
-  console.log(championData);
 });
 
 function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {

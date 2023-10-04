@@ -1,5 +1,6 @@
 <?php
 include_once('functions.php');
+require_once '/hdd1/clashapp/mongo-db.php';
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
@@ -39,6 +40,7 @@ $requestIterator = 0;
 // Fetch all the necessary data for updating or generating a single players player.json, stored in /clashapp/data/player/
 function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
     if($id != ""){
+        $mdb = new MongoDBHelper();
         $playerData = getPlayerData($type,$id);
         $playerName = $playerData["Name"];
         $sumid = $playerData["SumID"];
@@ -67,8 +69,6 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
         $tempAjaxMatchIDArray = array();
         global $requestIterator;
 
-        $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
-
         /**
          * STEP 1: Check if up-to-date
          */
@@ -79,7 +79,7 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                 // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
                 $return = true;
                 foreach($matchIDs as $checkSingleMatch){
-                    if(!in_array($checkSingleMatch, array_keys($existingJson["MatchIDs"])) || !file_exists('/hdd1/clashapp/data/matches/'.$checkSingleMatch.'.json')){
+                    if(!in_array($checkSingleMatch, array_keys($existingJson["MatchIDs"])) || !$mdb->findDocumentByField("matches", 'metadata.matchId', $checkSingleMatch)["success"]){
                         $tempAjaxMatchIDArray[] = $checkSingleMatch;
                     }
                 }
@@ -153,7 +153,7 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
              */
             $playerDataArray = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
             foreach(array_keys($playerDataArray["MatchIDs"]) as $match){
-                if(!file_exists('/var/www/html/clash/clashapp/data/matches/'.$match.'.json')){
+                if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $match)["success"]){
                     $tempAjaxMatchIDArray[] = $match;
                 }
             }

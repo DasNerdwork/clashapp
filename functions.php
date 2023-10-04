@@ -1,8 +1,9 @@
 <?php
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
+require_once '/hdd1/clashapp/mongo-db.php';
 
 /** Main functions.php containing overall used functions throughout different php files
  * @author Florian Falk <dasnerdwork@gmail.com>
@@ -368,6 +369,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
  * @return boolean N/A, file saving & logging instead
  */
 function downloadMatchesByID($matchids, $username = null){
+    $mdb = new MongoDBHelper();
     global $headers, $counter, $apiRequests;
     $logPath = '/hdd1/clashapp/data/logs/matchDownloader.log';
 
@@ -387,7 +389,7 @@ function downloadMatchesByID($matchids, $username = null){
         }
 
         // Only download if file doesn't exist yet
-        if(!file_exists('/hdd1/clashapp/data/matches/' . $matchid . ".json")){
+        if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $matchid)["success"]){
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -432,9 +434,7 @@ function downloadMatchesByID($matchids, $username = null){
             file_put_contents($logPath, $answer.PHP_EOL , FILE_APPEND | LOCK_EX);
             if($httpCode == "200"){
                 // if(($matchOutput->info->gameDuration != "0")){ // && (isset($matchOutput->info->participants[0]->killParticipation)
-                    $fp = fopen('/hdd1/clashapp/data/matches/' . $matchid . '.json', 'w');
-                    fwrite($fp, $matchOutput);
-                    fclose($fp);
+                    $mdb->insertDocument('matches', json_decode($matchOutput, true));
                 // } else {
                 //     $errorFile = $matchid;
                 //     $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
@@ -467,6 +467,7 @@ function downloadMatchesByID($matchids, $username = null){
  * @return array $matchData Array full of all given MatchID.json file contents up to the below maximum
  */
 function getMatchData($matchIDArray){
+    $mdb = new MongoDBHelper();
     $startMemory = memory_get_usage();
     $matchData = array();
     global $cleanAttributeArray;
@@ -474,8 +475,8 @@ function getMatchData($matchIDArray){
     // Loop through each matchID.json
     foreach ($matchIDArray as $key => $matchIDJSON) {
         if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
-        if(file_exists('/hdd1/clashapp/data/matches/'.$matchIDJSON.'.json')){
-           $matchData[$matchIDJSON] = json_decode(file_get_contents('/hdd1/clashapp/data/matches/'.$matchIDJSON.'.json'));
+        if($mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["success"]){
+           $matchData[$matchIDJSON] = $mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["document"];
            unset($matchData[$matchIDJSON]->metadata);
            unset($matchData[$matchIDJSON]->info->gameId);
            unset($matchData[$matchIDJSON]->info->gameMode);
@@ -564,6 +565,7 @@ function secondsToTime($seconds) {
  * @todo possibility to make more beautiful and/or write a testcase?
  */
 function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
+    $mdb = new MongoDBHelper();
     global $currentPatch;
     global $currentTimestamp;
     $count = 0;
@@ -576,8 +578,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
     $returnString .= "<div class='smooth-transition w-full overflow-hidden twok:min-h-[2300px] fullhd:min-h-[1868.75px]' x-show='open' x-transition x-cloak>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
-        $handle = file_get_contents("/hdd1/clashapp/data/matches/".$matchIDJSON.".json");
-        $inhalt = json_decode($handle);
+        $inhalt = $mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["document"];
         if(isset($inhalt->metadata->participants) && $inhalt->info->gameDuration != 0) {
             if(in_array($puuid, (array) $inhalt->metadata->participants)){
                 $count++;
