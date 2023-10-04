@@ -60,6 +60,8 @@ module.exports = {
         'tag-lime': '#4D751C',
         'tag-navy': '#2E1C75',
         'tag-purple': '#5B1C75',
+        'tag-positive': '#0a291a',
+        'tag-negative': '#280b1a',
         'threat-xxs': '#dddddd',
         'threat-xs': '#e1c1c1',
         'threat-s': '#ea8a8a',

@@ -1,10 +1,13 @@
 <?php
 include_once('/hdd1/clashapp/functions.php');
+require_once '/hdd1/clashapp/mongo-db.php';
+
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
 if(isset($_POST['sumids'])){
+    $mdb = new MongoDBHelper();
     $matchIDTeamArray = array();
     $masteryDataTeamArray = array();
     $playerLanesTeamArray = array();
@@ -48,12 +51,8 @@ if(isset($_POST['sumids'])){
 
     $suggestedBanMatchData = getMatchData($matchIDTeamArray);
     $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
-    $currentTeamJSON = json_decode(file_get_contents('/hdd1/clashapp/data/teams/'.$teamID.'.json'), true);
-    $currentTeamJSON["LastUpdate"] = time();
-    $currentTeamJSON["SuggestedBanData"] = $suggestedBanArray;
-    $fp = fopen('/hdd1/clashapp/data/teams/'.$teamID.'.json', 'w+');
-    fwrite($fp, json_encode($currentTeamJSON));
-    fclose($fp);
+    $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
+    $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'SuggestedBanData', $suggestedBanArray);
     // echo json_encode($suggestedBanArray);
 
     $timer = 0;

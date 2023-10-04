@@ -1,14 +1,14 @@
 <?php
 
-// IF THIS COMES FROM UPDATE PHP ALSO HAVE TO JS ADD LANES
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include_once('/hdd1/clashapp/functions.php');
+require_once '/hdd1/clashapp/mongo-db.php';
 
 if(isset($_POST['mode'])){
+    $mdb = new MongoDBHelper();
     $matchids = array_keys(json_decode($_POST['matchids'], true));
     $path = $_POST['path']; // grab path from ajax request
     $response = array('sumid' => substr($path, 0, -5));
@@ -42,7 +42,7 @@ if(isset($_POST['mode'])){
         $playerDataJSON["MatchIDs"] = array_slice($recalculatedMatchIDsArray, 0, 15);
         $response['matchScores'] = $playerDataJSON["MatchIDs"];
     }
-    
+    $mdb->insertDocument('players', $playerDataJSON);
     fwrite($fp, json_encode($playerDataJSON));
     fclose($fp);
 
