@@ -44,6 +44,7 @@ include('/hdd1/clashapp/templates/header.php');
 // ----------------------------------------------------------------v- INITIALIZER -v---------------------------------------------------------------- //
 
 // These arrays are necessary and used for the getSuggestedBans function as parameters to retrieve the most accurate suggested ban data efficiently
+$mdb = new MongoDBHelper();
 $playerSumidTeamArray = array(); // collects all 5 sumids
 $playerLanesTeamArray = array(); // collects all main and secondary roles per ["sumid"]
 $masteryDataTeamArray = array(); // collects mastery data per ["sumid"] to have them combined in a single array
@@ -59,16 +60,21 @@ $currentPlayerNumber = 1;
 $upToDate = false;
 $allUpToDate = 0;
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
-$autosuggestData = json_decode(file_get_contents("/hdd1/clashapp/data/player/autosuggest.json"), true);
+$autosuggestRequest = $mdb->getAutosuggestAggregate();
 $championDataArray = json_decode(file_get_contents("/hdd1/clashapp/data/patch/".$currentPatch."/data/en_US/champion.json"), true);
 $championArray = array();
 foreach ($championDataArray['data'] as $championKey => $championInfo) {
     $championArray["{$championInfo['name']}"] = "{$championInfo['image']['full']}";
 }
+if($autosuggestRequest["success"]){
+    $autosuggestData = $autosuggestRequest["data"];
+    echo "<script>const autosuggestData = " . json_encode(array_map('trim', $autosuggestData)) . ";</script>";
+} else {
+    echo "<script>const autosuggestData = '';</script>";
+}
 echo "
 <script>
 const requests = {};
-const autosuggestData = " . json_encode(array_map('trim', $autosuggestData)) . ";
 const currentPatch = " . json_encode($currentPatch) . ";
 const championData = " . json_encode($championArray) . ";
 const containerTitle = '" . __("Summoner") . "';
@@ -92,7 +98,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
 
         $startCheckBanFile = microtime(true);
         $memCheckBanFile = memory_get_usage();
-        $mdb = new MongoDBHelper();
         if(!$mdb->findDocumentByField('teams', 'TeamID', $teamID)["success"]){
             $suggestedBanFileContent["TeamID"] = $teamID;
             $suggestedBanFileContent["SuggestedBans"] = [];
@@ -220,7 +225,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         <table class='w-full flex table-fixed border-separate border-spacing-4 min-h-[2300px]' x-data='{ advancedGlobal: ".$matchesExpanded." }'>
             <tr>";
             // count($teamDataArray["Players"]) == 1 ? $tableWidth = "100%" : $tableWidth = round(100/count($teamDataArray["Players"]));          // disabled due to cumulative layout shift
-                $playerDataDirectory = new DirectoryIterator('/hdd1/clashapp/data/player/');
                 $playerSpawnDelay = 0;
                 foreach($teamDataArray["Players"] as $key => $player){ 
                     $startFetchPlayer[$key] = microtime(true);
@@ -232,167 +236,166 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                 <td class='w-1/5 text-center'>";
                                     $playerSpawnDelay += 0.2;
                                     unset($sumid); // necessary for check 22 lines below
-                                    foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
-                                        $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
-                                        if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
-                                            // echo str_replace(".json", "", $playerDataJSONPath) ." - ". $player["summonerId"];
-                                            if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
-                                                if($mdb->findDocumentByField('teams', 'TeamID', $teamID)["success"]){
-                                                    $tempTeamJSON = $mdb->findDocumentByField('teams', 'TeamID', $teamID)["document"];
-                                                    $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
-                                                    isset($_GET["reload"]) ? $forceReload = true : $forceReload = false;
-                                                    // echo "<script>console.log('Time: ".time()." LastUpdate: ".$tempTeamJSON->LastUpdate." Difference: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
-                                                    if(((time() - $tempTeamJSON->LastUpdate) > 600) || ($tempTeamJSON->LastUpdate == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
-                                                        $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);
-                                                        $matchInPlayerJsonButNotExistent = false;
-                                                        foreach(array_keys($playerDataJSON["MatchIDs"]) as $matchid) {
-                                                            if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $matchid)["success"]){
-                                                                $matchInPlayerJsonButNotExistent = true;
-                                                            }
-                                                        }
-                                                        if((array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]) || $matchInPlayerJsonButNotExistent){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
-                                                            echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Force updating.'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
-                                                            $newMatchesDownloaded = true;
-                                                            break;
-                                                        } else {
-                                                            $playerName = $playerDataJSON["PlayerData"]["Name"];
-                                                            $playerData = $playerDataJSON["PlayerData"];
-                                                            $sumid = $playerDataJSON["PlayerData"]["SumID"];
-                                                            $puuid = $playerDataJSON["PlayerData"]["PUUID"];
-                                                            $rankData = $playerDataJSON["RankData"];
-                                                            $masteryData = $playerDataJSON["MasteryData"];
-                                                            $matchids = array_keys($playerDataJSON["MatchIDs"]);
-
-                                                            echo "<script>console.log('".$playerName." already up to date.'); requests['".$player["summonerId"]."'] = 'Done';</script>";
-                                                            // echo "<script>console.log('DEBUG: New Teamupdate: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
-                                                            // HIERNACH MATCHIDS SENDEN
-                                                            $recalculateMatchIDs = false;
-                                                            $recalculatePlayerLanes = false;
-                                                            foreach($playerDataJSON["MatchIDs"] as $singleMatchID => $score){
-                                                                if($score == ""){
-                                                                    $recalculateMatchIDs = true;
-                                                                    break;
-                                                                }
-                                                            }
-
-                                                            if(!isset($playerDataJSON["LanePercentages"]) || $playerDataJSON["LanePercentages"] == null){
-                                                                $recalculatePlayerLanes = true;
-                                                            } else {
-                                                                $playerLanes = $playerDataJSON["LanePercentages"];
-                                                            }
-
-                                                            $xhrMessage = "";
-                                                            
-                                                            if($recalculatePlayerLanes){
-                                                                if($recalculateMatchIDs){
-                                                                    // If both player lanes and matchscores are missing/wrong in players .json
-                                                                    $xhrMessage = "mode=both&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid."&sumid=".$sumid;
-                                                                } else {
-                                                                    // if only player lanes are missing/wrong
-                                                                    $xhrMessage = "mode=lanes&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid;
-                                                                }
-                                                            } elseif($recalculateMatchIDs){
-                                                                // if only matchscores are wrong/missing
-                                                                $xhrMessage = "mode=scores&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&sumid=".$sumid;
-                                                            }
-
-                                                            if($recalculatePlayerLanes || $recalculateMatchIDs){
-                                                                echo "<script>
-                                                                ".processResponseData($currentPlayerNumber)."
-                                                                var data = '".$xhrMessage."';
-                                                                xhrAfter".$currentPlayerNumber.".send(data);
-                                                                </script>
-                                                                ";
-                                                                $currentPlayerNumber++;
-                                                            } else {
-                                                                $upToDate = true;
-                                                                $allUpToDate++;
-                                                                if($allUpToDate == count($teamDataArray["Players"])){ // Reset anti-request timer if all people are up to date and onAllFinish not called
-                                                                    $tempTeamJSON->LastUpdate = time();
-                                                                }
-                                                                $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
-                                                            }
-                                                            break;
-                                                        }
-                                                    } else {
-                                                        $playerName = $playerDataJSON["PlayerData"]["Name"];
-                                                        $playerData = $playerDataJSON["PlayerData"];
-                                                        $sumid = $playerDataJSON["PlayerData"]["SumID"];
-                                                        $puuid = $playerDataJSON["PlayerData"]["PUUID"];
-                                                        $rankData = $playerDataJSON["RankData"];
-                                                        $masteryData = $playerDataJSON["MasteryData"];
-                                                        $matchids = array_keys($playerDataJSON["MatchIDs"]);
-
-                                                        echo "<script>console.log('".$playerName." already up to date.'); requests['".$player["summonerId"]."'] = 'Done';</script>";
-                                                        // echo "<script>console.log('DEBUG: Last Teamupdate < 10mins ago: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
-                                                        // HIERNACH MATCHIDS SENDEN
-                                                        $recalculateMatchIDs = false;
-                                                        $recalculatePlayerLanes = false;
-                                                        foreach($playerDataJSON["MatchIDs"] as $singleMatchID => $score){
-                                                            if($score == ""){
-                                                                $recalculateMatchIDs = true;
-                                                                break;
-                                                            }
-                                                        }
-
-                                                        if(!isset($playerDataJSON["LanePercentages"]) || $playerDataJSON["LanePercentages"] == null){
-                                                            $recalculatePlayerLanes = true;
-                                                        } else {
-                                                            $playerLanes = $playerDataJSON["LanePercentages"];
-                                                        }
-
-                                                        $xhrMessage = "";
-                                                        
-                                                        if($recalculatePlayerLanes){
-                                                            if($recalculateMatchIDs){
-                                                                // If both player lanes and matchscores are missing/wrong in players .json
-                                                                $xhrMessage = "mode=both&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid."&sumid=".$sumid;
-                                                            } else {
-                                                                // if only player lanes are missing/wrong
-                                                                $xhrMessage = "mode=lanes&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid;
-                                                            }
-                                                        } elseif($recalculateMatchIDs){
-                                                            // if only matchscores are wrong/missing
-                                                            $xhrMessage = "mode=scores&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&sumid=".$sumid;
-                                                        }
-
-                                                        if($recalculatePlayerLanes || $recalculateMatchIDs){
-                                                            echo "<script>
-                                                            ".processResponseData($currentPlayerNumber)."
-                                                            var data = '".$xhrMessage."';
-                                                            xhrAfter".$currentPlayerNumber.".send(data);
-                                                            </script>
-                                                            ";
-                                                            $currentPlayerNumber++;
-                                                        } else {
-                                                            $upToDate = true;
-
-                                                        }
+                                    $playerDataRequest = $mdb->getPlayerBySummonerId($player["summonerId"]);
+                                    if($playerDataRequest["success"]){
+                                        if($mdb->findDocumentByField('teams', 'TeamID', $teamID)["success"]){
+                                            $tempTeamJSON = $mdb->findDocumentByField('teams', 'TeamID', $teamID)["document"];
+                                            $playerDataJSONString = json_encode($playerDataRequest["data"]);
+                                            $playerDataJSON = json_decode($playerDataJSONString, true);
+                                            // echo "<pre style=\"color:green;text-align: left;\">";
+                                            // print_r($playerDataJSON);
+                                            // echo "</pre>";
+                                            // echo "<pre style=\"color:red;text-align: left;\">";
+                                            // print_r($tempTeamJSON);
+                                            // echo "</pre>";
+                                            isset($_GET["reload"]) ? $forceReload = true : $forceReload = false;
+                                            // $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
+                                            // echo "<script>console.log('Time: ".time()." LastUpdate: ".$tempTeamJSON->LastUpdate." Difference: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
+                                            if(((time() - $tempTeamJSON->LastUpdate) > 600) || ($tempTeamJSON->LastUpdate == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
+                                                $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);                                           
+                                                $matchInPlayerJsonButNotExistent = false;
+                                                foreach(array_keys($playerDataJSON["MatchIDs"]) as $matchid) {
+                                                    if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $matchid)["success"]){
+                                                        $matchInPlayerJsonButNotExistent = true;
                                                     }
-                                                }  
-                                            } else {
-                                                // TODO: Error Handling echo "No Match found :(<br>".str_replace(".json", "", $playerDataJSONPath)."<br>".$player["summonerId"]."<br>";
-                                            }
-                                        }
-                                    }
-                                    if(!isset($sumid) && $player["summonerId"] != "") {
-                                        echo "<script>console.log('No playerfile found for ".$player["summonerId"]."'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
-                                        updateProfile($player["summonerId"], 15, "sumid");
-                                        foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
-                                            $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
-                                            if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){
-                                                if(str_replace(".json", "", $playerDataJSONPath) == $player["summonerId"]){ // if the team players sumid = filename in player json path
-                                                    $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
-                                                    $playerData = $playerDataJSON["PlayerData"];
+                                                }
+                                                if((array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]) || $matchInPlayerJsonButNotExistent){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
+                                                    echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Force updating.'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
+                                                    $newMatchesDownloaded = true;
+                                                    break;
+                                                } else {
                                                     $playerName = $playerDataJSON["PlayerData"]["Name"];
+                                                    $playerData = $playerDataJSON["PlayerData"];
                                                     $sumid = $playerDataJSON["PlayerData"]["SumID"];
                                                     $puuid = $playerDataJSON["PlayerData"]["PUUID"];
                                                     $rankData = $playerDataJSON["RankData"];
                                                     $masteryData = $playerDataJSON["MasteryData"];
                                                     $matchids = array_keys($playerDataJSON["MatchIDs"]);
-                                                    break;
+
+                                                    echo "<script>console.log('".$playerName." already up to date.'); requests['".$player["summonerId"]."'] = 'Done';</script>";
+                                                    // echo "<script>console.log('DEBUG: New Teamupdate: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
+                                                    // HIERNACH MATCHIDS SENDEN
+                                                    $recalculateMatchIDs = false;
+                                                    $recalculatePlayerLanes = false;
+                                                    foreach($playerDataJSON["MatchIDs"] as $singleMatchID => $score){
+                                                        if($score == ""){
+                                                            $recalculateMatchIDs = true;
+                                                            break;
+                                                        }
+                                                    }
+
+                                                    if(!isset($playerDataJSON["LanePercentages"]) || $playerDataJSON["LanePercentages"] == null){
+                                                        $recalculatePlayerLanes = true;
+                                                    } else {
+                                                        $playerLanes = $playerDataJSON["LanePercentages"];
+                                                    }
+
+                                                    $xhrMessage = "";
+                                                    
+                                                    if($recalculatePlayerLanes){
+                                                        if($recalculateMatchIDs){
+                                                            // If both player lanes and matchscores are missing/wrong in players .json
+                                                            $xhrMessage = "mode=both&matchids=".json_encode($playerDataJSON["MatchIDs"])."&puuid=".$puuid."&sumid=".$sumid;
+                                                        } else {
+                                                            // if only player lanes are missing/wrong
+                                                            $xhrMessage = "mode=lanes&matchids=".json_encode($playerDataJSON["MatchIDs"])."&puuid=".$puuid."&sumid=".$sumid;
+                                                        }
+                                                    } elseif($recalculateMatchIDs){
+                                                        // if only matchscores are wrong/missing
+                                                        $xhrMessage = "mode=scores&matchids=".json_encode($playerDataJSON["MatchIDs"])."&sumid=".$sumid;
+                                                    }
+
+                                                    if($recalculatePlayerLanes || $recalculateMatchIDs){
+                                                        echo "<script>
+                                                        ".processResponseData($currentPlayerNumber)."
+                                                        var data = '".$xhrMessage."';
+                                                        xhrAfter".$currentPlayerNumber.".send(data);
+                                                        </script>
+                                                        ";
+                                                        $currentPlayerNumber++;
+                                                    } else {
+                                                        $upToDate = true;
+                                                        $allUpToDate++;
+                                                        if($allUpToDate == count($teamDataArray["Players"])){ // Reset anti-request timer if all people are up to date and onAllFinish not called
+                                                            $tempTeamJSON->LastUpdate = time();
+                                                        }
+                                                        $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
+                                                    }
+                                                }
+                                            } else {
+                                                $playerName = $playerDataJSON["PlayerData"]["Name"];
+                                                $playerData = $playerDataJSON["PlayerData"];
+                                                $sumid = $playerDataJSON["PlayerData"]["SumID"];
+                                                $puuid = $playerDataJSON["PlayerData"]["PUUID"];
+                                                $rankData = $playerDataJSON["RankData"];
+                                                $masteryData = $playerDataJSON["MasteryData"];
+                                                $matchids = array_keys($playerDataJSON["MatchIDs"]);
+
+                                                echo "<script>console.log('".$playerName." already up to date.'); requests['".$player["summonerId"]."'] = 'Done';</script>";
+                                                // echo "<script>console.log('DEBUG: Last Teamupdate < 10mins ago: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
+                                                // HIERNACH MATCHIDS SENDEN
+                                                $recalculateMatchIDs = false;
+                                                $recalculatePlayerLanes = false;
+                                                foreach($playerDataJSON["MatchIDs"] as $singleMatchID => $score){
+                                                    if($score == ""){
+                                                        $recalculateMatchIDs = true;
+                                                        break;
+                                                    }
+                                                }
+
+                                                if(!isset($playerDataJSON["LanePercentages"]) || $playerDataJSON["LanePercentages"] == null){
+                                                    $recalculatePlayerLanes = true;
+                                                } else {
+                                                    $playerLanes = $playerDataJSON["LanePercentages"];
+                                                }
+
+                                                $xhrMessage = "";
+                                                
+                                                if($recalculatePlayerLanes){
+                                                    if($recalculateMatchIDs){
+                                                        // If both player lanes and matchscores are missing/wrong in players .json
+                                                        $xhrMessage = "mode=both&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid."&sumid=".$sumid;
+                                                    } else {
+                                                        // if only player lanes are missing/wrong
+                                                        $xhrMessage = "mode=lanes&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid;
+                                                    }
+                                                } elseif($recalculateMatchIDs){
+                                                    // if only matchscores are wrong/missing
+                                                    $xhrMessage = "mode=scores&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&sumid=".$sumid;
+                                                }
+
+                                                if($recalculatePlayerLanes || $recalculateMatchIDs){
+                                                    echo "<script>
+                                                    ".processResponseData($currentPlayerNumber)."
+                                                    var data = '".$xhrMessage."';
+                                                    xhrAfter".$currentPlayerNumber.".send(data);
+                                                    </script>
+                                                    ";
+                                                    $currentPlayerNumber++;
+                                                } else {
+                                                    $upToDate = true;
+
                                                 }
                                             }
+                                        }  
+                                    } else {
+                                        // TODO: Error Handling echo "No Match found :(<br>".str_replace(".json", "", $playerDataJSONPath)."<br>".$player["summonerId"]."<br>";
+                                    }
+                                    if(!isset($sumid) && $player["summonerId"] != "") {
+                                        echo "<script>console.log('No playerfile found for ".$player["summonerId"]."'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
+                                        updateProfile($player["summonerId"], 15, "sumid");
+                                        $playerDataRequest = $mdb->getPlayerBySummonerId($player["summonerId"]);
+                                        // print_r($playerDataRequest);
+                                        if($playerDataRequest["success"]){
+                                            $playerDataJSONString = json_encode($playerDataRequest["data"]);
+                                            $playerDataJSON = json_decode($playerDataJSONString, true);
+                                            $playerData = $playerDataJSON["PlayerData"];
+                                            $playerName = $playerDataJSON["PlayerData"]["Name"];
+                                            $sumid = $playerDataJSON["PlayerData"]["SumID"];
+                                            $puuid = $playerDataJSON["PlayerData"]["PUUID"];
+                                            $rankData = $playerDataJSON["RankData"];
+                                            $masteryData = $playerDataJSON["MasteryData"];
+                                            $matchids = array_keys($playerDataJSON["MatchIDs"]);
                                         }
                                     }
                                     if($teamDataArray["Players"][$key] == end($teamDataArray["Players"])){ // If we are at the last player (all possible downloads would be ready at this point)
