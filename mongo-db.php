@@ -251,5 +251,26 @@ class MongoDBHelper {
             return array('success' => false, 'code' => '0DL3MU', 'message' => 'No PlayerData found.');
         }
     }
+
+    /**
+     * Execute an aggregation pipeline on a collection.
+     *
+     * @param string $collectionName The name of the collection to aggregate.
+     * @param array $pipeline The aggregation pipeline.
+     * @param array $options The options for the aggregate operation.
+     *
+     * @return MongoDB\Driver\Cursor The cursor containing the aggregation results.
+     */
+    public function aggregate($collectionName, $pipeline, $options = []) {
+        $command = new MongoDB\Driver\Command([
+            'aggregate' => $collectionName,
+            'pipeline' => $pipeline,
+            'cursor' => new stdClass(),
+        ]);
+
+        $cursor = $this->client->executeCommand($this->mdb, $command);
+
+        return $cursor;
+    }
 }
 ?>
