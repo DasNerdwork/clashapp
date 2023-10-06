@@ -472,42 +472,61 @@ function getMatchData($matchIDArray){
     $matchData = array();
     global $cleanAttributeArray;
 
-    // Loop through each matchID.json
-    foreach ($matchIDArray as $key => $matchIDJSON) {
-        if(memory_get_usage() - $startMemory > "268435456" || $key == 500)return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
-        if($mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["success"]){
-           $matchData[$matchIDJSON] = $mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["document"];
-           unset($matchData[$matchIDJSON]->metadata);
-           unset($matchData[$matchIDJSON]->info->gameId);
-           unset($matchData[$matchIDJSON]->info->gameMode);
-           unset($matchData[$matchIDJSON]->info->gameName);
-           unset($matchData[$matchIDJSON]->info->gameType);
-           unset($matchData[$matchIDJSON]->info->mapId);
-           $matchData[$matchIDJSON]->info->gameVersion = explode(".",$matchData[$matchIDJSON]->info->gameVersion)[0].".".explode(".",$matchData[$matchIDJSON]->info->gameVersion)[1];
-           foreach($matchData[$matchIDJSON]->info->participants as $player){
-                unset($player->allInPings);
-                unset($player->assistMePings);
-                unset($player->baitPings);
-                unset($player->baronKills);
-                unset($player->basicPings);
-                unset($player->bountyLevel);
-                foreach($player->challenges as $challengeName => $challValue){
-                    if(!in_array($challengeName, $cleanAttributeArray)){
-                        unset($player->challenges->$challengeName);
-                    }
-                }
-                foreach($player as $statName => $statValue){
-                    if(!in_array($statName, $cleanAttributeArray) && $statName != "challenges"){
-                        unset($player->$statName);
-                    }
+    $pipeline = [
+        [
+            '$match' => ['metadata.matchId' => ['$in' => $matchIDArray]],
+        ],
+        [
+            '$project' => [
+                'metadata.dataVersion' => 0,
+                'metadata.participants' => 0,
+                'info.gameId' => 0,
+                'info.gameMode' => 0,
+                'info.gameName' => 0,
+                'info.gameType' => 0,
+                'info.mapId' => 0,
+                'info.platformId' => 0,
+                'info.queueId' => 0,
+                'info.teams' => 0,
+                'info.tournamentCode' => 0,
+                'info.participants.allInPings' => 0,
+                'info.participants.assistMePings' => 0,
+                'info.participants.baitPings' => 0,
+                'info.participants.baronKills' => 0,
+                'info.participants.basicPings' => 0,
+                'info.participants.bountyLevel' => 0,
+            ],
+        ],
+    ];
+    
+    // Call the aggregation pipeline
+    $cursor = $mdb->aggregate("matches", $pipeline, []);
+    
+    // Process the results as needed
+    foreach ($cursor as $document) {
+        if(memory_get_usage() - $startMemory > "268435456") return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
+        $document->info->gameVersion = explode(".",$document->info->gameVersion)[0].".".explode(".",$document->info->gameVersion)[1];
+        foreach($document->info->participants as $player){
+            unset($player->allInPings);
+            unset($player->assistMePings);
+            unset($player->baitPings);
+            unset($player->baronKills);
+            unset($player->basicPings);
+            unset($player->bountyLevel);
+            foreach($player->challenges as $challengeName => $challValue){
+                if(!in_array($challengeName, $cleanAttributeArray)){
+                    unset($player->challenges->$challengeName);
                 }
             }
-            unset($matchData[$matchIDJSON]->info->platformId); // e.g. EUW
-            unset($matchData[$matchIDJSON]->info->queueId); // E.g. 440 / Solo_Duo_Queue
-            unset($matchData[$matchIDJSON]->info->teams);
-            unset($matchData[$matchIDJSON]->info->tournamentCode);
-        }  else {
-            echo "File does not exist: ".$matchIDJSON;
+            foreach($player as $statName => $statValue){
+                if(!in_array($statName, $cleanAttributeArray) && $statName != "challenges"){
+                    unset($player->$statName);
+                }
+            }
+        }
+        $matchData[$document->metadata->matchId] = $document;
+        foreach ($matchData as $singleMatchData) {
+            unset($singleMatchData->metadata);
         }
     }
     return $matchData;
