@@ -24,7 +24,7 @@ const rl = readline.createInterface({
   
 const mongoClient = new mongodb.MongoClient(mongoURL);
 
-async function deleteAllMatches() {
+async function deleteAllMatches(close = false) {
   try {
     // Connect to the MongoDB server
     await mongoClient.connect();
@@ -38,10 +38,58 @@ async function deleteAllMatches() {
 
     console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Deleted ${result.deletedCount} documents from the 'matches' collection.`, new Date().toLocaleTimeString());
   } catch (err) {
-    console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error deleting documents: ${err}, new Date().toLocaleTimeString()`);
+    console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error deleting documents: ${err}`, new Date().toLocaleTimeString());
   } finally {
-    // Close the MongoDB connection
-    mongoClient.close();
+    if(close){
+      // Close the MongoDB connection
+      mongoClient.close();
+    }
+  }
+}
+
+async function deleteAllPlayers(close = false) {
+  try {
+    // Connect to the MongoDB server
+    await mongoClient.connect();
+
+    // Select the database and collection
+    const db = mongoClient.db('clashappdb'); // Replace with your database name
+    const collection = db.collection('players');
+
+    // Delete all documents in the "matches" collection
+    const result = await collection.deleteMany({});
+
+    console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Deleted ${result.deletedCount} documents from the 'players' collection.`, new Date().toLocaleTimeString());
+  } catch (err) {
+    console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error deleting documents: ${err}`, new Date().toLocaleTimeString());
+  } finally {
+    if(close){
+      // Close the MongoDB connection
+      mongoClient.close();
+    }
+  }
+}
+
+async function deleteAllTeams(close = false) {
+  try {
+    // Connect to the MongoDB server
+    await mongoClient.connect();
+
+    // Select the database and collection
+    const db = mongoClient.db('clashappdb'); // Replace with your database name
+    const collection = db.collection('teams');
+
+    // Delete all documents in the "matches" collection
+    const result = await collection.deleteMany({});
+
+    console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Deleted ${result.deletedCount} documents from the 'teams' collection.`, new Date().toLocaleTimeString());
+  } catch (err) {
+    console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error deleting documents: ${err}`, new Date().toLocaleTimeString());
+  } finally {
+    if(close){
+      // Close the MongoDB connection
+      mongoClient.close();
+    }
   }
 }
 
@@ -56,45 +104,15 @@ rl.on('line', (input) => {
     } else if (input.trim().match(/^say\s(.*)$/i)) {
       broadcastAll(input.trim().match(/^say\s(.*)$/i)[1]);
     } else if (input.trim().toLowerCase() === 'clear players' || input.trim().toLowerCase() === 'clear player') {
-      exec('ls -A /hdd1/clashapp/data/player/', (lsError, lsStdout) => {
-        if (lsError) {
-          console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error executing ls command: ${lsError.message}`, new Date().toLocaleTimeString());
-          return;
-        }
-        if (lsStdout.trim() === '') {
-          console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: \x1b[1;32mPlayer folder already empty!\x1b[0m', new Date().toLocaleTimeString());
-          return;
-        }
-        exec('rm /hdd1/clashapp/data/player/*', (error, stdout) => {
-          if (error) {
-            console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error executing command: ${error.message}`, new Date().toLocaleTimeString());
-            return;
-          } else {
-            console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: \x1b[1;32mSuccessfully cleared all player and match .json files\x1b[0m', new Date().toLocaleTimeString());
-          }
-        });
-      });
+      deleteAllPlayers();
     } else if (input.trim().toLowerCase() === 'clear matches') {
       deleteAllMatches();
+    } else if (input.trim().toLowerCase() === 'clear teams') {
+      deleteAllTeams();
     } else if (input.trim().toLowerCase() === 'clear all') {
-      exec('ls -A /hdd1/clashapp/data/player/', (playerLsError, playerLsStdout) => {
-        if (playerLsError) {
-          console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error executing ls command for players folder: ${playerLsError.message}`, new Date().toLocaleTimeString());
-          return;
-        }
-        if (playerLsStdout.trim() === '') {
-          console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: \x1b[1;32mPlayer folder already empty!\x1b[0m', new Date().toLocaleTimeString());
-        } else {
-          exec('rm /hdd1/clashapp/data/player/*', (playerRmError, playerRmStdout) => {
-            if (playerRmError) {
-              console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error executing rm command for players folder: ${playerRmError.message}`, new Date().toLocaleTimeString());
-              return;
-            }
-            console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: \x1b[1;32mSuccessfully cleared all player .json files\x1b[0m', new Date().toLocaleTimeString());
-          });
-        }
-      });
-      deleteAllMatches();
+      deleteAllPlayers(true);
+      deleteAllMatches(true);
+      deleteAllTeams();
     } else if (input.trim().toLowerCase() === 'status') {
       exec('screen -list', (error, stdout) => {
         if (error) {

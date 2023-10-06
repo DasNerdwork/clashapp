@@ -10,13 +10,11 @@ require_once '/hdd1/clashapp/mongo-db.php';
 if(isset($_POST['mode'])){
     $mdb = new MongoDBHelper();
     $matchids = array_keys(json_decode($_POST['matchids'], true));
-    $path = $_POST['path']; // grab path from ajax request
-    $response = array('sumid' => substr($path, 0, -5));
+    $response = array('sumid' => $_POST['sumid']);
     $recalculatedMatchIDsArray = array();
     // load players full match data into RAM array for fast access after page load
     $matchData = getMatchData($matchids); 
-    $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$path), true); // get CURRENT filecontent
-    $fp = fopen('/hdd1/clashapp/data/player/'.$path, 'r+');
+    $playerDataJSON = objectToArray($mdb->findDocumentByField('players', 'PlayerData.SumID', $response["sumid"])["document"]);
 
     if($_POST['mode'] == "both" || $_POST['mode'] == "lanes"){
         $puuid = $_POST['puuid']; // grab puuid from ajax request
@@ -42,9 +40,10 @@ if(isset($_POST['mode'])){
         $playerDataJSON["MatchIDs"] = array_slice($recalculatedMatchIDsArray, 0, 15);
         $response['matchScores'] = $playerDataJSON["MatchIDs"];
     }
-    $mdb->insertDocument('players', $playerDataJSON);
-    fwrite($fp, json_encode($playerDataJSON));
-    fclose($fp);
+    // $mdb->insertDocument('players', $playerDataJSON);
+    $mdb->addElementToDocument('players', 'PlayerData.SumID', $response["sumid"], 'LanePercentages', $playerDataJSON["LanePercentages"]);
+    $mdb->addElementToDocument('players', 'PlayerData.SumID', $response["sumid"], 'Tags', $playerDataJSON["Tags"]);
+    $mdb->addElementToDocument('players', 'PlayerData.SumID', $response["sumid"], 'MatchIDs', $playerDataJSON["MatchIDs"]);
 
     if($_POST['mode'] == "both") {
         $matchHistoryAsHTML = printTeamMatchDetailsByPUUID($matchids, $puuid, $matchRankingArray);

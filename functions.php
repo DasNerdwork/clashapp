@@ -578,7 +578,13 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
     $returnString .= "<div class='smooth-transition w-full overflow-hidden twok:min-h-[2300px] fullhd:min-h-[1868.75px]' x-show='open' x-transition x-cloak>";
     foreach ($matchIDArray as $i => $matchIDJSON) {
-        $inhalt = $mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["document"];
+        if(isset($mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["document"])){
+            $inhalt = $mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["document"];
+        } else {
+            // print_r($mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON));
+            // echo "<br>".$matchIDJSON."<br>";
+            return "";
+        }
         if(isset($inhalt->metadata->participants) && $inhalt->info->gameDuration != 0) {
             if(in_array($puuid, (array) $inhalt->metadata->participants)){
                 $count++;
@@ -2959,6 +2965,19 @@ function tagSelector($tagArray) {
     }
     return $returnString;
 }
+
+function objectToArray($object) {
+    if (is_object($object) || is_array($object)) {
+        $result = [];
+        foreach ($object as $key => $value) {
+            $result[$key] = objectToArray($value);
+        }
+        return $result;
+    } else {
+        return $object;
+    }
+}
+
 
 /** Always active "function" to collect the teamID of a given Summoner Name
  * This function calls an API request as soon as the sumname gets posted from the team.php

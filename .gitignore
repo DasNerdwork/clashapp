@@ -1,6 +1,7 @@
 /vendor
 /node_modules
 /data
+/mongodb
 /plugins
 package-lock.json
 .git
