@@ -17,11 +17,12 @@ if(isset($_POST['sumids'])){
     $returnString = "";
     global $currentPatch;
     foreach(array_keys($playerSumidTeamArray) as $playerSumid){
-        if(!file_exists('/hdd1/clashapp/data/player/'.$playerSumid.'.json')){
+        if(!$mdb->getPlayerBySummonerId($playerSumid)["success"]){
             echo "Could not find playerfile for ".$playerSumid;
             return;
         } else {
-            $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerSumid.'.json'), true);
+            $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.SumID', $playerSumid)["document"]);
+            $playerDataJSON = json_decode($playerDataJSONString, true);
             foreach(array_keys($playerDataJSON["MatchIDs"]) as $singleMatchID){
                 if(!in_array($singleMatchID, $matchIDTeamArray)){
                     $matchIDTeamArray[] = $singleMatchID;

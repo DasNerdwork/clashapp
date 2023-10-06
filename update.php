@@ -37,7 +37,6 @@ $requestIterator = 0;
 //     updateProfile($_POST["username"], 150);
 // }
 
-// Fetch all the necessary data for updating or generating a single players player.json, stored in /clashapp/data/player/
 function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
     if($id != ""){
         $mdb = new MongoDBHelper();
@@ -73,8 +72,9 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
          * STEP 1: Check if up-to-date
          */
         if($sumid != "" || $sumid != "/"){ /** @todo additional sanitizing regex check for valid $sumid variants */
-            if(file_exists('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json')){
-                $existingJson = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
+            $playerDataRequest = $mdb->getPlayerBySummonerId($sumid);
+            if($playerDataRequest["success"]){
+                $existingJson = $playerDataRequest["data"];
                 // If the newest local matchID equals the newest API requested matchID, ergo if there is nothing to update
                 // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
                 $return = true;
@@ -142,16 +142,16 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
             /**
              * STEP 2: Rewrite file if it doesn't exist or has to be updated
              */
-
-            $fp = fopen('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json', 'w');
-            // Open the file only to write. If it doesnt exist it will be created. If it exists it will be reset and updated with the newest data
-            fwrite($fp, json_encode($jsonArray));
-            fclose($fp);
+            $mdb->insertDocument('players', $jsonArray);
 
             /**
              * STEP 3: Fetch all given matchIDs and download each match via downloadMatchByID
              */
-            $playerDataArray = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$sumid.'.json'), true);
+            $playerDataArrayRequest = $mdb->getPlayerBySummonerId($sumid);
+            if($playerDataArrayRequest["success"]){
+                $playerDataJSONString = json_encode($playerDataArrayRequest["data"]);
+                $playerDataArray = json_decode($playerDataJSONString, true);
+            }
             foreach(array_keys($playerDataArray["MatchIDs"]) as $match){
                 if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $match)["success"]){
                     $tempAjaxMatchIDArray[] = $match;

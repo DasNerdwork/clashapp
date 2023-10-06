@@ -104,12 +104,12 @@ if (isset($_GET["name"])){
 
 <?php
 $startFetchPlayerData = microtime(true);
-    $playerDataDirectory = new DirectoryIterator('/hdd1/clashapp/data/player/');
+    // $playerDataDirectory = new DirectoryIterator(''); OUTDATED
 
     foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
         $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
         if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
-            $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+            // $playerDataJSON = json_decode(file_get_contents(''.$playerDataJSONPath), true); // get filepath content as variable OUTDATED
             if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
                 $playerData = $playerDataJSON["PlayerData"];
                 $playerName = $playerDataJSON["PlayerData"]["Name"];
@@ -127,7 +127,7 @@ $startFetchPlayerData = microtime(true);
         foreach ($playerDataDirectory as $playerDataJSONFile) { // going through all files
             $playerDataJSONPath = $playerDataJSONFile->getFilename();   // get all filenames as variable
             if(!($playerDataJSONPath == "." || $playerDataJSONPath == "..")){ 
-                $playerDataJSON = json_decode(file_get_contents('/hdd1/clashapp/data/player/'.$playerDataJSONPath), true); // get filepath content as variable
+                // $playerDataJSON = json_decode(file_get_contents(''.$playerDataJSONPath), true); // get filepath content as variable OUTDATED
                 if(isset($playerDataJSON["PlayerData"]["Name"]) && strtolower($formattedInput) == strtolower(preg_replace('/\s+/', '', $playerDataJSON["PlayerData"]["Name"]))){ // if playerdata->name of file equals input
                     $playerData = $playerDataJSON["PlayerData"];
                     $playerName = $playerDataJSON["PlayerData"]["Name"];
