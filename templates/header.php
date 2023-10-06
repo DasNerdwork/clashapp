@@ -1,5 +1,7 @@
 <?php
+require_once '/hdd1/clashapp/mongo-db.php';
 $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
+$mdb = new MongoDBHelper();
 // include_once('/hdd1/clashapp/lang/translate.php');
 ?>
 <!DOCTYPE html>
@@ -60,8 +62,9 @@ $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/versi
         ?>
         <div class="absolute right-0 flex h-16">
             <?php if(isset($_SESSION['user']['sumid'])){ // If there is currently a user logged in && the user has a connected league account
-                if(file_exists('/var/www/html/clash/clashapp/data/player/'.$_SESSION['user']['sumid'].'.json')){
-                $headerJson = json_decode(file_get_contents('/var/www/html/clash/clashapp/data/player/'.$_SESSION['user']['sumid'].'.json'), true);
+                if($mdb->getPlayerBySummonerId($_SESSION['user']['sumid'])["success"]){
+                $headerJsonString = json_encode($mdb->getPlayerBySummonerId($_SESSION['user']['sumid'])["data"]);
+                $headerJson = json_decode($headerJsonString, true);
                 }
                 $dataName = isset($_SESSION['user']['username']) ? $_SESSION['user']['username'] : '';
             ?>

@@ -327,11 +327,13 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
         const normalizedInputValue = normalizeString(inputValue);
         const currentInputLi = createAutosuggestItem(inputElement.value, '9', currentPatch, 'player');
         ulElement.appendChild(currentInputLi);
-        for (let key in autosuggestData) {
-          const normalizedUserKey = normalizeString(key);
-          if (normalizedUserKey.includes(normalizedInputValue)) {
-            const liElement = createAutosuggestItem(key, autosuggestData[key], currentPatch, 'player');
-            ulElement.appendChild(liElement);
+        if(autosuggestData !== ""){
+          for (let key in autosuggestData) {
+            const normalizedUserKey = normalizeString(key);
+            if (normalizedUserKey.includes(normalizedInputValue)) {
+              const liElement = createAutosuggestItem(key, autosuggestData[key], currentPatch, 'player');
+              ulElement.appendChild(liElement);
+            }
           }
         }
         for (let key in championData) {

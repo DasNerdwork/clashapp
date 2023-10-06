@@ -182,5 +182,74 @@ class MongoDBHelper {
         return array('success' => true, 'code' => '8AMZLM', 'message' => 'Successfully added or updated element in '.$collectionName);
     }
     
+    /**
+     * Retrieve a player document based on the PlayerData.SumID attribute.
+     *
+     * @param string $summonerId - The PlayerData.SumID value to search for.
+     *
+     * @return array - An array with keys 'success', 'code', 'message', and 'data'.
+     *   'success' determines the success of the operation.
+     *   'code' provides a code for reference.
+     *   'message' describes the outcome of the operation.
+     *   'data' contains the retrieved player document (if found).
+     */
+    public function getPlayerBySummonerId($summonerId) {
+        $filter = ['PlayerData.SumID' => $summonerId];
+        $query = new MongoDB\Driver\Query($filter);
+        $cursor = $this->client->executeQuery("{$this->mdb}.players", $query);
+
+        if (!$cursor->isDead()) {
+            $document = current($cursor->toArray());
+            return array('success' => true, 'code' => 'AK4MF0', 'message' => 'Successfully retrieved player document.', 'data' => $document);
+        } else {
+            return array('success' => false, 'code' => '0PPA1', 'message' => 'Player document not found.');
+        }
+    }
+
+    /**
+     * Retrieve PlayerData.Name and PlayerData.Icon, sort them alphabetically, and format as specified.
+     *
+     * @return array - An array with keys 'success', 'code', 'message', and 'data'.
+     *   'success' determines the success of the operation.
+     *   'code' provides a code for reference.
+     *   'message' describes the outcome of the operation.
+     *   'data' contains the sorted data.
+     */
+    public function getAutosuggestAggregate() {
+        // Aggregation pipeline
+        $pipeline = [
+            [
+                '$project' => [
+                    'PlayerData.Name' => 1,
+                    'PlayerData.Icon' => 1,
+                    '_id' => 0
+                ]
+            ],
+            [
+                '$sort' => [
+                    'PlayerData.Name' => 1
+                ]
+            ]
+        ];
+
+        // Execute aggregation query
+        $cursor = $this->client->executeCommand("{$this->mdb}", new MongoDB\Driver\Command([
+            'aggregate' => 'players',
+            'pipeline' => $pipeline,
+            'cursor' => new stdClass,
+        ]));
+
+        $result = [];
+
+        foreach ($cursor as $document) {
+            $result[$document->PlayerData->Name] = $document->PlayerData->Icon;
+        }
+
+        if (!empty($result)) {
+            return array('success' => true, 'code' => 'DJF64L', 'message' => 'Successfully retrieved and sorted PlayerData.', 'data' => $result);
+        } else {
+            return array('success' => false, 'code' => '0DL3MU', 'message' => 'No PlayerData found.');
+        }
+    }
 }
 ?>
