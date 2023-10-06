@@ -112,7 +112,7 @@ rl.on('line', (input) => {
     } else if (input.trim().toLowerCase() === 'clear all') {
       deleteAllPlayers(true);
       deleteAllMatches(true);
-      deleteAllTeams();
+      deleteAllTeams(true);
     } else if (input.trim().toLowerCase() === 'status') {
       exec('screen -list', (error, stdout) => {
         if (error) {
