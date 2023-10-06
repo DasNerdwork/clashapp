@@ -21,6 +21,7 @@ module.exports = {
     '-mt-[54px]',
     '-mt-[68px]',
     'min-w-[18rem]',
+    'animation-shake',
     {
       pattern: /text-(silver|gold|bronze|platinum|iron|emerald|diamond|master|grandmaster|challenger)\/100/,
     },
@@ -102,11 +103,25 @@ module.exports = {
           '0%': { transform: 'translateY(0)', opacity: '1' },
           '100%': { transform: 'translateY(-10px)', opacity: '0' },
         },
+        shake: {
+          '0%': { transform: 'translate(2px, 1px) rotate(0deg)' },
+          '10%': { transform: 'translate(-1px, -2px) rotate(-1deg)' },
+          '20%': { transform: 'translate(-3px, 0px) rotate(1deg)' },
+          '30%': { transform: 'translate(0px, 2px) rotate(0deg)' },
+          '40%': { transform: 'translate(1px, -1px) rotate(1deg)' },
+          '50%': { transform: 'translate(-1px, 2px) rotate(-1deg)' },
+          '60%': { transform: 'translate(-3px, 1px) rotate(0deg)' },
+          '70%': { transform: 'translate(2px, 1px) rotate(-1deg)' },
+          '80%': { transform: 'translate(-1px, -1px) rotate(1deg)' },
+          '90%': { transform: 'translate(2px, 2px) rotate(0deg)' },
+          '100%': { transform: 'translate(1px, -2px) rotate(-1deg)' },
+        },
       },
       animation: {
         'slideAndFadeIn': '.5s ease-in-out 0s 1 slideAndFadeIn',
         'fadeIn': '.5s ease-in-out 0s 1 fadeIn',
         'moveUpAndFadeOut': 'moveUpAndFadeOut 1s ease-in-out',
+        'shake': 'shake 0.3s 1 ease-out',
       },
     },
     screens: {
