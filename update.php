@@ -74,7 +74,8 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
         if($sumid != "" || $sumid != "/"){ /** @todo additional sanitizing regex check for valid $sumid variants */
             $playerDataRequest = $mdb->getPlayerBySummonerId($sumid);
             if($playerDataRequest["success"]){
-                $existingJson = $playerDataRequest["data"];
+                $playerDataJSONString = json_encode($playerDataRequest["data"]);
+                $existingJson = json_decode($playerDataJSONString, true);
                 // If the newest local matchID equals the newest API requested matchID, ergo if there is nothing to update
                 // and if we have the same amount or more matchIDs stored locally (no better data to grab) 
                 $return = true;
@@ -93,7 +94,7 @@ function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
                     if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
                         callAllFinish($requestIterator)
                         ."
-                    }</script>";
+                    }</>";
                 } else {
                 // THIS REQUEST IS SENT IF A PLAYER IS MISSING SOME MATCH IDS IN THEIR PLAYERFILE
                 echo "<script>

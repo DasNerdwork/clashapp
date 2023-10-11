@@ -1,8 +1,6 @@
 <?php 
 session_start();
 
-// print_r($_SESSION);
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -242,15 +240,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             $tempTeamJSON = $mdb->findDocumentByField('teams', 'TeamID', $teamID)["document"];
                                             $playerDataJSONString = json_encode($playerDataRequest["data"]);
                                             $playerDataJSON = json_decode($playerDataJSONString, true);
-                                            // echo "<pre style=\"color:green;text-align: left;\">";
-                                            // print_r($playerDataJSON);
-                                            // echo "</pre>";
-                                            // echo "<pre style=\"color:red;text-align: left;\">";
-                                            // print_r($tempTeamJSON);
-                                            // echo "</pre>";
                                             isset($_GET["reload"]) ? $forceReload = true : $forceReload = false;
-                                            // $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
-                                            // echo "<script>console.log('Time: ".time()." LastUpdate: ".$tempTeamJSON->LastUpdate." Difference: ".(time() - $tempTeamJSON->LastUpdate)."')</script>";
                                             if(((time() - $tempTeamJSON->LastUpdate) > 600) || ($tempTeamJSON->LastUpdate == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
                                                 $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);                                           
                                                 $matchInPlayerJsonButNotExistent = false;
@@ -262,7 +252,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                                 if((array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]) || $matchInPlayerJsonButNotExistent){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
                                                     echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Force updating.'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
                                                     $newMatchesDownloaded = true;
-                                                    break;
                                                 } else {
                                                     $playerName = $playerDataJSON["PlayerData"]["Name"];
                                                     $playerData = $playerDataJSON["PlayerData"];
@@ -382,10 +371,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                         // TODO: Error Handling echo "No Match found :(<br>".str_replace(".json", "", $playerDataJSONPath)."<br>".$player["summonerId"]."<br>";
                                     }
                                     if(!isset($sumid) && $player["summonerId"] != "") {
-                                        echo "<script>console.log('No playerfile found for ".$player["summonerId"]."'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
+                                        echo "<script>console.log('No playerfile found or out of date (".$player["summonerId"].")'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
                                         updateProfile($player["summonerId"], 15, "sumid");
                                         $playerDataRequest = $mdb->getPlayerBySummonerId($player["summonerId"]);
-                                        // print_r($playerDataRequest);
                                         if($playerDataRequest["success"]){
                                             $playerDataJSONString = json_encode($playerDataRequest["data"]);
                                             $playerDataJSON = json_decode($playerDataJSONString, true);
@@ -460,7 +448,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             
                             if(!$execOnlyOnce) $startGetLanePercentages = microtime(true);
                             $memGetLanePercentages = memory_get_usage();
-                            // print_r($playerLanes);
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetLanePercentages"]["Time"] = number_format((microtime(true) - $startGetLanePercentages), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["GetLanePercentages"]["Memory"] = number_format((memory_get_usage() - $memGetLanePercentages)/1024, 2, ',', '.')." kB";
                             if(!$execOnlyOnce) $startGetMostPlayedWith = microtime(true);
@@ -665,11 +652,6 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                     </div>
                                 </td>
                             </tr>";
-
-                            // echo "<pre>";
-                            //     print_r($mostPlayedWithArray);
-                            // echo "</pre>";
-
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintTags"]["Time"] = number_format((microtime(true) - $startPrintTags), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintTags"]["Memory"] = number_format((memory_get_usage() - $memPrintTags)/1024, 2, ',', '.')." kB";
 
