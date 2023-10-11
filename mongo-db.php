@@ -100,6 +100,7 @@ class MongoDBHelper {
      *   'message' describes the outcome of the insert operation.
      */
     public function insertDocument($collectionName, $document) {
+        $bulk = new MongoDB\Driver\BulkWrite;
         if ($collectionName === 'matches') {
             if (isset($document['metadata']['matchId'])) {
                 $alreadyExists = $this->findDocumentByField('matches', 'metadata.matchId', $document['metadata']['matchId'])['success'];
@@ -115,12 +116,21 @@ class MongoDBHelper {
         }
 
         if (!$alreadyExists) {
-            $bulk = new MongoDB\Driver\BulkWrite;
             $bulk->insert($document);
             $this->client->executeBulkWrite("{$this->mdb}.$collectionName", $bulk);
             return array('success' => true, 'code' => '8AMZLM', 'message' => 'Successfully inserted document into '.$collectionName);
         } else {
-            return array('success' => false, 'code' => 'MXZ4P5', 'message' => 'A document already exists');
+            $filter = [];
+            if ($collectionName === 'matches') {
+                $filter = ['metadata.matchId' => $document['metadata']['matchId']];
+            } elseif ($collectionName === 'players') {
+                $filter = ['PlayerData.PUUID' => $document['PlayerData']['PUUID']];
+            } elseif ($collectionName === 'teams') {
+                $filter = ['TeamID' => $document['TeamID']];
+            }
+            $bulk->update($filter, ['$set' => $document]);
+            $this->client->executeBulkWrite("{$this->mdb}.$collectionName", $bulk);
+            return array('success' => false, 'code' => 'MXZ4P5', 'message' => 'Successfully updated document in '.$collectionName);
         }
     }
 
