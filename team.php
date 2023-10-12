@@ -588,23 +588,28 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             
                             if(!$execOnlyOnce) $startPrintMasteryData = microtime(true);
                             $memPrintMasteryData = memory_get_usage();
+                            $maxVisibleItems = 20;
                             echo "
                             <tr>
                                 <td class='text-center h-32'>
-                                    <div class='inline-flex gap-8'>";
-                                        if(sizeof($masteryData) >= 3){
-                                            for($i=0; $i<3; $i++){
-                                                if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp')){ echo '
-                                                    <div>
-                                                        <img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryData[$i]["Filename"].'.webp" width="64" height="64" class="block relative z-0;" alt="A champion icon of the league of legends champion '.$masteryData[$i]["Champion"].'">
-                                                        <span>'.$masteryData[$i]["Champion"].'</span>
-                                                        <img src="/clashapp/data/misc/mastery-'.$masteryData[$i]["Lvl"].'.webp" width="32" height="32" class="relative -top-[5.75rem] -right-11 z-10" alt="A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher">';
-                                                        if(str_replace(',','', $masteryData[$i]["Points"]) > 999999){
-                                                            echo "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".str_replace(",",".",substr($masteryData[$i]["Points"],0,4))."m</div>";
-                                                        } else {
-                                                            echo "<div class='-mt-7 text-".getMasteryColor(str_replace(',','',$masteryData[$i]["Points"]))."/100'>".explode(",",$masteryData[$i]["Points"])[0]."k</div>";
-                                                        } echo "
-                                                    </div>";
+                                    <div class='inline-flex gap-8 slider-container overflow-hidden whitespace-nowrap max-w-[17rem] h-full w-full py-2'>";
+                                        if(sizeof($masteryData) >= 1){
+                                            for($i=0; $i<count($masteryData); $i++){
+                                                echo "
+                                                <div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab'>
+                                                    <img src='/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp' width='64' height='64' class='block relative z-0' alt='A champion icon of the league of legends champion {$masteryData[$i]["Champion"]}'>
+                                                    <span class='max-w-[64px] text-ellipsis overflow-hidden whitespace-nowrap block'>{$masteryData[$i]["Champion"]}</span>
+                                                    <img src='/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp' width='32' height='32' class='relative -top-[5.75rem] -right-11 z-10 "; echo ($masteryData[$i]["Lvl"] == 5) ? 'pb-0.5' : ''; echo "' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'>";
+                                                    if (str_replace(',', '', $masteryData[$i]["Points"]) > 999999) {
+                                                        echo "<div class='-mt-7 text-" . getMasteryColor(str_replace(',', '', $masteryData[$i]["Points"])) . "/100'>" . str_replace(",", ".", substr($masteryData[$i]["Points"], 0, 4)) . "m</div>";
+                                                    } else {
+                                                        echo "<div class='-mt-7 text-" . getMasteryColor(str_replace(',', '', $masteryData[$i]["Points"])) . "/100'>" . explode(",", $masteryData[$i]["Points"])[0] . "k</div>";
+                                                    }echo "
+                                                </div>";
+                                            
+                                                // Stop when we've displayed the max visible items
+                                                if ($i >= $maxVisibleItems - 1) {
+                                                    break;
                                                 }
                                             }
                                         } else { echo
