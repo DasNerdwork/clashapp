@@ -886,9 +886,9 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                     $returnString .= "</div>";
 
                     $returnString .= '<div class="match-tag-container col-span-6 row-span-1 h-full flex justify-start items-center gap-4 ">';
-                    $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Tag 1</div>';
-                    $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Testtag 2</div>';
-                    $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Verspeisen Sie Arsch?</div>';
+                    // $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Tag 1</div>';
+                    // $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Testtag 2</div>';
+                    // $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Verspeisen Sie Arsch?</div>';
                     $returnString .= "</div>";
 
                     $returnString .= '</div></div>';
