@@ -560,11 +560,11 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                     } else {
                                         foreach($rankData as $rankQueue){
                                             if($rankQueue["Queue"] == "RANKED_SOLO_5x5"){ echo "
-                                                <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
+                                                <div class='rounded bg-[#0e0f18] my-2.5 p-2'>
                                                 <span class='block text-[0.75rem]'>".__("Ranked Solo/Duo").":</span>
                                                     <span class='text-".strtolower($rankQueue["Tier"])."/100'>".__(ucfirst(strtolower($rankQueue["Tier"]))). " " . $rankQueue["Rank"];
                                             } else if($rankQueue["Queue"] == "RANKED_FLEX_SR"){ echo "
-                                                <div class='rounded bg-[#0e0f18] my-2.5 mx-5 p-2'>
+                                                <div class='rounded bg-[#0e0f18] my-2.5 p-2'>
                                                     <span class='block text-[0.75rem]'>".__("Ranked Flex").":</span>
                                                     <span class='block text-".strtolower($rankQueue["Tier"])."/100'>".__(ucfirst(strtolower($rankQueue["Tier"]))). " " . $rankQueue["Rank"];
                                             } 
@@ -774,7 +774,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);" @mouseover="showExplanation=true" @mouseout="showExplanation=false">
                 <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion->Filename . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.webp" alt="A league of legends champion icon of ' . $champname . '"></div>
             <span class="suggested-ban-caption w-16 block">' . $champname . '</span>
-            <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3" x-show="showExplanation" x-transition x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
+            <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3" x-show="showExplanation" x-transition x-transition:enter.delay.500ms x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
             <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark text-end">'.__('Category').'</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Addition').'</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">'.__('Explanation').'</div>';
             if (isset($suggestedBanArray->{$champname}->Points->Value)) {
                 echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->Points->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">' . $playerSumidTeamArray[$suggestedBanArray->{$champname}->Points->Cause] . ' ' . __('achieved a mastery score of') . ' ' . $suggestedBanArray->{$champname}->Points->Value . ' ' . __('on') . ' ' . $champname . '.</div>';
@@ -817,13 +817,13 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             if (isset($suggestedBanArray->{$champname}->OccurencesInLastGames->Count)) {
                 echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">'.__('Occurences').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->OccurencesInLastGames->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.$champname.' '.__('was played').' ';
                 echo $suggestedBanArray->{$champname}->OccurencesInLastGames->Count > 1 ? $suggestedBanArray->{$champname}->OccurencesInLastGames->Count.' '.__('times').' ' : ' '.__('once').' ';
-                echo __('in the teams').' '.$suggestedBanArray->{$champname}->OccurencesInLastGames->Games.' '.__('unique fetched Flex or Clash games').'.</div>';
+                echo __('in the teams').' '.$suggestedBanArray->{$champname}->OccurencesInLastGames->Games.' '.__('unique fetched Ranked or Clash games').'.</div>';
             } 
             if (isset($suggestedBanArray->{$champname}->AverageMatchScore->Add)) {
                 echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-dark text-end">'.__('Average Matchscore').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->AverageMatchScore->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left">'.__('The average matchscore achieved on').' '.$champname.' '.__('is').' '.$suggestedBanArray->{$champname}->AverageMatchScore->Value.'.</div>';
             }
             echo '
-            <div class="py-3 px-2 flex justify-end items-center font-bold border-solid border-r-2 border-t-2 border-dark text-end">'.__('Finalscore').':</div><div class="py-3 px-2 flex justify-center items-center underline decoration-double font-bold border-solid border-r-2 border-t-2 border-dark text-base underline-offset-2">'.number_format($suggestedBanArray->{$champname}->FinalScore, 2, '.', '').'</div><div class="flex justify-end items-end text-gray-600 border-solid border-t-2 border-dark"><a href="/docs" onclick="return false;">&#187; '.__('Graphs & Formulas').'</a></div>
+            <div class="py-3 px-2 flex justify-end items-center font-bold border-solid border-r-2 border-t-2 border-dark text-end">'.__('Finalscore').':</div><div class="py-3 px-2 flex justify-center items-center underline decoration-double font-bold border-solid border-r-2 border-t-2 border-dark text-base underline-offset-2">'.number_format($suggestedBanArray->{$champname}->FinalScore, 2, '.', '').'</div><div class="flex justify-end items-end text-gray-600 border-solid border-t-2 border-dark"><a href="/graphs-and-formulas">&#187; '.__('Graphs & Formulas').'</a></div>
             <svg class="absolute text-black/90 h-4 -ml-4 mt-5 rotate-90" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg>
             </div>';
         

@@ -12,7 +12,7 @@ tag,tag
 team name,teamname
 Tier,Rang
 History,Verlauf
-Advertisement,Werbung
+Advertisement,Placeholder
 Suggested Bans,Empfohlene Banns
 Voting is only available for %slogged-in%s users,Das Bewerten ist nur %seingeloggten%s Benutzern möglich
 This is your current identity and color for others. To customize it please,Dies ist deine Identität und Farbe für andere. Zum Individualisieren bitte
@@ -123,7 +123,7 @@ Finalscore,Finalwertung
 "times","mal"
 "once","einmal"
 "in the teams","in den vereinten"
-"unique fetched Flex or Clash games","einzeln abgerufenen Flex oder Clash Spielen auf"
+"unique fetched Ranked or Clash games","einzeln abgerufenen Ranglisten oder Clash Spielen auf"
 "The average matchscore achieved on","Die durchschnittlich erreichte Spielwertung auf"
 "Graphs & Formulas","Graphen & Formulare"
 "Winrate","Siegesrate"
@@ -273,3 +273,4 @@ Finalscore,Finalwertung
 "Lazy","Faul"
 "Two-Colored Tags","Zweifarbige Tags"
 "Enter a Summonername","'Gib einen Beschwörernamen ein'"
+"Settings","Einstellungen"
