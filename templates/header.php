@@ -109,7 +109,7 @@ $mdb = new MongoDBHelper();
             <?php } ?>
             <div id="settings-button" class="flex items-center ml-2 mr-4">
                 <a href="/settings">
-                    <img src="/clashapp/data/misc/settings-wheel.webp" width="20" height="20" alt="A settings wheel icon which looks like a gear"></img>
+                    <img src="/clashapp/data/misc/settings-wheel.webp" width="20" height="20" alt="A settings wheel icon which looks like a gear" title="<?= __("Settings") ?>"></img>
                 </a>
             </div>
         </div>
