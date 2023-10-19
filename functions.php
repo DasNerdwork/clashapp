@@ -685,14 +685,15 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                 }
 
                                 // Save values dealt for later print below
-                                $dealt = number_format($inhalt->info->participants[$in]->totalDamageDealtToChampions, 0);
-                                $tanked = number_format($inhalt->info->participants[$in]->totalDamageTaken, 0);
-                                $shealed = number_format($inhalt->info->participants[$in]->challenges->effectiveHealAndShielding, 0);
-                                $objs = number_format($inhalt->info->participants[$in]->damageDealtToObjectives, 0);
-                                $visionWards = $inhalt->info->participants[$in]->detectorWardsPlaced;
-                                $creepScore = $inhalt->info->participants[$in]->totalMinionsKilled+$inhalt->info->participants[$in]->neutralMinionsKilled;
-                                $visionScore = $inhalt->info->participants[$in]->visionScore;
-                                $turretPlatings = $inhalt->info->participants[$in]->challenges->turretPlatesTaken;
+                                $dealt = isset($inhalt->info->participants[$in]->totalDamageDealtToChampions) ? number_format($inhalt->info->participants[$in]->totalDamageDealtToChampions, 0) : __("N/A");
+                                $tanked = isset($inhalt->info->participants[$in]->totalDamageTaken) ? number_format($inhalt->info->participants[$in]->totalDamageTaken, 0) : __("N/A");
+                                $shealed = isset($inhalt->info->participants[$in]->challenges->effectiveHealAndShielding) ? number_format($inhalt->info->participants[$in]->challenges->effectiveHealAndShielding, 0) : __("N/A");
+                                $objs = isset($inhalt->info->participants[$in]->damageDealtToObjectives) ? number_format($inhalt->info->participants[$in]->damageDealtToObjectives, 0) : __("N/A");
+                                $visionWards = isset($inhalt->info->participants[$in]->detectorWardsPlaced) ? $inhalt->info->participants[$in]->detectorWardsPlaced : __("N/A");
+                                $creepScore = isset($inhalt->info->participants[$in]->totalMinionsKilled, $inhalt->info->participants[$in]->neutralMinionsKilled) ? $inhalt->info->participants[$in]->totalMinionsKilled + $inhalt->info->participants[$in]->neutralMinionsKilled : __("N/A");
+                                $visionScore = isset($inhalt->info->participants[$in]->visionScore) ? $inhalt->info->participants[$in]->visionScore : __("N/A");
+                                $turretPlatings = isset($inhalt->info->participants[$in]->challenges->turretPlatesTaken) ? $inhalt->info->participants[$in]->challenges->turretPlatesTaken : __("N/A");
+                                
 
                         // Display of champion level at end of game
                         $returnString .= '<div class="champion-level flex relative w-4 h-4 max-w-[16px] min-w-[16px] z-20 -ml-4 twok:bottom-[17px] twok:-right-[17px] twok:text-[13px] fullhd:bottom-[8px] fullhd:-right-[15px] fullhd:text-[12px] justify-center items-center">';
@@ -1196,7 +1197,7 @@ function getPlayerTags($matchDaten, $puuid, $playerLanes){
         }
     }
 
-    // Step 2: Generate GENERAL array
+    // Step 2: Generate FILL array
 
     foreach ($tempAverageArray as $lane) {
         foreach ($lane as $key => $value) {
@@ -1207,7 +1208,7 @@ function getPlayerTags($matchDaten, $puuid, $playerLanes){
             }
         }
     }
-    $tempAverageArray["GENERAL"] = $generalKey;
+    $tempAverageArray["FILL"] = $generalKey;
 
     // Step 3: Calculate averages over gameCount
 
@@ -1317,7 +1318,7 @@ function getAverage($attributesArray, $matchDataArray, $puuid, $lane){
             echo $averageArray[$key] = round($arrayElement / $counterArray[$key])."</td>";
         }
 
-        echo "<td>".$averageStatsJson['GENERAL'][$key]."</td>";
+        echo "<td>".$averageStatsJson['FILL'][$key]."</td>";
         echo "<td>".$averageStatsJson['BOTTOM'][$key]."</td>";
         echo "<td>".$averageStatsJson['UTILITY'][$key]."</td>";
         echo "<td>".$averageStatsJson['MIDDLE'][$key]."</td>";
@@ -1495,7 +1496,7 @@ function mostPlayedWith($matchDataArray, $puuid){
 /** Prints the champion and info a given player by $puuid has the highest winrate with
  * This function is only printing collected values, also possible to shove into profile.php
  *
- * @param string $lane Either "TOP", "JUNGLE", "MID", "BOT" or "UTILITY", but also "GENERAL" (all lanes) possible
+ * @param string $lane Either "TOP", "JUNGLE", "MID", "BOT" or "UTILITY", but also "FILL" (all lanes) possible
  * @param array $matchDataArray Inputarray of all MatchIDs of the user (PUUID) over which we iterate
  * @param string $puuid The summoners PUUID necessary to confirm that the users matches are in our local stored data
  * @var array $highestWinrateArray Returnarray which is printed, it contains the final data
@@ -1525,7 +1526,7 @@ function getHighestWinrateWith($lane, $matchDataArray, $puuid){
                 }
                 $count = $highestWinrateArray[$matchData->info->participants[$i]->championName]["win"]+$highestWinrateArray[$matchData->info->participants[$i]->championName]["lose"];
                 $winrate = ($highestWinrateArray[$matchData->info->participants[$i]->championName]["win"]/$count)*100;
-                if($lane == "GENERAL" || $lane == $myLane){
+                if($lane == "FILL" || $lane == $myLane){
                     $highestWinrateArray[$matchData->info->participants[$i]->championName]["lane"] = $myLane;
                     $highestWinrateArray[$matchData->info->participants[$i]->championName]["count"] = $count;
                     $highestWinrateArray[$matchData->info->participants[$i]->championName]["winrate"] = $winrate;
