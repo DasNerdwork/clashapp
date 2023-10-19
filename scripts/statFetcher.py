@@ -44,7 +44,7 @@ class MongoDBHelper:
 mongo_helper = MongoDBHelper()
 
 # Initializing dicts, vars and arrays
-averageJsonDict = dict.fromkeys(['GENERAL', 'TOP', 'JUNGLE', 'MIDDLE', 'UTILITY', 'BOTTOM'])
+averageJsonDict = dict.fromkeys(['FILL', 'TOP', 'JUNGLE', 'MIDDLE', 'UTILITY', 'BOTTOM'])
 challengeNameArray = [
     'abilityUses', 'acesBefore15Minutes', 'alliedJungleMonsterKills', 'baronTakedowns', 'bountyGold', 'buffsStolen', 'controlWardsPlaced', 'damagePerMinute', 'damageTakenOnTeamPercentage', 'deathsByEnemyChamps', 'dragonTakedowns',
     'earliestBaron', 'earlyLaningPhaseGoldExpAdvantage', 'effectiveHealAndShielding', 'elderDragonKillsWithOpposingSoul', 'elderDragonMultikills', 'enemyChampionImmobilizations', 'enemyJungleMonsterKills',
@@ -94,7 +94,7 @@ def statIterator(lane):
         if("info" not in jdata):
             continue
         for player in jdata['info']['participants']:
-            if (player.get('challenges')) and ((lane == "GENERAL") or (player['teamPosition'] == lane) or (player['individualPosition'] == lane) or (player['lane'] == lane)):
+            if (player.get('challenges')) and ((lane == "FILL") or (player['teamPosition'] == lane) or (player['individualPosition'] == lane) or (player['lane'] == lane)):
                 for key, val in player['challenges'].items():
                     if key in challengeNameArray:
                         challengeDict.setdefault(key, []).append(val)
