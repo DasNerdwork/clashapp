@@ -135,7 +135,17 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             </div>
             <div class='row-span-2 h-[26rem] flex items-center justify-center rounded bg-[#141624]'>
                 <div class='h-[21rem] w-[17.5rem] bg-black'>
-                    <span class='h-[21rem] flex items-center justify-center'>".__("Advertisement")."</span> 
+                    <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
+                            crossorigin='anonymous'></script>
+                    <!-- Team-Top-Left -->
+                    <ins class='adsbygoogle'
+                            style='display:block;height:336px;width:100%'
+                            data-ad-client='ca-pub-8928684248089281'
+                            data-ad-slot='9162424205'
+                            data-full-width-responsive='true'></ins>
+                    <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
                 </div>
             </div>
             <div class='row-span-2 h-[26rem] grid rounded bg-[#141624]'>
@@ -175,7 +185,17 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 </div>
                 <div class='row-span-2 h-[26rem] flex items-center justify-center rounded bg-[#141624]'>
                     <div class='h-[21rem] w-[17.5rem] bg-black'>
-                        <span class='h-[21rem] flex items-center justify-center'>".__("Advertisement")."</span>
+                        <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
+                            crossorigin='anonymous'></script>
+                        <!-- Team-Top-Right -->
+                        <ins class='adsbygoogle'
+                            style='display:block;height:336px;width:100%'
+                            data-ad-client='ca-pub-8928684248089281'
+                            data-ad-slot='8062709929'
+                            data-full-width-responsive='true'></ins>
+                        <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                        </script>
                     </div>
                 </div>
                 <div class='flex flex-wrap justify-center rounded bg-[#141624] overflow-hidden h-fit pt-1.5 pb-3 transition-all ease-out'>
@@ -649,7 +669,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                             if($playerDataJSON["LanePercentages"][0] != "FILL"){
                                                 echo tagSelector($playerDataJSON["Tags"][$playerDataJSON["LanePercentages"][0]]);
                                             } else {
-                                                echo tagSelector($playerDataJSON["Tags"]["GENERAL"]);
+                                                echo tagSelector($playerDataJSON["Tags"]["FILL"]);
                                             }
                                         }
                                     }
@@ -704,12 +724,34 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <div class='flex items-center justify-start gap-4 w-full' style='content-visibility: auto;'>
                             <div class='rounded bg-[#141624] p-4'>
                                 <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
-                                    <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
+                                    <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
+                                            crossorigin='anonymous'></script>
+                                    <!-- Team-Middle-Left -->
+                                    <ins class='adsbygoogle'
+                                            style='display:block'
+                                            data-ad-client='ca-pub-8928684248089281'
+                                            data-ad-slot='5730429745'
+                                            data-ad-format='horizontal'
+                                            data-full-width-responsive='true'></ins>
+                                    <script>
+                                            (adsbygoogle = window.adsbygoogle || []).push({});
+                                    </script>
                                 </div>
                             </div>
                             <div class='rounded bg-[#141624] p-4'>
                                 <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
-                                    <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
+                                    <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
+                                            crossorigin='anonymous'></script>
+                                    <!-- Team-Middle-Right -->
+                                    <ins class='adsbygoogle'
+                                            style='display:block'
+                                            data-ad-client='ca-pub-8928684248089281'
+                                            data-ad-slot='3743394805'
+                                            data-ad-format='horizontal'
+                                            data-full-width-responsive='true'></ins>
+                                    <script>
+                                            (adsbygoogle = window.adsbygoogle || []).push({});
+                                    </script>
                                 </div>
                             </div>
                             <div class='grid rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max items-center'>
@@ -842,12 +884,34 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     <div class='flex items-center justify-center twok:gap-x-48 fullhd:gap-x-36 mb-6 mt-2' style='content-visibility: auto;'>
         <div class='rounded bg-[#141624] p-4'>
             <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
-                <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
+                <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
+                    crossorigin='anonymous'></script>
+                <!-- Team-Bottom-Left -->
+                <ins class='adsbygoogle'
+                    style='display:block'
+                    data-ad-client='ca-pub-8928684248089281'
+                    data-ad-slot='6341637981'
+                    data-ad-format='horizontal'
+                    data-full-width-responsive='true'></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
             </div>
         </div>
         <div class='rounded bg-[#141624] p-4'>
             <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
-                <span class='h-full flex items-center justify-center'>".__("Advertisement")."</span> 
+                <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
+                        crossorigin='anonymous'></script>
+                <!-- Team-Bottom-Right -->
+                <ins class='adsbygoogle'
+                        style='display:block'
+                        data-ad-client='ca-pub-8928684248089281'
+                        data-ad-slot='8776229638'
+                        data-ad-format='horizontal'
+                        data-full-width-responsive='true'></ins>
+                <script>
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
             </div>
         </div>
     </div>
