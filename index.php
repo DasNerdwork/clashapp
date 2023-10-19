@@ -37,11 +37,8 @@ $statNameArray = [
     'visionScore', 'visionWardsBoughtInGame', 'wardsKilled', 'wardsPlaced'];
 
 $averageStatsJson = json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true);
-echo "<pre>";
-// print_r($averageStatsJson["GENERAL"]);
-echo "<pre>";
 
-$lane = 'GENERAL';
+$lane = 'FILL';
 $pipeline = [
     [
         '$unwind' => '$info.participants',

@@ -353,7 +353,7 @@ if($formattedInput != "") {
 
 
     $startAverage = microtime(true);
-    $averageAttributes = array_keys(json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true)["GENERAL"]);
+    $averageAttributes = array_keys(json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true)["FILL"]);
     $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
     getAverage($averageAttributes, $matchDaten, $puuid, $playerLane);
     
@@ -379,7 +379,7 @@ if($formattedInput != "") {
     getHighestWinrateAgainst("general", $matchDaten, $puuid);
     echo "<br><br>";
     $startHighestWinrateWith = microtime(true);
-    getHighestWinrateWith("GENERAL", $matchDaten, $puuid);
+    getHighestWinrateWith("FILL", $matchDaten, $puuid);
     getHighestWinrateWith("TOP", $matchDaten, $puuid);
     getHighestWinrateWith("JUNGLE", $matchDaten, $puuid);
     getHighestWinrateWith("MID", $matchDaten, $puuid);
