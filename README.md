@@ -32,9 +32,9 @@ Refinanzierung durch Werbeeinnahmen ab.
 *   [x] **Optimiertes Javascript** durch **Minifying**
 *   [x] **Verschärft eingestellte NGINX Header**
 *   [x] **Anbindung an League of Legends Accounts**
-*   [ ] **Tags** pro Spieler & Team zur schnellen identifierung von Faktoren
-*   [ ] **Premium** Accounts inkl. exkludierter Werbebanner
-*   [ ] **Discord Bot** angebunden an Github Status Updates
+*   [x] **Tags** pro Spieler & Team zur schnellen identifierung von Faktoren
+*   [x] **Premium** Accounts inkl. exkludierter Werbebanner
+*   [x] **Discord Bot** angebunden an Github Status Updates
 *   [ ] Persönlich einstellbare **League Userprofile**
 und noch vieles mehr...
 
