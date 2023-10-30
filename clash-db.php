@@ -115,6 +115,36 @@ class DB {
         }
     }
 
+    public function getPremium($mailOrName) {
+        $column = (str_contains($mailOrName, '@')) ? 'email' : 'username';
+        $sql = $this->db->prepare("SELECT is_premium FROM users WHERE $column = ?");
+        $sql->bind_param('s', $mailOrName);
+        $sql->execute();
+        $result = $sql->get_result();
+        
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['is_premium']; // Assuming 'is_premium' is the name of the boolean field.
+        } else {
+            return false; // For example, returning false if the user is not found.
+        }
+    }
+    
+    public function setPremium($isPremium, $mailOrName) {
+        $column = (str_contains($mailOrName, '@')) ? 'email' : 'username';
+        $sql = $this->db->prepare("UPDATE users SET is_premium = ? WHERE $column = ?");
+        $sql->bind_param('is', $isPremium, $mailOrName);
+        $sql->execute();
+        $result = $sql->affected_rows;
+    
+        if ($result > 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+
     public function get_data_via_stay_code($staycode) {
         $sql = $this->db->prepare("SELECT id, region, username, email, sumid FROM users WHERE staycode = ?");
         $sql->bind_param('s', $staycode);
