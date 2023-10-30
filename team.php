@@ -21,8 +21,8 @@ require_once '/hdd1/clashapp/mongo-db.php';
 
 // -----------------------------------------------------------v- CHECK STAY LOGGED IN COOKIE -v----------------------------------------------------------- //
 
+$db = new DB();
 if ((isset($_COOKIE['stay-logged-in'])) && !isset($_SESSION['user'])) {
-    $db = new DB();
     $sessionData = $db->get_data_via_stay_code($_COOKIE['stay-logged-in']);
     if($sessionData['status'] !== 'error') {
         $_SESSION['user'] = array('id' => $sessionData['id'], 'region' => $sessionData['region'], 'username' => $sessionData['username'], 'email' => $sessionData['email'], 'sumid' => $sessionData['sumid']);
@@ -32,6 +32,7 @@ if ((isset($_COOKIE['stay-logged-in'])) && !isset($_SESSION['user'])) {
 if ((isset($_COOKIE['stay-logged-in']))) {
     setcookie("stay-logged-in", $_COOKIE['stay-logged-in'], time() + (86400 * 30), "/");
 }
+
 
 // ----------------------------------------------------------------v- PRINT HEADER -v---------------------------------------------------------------- //
 
@@ -135,6 +136,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             </div>
             <div class='row-span-2 h-[26rem] flex items-center justify-center rounded bg-[#141624]'>
                 <div class='h-[21rem] w-[17.5rem] bg-black'>
+                    "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                    <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                    } else { echo "
                     <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                             crossorigin='anonymous'></script>
                     <!-- Team-Top-Left -->
@@ -146,6 +150,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                     <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
                     </script>
+                    "; } echo "
                 </div>
             </div>
             <div class='row-span-2 h-[26rem] grid rounded bg-[#141624]'>
@@ -185,6 +190,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 </div>
                 <div class='row-span-2 h-[26rem] flex items-center justify-center rounded bg-[#141624]'>
                     <div class='h-[21rem] w-[17.5rem] bg-black'>
+                        "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                        <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                        } else { echo "
                         <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                             crossorigin='anonymous'></script>
                         <!-- Team-Top-Right -->
@@ -196,6 +204,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <script>
                             (adsbygoogle = window.adsbygoogle || []).push({});
                         </script>
+                        "; } echo "
                     </div>
                 </div>
                 <div class='flex flex-wrap justify-center rounded bg-[#141624] overflow-hidden h-fit pt-1.5 pb-3 transition-all ease-out'>
@@ -724,6 +733,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                         <div class='flex items-center justify-start gap-4 w-full' style='content-visibility: auto;'>
                             <div class='rounded bg-[#141624] p-4'>
                                 <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
+                                    "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                                    <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                                    } else { echo "
                                     <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                                             crossorigin='anonymous'></script>
                                     <!-- Team-Middle-Left -->
@@ -736,10 +748,14 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                     <script>
                                             (adsbygoogle = window.adsbygoogle || []).push({});
                                     </script>
+                                    "; } echo "
                                 </div>
                             </div>
                             <div class='rounded bg-[#141624] p-4'>
                                 <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
+                                    "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                                    <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                                    } else { echo "
                                     <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                                             crossorigin='anonymous'></script>
                                     <!-- Team-Middle-Right -->
@@ -752,6 +768,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                                     <script>
                                             (adsbygoogle = window.adsbygoogle || []).push({});
                                     </script>
+                                    "; } echo "
                                 </div>
                             </div>
                             <div class='grid rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max items-center'>
@@ -884,6 +901,9 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     <div class='flex items-center justify-center twok:gap-x-48 fullhd:gap-x-36 mb-6 mt-2' style='content-visibility: auto;'>
         <div class='rounded bg-[#141624] p-4'>
             <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
+                "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                } else { echo "
                 <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                     crossorigin='anonymous'></script>
                 <!-- Team-Bottom-Left -->
@@ -896,10 +916,14 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <script>
                     (adsbygoogle = window.adsbygoogle || []).push({});
                 </script>
+                "; } echo "
             </div>
         </div>
         <div class='rounded bg-[#141624] p-4'>
             <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
+                "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                } else { echo "
                 <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                         crossorigin='anonymous'></script>
                 <!-- Team-Bottom-Right -->
@@ -912,6 +936,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <script>
                         (adsbygoogle = window.adsbygoogle || []).push({});
                 </script>
+                "; } echo "
             </div>
         </div>
     </div>
