@@ -85,7 +85,7 @@ function addToFile(teamId, champId, champName) {
         const filter = { TeamID: teamId };
         const update = {
           $addToSet: {
-            'SuggestedBans': { id: champId, name: champName }
+            'SuggestedBans': { id: champId, name: champName, status: "unlocked"}
           },
           $inc: { Status: 1 }
         };
@@ -191,6 +191,41 @@ function readTeamData(teamId) {
       console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error reading team data: ${error}`, new Date().toLocaleTimeString());
       reject(error);
     }
+  });
+}
+
+function toggleChampionStatus(teamId, champId, newStatus) {
+  return new Promise((resolve, reject) => {
+    mongoClient.connect()
+      .then(() => {
+        const db = mongoClient.db('clashappdb');
+        const teamsCollection = db.collection('teams');
+        const filter = { TeamID: teamId, 'SuggestedBans.id': champId };
+        const update = {
+          $set: {
+            'SuggestedBans.$.status': newStatus
+          }
+        };
+        return teamsCollection.updateOne(filter, update);
+      })
+      .then((result) => {
+        if (result.modifiedCount === 1) {
+          broadcastUpdate(teamId);
+          resolve({ status: 'Success', champId, newStatus });
+        } else {
+          console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Team document for ${teamId} not found or unable to update`, new Date().toLocaleTimeString());
+          resolve({ status: 'Error' });
+        }
+      })
+      .catch((error) => {
+        if (error == "MongoServerError: Document failed validation") {
+          console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Maximum elements in array (Document Validation Error)`, new Date().toLocaleTimeString());
+          resolve({ status: 'Error' });
+        } else {
+          console.error(`\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Error updating champion status: ${error}`, new Date().toLocaleTimeString());
+          reject({ status: 'Error' });
+        }
+      });
   });
 }
 
@@ -472,6 +507,25 @@ wss.on('connection', function connection(ws, req) {
             client.send('{"status":"Message","message":"joined the session.","name":"'+ws.name+'","color":"'+ws.color+'"}');
           }
         });
+
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      ////////////////////////////////////////////////// LOCK & UNLOCK /////////////////////////////////////////////////////
+      //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+      } else if(dataAsJSON.request == "lock"){
+        wss.clients.forEach(function each(client) {
+          if(client.location == dataAsJSON.teamid && client != ws){
+            client.send('{"status":"Lock","message":"locked %1.","champ":"'+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'","index":"'+dataAsJSON.index+'"}');
+          }
+        });
+        return toggleChampionStatus(dataAsJSON.teamid, dataAsJSON.champid, "locked");
+      } else if(dataAsJSON.request == "unlock"){
+        wss.clients.forEach(function each(client) {
+          if(client.location == dataAsJSON.teamid && client != ws){
+            client.send('{"status":"Unlock","message":"unlocked %1.","champ":"'+dataAsJSON.champname+'","name":"'+ws.name+'","color":"'+ws.color+'","index":"'+dataAsJSON.index+'"}');
+          }
+        });
+        return toggleChampionStatus(dataAsJSON.teamid, dataAsJSON.champid, "unlocked");
 
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //////////////////////////////////////////////////// MINIGAMES ///////////////////////////////////////////////////////
