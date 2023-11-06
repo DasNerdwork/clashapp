@@ -65,6 +65,10 @@ left the room.,hat den Raum verlassen.
 added %1.,hat %1 hinzugefügt.
 removed %1.,hat %1 entfernt.
 swapped %1 with %2.,tauschte %1 mit %2.
+locked %1.,hat %1 gesperrt.
+unlocked %1.,hat %1 entsperrt.
+Lock Ban,Bann sperren
+Unlock Ban,Bann entsperren
 Impressum,Impressum
 Datenschutzerklärung,Datenschutzerklärung
 ClashScout.com isn't endorsed by Riot Games and doesn't reflect the views or opinions of Riot Games or anyone officially involved in producing or managing Riot Games properties.,"ClashScout.com wird nicht von Riot Games unterstützt und spiegelt nicht die Ansichten oder Meinungen von Riot Games oder anderen Personen wider, die offiziell an der Produktion oder Verwaltung von Riot Games-Eigentum beteiligt sind."
@@ -274,3 +278,4 @@ Finalscore,Finalwertung
 "Two-Colored Tags","Zweifarbige Tags"
 "Enter a Summonername","'Gib einen Beschwörernamen ein'"
 "Settings","Einstellungen"
+"TY for Premium!","Danke für Premium!"
