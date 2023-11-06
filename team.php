@@ -58,6 +58,7 @@ $matchAlpineCounter = 0;
 $currentPlayerNumber = 1;
 $upToDate = false;
 $allUpToDate = 0;
+$emoteSources = array("/clashapp/data/misc/webp/ok.webp","/clashapp/data/misc/webp/teemo.webp","/clashapp/data/misc/webp/priceless.webp");
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 $autosuggestRequest = $mdb->getAutosuggestAggregate();
 $championDataArray = json_decode(file_get_contents("/hdd1/clashapp/data/patch/".$currentPatch."/data/en_US/champion.json"), true);
@@ -108,6 +109,20 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         $timeAndMemoryArray["CheckBanFile"]["Time"] = number_format((microtime(true) - $startCheckBanFile), 2, ',', '.')." s";
         $timeAndMemoryArray["CheckBanFile"]["Memory"] = number_format((memory_get_usage() - $memCheckBanFile)/1024, 2, ',', '.')." kB";
 
+// ------------------------------------------------------------v- CUSTOM BAN CONTEXT MENU -v------------------------------------------------------------ //
+
+echo '
+<div id="customBanContextMenu" class="opacity-0 absolute z-50 bg-[#202124] px-1 py-1 rounded text-sm border-[#646464] border-[1px] cursor-pointer transition-opacity duration-75">
+<ul class="bg-[#202124] hover:bg-[#3f4042] px-1 py-0.5 rounded">
+    <li onclick="lockSelectedBan(currentSelectedContextMenuElement)">🔒 <span class="text-xs">'.__("Lock Ban").'</span></li>
+</ul>
+</div>
+<div id="customBanUnlockMenu" class="opacity-0 absolute z-50 bg-[#202124] px-1 py-1 rounded text-sm border-[#646464] border-[1px] cursor-pointer transition-opacity duration-75">
+<ul class="bg-[#202124] hover:bg-[#3f4042] px-1 py-0.5 rounded">
+    <li onclick="unlockSelectedBan(currentSelectedContextMenuElement)">🔓 <span class="text-xs">'.__("Unlock Ban").'</span></li>
+</ul>
+</div>
+';
 
 // --------------------------------------------------------v- PRINT TOP PART TITLE, BANS & CO. -v-------------------------------------------------------- //
 
@@ -137,7 +152,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
             <div class='row-span-2 h-[26rem] flex items-center justify-center rounded bg-[#141624]'>
                 <div class='h-[21rem] w-[17.5rem] bg-black'>
                     "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
-                    <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                    <span class='h-[21rem] flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                     } else { echo "
                     <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                             crossorigin='anonymous'></script>
@@ -191,7 +206,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                 <div class='row-span-2 h-[26rem] flex items-center justify-center rounded bg-[#141624]'>
                     <div class='h-[21rem] w-[17.5rem] bg-black'>
                         "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
-                        <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                        <span class='h-[21rem] flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                         } else { echo "
                         <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                             crossorigin='anonymous'></script>
@@ -734,7 +749,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             <div class='rounded bg-[#141624] p-4'>
                                 <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
                                     "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
-                                    <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                                    <span class='h-full flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                                     } else { echo "
                                     <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                                             crossorigin='anonymous'></script>
@@ -754,7 +769,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
                             <div class='rounded bg-[#141624] p-4'>
                                 <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
                                     "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
-                                    <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                                    <span class='h-full flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                                     } else { echo "
                                     <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                                             crossorigin='anonymous'></script>
@@ -902,7 +917,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         <div class='rounded bg-[#141624] p-4'>
             <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
                 "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
-                <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                <span class='h-full flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                 } else { echo "
                 <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                     crossorigin='anonymous'></script>
@@ -922,7 +937,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
         <div class='rounded bg-[#141624] p-4'>
             <div class='twok:w-[970px] fullhd:w-[728px] h-[90px] bg-black'>
                 "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
-                <span class='h-[21rem] flex items-center justify-center'>".__("TY for Premium!")."</span>"; 
+                <span class='h-full flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                 } else { echo "
                 <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
                         crossorigin='anonymous'></script>
