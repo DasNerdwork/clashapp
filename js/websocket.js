@@ -43,23 +43,22 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                     for (const element of messageAsJson["SuggestedBans"]) {
                         if(executeOnlyOnce){
                             html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
-                                        '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
-                                            '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
-                                            '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp">'+
+                                        '<div class="hoverer group' + (element.status === "locked" ? ' locked' : '') + '" ' + (element.status === "locked" ? 'draggable="false" ' : 'draggable="true" ') + 'onclick="' + (element.status === "locked" ? '' : 'removeFromFile(this.parentElement);') + '">'+
+                                            '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '">'+
+                                            '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="/clashapp/data/misc/RemovalOverlay.webp">'+
                                         '</div>'+
                                     '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
                                     '</div>';
                             animateTimer += 0.1;
-                            
                         } else {
-                            if(!(selectedBans.innerHTML.includes("/champion/" + element["id"] + ".webp"))){
-                                html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24" style="animation: .1s ease-in-out 0s 1 slideIn; animation-fill-mode: forwards;">';  
+                            if (!(selectedBans.innerHTML.includes("/champion/" + element["id"] + ".webp"))) {
+                                html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24" style="animation: .1s ease-in-out 0s 1 slideIn; animation-fill-mode: forwards;">';
                             } else {
                                 html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24">';
                             }
-                            html += '<div class="hoverer group" draggable="true" onclick="removeFromFile(this.parentElement);">'+
-                                        '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp">'+
-                                        '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/RemovalOverlay.webp">'+
+                            html += '<div class="hoverer group' + (element.status === "locked" ? ' locked' : '') + '" ' + (element.status === "locked" ? '' : ' draggable="true"') + '" ' + (element.status === "locked" ? '' : 'onclick="removeFromFile(this.parentElement);"') + '>'+
+                                        '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '">'+
+                                        '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="/clashapp/data/misc/RemovalOverlay.webp">'+
                                     '</div>'+
                                 '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
                                 '</div>';
@@ -83,6 +82,8 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                         selectedBans.parentElement.classList.replace('pb-1', 'pb-3');
                     }
                     makeDragDroppable();
+                    var currentSelectedContextMenuElement = null;
+                    addContextMenuToSelectedBans();
                 });
             }
         } else {
@@ -159,6 +160,12 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                 } else {
                     addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color);
                 }
+            } else if (messageAsJson.status == "Lock") {
+                addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color, messageAsJson.champ);
+                lockSelectedBan(document.getElementById('selectedBans').children[messageAsJson.index], false);
+            } else if (messageAsJson.status == "Unlock") {
+                addCustomHistoryMessage(messageAsJson.message, messageAsJson.name, messageAsJson.color, messageAsJson.champ);
+                unlockSelectedBan(document.getElementById('selectedBans').children[messageAsJson.index], false);
             }
         }
     } else {
@@ -244,45 +251,59 @@ function makeDragDroppable(){
     let draggables = document.getElementsByClassName('hoverer')
     
     for (i = 0; i < draggables.length; i++) {
-      draggables[i].addEventListener('dragstart', dragStart)
-      draggables[i].addEventListener('drop', dropped)
-      draggables[i].addEventListener('dragenter', cancelDefault)
-      draggables[i].addEventListener('dragover', dragOver)
+        if (!draggables[i].classList.contains('locked')) {
+            draggables[i].addEventListener('dragstart', dragStart)
+            draggables[i].addEventListener('drop', dropped)
+            draggables[i].addEventListener('dragenter', cancelDefault)
+            draggables[i].addEventListener('dragover', dragOver)
+        }
     }
 
     function dragStart (e) {
-      e.dataTransfer.setData('fromID', e.srcElement.previousSibling.dataset.id);
-      e.dataTransfer.setData('fromName', e.srcElement.parentElement.parentElement.getElementsByTagName("span")[0].innerText);
-      e.dataTransfer.setData('isDraggable', e.srcElement.parentElement.classList); // set event data "isDraggable" to the class name "hoverer" of the parent element
-      e.dataTransfer.setDragImage(e.srcElement.previousSibling, 24, 24);
-      return oldIndex = getChildIndex(e.srcElement.parentElement.parentElement); // returning so function dropped is able to acces the old index variable
+        if (!e.srcElement.parentElement.classList.contains('locked')) {
+            e.dataTransfer.setData('fromID', e.srcElement.previousSibling.dataset.id);
+            e.dataTransfer.setData('fromName', e.srcElement.parentElement.parentElement.getElementsByTagName("span")[0].innerText);
+            e.dataTransfer.setData('isDraggable', e.srcElement.parentElement.classList); // set event data "isDraggable" to the class name "hoverer" of the parent element
+            e.dataTransfer.setDragImage(e.srcElement.previousSibling, 24, 24);
+            return oldIndex = getChildIndex(e.srcElement.parentElement.parentElement); // returning so function dropped is able to acces the old index variable
+        } else {
+            e.preventDefault(); // Prevent dragging if the element is locked
+        }
     }
 
     function dropped (e) {
-        var fromID = e.dataTransfer.getData('fromID');
-        var fromName = e.dataTransfer.getData('fromName');
-        var toID = e.srcElement.previousSibling.dataset.id;
-        var toName = e.srcElement.parentElement.parentElement.getElementsByTagName("span")[0].innerText;
-        cancelDefault(e);
-                
-        if(e.dataTransfer.getData('isDraggable') != "hoverer group"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
+        if (!e.srcElement.parentElement.classList.contains('locked')) {
+            var fromID = e.dataTransfer.getData('fromID');
+            var fromName = e.dataTransfer.getData('fromName');
+            var toID = e.srcElement.previousSibling.dataset.id;
+            var toName = e.srcElement.parentElement.parentElement.getElementsByTagName("span")[0].innerText;
             cancelDefault(e);
-      } else {
-        let sendInfo =  {
-            fromName: fromName,
-            fromID: fromID,
-            toName: toName,
-            toID: toID,
-            teamid: window.location.pathname.split("/team/")[1],
-            request: "swap"
-        };
-        ws.send(JSON.stringify(sendInfo));
+                    
+            if(e.dataTransfer.getData('isDraggable') != "hoverer group"){ // get the "isDraggable" event data, if class of dragged element == hoverer continue, else cancel
+                cancelDefault(e);
+        } else {
+            let sendInfo =  {
+                fromName: fromName,
+                fromID: fromID,
+                toName: toName,
+                toID: toID,
+                teamid: window.location.pathname.split("/team/")[1],
+                request: "swap"
+            };
+            ws.send(JSON.stringify(sendInfo));
+            }
+        } else {
+            e.preventDefault();
         }
     }
 
     function dragOver (e) {
-        e.dataTransfer.dropEffect = "move";
         cancelDefault(e);
+        if(e.target.parentElement.classList.contains("locked")){
+            e.dataTransfer.dropEffect = "none";
+        } else {
+            e.dataTransfer.dropEffect = "move";
+        }
     }
 
     function cancelDefault (e) {
@@ -292,8 +313,108 @@ function makeDragDroppable(){
     }
 }
 
-// ADDITIONAL SETTINGS
+function addContextMenuToSelectedBans(){
+    let selectedBanHoverElements = document.getElementsByClassName("selected-ban-champion");
+    Array.from(selectedBanHoverElements).forEach((singleBanHoverElement) => {
+        singleBanHoverElement.firstChild.oncontextmenu = customBanContextMenu;
+        document.onclick = hideCustomBanContextMenu;
+    })
+}
 
-function expandAllMatches(){
-    
+function hideCustomBanContextMenu(){
+    if(document.getElementById("customBanContextMenu")){
+        document.getElementById("customBanContextMenu").classList.replace("opacity-100", "opacity-0")
+        setTimeout(() => {
+            document.getElementById("customBanContextMenu").style.left = "0px"; 
+            document.getElementById("customBanContextMenu").style.top = "0px"; 
+        }, 75);
+    }
+    if(document.getElementById("customBanUnlockMenu")){
+        document.getElementById("customBanUnlockMenu").classList.replace("opacity-100", "opacity-0")
+        setTimeout(() => {
+            document.getElementById("customBanUnlockMenu").style.left = "0px"; 
+            document.getElementById("customBanUnlockMenu").style.top = "0px"; 
+        }, 75);
+    }
+}
+
+function customBanContextMenu(e) {
+    e.preventDefault();
+
+    // Handle right-click behavior
+    if (e.button === 2) {
+        if (document.getElementById("customBanContextMenu").classList.contains("opacity-100") || document.getElementById("customBanUnlockMenu").classList.contains("opacity-100")) {
+            if (e.target.parentElement.classList.contains("locked")) {
+                let menu = document.getElementById("customBanUnlockMenu");
+                menu.style.left = e.pageX + "px";
+                menu.style.top = e.pageY + "px";
+            } else {
+                let menu = document.getElementById("customBanContextMenu");
+                menu.style.left = e.pageX + "px";
+                menu.style.top = e.pageY + "px";
+            }
+        } else {
+            if (e.target.parentElement.classList.contains("locked")) {
+                let menu = document.getElementById("customBanUnlockMenu");
+                menu.classList.replace("opacity-0", "opacity-100");
+                menu.style.left = e.pageX + "px";
+                menu.style.top = e.pageY + "px";
+            } else {
+                let menu = document.getElementById("customBanContextMenu");
+                menu.classList.replace("opacity-0", "opacity-100");
+                menu.style.left = e.pageX + "px";
+                menu.style.top = e.pageY + "px";
+            }
+            currentSelectedContextMenuElement = e.target.parentElement.parentElement;
+        }
+    }
+}
+
+
+function lockSelectedBan(selectedBanElement, websocket = true){
+    selectedBanElement.firstChild.classList.add("locked");
+    selectedBanElement.firstChild.draggable = false;
+    selectedBanElement.firstChild.onclick = null;
+    let selectedBanImgElement = selectedBanElement.firstChild.firstChild;
+    selectedBanImgElement.style.filter = "url(\"data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\'><filter id=\'grayscale\'><feColorMatrix type=\'matrix\' values=\'0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0.3333 0.3333 0.3333 0 0 0 0 0 0 1 0\'/></filter></svg>#grayscale\")";
+    selectedBanImgElement.style.filter = "gray";
+    selectedBanImgElement.style.WebkitFilter = "grayscale(100%)";
+    selectedBanImgElement.nextSibling.classList.add("hidden");
+    if(websocket){
+        let selectedBanIndex = Array.from(selectedBanElement.parentElement.children).indexOf(selectedBanElement);
+        let champname = selectedBanElement.firstChild.nextSibling.innerText;
+        let champid = selectedBanElement.getElementsByTagName("img")[0].dataset.id;
+        let sendInfo =  {
+            index: selectedBanIndex,
+            champname: champname,
+            champid: champid,
+            teamid: window.location.pathname.split("/team/")[1],
+            request: "lock"
+        };
+        ws.send(JSON.stringify(sendInfo));
+    }
+}
+
+function unlockSelectedBan(selectedBanElement, websocket = true) {
+    selectedBanElement.firstChild.classList.remove("locked");
+    selectedBanElement.firstChild.draggable = true;
+    selectedBanElement.firstChild.onclick = function () {
+    };
+    let selectedBanImgElement = selectedBanElement.firstChild.firstChild;
+    selectedBanImgElement.style.filter = "";
+    selectedBanImgElement.style.WebkitFilter = "";
+    selectedBanImgElement.nextSibling.classList.remove("hidden");
+    if(websocket){
+        let selectedBanIndex = Array.from(selectedBanElement.parentElement.children).indexOf(selectedBanElement);
+        let champname = selectedBanElement.firstChild.nextSibling.innerText;
+        let champid = selectedBanElement.getElementsByTagName("img")[0].dataset.id;
+        let sendInfo =  {
+            index: selectedBanIndex,
+            champname: champname,
+            champid: champid,
+            teamid: window.location.pathname.split("/team/")[1],
+            request: "unlock"
+        };
+        ws.send(JSON.stringify(sendInfo));
+    }
 }
