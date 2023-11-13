@@ -299,10 +299,11 @@ ready(function(){
 function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
     const inputElement = document.getElementById('main-input');
     const autosuggestContainer = document.getElementById('autosuggest-container');
+    const tagLineSuggest = document.getElementById('tagLineSuggest');
 
     inputElement.addEventListener('keyup', function() {
       autosuggestContainer.innerHTML = '';
-      
+     
       const innerDiv1 = document.createElement('div');
       innerDiv1.className = 'text-xs bg-searchbg';
       const innerDiv2 = document.createElement('div');
@@ -366,15 +367,44 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
       }
     });
 
-    inputElement.addEventListener('focus', function() {
+    inputElement.addEventListener('input', function(e) {
+      checkForTagSuggest(e);
+    });
+
+    inputElement.addEventListener('keydown', function(e) {
+      if(e.key === 'Tab'){
+        e.preventDefault();
+        if(!inputElement.value.includes('#')){
+          inputElement.value += "#";
+        }
+        tagLineSuggest.innerHTML = "";
+      }
+    });
+
+    inputElement.addEventListener('focus', function(e) {
       autosuggestContainer.classList.remove('hidden');
+      checkForTagSuggest(e);
     });
 
     inputElement.addEventListener('blur', function () {
-      setTimeout(() => {
         autosuggestContainer.classList.add('hidden');
-      }, 500);
+        tagLineSuggest.innerHTML = "";
     });
+
+    function checkForTagSuggest(e){
+      if (inputElement.value.length > 2 && !inputElement.value.includes('#')) {
+        let currentInput = inputElement.value;
+        tagLineSuggest.innerHTML = currentInput + " #Tag";
+      } else {
+        tagLineSuggest.innerHTML = "";
+        if(e.data === "#"){
+          inputElement.value = inputElement.value.split('#')[0] + "#" +inputElement.value.split('#')[1].slice(0, 5);
+        }
+        if(inputElement.value.includes('#') && inputElement.value.split('#')[1].length > 5){
+          inputElement.value = inputElement.value.split('#')[0] + "#" +inputElement.value.split('#')[1].slice(0, 5);
+        }
+      }
+    }
 
     // Hilfsfunktion zur Normalisierung von Zeichenfolgen
     function normalizeString(input) {

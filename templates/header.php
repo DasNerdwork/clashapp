@@ -39,7 +39,7 @@ $mdb = new MongoDBHelper();
 		</nav>
         <?php if($_SERVER['REQUEST_URI'] == "/"){ echo '
             <form class="h-10 w-[800px] flex absolute left-2/4 -translate-x-2/4 -translate-y-2/4 top-[60%]" action="" onsubmit="return false;" method="GET" autocomplete="off">
-                <input type="text" name="name" class="h-16 w-full py-2.5 pl-2.5 pr-16 text-xl border-none text-black font-normal rounded-l-full indent-5 outline-none focus:pl-2.5 focus:text-xl" value="" placeholder="Enter a Summoner Name">
+                <input type="text" name="name" class="h-16 w-full py-2.5 pl-2.5 pr-16 text-xl border-none text-black font-normal rounded-l-full indent-5 outline-none focus:pl-2.5 focus:text-xl" value="" placeholder='.__("'Search Teams, Players or Champions'").'>
                 <input type="submit" name="submitBtn" class=\'h-16 w-20 py-2.5 pl-2.5 pr-16 text-xl border-none bg-white text-black cursor-pointer rounded-r-full bg-[length:50%] bg-[url("/clashapp/data/misc/webp/searchicon.webp")] bg-no-repeat bg-center focus:text-xl active:bg-[#ccc]\' value="" onclick="sanitize(this.form.name.value);">
                 <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
                 <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
@@ -48,7 +48,10 @@ $mdb = new MongoDBHelper();
         } else { echo '
             <div class="flex absolute left-2/4 -translate-x-2/4 translate-y-1/4 flex-col z-50 bg-black">
                 <form class="h-10 flex" action="" onsubmit="return false;" method="GET" autocomplete="off">
-                    <input id="main-input" type="text" name="name" class="px-2.5 text-base w-80 !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-base" value="" placeholder='.__("Enter a Summonername").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false">
+                    <div class="relative">
+                        <div id="tagLineSuggest" class="absolute -z-10 px-2.5 text-base w-full h-full bg-white text-[#a9a9a9] flex items-center"></div>
+                        <input id="main-input" type="text" name="name" class="bg-transparent px-2.5 text-base w-80 h-full !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-base" value="" placeholder='.__("'Search Teams, Players or Champions'").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false" maxlength="22">
+                    </div>
                     <input type="submit" name="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="'.__('Search').'" onclick="sanitize(this.form.name.value);">
                     <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
                     <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
