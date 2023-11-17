@@ -1,5 +1,6 @@
 <?php 
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
+
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -78,6 +79,7 @@ const requests = {};
 const currentPatch = " . json_encode($currentPatch) . ";
 const championData = " . json_encode($championArray) . ";
 const containerTitle = '" . __("Summoner") . "';
+const searchHistoryTitle = '" . __("Recently Searched") . "';
 </script>";
 
 
