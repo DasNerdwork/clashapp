@@ -4,7 +4,7 @@
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 
 require_once '/hdd1/clashapp/vendor/autoload.php';
 use PragmaRX\Google2FA\Google2FA;
