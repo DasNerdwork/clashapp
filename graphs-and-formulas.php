@@ -1,5 +1,5 @@
 <?php 
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 include('/hdd1/clashapp/templates/head.php');
 setCodeHeader('Profile', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
 include('/hdd1/clashapp/templates/header.php');

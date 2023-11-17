@@ -300,8 +300,53 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
     const inputElement = document.getElementById('main-input');
     const autosuggestContainer = document.getElementById('autosuggest-container');
     const tagLineSuggest = document.getElementById('tagLineSuggest');
+    
+    const searchHistory = JSON.parse(localStorage.getItem("SearchHistory"));
 
-    inputElement.addEventListener('keyup', function() {
+    if(searchHistory != null){
+      var historyUlElement = document.getElementById("autosuggest-history-parent");
+      if(!historyUlElement){
+        var historyTitleDiv = document.createElement('div');
+        historyTitleDiv.className = 'p-1.5 bg-searchtitle';
+        const historyTitleSpan = document.createElement('span');
+        historyTitleSpan.textContent = searchHistoryTitle;
+        historyTitleSpan.className = 'font-bold';
+        var historyUlElement = document.createElement('ul');
+        historyUlElement.id = 'autosuggest-history-parent';
+        historyTitleDiv.appendChild(historyTitleSpan);
+        for (let i = searchHistory.length - 1; i >= 0; i--) {
+          let normalizedSearchHistory = normalizeString(searchHistory[i]);
+          let handled = false;
+          if(autosuggestData !== ""){
+            for (let key in autosuggestData) {
+              const normalizedUserKey = normalizeString(key);
+              if (normalizedUserKey == normalizedSearchHistory) {
+                const liElement = createAutosuggestItem(key, autosuggestData[key], currentPatch, 'player');
+                historyUlElement.appendChild(liElement);
+                handled = true;
+              } 
+            }
+
+            if(!handled){
+              for (let key in championData) {
+                if (key.trim().toLowerCase() == normalizedSearchHistory) {
+                  const liElement = createAutosuggestItem(key, championData[key], currentPatch, 'champion');
+                  historyUlElement.appendChild(liElement);
+                  handled = true;
+                } 
+              }
+            }
+
+            if(!handled) {
+              const liElement = createAutosuggestItem(searchHistory[i], '9', currentPatch, 'player');
+              historyUlElement.appendChild(liElement);
+            }
+          }
+        }
+      }
+    }
+
+    function addAutosuggestContainer(){
       autosuggestContainer.innerHTML = '';
      
       const innerDiv1 = document.createElement('div');
@@ -314,11 +359,15 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
       titleSpan.className = 'font-bold';
       const ulElement = document.createElement('ul');
       ulElement.id = 'autosuggest-search-parent';
-
+  
       // Construct the structure by appending child elements
-      titleDiv.appendChild(titleSpan);
-      innerDiv2.appendChild(titleDiv);
-      innerDiv2.appendChild(ulElement);
+      if(inputElement.value.length > 0){
+        titleDiv.appendChild(titleSpan);
+        innerDiv2.appendChild(titleDiv);
+        innerDiv2.appendChild(ulElement);
+      }
+      innerDiv2.appendChild(historyTitleDiv);
+      innerDiv2.appendChild(historyUlElement);
       innerDiv1.appendChild(innerDiv2);
       autosuggestContainer.appendChild(innerDiv1);
 
@@ -362,10 +411,10 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
         ulElement.innerHTML = '';
         const currentInputLi = createAutosuggestItem(inputElement.value, '9', currentPatch, 'player');
         ulElement.appendChild(currentInputLi);
-      } else {
-        autosuggestContainer.innerHTML = '';
       }
-    });
+    }
+
+    inputElement.addEventListener('keyup', addAutosuggestContainer);
 
     inputElement.addEventListener('input', function(e) {
       checkForTagSuggest(e);
@@ -381,14 +430,19 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
       }
     });
 
+    inputElement.addEventListener('dragstart', function (event) {
+      event.preventDefault();
+    });
+
     inputElement.addEventListener('focus', function(e) {
+      addAutosuggestContainer();
       autosuggestContainer.classList.remove('hidden');
       checkForTagSuggest(e);
     });
 
     inputElement.addEventListener('blur', function () {
-        autosuggestContainer.classList.add('hidden');
-        tagLineSuggest.innerHTML = "";
+      autosuggestContainer.classList.add('hidden');
+      tagLineSuggest.innerHTML = "";
     });
 
     function checkForTagSuggest(e){
@@ -442,22 +496,56 @@ function createAutosuggestItem(key, icon, currentPatch, variant) {
   divElement.appendChild(spanElement);
   liElement.appendChild(divElement);
 
+  function updateSearchHistory(text){
+    let searchHistory = localStorage.getItem("SearchHistory");
+    if(searchHistory == null){
+      let historyArray = [text];
+      localStorage.setItem("SearchHistory", JSON.stringify(historyArray));
+    } else {
+      searchHistory = JSON.parse(searchHistory);
+      if (searchHistory.length < 3){
+        const index = searchHistory.indexOf(text);
+        if (index !== -1) {
+          searchHistory.splice(index, 1);
+        }
+      } else if (searchHistory.length == 3){
+        const index = searchHistory.indexOf(text);
+        if (index !== -1) {
+          searchHistory.splice(index, 1);
+        } else {
+          searchHistory.shift();
+        }
+        searchHistory.push(text);
+      }
+      localStorage.setItem("SearchHistory", JSON.stringify(searchHistory));
+    }
+  }
+
   if(variant == 'player'){
+    liElement.addEventListener('mousedown', function (event) {
+      event.preventDefault(); // Prevents the blur event from immediately firing
+    });
     liElement.addEventListener('click', function() {
-      if(key == "Flokrastinator" || key == "jNNsTV" || key == "5 Min Deathtimer" || key == "ILEALORI" || key == "Vollbard"){
+      updateSearchHistory(key);
+      key2 = key.toLowerCase();
+      if(key2 == "flokrastinator" || key2 == "jnnstv" || key2 == "5 min deathtimer" || key2 == "ilealori" || key2 == "vollbard" || key2 == "bard bard bard bard#brd" || key2 == "dasnerdwork#nerdy"){
         window.location.href="https://clashscout.com/team/test";
       } else {
         postAjax(`${window.location.protocol}//${window.location.hostname}/clashapp/functions.php`, { sumname: key }, function(data){
-            if(data == "404"){
-                window.location.href="https://clashscout.com/404";
-            } else {
-                window.location.href="https://clashscout.com/team/" + data;
-            }
+          if(data == "404"){
+              window.location.href="https://clashscout.com/404";
+          } else {
+              window.location.href="https://clashscout.com/team/" + data;
+          }
         });
       }
     });
   } else if(variant == 'champion'){
+    liElement.addEventListener('mousedown', function (event) {
+      event.preventDefault(); // Prevents the blur event from immediately firing
+    });
     liElement.addEventListener('click', function() {
+      updateSearchHistory(key);
       // window.location.href="https://clashscout.com/team/test";
       alert("Error: Champion pages not implemented yet.");
     });

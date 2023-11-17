@@ -26,6 +26,20 @@ function sanitize(text){
         } else {
             window.location.href="https://clashscout.com/team/" + data;
         }
+        let searchHistory = localStorage.getItem("SearchHistory");
+        if(searchHistory == null){
+          let historyArray = [text];
+          localStorage.setItem("SearchHistory", JSON.stringify(historyArray));
+        } else {
+          searchHistory = JSON.parse(searchHistory);
+          if (searchHistory.length < 3){
+            searchHistory.push(text);
+          } else if (searchHistory.length == 3){
+            searchHistory.shift();
+            searchHistory.push(text);
+          }
+          localStorage.setItem("SearchHistory", JSON.stringify(searchHistory));
+        }
       });
     //   showLoader();
   } else {
