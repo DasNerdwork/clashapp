@@ -1,5 +1,5 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 require_once '/hdd1/clashapp/clash-db.php';
 if(isset($_POST['username'], $_POST['points'])){
     $db = new DB();
