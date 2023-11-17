@@ -1,4 +1,4 @@
-<?php session_start(); 
+<?php if (session_status() === PHP_SESSION_NONE) session_start(); 
 include_once('/hdd1/clashapp/functions.php');
 require_once '/hdd1/clashapp/clash-db.php';
 

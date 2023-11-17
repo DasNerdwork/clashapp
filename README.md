@@ -19,6 +19,7 @@ Refinanzierung durch Werbeeinnahmen ab.
 *   [x] **Gesamtübersicht eines Gegnerteams** komprimiert auf eine Website
 *   [x] **Bannempfehlungen** automatisch generiert
 *   [x] **Matchhistory** jedes einzelnen Spielers
+*   [x] **Automatische Aktualisierungen** der Matchhistorie 
 *   [x] **Auswertung von Rankdaten** inkl. Meisterschaftspunkte
 *   [x] **Websocket** für Live dargestellte Bannauswahl
 *   [x] **Champion Filterung** zum simpleren Navigieren
@@ -46,9 +47,10 @@ und noch vieles mehr...
 * [PragmaRX\Google2FA](https://packagist.org/packages/pragmarx/google2fa)
 * [BaconQrCode](https://github.com/Bacon/BaconQrCode)
 * [websocket/ws](https://github.com/websockets/ws)
-* [PHP8.1](https://www.php.net/releases/8.1/en.php)
+* [PHP8.2](https://www.php.net/releases/8.2/en.php)
 * [NGINX](https://www.nginx.com/)
 * [MySQL](https://www.php.net/manual/de/book.mysqli.php)
+* [MongoDB](https://www.mongodb.com/de-de)
 
 ### Install
 
