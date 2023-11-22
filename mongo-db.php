@@ -216,6 +216,30 @@ class MongoDBHelper {
         }
     }
 
+        /**
+     * Retrieve a player document based on the PlayerData.PUUID attribute.
+     *
+     * @param string $puuid - The PlayerData.PUUID value to search for.
+     *
+     * @return array - An array with keys 'success', 'code', 'message', and 'data'.
+     *   'success' determines the success of the operation.
+     *   'code' provides a code for reference.
+     *   'message' describes the outcome of the operation.
+     *   'data' contains the retrieved player document (if found).
+     */
+    public function getPlayerByPUUID($puuid) {
+        $filter = ['PlayerData.PUUID' => $puuid];
+        $query = new MongoDB\Driver\Query($filter);
+        $cursor = $this->client->executeQuery("{$this->mdb}.players", $query);
+
+        if (!$cursor->isDead()) {
+            $document = current($cursor->toArray());
+            return array('success' => true, 'code' => 'AK4MF0', 'message' => 'Successfully retrieved player document.', 'data' => $document);
+        } else {
+            return array('success' => false, 'code' => '0PPA1', 'message' => 'Player document not found.');
+        }
+    }
+
     /**
      * Retrieve PlayerData.Name and PlayerData.Icon, sort them alphabetically, and format as specified.
      *

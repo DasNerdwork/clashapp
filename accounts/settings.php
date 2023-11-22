@@ -65,9 +65,9 @@ if (isset($_POST['current-password']) && isset($_POST['new-password']) && isset(
 }
 
 if (isset($_GET['verify'])){
-    $sumid = $db->get_sumid($_SESSION['user']['username']);
-    if($sumid['status'] == 'success') {
-        $_SESSION['user']["sumid"] = $sumid['sumid'];
+    $puuid = $db->get_puuid($_SESSION['user']['username']);
+    if($puuid['status'] == 'success') {
+        $_SESSION['user']["puuid"] = $puuid['puuid'];
     }
     Header('Location: https://clashscout.com/settings?verified=true');
 }
@@ -89,8 +89,8 @@ if (isset($_GET['remove2FA'])){
 if (isset($_POST['dcpassword'])) {
     $response = $db->check_credentials($_SESSION['user']['username'], $_POST['dcpassword']);
     if ($response['status'] == 'success') {
-        if($db->disconnect_account($_SESSION['user']["sumid"], $_SESSION['user']['username'])){
-            unset($_SESSION['user']["sumid"]);
+        if($db->disconnect_account($_SESSION['user']["puuid"], $_SESSION['user']['username'])){
+            unset($_SESSION['user']["puuid"]);
             Header('Location: https://clashscout.com/settings?verified=false');
         } else {
             echo "<script>setError('Unable to locally disconnected accounts. Please reach out to an administrator.');</script>"; // TODO: Fix error banner display
@@ -238,23 +238,23 @@ if (!empty($success_message)) {
                 <div class='text-xl mb-2' id="unlink-account-title">Unlink your account</div>
                 <span class='text-sm text-justify block' id='unlink-account-desc'>If you wish to unlink your account please enter your password and press confirm. You can always re-link your account again.</span>
             </div>
-                <?php if (!isset($_SESSION['user']['sumid'])) { ?>
+                <?php if (!isset($_SESSION['user']['puuid'])) { ?>
             <button id="connect-account-button" class="mt-3 mb-3 h-8 text-base w-64 bg-light text-white hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = false, confirmLeague = false, connectLeague = true, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!connectLeague">Connect League Account</button>
             <div class="link-account-area border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="connectLeague">
                 <div class='text-xl mb-2' id="link-account-title">Link your account</div>
                 <span class='text-sm text-justify block' id='link-account-desc'>To link your account please enter your League of Legends username.</span>
                 <form method="post" class="mt-2.5">
                     <div><label for="name" class="text-xs font-bold block text-left ml-5">Summoner Name: </label></div>
-                    <input type="text" name="connectname" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" maxlength=16 required placeholder="Summoner Name" />
+                    <input type="text" name="connectname" class="text-base color-white text-left w-80 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" maxlength=23 required placeholder="Summoner Name" />
                     <div class="flow-root mx-auto max-w-[320px]"><button type="submit" id="connect-account-confirm" class="float-right ml-0 mt-1 h-8 mb-4 w-24 bg-[#27358b] text-white text-base hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = false, confirmLeague = true, connectLeague = false, add2FA = false, remove2FA = false, deleteAccount = false">Connect</button>
                     <button type="button" id="connect-account-cancel" class="float-left ml-0 mt-1 h-8 mb-4 w-24 bg-[#2a2d40] text-white text-base hover:brightness-75 active:brightness-50" @click="connectLeague = false">Cancel</button></div>
                 </form>
             </div>
             <?php } else { 
-                $currentPlayerData = getPlayerData("sumid", $_SESSION['user']['sumid']);
+                $currentPlayerData = getPlayerData("puuid", $_SESSION['user']['puuid']);
                 echo '<div class="account-link mt-2" id="account-link"><span class="block">Linked to:</span>
                     <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.webp" class="m-auto inline-flex justify-center max-w-[32px] max-h-[32px]" width="32" loading="lazy">
-                    '.$currentPlayerData["Name"].'</div>';
+                    '.$currentPlayerData["GameName"]."#".$currentPlayerData["Tag"].'</div>';
                 ?> 
             <div id="lower-dcform">
                 <button id="disconnect-account-button" class="mt-4 mb-3 h-8 text-base w-64 bg-light text-white hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = true, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = false" x-show="!disconnectLeague">Disconnect League Account</button>
@@ -295,20 +295,20 @@ if (!empty($success_message)) {
             .'\x{AA7E}-\x{AAAF}\x{AAB1}\x{AAB5}\x{AAB6}\x{AAB9}-\x{AABD}\x{AAC0}\x{AAC2}\x{AADB}-\x{AADD}\x{AAE0}-\x{AAEA}\x{AAF2}-\x{AAF4}\x{AB01}-\x{AB06}\x{AB09}-\x{AB0E}\x{AB11}-\x{AB16}\x{AB20}-\x{AB26}\x{AB28}-\x{AB2E}\x{AB30}-\x{AB5A}'
             .'\x{AB5C}-\x{AB65}\x{AB70}-\x{ABE2}\x{AC00}-\x{D7A3}\x{D7B0}-\x{D7C6}\x{D7CB}-\x{D7FB}\x{F900}-\x{FA6D}\x{FA70}-\x{FAD9}\x{FB00}-\x{FB06}\x{FB13}-\x{FB17}\x{FB1D}\x{FB1F}-\x{FB28}\x{FB2A}-\x{FB36}\x{FB38}-\x{FB3C}\x{FB3E}'
             .'\x{FB40}\x{FB41}\x{FB43}\x{FB44}\x{FB46}-\x{FBB1}\x{FBD3}-\x{FD3D}\x{FD50}-\x{FD8F}\x{FD92}-\x{FDC7}\x{FDF0}-\x{FDFB}\x{FE70}-\x{FE74}\x{FE76}-\x{FEFC}\x{FF21}-\x{FF3A}\x{FF41}-\x{FF5A}\x{FF66}-\x{FFBE}\x{FFC2}-\x{FFC7}'
-            .'\x{FFCA}-\x{FFCF}\x{FFD2}-\x{FFD7}\x{FFDA}-\x{FFDC}]+$/u', $_POST['connectname']);
+            .'\x{FFCA}-\x{FFCF}\x{FFD2}-\x{FFD7}\x{FFDA}-\x{FFDC}\x{0023}]+$/u', $_POST['connectname']);
 
-            if (strlen($_POST['connectname']) > 16 || strlen($_POST['connectname']) < 3) {
+            if (strlen($_POST['connectname']) > 23 || strlen($_POST['connectname']) < 6) {
                 echo '<script>setError("Summoner Names have to be between 3 and 16 characters long.");</script>';
             } else if(!$validName) {
                 echo '<script>setError("Summoner Name incorrect: Allowed characters are a-Z, 0-9 and alphabets of other languages.");</script>';
             } else {
-                $playerDataArray = getPlayerData("name", $_POST['connectname']);
+                $playerDataArray = getPlayerData("riot-id", $_POST['connectname']);
                 if($playerDataArray['Icon'] != ""){
                     $randomIcon = getRandomIcon($playerDataArray["Icon"]);
                     echo '
                     <div>
                         <div id="connect-account-area" class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="confirmLeague">
-                            <div class="mb-4 text-xl">Found account for: '.$playerDataArray['Name'].'</div>'.'
+                            <div class="mb-4 text-xl">Found account for: '.$playerDataArray['GameName']."#".$playerDataArray['Tag'].'</div>'.'
                             <div class="flex justify-center items-center gap-8 mb-4">
                                 <img id="current-profile-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerDataArray["Icon"].'.webp" class="w-20" loading="lazy">
                                 <span>&#10148;</span>
@@ -330,7 +330,7 @@ if (!empty($success_message)) {
                             function() {
                                 button.disabled = false;
                             }, 3000);
-                        postAjax("connect.php", { icon: "'.$randomIcon.'", name: "'.$playerDataArray['Name'].'", sessionUsername: "'.$_SESSION['user']['username'].'" }, function(data){
+                        postAjax("connect.php", { icon: "'.$randomIcon.'", name: "'.$playerDataArray['GameName']."#".$playerDataArray['Tag'].'", sessionUsername: "'.$_SESSION['user']['username'].'" }, function(data){
                                 data = JSON.parse(data);
                                 if(data.status == "success"){
                                     location.href = "settings?verify=true";
