@@ -37,7 +37,7 @@ $requestIterator = 0;
 //     updateProfile($_POST["username"], 150);
 // }
 
-function updateProfile($id, $maxMatchIds, $type="name", $tempMatchIDs=null){
+function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
     if($id != ""){
         $mdb = new MongoDBHelper();
         $playerData = getPlayerData($type,$id);

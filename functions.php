@@ -64,16 +64,17 @@ function getPlayerData($type, $id){
     $playerDataArray = array();
 
     switch ($type) {
-        case "name":
-            $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-name/";
+        case "riot-id":
+            $id = str_replace("#","/",$id);
+            $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/";
             break;
         case "puuid":
-            $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
+            $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
             break;
         case "sumid":
             $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/";
             break;
-    }
+    }    
 
     // Curl API request block
     $ch = curl_init();
@@ -101,9 +102,29 @@ function getPlayerData($type, $id){
         curl_close($ch);
     }
 
+    if($httpCode == "200" && ($type == "riot-id" || $type == "puuid")){
+        $type == "puuid" ? $gameName = json_decode($output)->gameName : $gameName = "";
+        $type == "puuid" ? $tag = json_decode($output)->tagLine : $tag = "";
+        $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $requestUrlVar . json_decode($output)->puuid);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $output = curl_exec($ch); $apiRequests["getPlayerData"]++;
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    }
+
     // Collect requested values in returnarray
     $playerDataArray["Icon"] = json_decode($output)->profileIconId;
     $playerDataArray["Name"] = json_decode($output)->name;
+    if($type == "riot-id"){
+        $playerDataArray["GameName"] = explode("/", $id)[0];
+        $playerDataArray["Tag"] = explode("/", $id)[1];
+    } else {
+        $playerDataArray["GameName"] = $gameName;
+        $playerDataArray["Tag"] = $tag;
+    }
     $playerDataArray["Level"] = json_decode($output)->summonerLevel;
     $playerDataArray["PUUID"] = json_decode($output)->puuid;
     $playerDataArray["SumID"] = json_decode($output)->id;
@@ -112,6 +133,10 @@ function getPlayerData($type, $id){
 
     return $playerDataArray;
 }
+
+
+
+
 
 /** Get info about summoners mastery scores
  * This function retrieves the all available mastery score info about a summoner
@@ -3017,35 +3042,52 @@ function objectToArray($object) {
  */
 if(isset($_POST['sumname'])){
     global $headers, $apiRequests;
-    $playerName = preg_replace('/\s+/', '+', $_POST['sumname']);
-    $playerData = getPlayerData("name",$playerName);
+    $playerName = preg_replace('/\s+/', '', $_POST['sumname']);
+    $playerName = str_replace("#","/",$playerName);
+    $playerData = getPlayerData("riot-id",$playerName);
 
     // Curl API request block
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/tournaments");
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
+    $tournamentsOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
-    // 429 Too Many Requests
-    if($httpCode == "429"){
-        sleep(5);
-        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-    }
-
-    // Decode and echo returned data, if not existent send to 404 page
-    $clashData = json_decode($clashOutput, true);
-    if(isset($clashData[0]["teamId"])){
-        echo $clashData[0]["teamId"];
-    } else {
-        echo "404";
+    if($httpCode == "200"){
+        
+        if(empty(json_decode($tournamentsOutput, true))){
+            echo $playerName;
+        } else {
+            // Curl API request block
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+        
+            // 429 Too Many Requests
+            if($httpCode == "429"){
+                sleep(5);
+                curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+            }
+        
+            // Decode and echo returned data, if not existent send to 404 page
+            $clashData = json_decode($clashOutput, true);
+            if(isset($clashData[0]["teamId"])){
+                echo $clashData[0]["teamId"];
+            } else {
+                echo "404";
+            }
+        }
     }
 }
 ?>

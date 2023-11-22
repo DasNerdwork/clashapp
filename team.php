@@ -1,6 +1,7 @@
 <?php 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
+print_r($_SESSION);
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);

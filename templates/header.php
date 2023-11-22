@@ -64,17 +64,17 @@ $mdb = new MongoDBHelper();
         // TODO: Design and find usage for update button and/or remove: <button type="button" id="updateBtn" class="w-20 text-base bg-white text-black hidden cursor-pointer focus:text-base active:bg-[#ccc]" onclick="showLoader();" disabled>Update</button>
         ?>
         <div class="absolute right-0 flex h-16">
-            <?php if(isset($_SESSION['user']['sumid'])){ // If there is currently a user logged in && the user has a connected league account
-                if($mdb->getPlayerBySummonerId($_SESSION['user']['sumid'])["success"]){
-                $headerJsonString = json_encode($mdb->getPlayerBySummonerId($_SESSION['user']['sumid'])["data"]);
+            <?php if(isset($_SESSION['user']['puuid'])){ // If there is currently a user logged in && the user has a connected league account
+                if($mdb->getPlayerByPUUID($_SESSION['user']['puuid'])["success"]){
+                $headerJsonString = json_encode($mdb->getPlayerByPUUID($_SESSION['user']['puuid'])["data"]);
                 $headerJson = json_decode($headerJsonString, true);
                 }
                 $dataName = isset($_SESSION['user']['username']) ? $_SESSION['user']['username'] : '';
             ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
-                <?php echo '<a href="https://clashscout.com/profile/'.strtolower($headerJson["PlayerData"]["Name"]).'">';
+                <?php echo '<a href="https://clashscout.com/profile/'.strtolower($headerJson["PlayerData"]["GameName"]).'/'.strtolower($headerJson["PlayerData"]["Tag"]).'">';
                       echo '<img width="32" height="32" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" class="align-middle mr-2.5 no-underline inline-flex" alt="A custom profile icon of a player">';
-                      echo '<p id="highlighter" data-username="'.$dataName.'" class="inline hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;"><span class="text-white">'.$headerJson["PlayerData"]["Name"].'</span></p></a>'; ?>
+                      echo '<p id="highlighter" data-username="'.$dataName.'" class="inline hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;"><span class="text-white">'.$headerJson["PlayerData"]["GameName"].'#'.$headerJson["PlayerData"]["Tag"].'</span></p></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
