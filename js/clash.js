@@ -291,10 +291,11 @@ function updateTagColor(checkbox) {
   }
 }
 
-
-ready(function(){
-  searchAutosuggestData(autosuggestData, currentPatch, containerTitle);
-});
+document.onreadystatechange = function () {
+  if (document.readyState == "complete") {
+    searchAutosuggestData(autosuggestData, currentPatch, containerTitle);
+  }
+}
 
 function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
     const inputElement = document.getElementById('main-input');
@@ -366,8 +367,10 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
         innerDiv2.appendChild(titleDiv);
         innerDiv2.appendChild(ulElement);
       }
-      innerDiv2.appendChild(historyTitleDiv);
-      innerDiv2.appendChild(historyUlElement);
+      if(searchHistory != null){
+        innerDiv2.appendChild(historyTitleDiv);
+        innerDiv2.appendChild(historyUlElement);
+      }
       innerDiv1.appendChild(innerDiv2);
       autosuggestContainer.appendChild(innerDiv1);
 

@@ -8,7 +8,7 @@ $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 
 class FunctionsTest extends TestCase {
     public function testGetPlayerDataByName() {
-        $actualData = getPlayerData("name", "Flokrastinator");
+        $actualData = getPlayerData("riot-id", "Flokrastinator");
 
         $this->assertArrayHasKey('Icon', $actualData, "Icon key is missing");
         $this->assertIsNumeric($actualData['Icon'], "Icon ID is not numeric");
