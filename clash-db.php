@@ -27,9 +27,9 @@ class DB {
   
     public function check_credentials($mailorname = '', $password = '') {
         if(str_contains($mailorname, '@')){
-            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, sumid, 2fa FROM users WHERE email = ?");
+            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, puuid, 2fa FROM users WHERE email = ?");
         } else {
-            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, sumid, 2fa FROM users WHERE username = ?");
+            $sql = $this->db->prepare("SELECT id, region, username, email, password, status, puuid, 2fa FROM users WHERE username = ?");
         }
         $sql->bind_param('s', $mailorname);
         $sql->execute();
@@ -41,7 +41,7 @@ class DB {
 
             if ($row['status'] == '1' || $row['status'] == '2') {
                 if (password_verify($password, $row['password'])) {
-                    return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'sumid' => $row['sumid']);
+                    return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'puuid' => $row['puuid']);
                 }
                 return array('status' => 'error', 'message' => 'Email/Username or password is invalid.'); // The Password decrypt was unsuccessful
             }
@@ -53,9 +53,9 @@ class DB {
 
     public function get_credentials_2fa($mailorname = '') {
         if(str_contains($mailorname, '@')){
-            $sql = $this->db->prepare("SELECT id, region, username, email, status, sumid, 2fa FROM users WHERE email = ?");
+            $sql = $this->db->prepare("SELECT id, region, username, email, status, puuid, 2fa FROM users WHERE email = ?");
         } else {
-            $sql = $this->db->prepare("SELECT id, region, username, email, status, sumid, 2fa FROM users WHERE username = ?");
+            $sql = $this->db->prepare("SELECT id, region, username, email, status, puuid, 2fa FROM users WHERE username = ?");
         }
         $sql->bind_param('s', $mailorname);
         $sql->execute();
@@ -67,7 +67,7 @@ class DB {
  
             $twofa = $row['2fa'] != NULL ? $twofa = 'true' : $twofa = 'false';
 
-            return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'sumid' => $row['sumid'], '2fa' => $twofa);
+            return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'puuid' => $row['puuid'], '2fa' => $twofa);
         }
         return array('status' => 'error', 'message' => 'Unable to fetch userdata, please contact an administrator.'); // The Password decrypt was unsuccessful
     }
@@ -85,9 +85,9 @@ class DB {
         }
     } 
 
-    public function connect_account($sumid, $username = '') {
-        $sql = $this->db->prepare("UPDATE users SET sumid = ? WHERE username = ?");
-        $sql->bind_param('ss', $sumid, $username);
+    public function connect_account($puuid, $username = '') {
+        $sql = $this->db->prepare("UPDATE users SET puuid = ? WHERE username = ?");
+        $sql->bind_param('ss', $puuid, $username);
         $sql->execute();
         $result = $sql->affected_rows;
 
@@ -146,22 +146,22 @@ class DB {
     
 
     public function get_data_via_stay_code($staycode) {
-        $sql = $this->db->prepare("SELECT id, region, username, email, sumid FROM users WHERE staycode = ?");
+        $sql = $this->db->prepare("SELECT id, region, username, email, puuid FROM users WHERE staycode = ?");
         $sql->bind_param('s', $staycode);
         $sql->execute();
         $result = $sql->get_result();
         
         if($result->num_rows) {
             $row = $result->fetch_assoc();
-            return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'sumid' => $row['sumid']);
+            return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'puuid' => $row['puuid']);
         } else {
             return array('status' => 'error');
         }
     } 
 
-    public function disconnect_account($sumid, $username = '') {
-        $sql = $this->db->prepare("UPDATE users SET sumid = NULL WHERE username = ? AND sumid = ?");
-        $sql->bind_param('ss', $username, $sumid);
+    public function disconnect_account($puuid, $username = '') {
+        $sql = $this->db->prepare("UPDATE users SET puuid = NULL WHERE username = ? AND puuid = ?");
+        $sql->bind_param('ss', $username, $puuid);
         $sql->execute();
         $result = $sql->affected_rows;
 
@@ -203,11 +203,11 @@ class DB {
         }
     } 
 
-    public function get_sumid($mailorname = '') {
+    public function get_puuid($mailorname = '') {
         if(str_contains($mailorname, '@')){
-            $sql = $this->db->prepare("SELECT sumid FROM users WHERE email = ?");
+            $sql = $this->db->prepare("SELECT puuid FROM users WHERE email = ?");
         } else {
-            $sql = $this->db->prepare("SELECT sumid FROM users WHERE username = ?");
+            $sql = $this->db->prepare("SELECT puuid FROM users WHERE username = ?");
         }
         $sql->bind_param('s', $mailorname);
         $sql->execute();
@@ -215,9 +215,9 @@ class DB {
         
         if($result->num_rows) {
             $row = $result->fetch_assoc();
-            return array('status' => 'success', 'sumid' => $row['sumid']);
+            return array('status' => 'success', 'puuid' => $row['puuid']);
         } else {
-            return array('status' => 'error', 'sumid' => NULL);
+            return array('status' => 'error', 'puuid' => NULL);
         }
     } 
 
