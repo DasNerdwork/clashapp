@@ -41,7 +41,7 @@ function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
     if($id != ""){
         $mdb = new MongoDBHelper();
         $playerData = getPlayerData($type,$id);
-        $playerName = $playerData["Name"];
+        $playerName = $playerData["GameName"];
         $sumid = $playerData["SumID"];
         $puuid = $playerData["PUUID"];
         $masteryData = getMasteryScores($sumid);

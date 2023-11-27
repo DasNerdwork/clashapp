@@ -1,8 +1,6 @@
 <?php 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-print_r($_SESSION);
-
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -297,10 +295,11 @@ echo '
                                                     }
                                                 }
                                                 if((array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]) || $matchInPlayerJsonButNotExistent){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
-                                                    echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["Name"]." was out-of-date -> Force updating.'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
+                                                    echo "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["GameName"]." was out-of-date -> Force updating.'); requests['".$player["summonerId"]."'] = 'Pending';</script>";
                                                     $newMatchesDownloaded = true;
                                                 } else {
-                                                    $playerName = $playerDataJSON["PlayerData"]["Name"];
+                                                    $playerName = $playerDataJSON["PlayerData"]["GameName"];
+                                                    $playerTag = $playerDataJSON["PlayerData"]["Tag"];
                                                     $playerData = $playerDataJSON["PlayerData"];
                                                     $sumid = $playerDataJSON["PlayerData"]["SumID"];
                                                     $puuid = $playerDataJSON["PlayerData"]["PUUID"];
@@ -359,7 +358,8 @@ echo '
                                                     }
                                                 }
                                             } else {
-                                                $playerName = $playerDataJSON["PlayerData"]["Name"];
+                                                $playerName = $playerDataJSON["PlayerData"]["GameName"];
+                                                $playerTag = $playerDataJSON["PlayerData"]["Tag"];
                                                 $playerData = $playerDataJSON["PlayerData"];
                                                 $sumid = $playerDataJSON["PlayerData"]["SumID"];
                                                 $puuid = $playerDataJSON["PlayerData"]["PUUID"];
@@ -425,7 +425,8 @@ echo '
                                             $playerDataJSONString = json_encode($playerDataRequest["data"]);
                                             $playerDataJSON = json_decode($playerDataJSONString, true);
                                             $playerData = $playerDataJSON["PlayerData"];
-                                            $playerName = $playerDataJSON["PlayerData"]["Name"];
+                                            $playerName = $playerDataJSON["PlayerData"]["GameName"];
+                                            $playerTag = $playerDataJSON["PlayerData"]["Tag"];
                                             $sumid = $playerDataJSON["PlayerData"]["SumID"];
                                             $puuid = $playerDataJSON["PlayerData"]["PUUID"];
                                             $rankData = $playerDataJSON["RankData"];
@@ -481,7 +482,7 @@ echo '
                                                     }
                                             echo "<div class='absolute text-[#e8dfcc] mt-24 text-xs z-20 twok:mt-[6.8rem]'>".$playerData["Level"]."</div>";
                                             } echo "
-                                  <span class='absolute mt-[8.75rem] z-20'>".$playerName."</span></div>";
+                                  <div class='absolute mt-[8.75rem] z-20'><span>".$playerName."</span><span class='bg-searchtitle px-1 rounded ml-1 text-sm text-[#9ea4bd]'>#".$playerTag."</span></div></div>";
 
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
