@@ -49,7 +49,7 @@ $mdb = new MongoDBHelper();
             <div class="flex absolute left-2/4 -translate-x-2/4 translate-y-1/4 flex-col z-50 bg-black">
                 <form class="h-10 flex" action="" onsubmit="return false;" method="GET" autocomplete="off">
                     <div class="relative">
-                        <div id="tagLineSuggest" class="absolute -z-10 px-2.5 text-base w-full h-full bg-white text-[#a9a9a9] flex items-center"></div>
+                        <div id="tagLineSuggest" class="absolute -z-10 px-2.5 text-base w-full h-full bg-white flex items-center"></div>
                         <input id="main-input" type="text" name="name" class="bg-transparent px-2.5 text-base w-80 h-full !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-base" value="" placeholder='.__("'Search Teams, Players or Champions'").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false" maxlength="22">
                     </div>
                     <input type="submit" name="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="'.__('Search').'" onclick="sanitize(this.form.name.value);">
@@ -72,9 +72,9 @@ $mdb = new MongoDBHelper();
                 $dataName = isset($_SESSION['user']['username']) ? $_SESSION['user']['username'] : '';
             ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
-                <?php echo '<a href="https://clashscout.com/profile/'.strtolower($headerJson["PlayerData"]["GameName"]).'/'.strtolower($headerJson["PlayerData"]["Tag"]).'">';
+                <?php echo '<a class="group" href="https://clashscout.com/profile/'.strtolower($headerJson["PlayerData"]["GameName"]).'/'.strtolower($headerJson["PlayerData"]["Tag"]).'">';
                       echo '<img width="32" height="32" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp" class="align-middle mr-2.5 no-underline inline-flex" alt="A custom profile icon of a player">';
-                      echo '<p id="highlighter" data-username="'.$dataName.'" class="inline hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;"><span class="text-white">'.$headerJson["PlayerData"]["GameName"].'#'.$headerJson["PlayerData"]["Tag"].'</span></p></a>'; ?>
+                      echo '<p id="highlighter" data-username="'.$dataName.'" class="inline decoration-2 group-hover:text-[#fff] group-hover:underline group-hover:text-[#fff]" style="text-decoration-skip-ink: none;"><span class="text-white">'.$headerJson["PlayerData"]["GameName"].'</span></p><span class="bg-searchtitle px-1 rounded ml-1 text-sm decoration-2 group-hover:text-[#fff] group-hover:text-[#fff] text-[#9ea4bd]">#'.$headerJson["PlayerData"]["Tag"].'</span></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
