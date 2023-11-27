@@ -254,14 +254,15 @@ class MongoDBHelper {
         $pipeline = [
             [
                 '$project' => [
-                    'PlayerData.Name' => 1,
+                    'PlayerData.GameName' => 1,
+                    'PlayerData.Tag' => 1,
                     'PlayerData.Icon' => 1,
                     '_id' => 0
                 ]
             ],
             [
                 '$sort' => [
-                    'PlayerData.Name' => 1
+                    'PlayerData.GameName' => 1
                 ]
             ]
         ];
@@ -276,7 +277,7 @@ class MongoDBHelper {
         $result = [];
 
         foreach ($cursor as $document) {
-            $result[$document->PlayerData->Name] = $document->PlayerData->Icon;
+            $result[$document->PlayerData->GameName.'#'.$document->PlayerData->Tag] = $document->PlayerData->Icon;
         }
 
         if (!empty($result)) {

@@ -37,7 +37,7 @@ if(isset($_POST['sumids'])){
             }
             foreach ($playerNameTeamArray as $singleSumid => $index) {
                 if($playerDataJSON["PlayerData"]["SumID"] == $singleSumid){
-                    $playerNameTeamArray[$singleSumid] = $playerDataJSON["PlayerData"]["Name"];
+                    $playerNameTeamArray[$singleSumid] = $playerDataJSON["PlayerData"]["GameName"];
                 }
             }
         }

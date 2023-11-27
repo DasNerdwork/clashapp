@@ -115,6 +115,20 @@ function getPlayerData($type, $id){
         curl_close($ch);
     }
 
+    // fetch puuid with sumid and then playername (because standard name is deprecated -> riotid)
+    if($httpCode == "200" && $type == "sumid") {
+        $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $requestUrlVar . json_decode($output)->puuid);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $riotIdSumidOutput = curl_exec($ch); $apiRequests["getPlayerData"]++;
+        $gameName = json_decode($riotIdSumidOutput)->gameName;
+        $tag = json_decode($riotIdSumidOutput)->tagLine;
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+    }
+
     // Collect requested values in returnarray
     $playerDataArray["Icon"] = json_decode($output)->profileIconId;
     $playerDataArray["Name"] = json_decode($output)->name;
