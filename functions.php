@@ -158,7 +158,7 @@ function getPlayerData($type, $id){
  * Eq. to https://developer.riotgames.com/apis#champion-mastery-v4/GET_getAllChampionMasteries
  * Also possible for Total Mastery score or masterdata only about a single champion
  *
- * @param string $sumid The summoners encrypted summoner ID necessary to perform the API request
+ * @param string $puuid The players encrypted PUUID necessary to perform the API request
  * @var array $masteryDataArray The temporary array to fetch a single champions mastery data
  * @var array $output Contains the output of the curl request as string which we later convert using json_decode
  * @var string $httpCode Contains the returncode of the curl request (e.g. 404 not found)
@@ -166,14 +166,14 @@ function getPlayerData($type, $id){
  * Returnvalue:
  * @return array $masteryReturnArray The full return array including all single champion arrays
  */
-function getMasteryScores($sumid){
+function getMasteryScores($puuid){
     global $headers, $apiRequests;
     $masteryDataArray = array();
     $masteryReturnArray = array();
 
     // Curl API request block
     $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid);
+    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/".$puuid);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     $output = curl_exec($ch); $apiRequests["getMasteryScores"]++;
@@ -188,7 +188,7 @@ function getMasteryScores($sumid){
     if($httpCode == "429"){
         sleep(10);
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$sumid);
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$puuid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $output = curl_exec($ch); $apiRequests["getMasteryScores"]++;
