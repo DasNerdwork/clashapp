@@ -39,7 +39,7 @@ class FunctionsTest extends TestCase {
     public function testGetMasteryScores() {
         global $currentPatch;
         $championJson = json_decode(file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), true);
-        $actualData = getMasteryScores("kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw");
+        $actualData = getMasteryScores("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA");
     
         foreach ($actualData as $masteryData) {
             $this->assertArrayHasKey("Champion", $masteryData, "Champion key is missing");

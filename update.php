@@ -44,7 +44,7 @@ function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
         $playerName = $playerData["GameName"];
         $sumid = $playerData["SumID"];
         $puuid = $playerData["PUUID"];
-        $masteryData = getMasteryScores($sumid);
+        $masteryData = getMasteryScores($puuid);
         $rankData = getCurrentRank($sumid);
         if($tempMatchIDs == null){
             $matchIDs = getMatchIDs($puuid, 15);
