@@ -66,6 +66,8 @@ if (isset($_POST['submit'])) {
         $error_message[] = 'The selected region is currently not supported.';
     } else if($db->account_exists($_POST['email'], $_POST['username'])) {
         $error_message[] = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" class="cursor-pointer">forgotten your password</u>?'; // TODO change to password reset mail instead of onclick open 
+    } else if(isset($_POST['hnypt'])){
+        $error_message[] = 'Honeypot-Detection triggered. If you believe this is an error please contact an administrator.';
     } else {
         $options = [
             'cost' => 11,
@@ -175,6 +177,7 @@ if (!empty($success_message)) {
         </div>
         <div><label for="email" class="block text-xs font-bold text-left ml-1">Email: </label></div>
         <div><input type="email" name="email" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" value="<?= isset($_POST["email"]) ? $_POST["email"] : "" ?>" placeholder="mail@example.com" required /></div>
+        <div class="absolute -left-[5000px]" aria-hidden="true"><input type="text" name="hnypt" class="hidden" tabindex="-1"/></div>
         <div><label for="password" class="block text-xs font-bold text-left ml-1">Password:</label></div>
         <div><input type="password" name="password" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Enter Password" maxlength=32 required /></div>
         <div><input type="password" name="confirm-password" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Confirm Password" maxlength=32 required /></div>
