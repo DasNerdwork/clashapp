@@ -5,10 +5,16 @@ if (isset($_SESSION['user'])) {
     header('Location: settings');
 }
 
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
 require_once '/hdd1/clashapp/clash-db.php';
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use IconCaptcha\IconCaptcha;
 
 require '/hdd1/clashapp/plugins/phpmailer/src/Exception.php';
 require '/hdd1/clashapp/plugins/phpmailer/src/PHPMailer.php';
@@ -66,74 +72,87 @@ if (isset($_POST['submit'])) {
         $error_message[] = 'The selected region is currently not supported.';
     } else if($db->account_exists($_POST['email'], $_POST['username'])) {
         $error_message[] = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" class="cursor-pointer">forgotten your password</u>?'; // TODO change to password reset mail instead of onclick open 
-    } else if(isset($_POST['hnypt'])){
+    } else if(isset($_POST['hnypt']) && $_POST['hnypt'] != ""){
         $error_message[] = 'Honeypot-Detection triggered. If you believe this is an error please contact an administrator.';
     } else {
-        $options = [
-            'cost' => 11,
-        ];
-        $verifier = bin2hex(random_bytes(5));
-        $response = $db->create_account($_POST['username'], $_POST['region'], $_POST['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options), $verifier);
-        $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email']);
-        if ($response['status'] == 'success') {
-            if(isset($_POST['stay-logged-in'])) {
-                $stayCode = bin2hex(random_bytes(5));
-                if($db->set_stay_code($stayCode, $_SESSION['user']['email'])){
-                    setcookie("stay-logged-in", $stayCode, time() + (86400 * 30), "/"); // 86400 = 1 day | Set cookie for 30 days
-                }
-            }
-            try {
-                //Server settings
-                $mail = new PHPMailer();
-                $mail->isSMTP();                                            //Send using SMTP
-                $mail->Host       = 'smtp.sendgrid.net';                    //Set the SMTP server to send through
-                $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-                $mail->Username   = 'apikey';                               //SMTP username
-                $mail->Password   = '***REMOVED***';                     //SMTP password
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-                $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
-            
-                //Recipients
-                $mail->setFrom('no-reply@clashscout.com', 'ClashScout.com');
-                $mail->addAddress($_POST['email']);              //Add a recipient
-                // $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
-                // $mail->addReplyTo('no-reply@dasnerdwork.net');
-                // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
-        
-                //Attachments
-                // $mail->addAttachment('/var/tmp/file.tar.gz');            //Add attachments
-                // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');       //Optional name
-        
-                //Content
-                $mail->isHTML(true);                                  //Set email format to HTML
-                $mail->Subject = 'Activate your Account';
-                $mail->Body    = '
-                Hey '.$_POST['username'].',<br><br>
-                Thank you for registering and welcome to  <a href="https://clashscout.com/"><b>ClashScout.com</b></a><br><br>
-                To use all of our features to the fullest you can activate your account by visiting the following link:<br><br>
-                <a><b>https://clashscout.com/verify?account='.$verifier.'</b></a><br><br>
-                Best regards,<br>
-                The ClashScout.com Team';
-                // $mail->AltBody = 'You can activate your account by visiting the following link: https://clashscout.com/verify?account='.$verifier;
-                // $mail->addCustomHeader('MIME-Version: 1.0');
-                // $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
-        
-                $result = $mail->Send();
-        
-                if(!$result) {
-                    $error_message[] = "Could not deliver mail. Please contact an administrator.";    
-                } else {
-                    $success_message[] = "Successfully sent account verify mail! Please also check your spam folder.";
-                }
-            } catch (Exception $e) {
-                // $error_message[] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-                $error_message[] = "Message could not be sent. Please contact an administrator.";
-            }
-            $_SESSION['user'] = array('id' => $response['id'], 'username' => $_POST['username']);
-            header('Location: settings');
-        }
+        $config = require __DIR__ . '/../ajax/captcha-config.php';
 
-        $error_message[] = ($response['status'] == 'error') ? $response['message'] : '';
+        // Create an instance of IconCaptcha.
+        $captcha = new IconCaptcha($config);
+    
+        // Validate the captcha.
+        $validation = $captcha->validate($_POST);
+    
+        // Confirm the captcha was validated.
+        if($validation->success()) {
+            $options = [
+                'cost' => 11,
+            ];
+            $verifier = bin2hex(random_bytes(5));
+            $response = $db->create_account($_POST['username'], $_POST['region'], $_POST['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options), $verifier);
+            $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email']);
+            if ($response['status'] == 'success') {
+                if(isset($_POST['stay-logged-in'])) {
+                    $stayCode = bin2hex(random_bytes(5));
+                    if($db->set_stay_code($stayCode, $_SESSION['user']['email'])){
+                        setcookie("stay-logged-in", $stayCode, time() + (86400 * 30), "/"); // 86400 = 1 day | Set cookie for 30 days
+                    }
+                }
+                try {
+                    //Server settings
+                    $mail = new PHPMailer();
+                    $mail->isSMTP();                                            //Send using SMTP
+                    $mail->Host       = 'smtp.sendgrid.net';                    //Set the SMTP server to send through
+                    $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
+                    $mail->Username   = 'apikey';                               //SMTP username
+                    $mail->Password   = '***REMOVED***';                     //SMTP password
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
+                    $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+                
+                    //Recipients
+                    $mail->setFrom('no-reply@clashscout.com', 'ClashScout.com');
+                    $mail->addAddress($_POST['email']);              //Add a recipient
+                    // $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
+                    // $mail->addReplyTo('no-reply@dasnerdwork.net');
+                    // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+            
+                    //Attachments
+                    // $mail->addAttachment('/var/tmp/file.tar.gz');            //Add attachments
+                    // $mail->addAttachment('/tmp/image.jpg', 'new.jpg');       //Optional name
+            
+                    //Content
+                    $mail->isHTML(true);                                  //Set email format to HTML
+                    $mail->Subject = 'Activate your Account';
+                    $mail->Body    = '
+                    Hey '.$_POST['username'].',<br><br>
+                    Thank you for registering and welcome to  <a href="https://clashscout.com/"><b>ClashScout.com</b></a><br><br>
+                    To use all of our features to the fullest you can activate your account by visiting the following link:<br><br>
+                    <a><b>https://clashscout.com/verify?account='.$verifier.'</b></a><br><br>
+                    Best regards,<br>
+                    The ClashScout.com Team';
+                    // $mail->AltBody = 'You can activate your account by visiting the following link: https://clashscout.com/verify?account='.$verifier;
+                    // $mail->addCustomHeader('MIME-Version: 1.0');
+                    // $mail->addCustomHeader('Content-Type: text/html; charset=ISO-8859-1');
+            
+                    $result = $mail->Send();
+            
+                    if(!$result) {
+                        $error_message[] = "Could not deliver mail. Please contact an administrator.";    
+                    } else {
+                        $success_message[] = "Successfully sent account verify mail! Please also check your spam folder.";
+                    }
+                } catch (Exception $e) {
+                    // $error_message[] = "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
+                    $error_message[] = "Message could not be sent. Please contact an administrator.";
+                }
+                $_SESSION['user'] = array('id' => $response['id'], 'username' => $_POST['username']);
+                header('Location: settings');
+            }
+
+            $error_message[] = ($response['status'] == 'error') ? $response['message'] : '';
+        } else {
+            $error_message[] = 'Invalid Captcha, please try again.';
+        }
     }        
 }
 
@@ -154,14 +173,32 @@ if (!empty($success_message)) {
         </div>';
     }
 } 
+
+$translations = array(
+    'verify' => __('Are you a human?'),
+    'loading' => __('Loading challenge...'),
+    'header' => __('Select the image displayed the <u>least</u> amount of times'),
+    'correct' => __('Verification complete.'),
+    'incorrect' => array(
+        'title' => __('Uh oh.'),
+        'subtitle' => __("You've selected the wrong image.")
+    ),
+    'timeout' => array(
+        'title' => __('Please wait.'),
+        'subtitle' => __('You made too many incorrect selections.')
+    )
+);
+
+echo '<script>var translations = ' . json_encode($translations) . ';</script>';
+
 ?>
 <div class="h-[calc(100vh-5rem)] w-full flex justify-center items-center -mb-16">
-    <form method="post" autocomplete="off" class="py-10 px-9 h-fit w-fit bg-dark box-border max-w-[22rem] mb-32">
+    <form method="post" autocomplete="off" class="py-10 px-9 h-fit w-fit bg-dark box-border max-w-[402px] mb-32">
         <div class="text-center text-xl mb-4">Register your account</div>
         <div><label for="username" class="block text-xs font-bold text-left ml-1">Username: </label></div>
-        <div><input type="text" name="username" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" value="<?= isset($_POST["username"]) ? $_POST["username"] : "" ?>" placeholder="Username" maxlength=16 required /></div>
+        <div><input type="text" name="username" autofill="custom-username" class="text-base color-white text-left w-[330px] bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" value="<?= isset($_POST["username"]) ? $_POST["username"] : "" ?>" placeholder="Username" maxlength=16 required /></div>
         <div><label for="region" class="block text-xs font-bold text-left ml-1">Region: </label></div>
-        <div><select name="region" class="border-0 outline-none cursor-pointer w-64 h-8 mt-1 mb-4 text-base text-center bg-[#2a2d40] text-white" placeholder="Europe West" required>
+        <div><select name="region" tabindex="-1" class="border-0 outline-none cursor-pointer w-[330px] h-8 mt-1 mb-4 text-base text-center bg-[#2a2d40] text-white" placeholder="Europe West" required>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'EUW') { ?>selected="true" <?php }; ?>value="EUW">Europe West</option>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'EUN') { ?>selected="true" <?php }; ?>value="EUN">Europe Nordic & East</option>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'NA') { ?>selected="true" <?php }; ?>value="NA">North America</option>
@@ -176,16 +213,55 @@ if (!empty($success_message)) {
             </select>
         </div>
         <div><label for="email" class="block text-xs font-bold text-left ml-1">Email: </label></div>
-        <div><input type="email" name="email" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" value="<?= isset($_POST["email"]) ? $_POST["email"] : "" ?>" placeholder="mail@example.com" required /></div>
+        <div><input type="email" name="email" class="text-base color-white text-left w-[330px] bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" value="<?= isset($_POST["email"]) ? $_POST["email"] : "" ?>" placeholder="mail@example.com" required /></div>
         <div class="absolute -left-[5000px]" aria-hidden="true"><input type="text" name="hnypt" class="hidden" tabindex="-1"/></div>
         <div><label for="password" class="block text-xs font-bold text-left ml-1">Password:</label></div>
-        <div><input type="password" name="password" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Enter Password" maxlength=32 required /></div>
-        <div><input type="password" name="confirm-password" class="text-base color-white text-left w-64 bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Confirm Password" maxlength=32 required /></div>
+        <div><input type="password" name="password" class="text-base color-white text-left w-[330px] bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Enter Password" maxlength=32 required /></div>
+        <div><input type="password" name="confirm-password" class="text-base color-white text-left w-[330px] bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" placeholder="Confirm Password" maxlength=32 required /></div>
         <div class="cursor-default text-center"><input type="checkbox" class="cursor-pointer accent-[#27358b]" id="stay-logged-in" name="stay-logged-in">
         <label for="stay-logged-in" class="stay-logged-in"> Stay logged in for a month</label></div>
-        <div><input type="submit" name="submit" class="float-center ml-0 mt-4 h-8 mb-4 w-64 bg-[#27358b] text-white text-base cursor-pointer focus:text-base hover:brightness-75 active:brightness-75" value="Register" /></div>
+        <?php echo \IconCaptcha\Token\IconCaptchaToken::render(); ?>
+        <div class="iconcaptcha-widget" data-theme="dark"></div>
+        <div><input type="submit" name="submit" class="float-center ml-0 mt-4 h-8 mb-4 w-[330px] bg-[#27358b] text-white text-base cursor-pointer focus:text-base hover:brightness-75 active:brightness-75" value="Register" /></div>
         <div>Already have an account? <a class="text-[#bbb] hover:text-white hover:underline" href="/login">Login</a>.</div>
     </form>
+    <link href="/iconcaptcha/iconcaptcha.min.css" rel="stylesheet" type="text/css">
+    <script src="/iconcaptcha/iconcaptcha.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            IconCaptcha.init('.iconcaptcha-widget', {
+                general: {
+                    endpoint: '/ajax/captcha-request.php', // required, change the path accordingly.
+                    fontFamily: 'inherit',
+                    credits: 'show',
+                },
+                security: {
+                    interactionDelay: 1500,
+                    hoverProtection: true,
+                    displayInitialMessage: true,
+                    initializationDelay: 500,
+                    incorrectSelectionResetDelay: 3000,
+                    loadingAnimationDuration: 1000,
+                },
+                locale: {
+                    initialization: {
+                        verify: translations.verify,
+                        loading: translations.loading,
+                    },
+                    header: translations.header,
+                    correct: translations.correct,
+                    incorrect: {
+                        title: translations.incorrect.title,
+                        subtitle: translations.incorrect.subtitle,
+                    },
+                    timeout: {
+                        title: translations.timeout.title,
+                        subtitle: translations.timeout.subtitle
+                    }
+                }
+            });
+        });
+    </script>
 </div>
 
 <?php 

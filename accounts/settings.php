@@ -381,7 +381,7 @@ if (!empty($success_message)) {
                 </form>
                 <small class="text-[#333344] block mb-2">If you don't have access to your Authenticator App anymore please reach out to an administrator to have your 2FA removed.</small>
             </div>
-            <?php } ?>
+            <?php } // TODO: Add that you can immediately delete account and not only after relog ?>
         </div>
         <div id="account-delete-area">
             <button class="mt-3 mb-3 h-8 text-base w-64 bg-[#560909] text-white hover:brightness-75 active:brightness-50" @click="resetPassword = false, disconnectLeague = false, connectLeague = false, confirmLeague = false, add2FA = false, remove2FA = false, deleteAccount = true" x-show="!deleteAccount">Delete Account</button>
