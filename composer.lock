@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "01034050a3028eb9aa1379b5b0b7d7bb",
+    "content-hash": "9bfbf19923508f24846bb5bc0f8718a9",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -226,6 +226,72 @@
                 }
             ],
             "time": "2022-12-30T00:23:10+00:00"
+        },
+        {
+            "name": "fabianwennink/iconcaptcha",
+            "version": "4.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fabianwennink/IconCaptcha-PHP.git",
+                "reference": "d12f6dfb5d6efbae87df83789e0d5aa5a6530f29"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fabianwennink/IconCaptcha-PHP/zipball/d12f6dfb5d6efbae87df83789e0d5aa5a6530f29",
+                "reference": "d12f6dfb5d6efbae87df83789e0d5aa5a6530f29",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": ">=7.4"
+            },
+            "suggest": {
+                "ext-gd": "Required if you wish to use the GD image generator.",
+                "ext-imagick": "Required if you wish to use the ImageMagick image generator.",
+                "ext-pdo": "Required if you wish to use the default PDOSession class."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "IconCaptcha\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabian Wennink",
+                    "homepage": "https://www.fabianwennink.nl/en"
+                }
+            ],
+            "description": "IconCaptcha is a self-hosted, fast, simple and user-friendly captcha.",
+            "homepage": "https://github.com/fabianwennink/IconCaptcha-PHP",
+            "keywords": [
+                "anti-bot",
+                "anti-spam",
+                "bots",
+                "captcha",
+                "iconcaptcha",
+                "spam"
+            ],
+            "support": {
+                "issues": "https://github.com/fabianwennink/IconCaptcha-PHP/issues",
+                "source": "https://github.com/fabianwennink/IconCaptcha-PHP/tree/4.0.0",
+                "wiki": "https://github.com/fabianwennink/IconCaptcha-PHP/wiki"
+            },
+            "funding": [
+                {
+                    "url": "https://paypal.me/nlgamevideosnl",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://www.buymeacoffee.com/fabianwennink",
+                    "type": "custom"
+                }
+            ],
+            "time": "2023-11-05T19:15:20+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
@@ -660,16 +726,16 @@
         },
         {
             "name": "phpstan/phpdoc-parser",
-            "version": "1.24.2",
+            "version": "1.24.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/phpstan/phpdoc-parser.git",
-                "reference": "bcad8d995980440892759db0c32acae7c8e79442"
+                "reference": "6bd0c26f3786cd9b7c359675cb789e35a8e07496"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/bcad8d995980440892759db0c32acae7c8e79442",
-                "reference": "bcad8d995980440892759db0c32acae7c8e79442",
+                "url": "https://api.github.com/repos/phpstan/phpdoc-parser/zipball/6bd0c26f3786cd9b7c359675cb789e35a8e07496",
+                "reference": "6bd0c26f3786cd9b7c359675cb789e35a8e07496",
                 "shasum": ""
             },
             "require": {
@@ -701,9 +767,9 @@
             "description": "PHPDoc parser with support for nullable, intersection and generic types",
             "support": {
                 "issues": "https://github.com/phpstan/phpdoc-parser/issues",
-                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.24.2"
+                "source": "https://github.com/phpstan/phpdoc-parser/tree/1.24.4"
             },
-            "time": "2023-09-26T12:28:12+00:00"
+            "time": "2023-11-26T18:29:22+00:00"
         },
         {
             "name": "pragmarx/google2fa",
@@ -2514,16 +2580,16 @@
         },
         {
             "name": "theseer/tokenizer",
-            "version": "1.2.1",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/theseer/tokenizer.git",
-                "reference": "34a41e998c2183e22995f158c581e7b5e755ab9e"
+                "reference": "b2ad5003ca10d4ee50a12da31de12a5774ba6b96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/theseer/tokenizer/zipball/34a41e998c2183e22995f158c581e7b5e755ab9e",
-                "reference": "34a41e998c2183e22995f158c581e7b5e755ab9e",
+                "url": "https://api.github.com/repos/theseer/tokenizer/zipball/b2ad5003ca10d4ee50a12da31de12a5774ba6b96",
+                "reference": "b2ad5003ca10d4ee50a12da31de12a5774ba6b96",
                 "shasum": ""
             },
             "require": {
@@ -2552,7 +2618,7 @@
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
             "support": {
                 "issues": "https://github.com/theseer/tokenizer/issues",
-                "source": "https://github.com/theseer/tokenizer/tree/1.2.1"
+                "source": "https://github.com/theseer/tokenizer/tree/1.2.2"
             },
             "funding": [
                 {
@@ -2560,7 +2626,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2021-07-28T10:34:58+00:00"
+            "time": "2023-11-20T00:12:19+00:00"
         }
     ],
     "aliases": [],

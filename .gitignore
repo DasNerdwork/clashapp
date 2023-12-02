@@ -3,6 +3,8 @@
 /data
 /mongodb
 /plugins
+/iconcaptcha
+/css/output.css
 package-lock.json
 .git
 ads.txt
