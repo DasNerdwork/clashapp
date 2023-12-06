@@ -14,7 +14,16 @@ function setCodeHeader($title, $css, $javascript, $alpinejs, $websocket, $favico
         if($javascript || $javascript == "qr"){ echo '<script type="text/javascript" src="../clashapp/main.min.js"></script><script type="text/javascript" src="../clashapp/clash.min.js"></script>'; }
         if($javascript === "qr"){ echo '<script type="text/javascript" src="../clashapp/qr-codes.min.js"></script>'; }
         if($websocket){ echo '<script type="text/javascript" src="../clashapp/websocket.min.js"></script>'; }
-        echo '<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281" crossorigin="anonymous"></script>';
+        echo "<script>
+        function loadAds() {
+            var adsScript = document.createElement('script');
+            adsScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281';
+            adsScript.async = true;
+            adsScript.crossOrigin = 'anonymous';
+            document.head.appendChild(adsScript);
+          }
+          ready(function() {loadAds();}); 
+          </script>";
     echo '</head>';
 }
 ?>

@@ -351,10 +351,10 @@ echo '
                                                     } else {
                                                         $upToDate = true;
                                                         $allUpToDate++;
-                                                        if($allUpToDate == count($teamDataArray["Players"])){ // Reset anti-request timer if all people are up to date and onAllFinish not called
-                                                            $tempTeamJSON->LastUpdate = time();
+                                                        if($allUpToDate == count($teamDataArray["Players"]) ){ // Reset anti-request timer if all people are up to date and onAllFinish not called
+                                                            // $tempTeamJSON->LastUpdate = time();
+                                                            $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
                                                         }
-                                                        $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
                                                     }
                                                 }
                                             } else {
