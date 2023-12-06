@@ -215,6 +215,38 @@ class MongoDBHelper {
             return array('success' => false, 'code' => '0PPA1', 'message' => 'Player document not found.');
         }
     }
+    
+    /**
+     * Retrieve a player document based on the PlayerData.SumID attribute.
+     *
+     * @param string $riotId - The PlayerData.GameName value to search for.
+     *
+     * @return array - An array with keys 'success', 'code', 'message', and 'data'.
+     *   'success' determines the success of the operation.
+     *   'code' provides a code for reference.
+     *   'message' describes the outcome of the operation.
+     *   'data' contains the retrieved player document (if found).
+     */
+    public function getPlayerByRiotId($gameName, $tag) {
+        // Case-insensitive regular expression for the gameName and tag
+        $gameNameRegex = new MongoDB\BSON\Regex("^$gameName$", 'i');
+        $tagRegex = new MongoDB\BSON\Regex("^$tag$", 'i');
+
+        $filter = [
+            'PlayerData.GameName' => $gameNameRegex,
+            'PlayerData.Tag' => $tagRegex
+        ];
+        
+        $query = new MongoDB\Driver\Query($filter);
+        $cursor = $this->client->executeQuery("{$this->mdb}.players", $query);
+
+        if (!$cursor->isDead()) {
+            $document = current($cursor->toArray());
+            return array('success' => true, 'code' => 'AM5A3', 'message' => 'Successfully retrieved player document.', 'data' => $document);
+        } else {
+            return array('success' => false, 'code' => 'POL4M', 'message' => 'Player document not found.');
+        }
+    }
 
         /**
      * Retrieve a player document based on the PlayerData.PUUID attribute.
