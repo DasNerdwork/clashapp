@@ -58,7 +58,7 @@ module.exports = {
         'tag-cyan': '#1C7556',
         'tag-pink': '#6d0958',
         'tag-green': '#264b0e',
-        'tag-lime': '#4D751C',
+        'tag-lime': '#185504',
         'tag-navy': '#2E1C75',
         'tag-purple': '#5B1C75',
         'tag-positive': '#0a291a',
