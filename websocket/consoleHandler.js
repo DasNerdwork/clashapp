@@ -114,7 +114,7 @@ rl.on('line', (input) => {
       deleteAllMatches(true);
       deleteAllTeams(true);
     } else if (input.trim().toLowerCase() === 'status') {
-      exec('screen -list', (error, stdout) => {
+      exec('pm2 list', (error, stdout) => {
         if (error) {
           console.log(`\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error executing command: ${error.message}`, new Date().toLocaleTimeString());
           return;
