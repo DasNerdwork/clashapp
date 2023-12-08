@@ -198,7 +198,7 @@ echo '<script>var translations = ' . json_encode($translations) . ';</script>';
         <div><label for="username" class="block text-xs font-bold text-left ml-1">Username: </label></div>
         <div><input type="text" name="username" autofill="custom-username" class="text-base color-white text-left w-[330px] bg-darker mt-1 mb-4 h-8 pl-1.5 focus:text-base placeholder:text-[#353950] autofill:shadow-[0_0_0_50px_#0e0f18_inset] placeholder:text-left" value="<?= isset($_POST["username"]) ? $_POST["username"] : "" ?>" placeholder="Username" maxlength=16 required /></div>
         <div><label for="region" class="block text-xs font-bold text-left ml-1">Region: </label></div>
-        <div><select name="region" tabindex="-1" class="border-0 outline-none cursor-pointer w-[330px] h-8 mt-1 mb-4 text-base text-center bg-[#2a2d40] text-white" placeholder="Europe West" required>
+        <div><select aria-label="Region Selector" name="region" tabindex="-1" class="border-0 outline-none cursor-pointer w-[330px] h-8 mt-1 mb-4 text-base text-center bg-[#2a2d40] text-white" placeholder="Europe West" required>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'EUW') { ?>selected="true" <?php }; ?>value="EUW">Europe West</option>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'EUN') { ?>selected="true" <?php }; ?>value="EUN">Europe Nordic & East</option>
                 <option <?php if (isset($_POST['region']) && $_POST['region'] == 'NA') { ?>selected="true" <?php }; ?>value="NA">North America</option>

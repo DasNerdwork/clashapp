@@ -265,7 +265,15 @@ function copyInviteLink(element, text, delay, direction, additionalCSS = '') {
 function updateTagColor(checkbox) {
   const playerTags = document.querySelectorAll('.playerTag');
   
-  if (getCookie("tagOptions") === "two-colored") {
+  if (getCookie("tagOptions") === "multi-colored") {
+    playerTags.forEach(tag => {
+      Array.from(tag.classList).forEach(className => {
+        if (className.startsWith('bg-tag-')) {
+          tag.classList.replace(className, tag.dataset.color);
+        }
+      });
+    });
+  } else {
     playerTags.forEach(tag => {
       let currentBgClass = tag.dataset.color;
       let newClass = "";
@@ -278,15 +286,6 @@ function updateTagColor(checkbox) {
       }
       
       tag.classList.replace(currentBgClass, newClass);
-      // console.log("Current: " + currentBgClass + ", New: " + newClass);
-    });
-  } else {
-    playerTags.forEach(tag => {
-      Array.from(tag.classList).forEach(className => {
-        if (className.startsWith('bg-tag-')) {
-          tag.classList.replace(className, tag.dataset.color);
-        }
-      });
     });
   }
 }
@@ -611,9 +610,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add event listeners to the slider for mouse and touch events
     slider.addEventListener('mousedown', start);
-    slider.addEventListener('touchstart', start);
+    slider.addEventListener('touchstart', start, {passive: true});
     slider.addEventListener('mousemove', move);
-    slider.addEventListener('touchmove', move);
+    slider.addEventListener('touchmove', move, {passive: true});
     slider.addEventListener('mouseup', end);
     slider.addEventListener('touchend', end);
     slider.addEventListener('mouseleave', end);
@@ -621,12 +620,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Add scroll wheel event listener for whole-element scrolling
     slider.addEventListener('wheel', (e) => {
-      e.preventDefault();
       if (e.deltaY > 0) {
         slider.scrollLeft += sliderItemWidth + gapWidth;
       } else {
         slider.scrollLeft -= sliderItemWidth + gapWidth;
       }
-    });
+    }, {passive: true});
   });
 });

@@ -58,7 +58,7 @@ $matchAlpineCounter = 0;
 $currentPlayerNumber = 1;
 $upToDate = false;
 $allUpToDate = 0;
-$emoteSources = array("/clashapp/data/misc/webp/ok.webp","/clashapp/data/misc/webp/teemo.webp","/clashapp/data/misc/webp/priceless.webp");
+$emoteSources = array("/clashapp/data/misc/webp/ok.webp?version=".md5_file("/hdd1/clashapp/data/misc/webp/ok.webp"),"/clashapp/data/misc/webp/teemo.webp?version=".md5_file("/hdd1/clashapp/data/misc/webp/teemo.webp"),"/clashapp/data/misc/webp/priceless.webp?version=".md5_file("/hdd1/clashapp/data/misc/webp/priceless.webp"));
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 $autosuggestRequest = $mdb->getAutosuggestAggregate();
 $championDataArray = json_decode(file_get_contents("/hdd1/clashapp/data/patch/".$currentPatch."/data/en_US/champion.json"), true);
@@ -136,10 +136,10 @@ echo '
             <div id='team-info' class='h-[26rem] row-span-2'>
                 <div class='p-4 rounded bg-[#141624] h-[26rem] grid grid-rows-teaminfo'>
                     <h1 id='teamname' class='inline-flex items-center gap-4'>";
-                    if(file_exists("/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp")){
-                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>";
+                    if(fileExistsWithCache("/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp")){
+                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp?version=".md5_file('/hdd1/clashapp/data/misc/clash/logos/'.$teamDataArray["Icon"].'/1_64.webp')."' width='64' alt='The in league of legends selected logo of the clash team'>";
                     } else {
-                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/0/1_64.webp' width='64' alt='The in league of legends selected logo of the clash team'>";
+                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/0/1_64.webp?version=".md5_file('/hdd1/clashapp/data/misc/clash/logos/0/1_64.webp')."' width='64' alt='The in league of legends selected logo of the clash team'>";
                     } echo "
                         <span id='team-title' class='text-2xl break-all'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (".__("Tier")." ".$teamDataArray["Tier"].")</span>
                     </h1>
@@ -156,17 +156,20 @@ echo '
                     "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
                     <span class='h-[21rem] flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                     } else { echo "
-                    <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
-                            crossorigin='anonymous'></script>
-                    <!-- Team-Top-Left -->
-                    <ins class='adsbygoogle'
-                            style='display:block;height:336px;width:100%'
-                            data-ad-client='ca-pub-8928684248089281'
-                            data-ad-slot='9162424205'
-                            data-full-width-responsive='true'></ins>
-                    <script>
-                            (adsbygoogle = window.adsbygoogle || []).push({});
-                    </script>
+                        <div class='lazyhtml' data-lazyhtml onvisible>
+                            <script type='text/lazyhtml'>
+                            <!--
+                            <ins class='adsbygoogle'
+                                    style='display:block;height:336px;width:100%'
+                                    data-ad-client='ca-pub-8928684248089281'
+                                    data-ad-slot='9162424205'
+                                    data-full-width-responsive='true'></ins>
+                            <script>
+                                    (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                            -->
+                            </script>
+                        </div>
                     "; } echo "
                 </div>
             </div>
@@ -197,7 +200,7 @@ echo '
                     </div>"; } echo "
                     <div class='flex justify-center items-center opacity-0' style='animation: .5s ease-in-out 1.5s 1 fadeIn; animation-fill-mode: forwards;'>
                         <div class='group relative inline-block' x-data='{ tooltip: 0 }' x-cloak>
-                            <input type='text' value='https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."' onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-lg p-3 w-fit bg-[#0e0f18] rounded-xl' readonly @click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'></input>
+                            <input type='text' aria-label='Copy to Clipboard' value='https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."' onclick=\"copyToClipboard('https://".$_SERVER["HTTP_HOST"].$_SERVER["REQUEST_URI"]."');\" class='cursor-copy m-8 text-lg p-3 w-fit bg-[#0e0f18] rounded-xl' readonly @click='tooltip = 1, setTimeout(() => tooltip = 0, 2000)'></input>
                             <div class='w-40 bg-black/50 text-white text-center text-xs rounded-lg py-2 absolute z-30 bottom-3/4 ml-[6.75rem] px-3' x-show='tooltip' x-transition @click='tooltip = 0'>
                                 Copied to Clipboard
                                 <svg class='absolute text-black h-2 w-full left-0 top-full' x='0px' y='0px' viewBox='0 0 255 255' xml:space='preserve'><polygon class='fill-current' points='0,0 127.5,127.5 255,0'/></svg>
@@ -210,17 +213,20 @@ echo '
                         "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
                         <span class='h-[21rem] flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                         } else { echo "
-                        <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
-                            crossorigin='anonymous'></script>
-                        <!-- Team-Top-Right -->
-                        <ins class='adsbygoogle'
-                            style='display:block;height:336px;width:100%'
-                            data-ad-client='ca-pub-8928684248089281'
-                            data-ad-slot='8062709929'
-                            data-full-width-responsive='true'></ins>
-                        <script>
-                            (adsbygoogle = window.adsbygoogle || []).push({});
-                        </script>
+                        <div class='lazyhtml' data-lazyhtml onvisible>
+                            <script type='text/lazyhtml'>
+                            <!--
+                            <ins class='adsbygoogle'
+                                style='display:block;height:336px;width:100%'
+                                data-ad-client='ca-pub-8928684248089281'
+                                data-ad-slot='8062709929'
+                                data-full-width-responsive='true'></ins>
+                            <script>
+                                (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                            -->
+                            </script>
+                        </div>
                         "; } echo "
                     </div>
                 </div>
@@ -239,16 +245,16 @@ echo '
                                 <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2 twok:pr-10 fullhd:w-[55%]' value='' placeholder='".__("Championname")."'>
                                 <button id='champSelectorClear' class='bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none -ml-7 px-2 py-1' onclick='this.previousElementSibling.value=\"\";'>x</button>
                             </div>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer' src='/clashapp/data/misc/lanes/UTILITY.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='sup' alt='An icon for the support lane'>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/BOTTOM.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='adc' alt='An icon for the bottom lane'>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/MIDDLE.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='mid' alt='An icon for the middle lane'>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/JUNGLE.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='jgl' alt='An icon for the jungle'>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/TOP.webp' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='top' alt='An icon for the top lane'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer' src='/clashapp/data/misc/lanes/UTILITY.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/UTILITY.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='sup' alt='An icon for the support lane'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/BOTTOM.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/BOTTOM.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='adc' alt='An icon for the bottom lane'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/MIDDLE.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/MIDDLE.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='mid' alt='An icon for the middle lane'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/JUNGLE.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/JUNGLE.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='jgl' alt='An icon for the jungle'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/TOP.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/TOP.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='top' alt='An icon for the top lane'>
                         </div>
                         <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1 twok:h-[13rem] fullhd:h-[13.5rem]'>";
                             showBanSelector(); echo "
                         </div>
-                        <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/5 relative -top-48'><img src='/clashapp/data/misc/webp/empty_search.webp' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
+                        <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/5 relative -top-48'><img src='/clashapp/data/misc/webp/empty_search.webp?version=".md5_file('/hdd1/clashapp/data/misc/webp/empty_search.webp')."' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
                     </form>
                 </div>
             </div>";
@@ -287,7 +293,7 @@ echo '
                                             $playerDataJSONString = json_encode($playerDataRequest["data"]);
                                             $playerDataJSON = json_decode($playerDataJSONString, true);
                                             isset($_GET["reload"]) ? $forceReload = true : $forceReload = false;
-                                            if(((time() - $tempTeamJSON->LastUpdate) > 600) || ($tempTeamJSON->LastUpdate == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
+                                            if(((time() - $tempTeamJSON->LastUpdate) > 1800) || ($tempTeamJSON->LastUpdate == 0) || ($forceReload)){ // FIXME: force reload only temp for testing
                                                 $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);                                           
                                                 $matchInPlayerJsonButNotExistent = false;
                                                 foreach(array_keys($playerDataJSON["MatchIDs"]) as $matchid) {
@@ -451,8 +457,8 @@ echo '
                                     $memProfileIconBorders = memory_get_usage();
                                     echo "<div class='h-40 mt-4 grid grid-cols-2 gap-4 single-player-column' data-puuid='".$puuid."' data-sumid='".$sumid."'>
                                         <div class='relative flex justify-center overflow-hidden'>";
-                                            if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
-                                                echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="84" height="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px] pointer-events-none select-none" alt="The custom profile icon of a player">';
+                                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
+                                                echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp').'" width="84" height="84" class="rounded-full mt-6 z-0 max-h-[84px] max-w-[84px] pointer-events-none select-none" alt="The custom profile icon of a player">';
                                             } else {
                                                 echo "Missing Img"; // FIXME: Create Fallback
                                             }
@@ -462,24 +468,24 @@ echo '
                                                 // Print the profile border image url for current highest rank
                                                 $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/wings_*'.strtolower($rankOrLevelArray["HighestRank"]).'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
                                                 $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
-                                                if(file_exists($profileBorderPath)){
-                                                    echo '<img src="'.$webBorderPath.'" width="384" height="384" class="twok:max-w-[110%] fullhd:max-w-[148%] twok:top-[-8.25rem] fullhd:top-[-130px] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
+                                                if(fileExistsWithCache($profileBorderPath)){
+                                                    echo '<img src="'.$webBorderPath.'?version='.md5_file('/hdd1'.$webBorderPath).'" width="384" height="384" class="twok:max-w-[110%] fullhd:max-w-[148%] twok:top-[-8.25rem] fullhd:top-[-130px] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
                                                 }
                                                 // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
                                                 if ($rankOrLevelArray["HighEloLP"] != ""){
-                                                    echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="30" height="18" class="absolute z-20 mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+                                                    echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="30" height="18" class="absolute z-20 mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
                                                     echo "<div class='font-bold color-[#e8dfcc] absolute -mt-2 text-xs z-20'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
                                                 } else {
-                                                    echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="30" height="18" class="absolute z-20 mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+                                                    echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="30" height="18" class="absolute z-20 mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
                                                     echo "<div class='font-bold color-[#e8dfcc] absolute mt-[0.85rem] text-xs z-20'>".$rankOrLevelArray["RankNumber"]."</div>";
                                                 }
-                                                echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="38" height="26" class="absolute z-20 mt-[6.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+                                                echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="38" height="26" class="absolute z-20 mt-[6.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
                                                 echo "<div class='color-[#e8dfcc] absolute mt-[6.8rem] text-xs z-20'>".$playerData["Level"]."</div>"; // Always current lvl at the bottom
                                             } else if($rankOrLevelArray["Type"] === "Level") { // Else set to current level border
                                                 $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
                                                 $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
-                                                if(file_exists($profileBorderPath)){
-                                                    echo '<img src="'.$webBorderPath.'" width="190" height="190" class="absolute -mt-[2.05rem] z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);" alt="The profile border corresponding to a players level">';
+                                                if(fileExistsWithCache($profileBorderPath)){
+                                                    echo '<img src="'.$webBorderPath.'?version='.md5_file(''.$webBorderPath.'').'" width="190" height="190" class="absolute -mt-[2.05rem] z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);" alt="The profile border corresponding to a players level">';
                                                     }
                                             echo "<div class='absolute text-[#e8dfcc] mt-24 text-xs z-20 twok:mt-[6.8rem]'>".$playerData["Level"]."</div>";
                                             } echo "
@@ -525,28 +531,28 @@ echo '
                                             <div class='flex h-8 items-center justify-between'>
                                                 <span>".__("Queued as").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
-                                                if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
+                                                if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
                                                     if($queueRole != $playerMainRole && $queueRole != $playerSecondaryRole){ // TODO: Also add Tag "Off Position"
-                                                        echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">
-                                                            <span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5 cursor-help px-1.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
+                                                        echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">
+                                                            <span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5 cursor-help px-1.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp?version='.md5_file('/hdd1/clashapp/data/misc/webp/exclamation-yellow.webp').'" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
                                                             <div class="bg-black/50 text-white text-center text-xs rounded-lg w-40 whitespace-pre-line py-2 px-3 absolute z-30 -ml-16 twok:bottom-[49.75rem] fullhd:bottom-[34.75rem]" x-show="exclamation" x-transition x-cloak>'.__("This player did not queue on their main position")
                                                             .'<svg class="absolute text-black h-2 w-full left-0 ml-14 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve">
                                                                 <polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon>
                                                             </svg>
                                                             </div>';
                                                     } else {
-                                                        echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
+                                                        echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
                                                     }
                                                 } echo"</div>
                                             </div>
                                             <div class='flex h-8 items-center justify-between'>
                                                 <span class='lane-positions'>".__("Position(s)").":</span>
                                                 <div class='inline-flex gap-2 w-[72px] justify-center'>";
-                                                if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
-                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
+                                                if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
+                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
                                                 }
-                                                if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
-                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players secondary position">';
+                                                if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
+                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players secondary position">';
                                                 }echo "</div>
                                             </div>";
                                             if(!$execOnlyOnce) $startPrintAverageMatchscore = microtime(true);
@@ -572,8 +578,8 @@ echo '
                                             <div class='flex h-8 items-center justify-between'>
                                                 <span>".__("Queued as").":</span>
                                                 <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
-                                                if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
-                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
+                                                if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
+                                                    echo '<img class="saturate-0 brightness-150" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
                                                 } echo "
                                                 </div>
                                             </div>
@@ -646,9 +652,9 @@ echo '
                                             for($i=0; $i<count($masteryData); $i++){
                                                 echo "
                                                 <div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab'>
-                                                    <img src='/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp' width='64' height='64' class='block relative z-0' alt='A champion icon of the league of legends champion {$masteryData[$i]["Champion"]}'>
+                                                    <img src='/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp?version=".md5_file("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp")."' width='64' height='64' class='block relative z-0' alt='A champion icon of the league of legends champion {$masteryData[$i]["Champion"]}'>
                                                     <span class='max-w-[64px] text-ellipsis overflow-hidden whitespace-nowrap block'>{$masteryData[$i]["Champion"]}</span>
-                                                    <img src='/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp' width='32' height='32' class='relative -top-[5.75rem] -right-11 z-10 "; echo ($masteryData[$i]["Lvl"] == 5) ? 'pb-0.5' : ''; echo "' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'>";
+                                                    <img src='/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp?version=".md5_file("/hdd1/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp")."' width='32' height='32' class='relative -top-[5.75rem] -right-11 z-10 "; echo ($masteryData[$i]["Lvl"] == 5) ? 'pb-0.5' : ''; echo "' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'>";
                                                     if (str_replace(',', '', $masteryData[$i]["Points"]) > 999999) {
                                                         echo "<div class='-mt-7 text-" . getMasteryColor(str_replace(',', '', $masteryData[$i]["Points"])) . "/100'>" . str_replace(",", ".", substr($masteryData[$i]["Points"], 0, 4)) . "m</div>";
                                                     } else {
@@ -663,7 +669,7 @@ echo '
                                             }
                                         } else { echo
                                             "<div>".
-                                            '<img src="/clashapp/data/misc/webp/empty_search.webp" height="64" width="64" alt="A frog emoji with a questionmark"></div>'.
+                                            '<img src="/clashapp/data/misc/webp/empty_search?version='.md5_file('/hdd1/clashapp/data/misc/webp/empty_search.webp').'" height="64" width="64" alt="A frog emoji with a questionmark"></div>'.
                                             "</div>";
                                         } echo "
                                     </div>
@@ -756,18 +762,21 @@ echo '
                                     "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
                                     <span class='h-full flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                                     } else { echo "
-                                    <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
-                                            crossorigin='anonymous'></script>
-                                    <!-- Team-Middle-Left -->
-                                    <ins class='adsbygoogle'
-                                            style='display:block'
-                                            data-ad-client='ca-pub-8928684248089281'
-                                            data-ad-slot='5730429745'
-                                            data-ad-format='horizontal'
-                                            data-full-width-responsive='true'></ins>
-                                    <script>
-                                            (adsbygoogle = window.adsbygoogle || []).push({});
-                                    </script>
+                                    <div class='lazyhtml' data-lazyhtml onvisible>
+                                        <script type='text/lazyhtml'>
+                                        <!--
+                                        <ins class='adsbygoogle'
+                                                style='display:block'
+                                                data-ad-client='ca-pub-8928684248089281'
+                                                data-ad-slot='5730429745'
+                                                data-ad-format='horizontal'
+                                                data-full-width-responsive='true'></ins>
+                                        <script>
+                                                (adsbygoogle = window.adsbygoogle || []).push({});
+                                        </script>
+                                        -->
+                                        </script>
+                                    </div>
                                     "; } echo "
                                 </div>
                             </div>
@@ -776,26 +785,29 @@ echo '
                                     "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
                                     <span class='h-full flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                                     } else { echo "
-                                    <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
-                                            crossorigin='anonymous'></script>
-                                    <!-- Team-Middle-Right -->
-                                    <ins class='adsbygoogle'
-                                            style='display:block'
-                                            data-ad-client='ca-pub-8928684248089281'
-                                            data-ad-slot='3743394805'
-                                            data-ad-format='horizontal'
-                                            data-full-width-responsive='true'></ins>
-                                    <script>
-                                            (adsbygoogle = window.adsbygoogle || []).push({});
-                                    </script>
+                                    <div class='lazyhtml' data-lazyhtml onvisible>
+                                        <script type='text/lazyhtml'>
+                                        <!--
+                                        <ins class='adsbygoogle'
+                                                style='display:block'
+                                                data-ad-client='ca-pub-8928684248089281'
+                                                data-ad-slot='3743394805'
+                                                data-ad-format='horizontal'
+                                                data-full-width-responsive='true'></ins>
+                                        <script>
+                                                (adsbygoogle = window.adsbygoogle || []).push({});
+                                        </script>
+                                        -->
+                                        </script>
+                                    </div>
                                     "; } echo "
                                 </div>
                             </div>
                             <div class='grid rounded bg-[#141624] h-[122px] p-4 w-full text-center min-w-max items-center'>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='tagOptions' id='tagOptions' 
-                                @change='document.getElementById(\"tagOptions\").checked ? setCookie(\"tagOptions\", \"two-colored\") : deleteCookie(\"tagOptions\");
+                                @change='document.getElementById(\"tagOptions\").checked ? setCookie(\"tagOptions\", \"multi-colored\") : deleteCookie(\"tagOptions\");
                                 updateTagColor(this)'"; 
-                                if(isset($_COOKIE["tagOptions"])){ if($_COOKIE["tagOptions"] == "two-colored"){ echo "checked"; }} echo " ></input><label for='tagOptions'> ".__("Two-Colored Tags")."</label></div>
+                                if(isset($_COOKIE["tagOptions"])){ if($_COOKIE["tagOptions"] == "multi-colored"){ echo "checked"; }} echo " ></input><label for='tagOptions'> ".__("Multi-Colored Tags")."</label></div>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-pointer accent-[#27358b]' name='expand-all-matches' id='expand-all-matches' @change='document.getElementById(\"expand-all-matches\").checked ? advancedGlobal = true : advancedGlobal = false'></input><label for='expand-all-matches'> ".__("Expand all matches")."</label></div>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-not-allowed accent-[#27358b]' name='additional-setting2' id='additional-setting2' disabled></input><label for='additional-setting2'> ".__("Additional setting")."</label></div>
                                 <div class='cursor-default h-fit'><input type='checkbox' class='cursor-not-allowed accent-[#27358b]' name='additional-setting3' id='additional-setting3' disabled></input><label for='additional-setting3'> ".__("Additional setting")."</label></div>
@@ -821,7 +833,7 @@ echo '
                 <td class='align-top w-1/5 opacity-0' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
                     <table class='rounded-b bg-[#141624] w-full'>
                         <tr>
-                            <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")' class='single-player-match-history' data-puuid='".$player["puuid"]."' data-sumid='".$player["sumid"]."'>";
+                            <td x-data='{ open: true }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")' class='single-player-match-history' data-puuid='".$player["puuid"]."' data-sumid='".$player["sumid"]."'>";
                                 if($upToDate){
                                     if(!$execOnlyOnce) $startPrintMatchHistoryFunction = microtime(true);
                                     $memPrintMatchHistoryFunction = memory_get_usage(); 
@@ -855,7 +867,7 @@ echo '
         foreach($suggestedBanArray as $champname => $banChampion){
             echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0 relative" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards; z-index: '.$zIndex.';" x-data="{ showExplanation: false }">
             <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);" @mouseover="showExplanation=true" @mouseout="showExplanation=false">
-                <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion->Filename . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.webp" alt="A league of legends champion icon of ' . $champname . '"></div>
+                <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion->Filename . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.webp?version='.md5_file('/hdd1/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.webp').'" alt="A league of legends champion icon of ' . $champname . '"></div>
             <span class="suggested-ban-caption w-16 block">' . $champname . '</span>
             <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3" x-show="showExplanation" x-transition x-transition:enter.delay.500ms x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
             <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark text-end">'.__('Category').'</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Addition').'</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">'.__('Explanation').'</div>';
@@ -928,18 +940,21 @@ echo '
                 "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
                 <span class='h-full flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                 } else { echo "
-                <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
-                    crossorigin='anonymous'></script>
-                <!-- Team-Bottom-Left -->
-                <ins class='adsbygoogle'
-                    style='display:block'
-                    data-ad-client='ca-pub-8928684248089281'
-                    data-ad-slot='6341637981'
-                    data-ad-format='horizontal'
-                    data-full-width-responsive='true'></ins>
-                <script>
-                    (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
+                <div class='lazyhtml' data-lazyhtml onvisible>
+                    <script type='text/lazyhtml'>
+                    <!--
+                    <ins class='adsbygoogle'
+                        style='display:block'
+                        data-ad-client='ca-pub-8928684248089281'
+                        data-ad-slot='6341637981'
+                        data-ad-format='horizontal'
+                        data-full-width-responsive='true'></ins>
+                    <script>
+                        (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                    -->
+                    </script>
+                </div>
                 "; } echo "
             </div>
         </div>
@@ -948,18 +963,21 @@ echo '
                 "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
                 <span class='h-full flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                 } else { echo "
-                <script async src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8928684248089281'
-                        crossorigin='anonymous'></script>
-                <!-- Team-Bottom-Right -->
-                <ins class='adsbygoogle'
-                        style='display:block'
-                        data-ad-client='ca-pub-8928684248089281'
-                        data-ad-slot='8776229638'
-                        data-ad-format='horizontal'
-                        data-full-width-responsive='true'></ins>
-                <script>
-                        (adsbygoogle = window.adsbygoogle || []).push({});
-                </script>
+                <div class='lazyhtml' data-lazyhtml onvisible>
+                    <script type='text/lazyhtml'>
+                    <!--
+                    <ins class='adsbygoogle'
+                            style='display:block'
+                            data-ad-client='ca-pub-8928684248089281'
+                            data-ad-slot='8776229638'
+                            data-ad-format='horizontal'
+                            data-full-width-responsive='true'></ins>
+                    <script>
+                            (adsbygoogle = window.adsbygoogle || []).push({});
+                    </script>
+                    -->
+                    </script>
+                </div>
                 "; } echo "
             </div>
         </div>
