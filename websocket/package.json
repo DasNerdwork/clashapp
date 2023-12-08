@@ -1,0 +1,7 @@
+{
+    "type": "module",
+    "name" : "server",
+    "namespace" : "ClashScout",
+    "version" : "v1.0.0",
+    "description": "The WebSocket Server connection used for simultaneous ban management and minigames"
+}
