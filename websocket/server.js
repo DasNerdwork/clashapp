@@ -20,6 +20,7 @@ const mongoClient = new mongodb.MongoClient(mongoURL);
 
 // Attach the uncaught exception handler
 process.on('uncaughtException', handleCrash);
+process.on('unhandledRejection', handleShutdown);
 
 // Redirect console output to the log file
 const originalConsoleLog = console.log;
@@ -849,4 +850,10 @@ function handleCrash(error) {
   const crashMessage = `[${currentTime}] [Server Crash]: ${error.stack}\n`;
   fs.appendFileSync(logPath, crashMessage, 'utf8');
   process.exit(1);
+}
+
+function handleShutdown(error){
+  var currentTime = new Date().toLocaleTimeString();
+  const crashMessage = `[${currentTime}] [Server Shutdown]: ${error.stack}\n`;
+  fs.appendFileSync(logPath, crashMessage, 'utf8');
 }
