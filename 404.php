@@ -8,7 +8,7 @@ setCodeHeader('404', $css = true, $javascript = true, $alpinejs = false, $websoc
 include('/hdd1/clashapp/templates/header.php');
 ?>
 <div class="flex flex-col items-center justify-center w-full min-h-[calc(100vh_-_150px)]">
-    <img src="/clashapp/data/misc/webp/empty_search.webp" class="w-64 pb-8 -mt-8" alt="A frog emoji with a questionmark">
+    <img src="/clashapp/data/misc/webp/empty_search.webp?version= <?= md5_file("/hdd1/clashapp/data/misc/webp/empty_search.webp") ?>" class="w-64 pb-8 -mt-8" alt="A frog emoji with a questionmark">
     <h1 class="text-2xl pb-2 font-bold"><?= __("Whoops, we couldn't find what you are looking for.") ?></h1>
     <span class="text-base text-silver"><?= __("Hint: Teamsearches only work for players in active clash teams.") ?></span>
     <div id="logout-button">
