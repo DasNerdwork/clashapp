@@ -56,10 +56,74 @@ class MongoDBHelper {
             if ($returnAsArray) {
                 return array('success' => true, 'code' => 'M2GJCU', 'message' => 'Successfully found document by field', 'document' => (array)$document);
             } else {
-                return array('success' => true, 'code' => 'M2GJCU', 'message' => 'Successfully found document by field', 'document' => $document);
+                return array('success' => true, 'code' => 'M54ND7', 'message' => 'Successfully found document by field', 'document' => $document);
             }
         }
     }
+
+    /**
+     * Find documents in a collection by an array of specific match IDs.
+     *
+     * @param string $collectionName - The name of the collection to query.
+     * @param string $fieldName - The field to filter by (e.g., 'metadata.matchId').
+     * @param array $matchIds - An array of match IDs to filter by (e.g., ['EUW1_6270020637', 'EUW1_6270020638']).
+     *
+     * @return array - An array with keys 'success', 'code', 'message', and 'documents'.
+     *   'success' determines the success of the operation.
+     *   'code' provides a code for reference.
+     *   'message' describes the outcome of the operation.
+     *   'documents' contains an array of retrieved documents (if found).
+     */
+    public function findDocumentsByMatchIds($collectionName, $fieldName, $matchIds, $fieldsToRetrieve = [], $returnAsArray = false) {
+        $filter = [$fieldName => ['$in' => $matchIds]];
+    
+        $pipeline = [
+            ['$match' => $filter],
+            ['$project' => $this->createProjection($fieldsToRetrieve)],
+        ];
+    
+        $command = new MongoDB\Driver\Command([
+            'aggregate' => $collectionName,
+            'pipeline' => $pipeline,
+            'cursor' => new stdClass, // Add this line
+        ]);
+    
+        $cursor = $this->client->executeCommand($this->mdb, $command);
+
+        if ($cursor->isDead()) {
+            return array('success' => false, 'code' => '68CSZ1', 'message' => 'Unable to find fields in documents');
+        } else {
+            $documents = $cursor->toArray();
+            $result = array_map(function ($document) use ($returnAsArray) {
+                return $returnAsArray ? (array)$document : $document;
+            }, $documents);
+
+            return array('success' => true, 'code' => 'MO34LAN', 'message' => 'Successfully found documents by match IDs', 'documents' => $result);
+        }
+    }
+    
+    private function createProjection($fieldsToRetrieve) {
+        $projection = [];
+    
+        foreach ($fieldsToRetrieve as $field) {
+            // Handle fields that start with '$' in a special way
+            $fieldParts = explode('.', $field);
+            $modifiedField = implode('.', array_map(function ($part) {
+                return strpos($part, '$') === 0 ? substr($part, 1) : $part;
+            }, $fieldParts));
+    
+            // Set the modified field in the projection
+            $projection[$modifiedField] = 1;
+        }
+    
+        return $projection;
+    }
+    
+    
+    
+    
+    
+
 
     /**
      * Deletes a document from a MongoDB collection based on a specified field's value.

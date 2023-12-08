@@ -75,6 +75,7 @@ if($autosuggestRequest["success"]){
 echo "
 <script>
 const requests = {};
+var cached = 0;
 const currentPatch = " . json_encode($currentPatch) . ";
 const championData = " . json_encode($championArray) . ";
 const containerTitle = '" . __("Summoner") . "';
@@ -813,8 +814,8 @@ echo '
                     </td>
                 </tr>
                 <tr id="match-history">';
+            if(!$execOnlyOnce) $startPrintMatchHistory = microtime(true);
             foreach($tempStoreArray as $key => $player){ 
-                if(!$execOnlyOnce) $startPrintMatchHistory = microtime(true);
                 $memPrintMatchHistory = memory_get_usage(); 
                 echo "
                 <td class='align-top w-1/5 opacity-0' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
@@ -822,7 +823,11 @@ echo '
                         <tr>
                             <td x-data='{ open: false }' x-init='setTimeout(() => open = true, ".$matchAlpineCounter.")' class='single-player-match-history' data-puuid='".$player["puuid"]."' data-sumid='".$player["sumid"]."'>";
                                 if($upToDate){
+                                    if(!$execOnlyOnce) $startPrintMatchHistoryFunction = microtime(true);
+                                    $memPrintMatchHistoryFunction = memory_get_usage(); 
                                     echo printTeamMatchDetailsByPUUID($player["matchids_sliced"], $player["puuid"], $player["matchRankingArray"]);
+                                    if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistoryFunction"]["Time"] = number_format((microtime(true) - $startPrintMatchHistoryFunction), 2, ',', '.')." s";
+                                    if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistoryFunction"]["Memory"] = number_format((memory_get_usage() - $memPrintMatchHistoryFunction)/1024, 2, ',', '.')." kB";
                                 }
                                 echo "
                             </td>
@@ -830,11 +835,11 @@ echo '
                     </table>
                 </td>";
                 $matchAlpineCounter += 50;
-                if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistory"]["Time"] = number_format((microtime(true) - $startPrintMatchHistory), 2, ',', '.')." s";
-                if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistory"]["Memory"] = number_format((memory_get_usage() - $memPrintMatchHistory)/1024, 2, ',', '.')." kB";
-                } echo "
+            } echo "
             </tr>
-        </table>";
+            </table>";
+            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistory"]["Time"] = number_format((microtime(true) - $startPrintMatchHistory), 2, ',', '.')." s";
+            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$playerName]["PrintMatchHistory"]["Memory"] = number_format((memory_get_usage() - $memPrintMatchHistory)/1024, 2, ',', '.')." kB";
         $timeAndMemoryArray["FetchPlayerTotal"]["Time"] = number_format((microtime(true) - $startFetchPlayerTotal), 2, ',', '.')." s";
         $timeAndMemoryArray["FetchPlayerTotal"]["Memory"] = number_format((memory_get_usage() - $memFetchPlayerTotal)/1024, 2, ',', '.')." kB";
 
@@ -970,7 +975,9 @@ $timeAndMemoryArray["Total"]["Memory"] = number_format((memory_get_usage() - $me
 
     // --------------------------------------------------------------------------------------------------v- DEBUG  -v-------------------------------------------------------------------------------------------------- //
 
-// console.log(".json_encode($timeAndMemoryArray).");
+echo "<script>var timeAndMemoryArray = ".json_encode($timeAndMemoryArray).";
+      timeAndMemoryArray['CachedMatches'] = cached;
+      console.log(timeAndMemoryArray);</script>";
 $apiRequests["total"] = array_sum($apiRequests);
 echo "<script>console.log('API Request Array:', ".json_encode($apiRequests).")</script>";
 ?>
