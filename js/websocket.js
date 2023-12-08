@@ -39,51 +39,69 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                 fetch("https://clashscout.com/clashapp/data/patch/version.txt")
                 .then(response => { return response.text();
                 }).then(currentpatch => {
-                    
-                    for (const element of messageAsJson["SuggestedBans"]) {
-                        if(executeOnlyOnce){
-                            html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
-                                        '<div class="hoverer group' + (element.status === "locked" ? ' locked' : '') + '" ' + (element.status === "locked" ? 'draggable="false" ' : 'draggable="true" ') + 'onclick="' + (element.status === "locked" ? '' : 'removeFromFile(this.parentElement);') + '">'+
-                                            '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '">'+
-                                            '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="/clashapp/data/misc/RemovalOverlay.webp">'+
+                    const championImagePromises  = messageAsJson["SuggestedBans"].map(element => {
+                        return getVersionedUrl('/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp');
+                    });
+                    const removalOverlayPromise = getVersionedUrl('/clashapp/data/misc/RemovalOverlay.webp');
+                    const allPromises = [...championImagePromises, removalOverlayPromise];
+
+                    Promise.all(allPromises)
+                        .then(versionedPaths => {
+                            // Separate champion images and removal-overlay image paths
+                            const championImagePaths = versionedPaths.slice(0, messageAsJson["SuggestedBans"].length);
+                            const removalOverlayPath = versionedPaths.pop();
+                        
+                            championImagePaths.forEach((versionedPath, index) => {
+                                const element = messageAsJson["SuggestedBans"][index];
+                                const versionedChampImg = versionedPath;
+                                const versionedRemovalOverlayImg = removalOverlayPath;
+                            if(executeOnlyOnce){
+                                html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
+                                            '<div class="hoverer group' + (element.status === "locked" ? ' locked' : '') + '" ' + (element.status === "locked" ? 'draggable="false" ' : 'draggable="true" ') + 'onclick="' + (element.status === "locked" ? '' : 'removeFromFile(this.parentElement);') + '">'+
+                                                '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="' + versionedChampImg + '" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '">'+
+                                                '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="' + versionedRemovalOverlayImg + '">'+
+                                            '</div>'+
+                                        '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
+                                        '</div>';
+                                animateTimer += 0.1;
+                            } else {
+                                if (!(selectedBans.innerHTML.includes("/champion/" + element["id"] + ".webp"))) {
+                                    html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24" style="animation: .1s ease-in-out 0s 1 slideIn; animation-fill-mode: forwards;">';
+                                } else {
+                                    html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24">';
+                                }
+                                html += '<div class="hoverer group' + (element.status === "locked" ? ' locked' : '') + '" ' + (element.status === "locked" ? '' : ' draggable="true"') + '" ' + (element.status === "locked" ? '' : 'onclick="removeFromFile(this.parentElement);"') + '>'+
+                                            '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="' + versionedChampImg + '" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '">'+
+                                            '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="' + versionedRemovalOverlayImg + '">'+
                                         '</div>'+
                                     '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
                                     '</div>';
-                            animateTimer += 0.1;
-                        } else {
-                            if (!(selectedBans.innerHTML.includes("/champion/" + element["id"] + ".webp"))) {
-                                html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24" style="animation: .1s ease-in-out 0s 1 slideIn; animation-fill-mode: forwards;">';
-                            } else {
-                                html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24">';
                             }
-                            html += '<div class="hoverer group' + (element.status === "locked" ? ' locked' : '') + '" ' + (element.status === "locked" ? '' : ' draggable="true"') + '" ' + (element.status === "locked" ? '' : 'onclick="removeFromFile(this.parentElement);"') + '>'+
-                                        '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '">'+
-                                        '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="/clashapp/data/misc/RemovalOverlay.webp">'+
-                                    '</div>'+
-                                '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
-                                '</div>';
+                        });
+                        executeOnlyOnce = false;
+                        selectedBans.innerHTML = html;
+                        banSearchContainer = document.getElementById('banSearch').parentElement;
+                        champSelectorContainer = document.getElementById('champSelect');
+                        if(messageAsJson["SuggestedBans"].length >= 6){ // If our container exceeds one line of elements
+                            banSearchContainer.classList.replace('twok:h-[16.5rem]', 'twok:h-[10.5rem]');
+                            banSearchContainer.classList.replace('fullhd:h-[17rem]', 'fullhd:h-[12rem]');
+                            champSelectorContainer.classList.replace('twok:h-[13rem]', 'twok:h-[7.5rem]');
+                            champSelectorContainer.classList.replace('fullhd:h-[13.5rem]', 'fullhd:h-[9rem]');
+                            selectedBans.parentElement.classList.replace('pb-3', 'pb-1');
+                        } else {
+                            banSearchContainer.classList.replace('twok:h-[10.5rem]', 'twok:h-[16.5rem]');
+                            banSearchContainer.classList.replace('fullhd:h-[12rem]', 'fullhd:h-[17rem]');
+                            champSelectorContainer.classList.replace('twok:h-[7.5rem]', 'twok:h-[13rem]');
+                            champSelectorContainer.classList.replace('fullhd:h-[9rem]', 'fullhd:h-[13.5rem]');
+                            selectedBans.parentElement.classList.replace('pb-1', 'pb-3');
                         }
-                    }
-                    executeOnlyOnce = false;
-                    selectedBans.innerHTML = html;
-                    banSearchContainer = document.getElementById('banSearch').parentElement;
-                    champSelectorContainer = document.getElementById('champSelect');
-                    if(messageAsJson["SuggestedBans"].length >= 6){ // If our container exceeds one line of elements
-                        banSearchContainer.classList.replace('twok:h-[16.5rem]', 'twok:h-[10.5rem]');
-                        banSearchContainer.classList.replace('fullhd:h-[17rem]', 'fullhd:h-[12rem]');
-                        champSelectorContainer.classList.replace('twok:h-[13rem]', 'twok:h-[7.5rem]');
-                        champSelectorContainer.classList.replace('fullhd:h-[13.5rem]', 'fullhd:h-[9rem]');
-                        selectedBans.parentElement.classList.replace('pb-3', 'pb-1');
-                    } else {
-                        banSearchContainer.classList.replace('twok:h-[10.5rem]', 'twok:h-[16.5rem]');
-                        banSearchContainer.classList.replace('fullhd:h-[12rem]', 'fullhd:h-[17rem]');
-                        champSelectorContainer.classList.replace('twok:h-[7.5rem]', 'twok:h-[13rem]');
-                        champSelectorContainer.classList.replace('fullhd:h-[9rem]', 'fullhd:h-[13.5rem]');
-                        selectedBans.parentElement.classList.replace('pb-1', 'pb-3');
-                    }
-                    makeDragDroppable();
-                    var currentSelectedContextMenuElement = null;
-                    addContextMenuToSelectedBans();
+                        makeDragDroppable();
+                        var currentSelectedContextMenuElement = null;
+                        addContextMenuToSelectedBans();
+                        })
+                    .catch(error => {
+                        console.error("Error fetching versioned URLs:", error);
+                    });
                 });
             }
         } else {
@@ -136,7 +154,9 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                     newSpan.setAttribute("onmouseover", "showIdentityNotice(true)");
                     newSpan.setAttribute("onmouseout", "showIdentityNotice(false)");
                     newParentDiv.classList.add("z-20","w-40","h-8");
-                    newImg.src="/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp"
+                    getVersionedUrl("/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp").then(versionedPath => {
+                        newImg.src = versionedPath;
+                    });
                     newImg.width = "32";
                     newImg.classList.add("align-middle","mr-2.5","no-underline","inline-flex");
                     newP.id = "highlighter";
@@ -417,4 +437,19 @@ function unlockSelectedBan(selectedBanElement, websocket = true) {
         };
         ws.send(JSON.stringify(sendInfo));
     }
+}
+
+function getVersionedUrl(url) {
+    return fetch(url)
+        .then(response => {
+            const lastModified = response.headers.get('Last-Modified');
+            return lastModified ? new Date(lastModified).getTime() : null;
+        })
+        .then(timestamp => {
+            return timestamp !== null ? url + "?version=" + timestamp : url;
+        })
+        .catch(error => {
+            console.error("Error fetching or extracting Last-Modified:", error);
+            return url; // Return the original URL in case of an error
+        });
 }
