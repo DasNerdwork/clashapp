@@ -397,7 +397,7 @@ $db = new DB();
             </form>
             <div class="flex justify-center items-center mt-4">
                 <span class="text-xl"><?= __("Difficulty: ") ?></span>
-                <select id="difficulty-selector" 
+                <select id="difficulty-selector"  aria-label="Difficulty Selector"
                         class="text-center h-8 w-28 align-middle mr-2.5 ml-2.5 text-base bg-[#eee] text-black active:bg-[#ccc] focus:outline-none border-none"
                         onchange="setCookie('pixelChamp', this.value); this.disabled = true; location.reload();">
                     <option value="easy" <?= (!isset($_COOKIE["pixelChamp"]) || $_COOKIE["pixelChamp"] == "easy") ? "hidden" : ""; ?>><?= __("Easy") ?></option>
