@@ -21,6 +21,7 @@ require_once '/hdd1/clashapp/mongo-db.php';
 
 // putenv('API_KEY=RGAPI-9b672bbc-d75e-49e6-a112-4c2660f4d5de'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
 $apiKey = getenv('API_KEY');
+$mdb = new MongoDBHelper();
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
 $headers = array(
@@ -41,6 +42,8 @@ $apiRequests = array(
     "postSubmit" => 0
 );
 $currentTimestamp = time();
+$fileExistsCache = array();
+$matchDataCache = array();
 $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns",
 "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
 $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
@@ -406,7 +409,7 @@ function getMatchIDs($puuid, $maxMatchIDs){
  * @return boolean N/A, file saving & logging instead
  */
 function downloadMatchesByID($matchids, $username = null){
-    $mdb = new MongoDBHelper();
+    global $mdb;
     global $headers, $counter, $apiRequests;
     $logPath = '/hdd1/clashapp/data/logs/matchDownloader.log';
 
@@ -504,7 +507,7 @@ function downloadMatchesByID($matchids, $username = null){
  * @return array $matchData Array full of all given MatchID.json file contents up to the below maximum
  */
 function getMatchData($matchIDArray){
-    $mdb = new MongoDBHelper();
+    global $mdb;
     $startMemory = memory_get_usage();
     $matchData = array();
     global $cleanAttributeArray;
@@ -620,10 +623,14 @@ function secondsToTime($seconds) {
  *
  * @todo possibility to make more beautiful and/or write a testcase?
  */
+
 function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
-    $mdb = new MongoDBHelper();
+    $startPrintMatchHistoryTop = microtime(true);
+    global $mdb;
     global $currentPatch;
     global $currentTimestamp;
+    global $matchDataCache;
+    $matchTestTempArray = array();
     $count = 0;
     $totalTeamTakedowns = 0;
     $returnString = "";
@@ -633,312 +640,370 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
             @click='open = !open'
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
     $returnString .= "<div class='smooth-transition w-full overflow-hidden twok:min-h-[2300px] fullhd:min-h-[1868.75px]' x-show='open' x-transition x-cloak>";
-    foreach ($matchIDArray as $i => $matchIDJSON) {
-        if(isset($mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["document"])){
-            $inhalt = $mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON)["document"];
-        } else {
-            // print_r($mdb->findDocumentByField("matches", 'metadata.matchId', $matchIDJSON));
-            // echo "<br>".$matchIDJSON."<br>";
-            return "";
-        }
-        if(isset($inhalt->metadata->participants) && $inhalt->info->gameDuration != 0) {
-            if(in_array($puuid, (array) $inhalt->metadata->participants)){
-                $count++;
-                for($in = 0; $in < 10; $in++){
-                    if($inhalt->info->participants[$in]->puuid == $puuid) {
-                        $teamID = $inhalt->info->participants[$in]->teamId;
-                        if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
-                            $returnString .= '<div class="w-full bg-gray-800 border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$inhalt->metadata->matchId.'>';
-                        } elseif ($inhalt->info->participants[$in]->win == false){
-                            $returnString .= '<div class="w-full bg-lose border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$inhalt->metadata->matchId.'>';
-                        } else {
-                            $returnString .= '<div class="w-full bg-win border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$inhalt->metadata->matchId.'>';
-                        }
-                            $returnString .= '<div id="match-header" class="inline-flex w-full gap-2 pt-2 px-2">';
-                                $returnString .= '<div class="match-result mb-2">';
-                                // Display of W(in) or L(ose)
-                                if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
-                                    $returnString .= '<span class="text-white font-bold">'.__("R").'</span>';
-                                } elseif($inhalt->info->participants[$in]->win == true) {
-                                    $returnString .= '<span class="text-online font-bold">'.__("W").'</span>';
-                                } else {
-                                    $returnString .= '<span class="text-offline font-bold">'.__("L").'</span>';
-                                }
-                                $returnString .= '</div>';
 
-                                $returnString .= '<div class="match-type-and-time">';
-                                // Display of Ranked Queuetype & Gamelength
-                                switch ($inhalt->info->queueId) {
-                                    case 420:
-                                        $returnString .= "<span>".__("Solo/Duo")." ";
-                                        break;
-                                    case 440:
-                                        $returnString .= "<span>".__("Flex")." ";
-                                        break;
-                                    case 700:
-                                        $returnString .= "<span>".__("Clash")." ";
-                                        break;
-                                }
-                                $returnString .= gmdate("i:s", $inhalt->info->gameDuration)."</span>";
-                                $returnString .= "</div>";
-
-                                // $returnString .= "<div class='match-id hidden'>".$matchIDJSON."</div>";
-
-                                $returnString .= '<div id="match-time-ago" class="ml-auto">';
-
-                                // Display when the game date was, if > than 23h -> day format, if > than 30d -> month format, etc.
-                                $returnString .= "<span>".secondsToTime(strtotime('now')-intdiv($inhalt->info->gameEndTimestamp, 1000))."</span></div>";
-                                $returnString .= '</div>';
-
-                                // Display of the played champions icon
-                                $returnString .= '<div class="champion-data flex gap-2 twok:h-[68px] fullhd:h-[56px] justify-between px-2"><div class="champion-data-left inline-flex gap-2"><div class="champion-icon">';
-                                if ($inhalt->info->participants[$in])
-                                $champion = $inhalt->info->participants[$in]->championName;
-                                if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** TODO: One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                                if($champion == "Kayn"){
-                                    if($inhalt->info->participants[$in]->championTransform == "1"){
-                                        if(file_exists('/hdd1/clashapp/data/misc/webp/kayn_rhaast_darkin.webp')){
-                                            $returnString .= '<img src="/clashapp/data/misc/webp/kayn_rhaast_darkin.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
-                                            $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
-                                        }
-                                    } else if($inhalt->info->participants[$in]->championTransform == "2") {
-                                        if(file_exists('/hdd1/clashapp/data/misc/webp/kayn_shadow_assassin.webp')){
-                                            $returnString .= '<img src="/clashapp/data/misc/webp/kayn_shadow_assassin.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
-                                            $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
-                                        }
-                                    } else {
-                                        if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
-                                            $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
-                                            $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
-                                        }
-                                    }
-                                } else {
-                                    if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
-                                        $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
-                                        $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
-                                    } else {
-                                        $returnString .= '<img src="/clashapp/data/misc/na.webp" width="68" height="68" class="align-middle twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] rounded" loading="lazy" alt="This icon represents a value not being available">';
-                                    }
-                                }
-
-                                // Save values dealt for later print below
-                                $dealt = isset($inhalt->info->participants[$in]->totalDamageDealtToChampions) ? number_format($inhalt->info->participants[$in]->totalDamageDealtToChampions, 0) : __("N/A");
-                                $tanked = isset($inhalt->info->participants[$in]->totalDamageTaken) ? number_format($inhalt->info->participants[$in]->totalDamageTaken, 0) : __("N/A");
-                                $shealed = isset($inhalt->info->participants[$in]->challenges->effectiveHealAndShielding) ? number_format($inhalt->info->participants[$in]->challenges->effectiveHealAndShielding, 0) : __("N/A");
-                                $objs = isset($inhalt->info->participants[$in]->damageDealtToObjectives) ? number_format($inhalt->info->participants[$in]->damageDealtToObjectives, 0) : __("N/A");
-                                $visionWards = isset($inhalt->info->participants[$in]->detectorWardsPlaced) ? $inhalt->info->participants[$in]->detectorWardsPlaced : __("N/A");
-                                $creepScore = isset($inhalt->info->participants[$in]->totalMinionsKilled, $inhalt->info->participants[$in]->neutralMinionsKilled) ? $inhalt->info->participants[$in]->totalMinionsKilled + $inhalt->info->participants[$in]->neutralMinionsKilled : __("N/A");
-                                $visionScore = isset($inhalt->info->participants[$in]->visionScore) ? $inhalt->info->participants[$in]->visionScore : __("N/A");
-                                $turretPlatings = isset($inhalt->info->participants[$in]->challenges->turretPlatesTaken) ? $inhalt->info->participants[$in]->challenges->turretPlatesTaken : __("N/A");
-                                
-
-                        // Display of champion level at end of game
-                        $returnString .= '<div class="champion-level flex relative w-4 h-4 max-w-[16px] min-w-[16px] z-20 -ml-4 twok:bottom-[17px] twok:-right-[17px] twok:text-[13px] fullhd:bottom-[8px] fullhd:-right-[15px] fullhd:text-[12px] justify-center items-center">';
-                        $returnString .= $inhalt->info->participants[$in]->champLevel;
-                        $returnString .= '</div>';
-
-                        // Display of played Position
-                        $returnString .= "<div class='champion-lane flex relative w-4 h-4 twok:max-w-[16px] twok:min-w-[16px] z-20 -ml-4 twok:bottom-[33px] twok:-right-[66px] fullhd:max-w-[14px] fullhd:min-w-[14px] fullhd:bottom-[25px] fullhd:-right-[56px] justify-center items-center'>";
-                        $matchLane = $inhalt->info->participants[$in]->teamPosition;
-                        if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
-                            $returnString .= '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" height="16"  loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0 brightness-150" alt="Icon of a league of legends position for '.$matchLane.'">';
-                        }
-                        $returnString .= "</div>";
-                        $returnString .= "</div>";
-
-                        // Display summoner spells
-                        $returnString .= '<div class="summoner-spells grid grid-rows-2 gap-1 twok:max-w-[32px] fullhd:max-w-[26px]">';
-                        $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
-                        $summoner2Id = $inhalt->info->participants[$in]->summoner2Id;
-                        if(file_exists('/hdd1/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".webp")){
-                            $returnString .= '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.webp" width="32" height="32" class="rounded" loading="lazy" alt="Icon of a players first selected summoner spell">';
-                        }
-                        if(file_exists('/hdd1/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".webp")){
-                            $returnString .= '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.webp" width="32" height="32" class="rounded" loading="lazy" alt="Icon of a players second selected summoner spell">';
-                        }
-                        $returnString .= "</div>";
-
-
-
-                        // Display of the equipped keyrune + secondary tree
-                        $returnString .= '<div class="rune-container grid grid-cols-2 grid-rows-2 gap-y-1">';
-                        $returnString .= "<div class='flex col-span-2 row-span-1 justify-start items-center gap-1'>";
-                        $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
-                        $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
-                        if(file_exists('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp')){
-                            $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
-                        } else {
-                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
-                        }
-                        if(file_exists('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp')){
-                            $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
-                        } else {
-                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
-                        }
-                        $returnString .= "</div>";
-
-                        // calculate of Match Score 1-10
-                        foreach ($matchRankingArray as $matchID => $rankingValue){
-                            // print_r($matchID."<br>");
-                            if($matchID == $inhalt->metadata->matchId){
-                                $matchScore = $matchRankingArray[$matchID];
-                            }
-                        }
-
-                        // Display Matchscore
-                        $returnString .= '<div class="matchscore-container flex row-span-1 col-span-2 justify-center items-center">';
-                        if($matchScore == "" || $matchScore == "N/A"){
-                            $returnString .= "<span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Game length below minimum of 10min")."\", 500, \"top-right\")' onmouseleave='hideTooltip(this)'>&Oslash; N/A</span>";
-                        } else {
-                            $returnString .= '<span>&Oslash; '.$matchScore.'</span>';
-                        }
-                        $returnString .= "</div></div></div>";
-
-                        // Display of the players Kills/Deaths/Assists
-                        $returnString .= '<div class="kda-stats flex flex-col justify-center items-center"><div class="stats twok:text-[1.75rem] twok:tracking-tighter fullhd:text-[1.3rem] fullhd:-tracking-[.15rem]">';
-                        $kills = $inhalt->info->participants[$in]->kills;
-                        $deaths = $inhalt->info->participants[$in]->deaths;
-                        $assists = $inhalt->info->participants[$in]->assists;
-                        $returnString .= $kills . " / ";
-                        $returnString .= "<div class='inline text-threat-s'>".$deaths."</div> / ";
-                        $returnString .= $assists;
-                        $returnString .= '</div><div class="kda text-xs">';
-                        if($deaths != 0){
-                            $returnString .= __("KDA").": ".number_format(($kills+$assists)/$deaths, 2)."</div>";
-                        } else {
-                            $returnString .= __("KDA").": ".number_format(($kills+$assists)/1, 2)."</div>";
-                        }
-                        $returnString .= "</div>";
-
-                        // Display of the last items the user had at the end of the game in his inventory
-                        $returnString .= '<div class="items grid grid-rows-2 grid-cols-3 twok:max-w-[104px] twok:min-w-[104px] fullhd:max-w-[84.5px] fullhd:min-w-[84.5px] gap-1">';
-                        $noItemCounter = 0;
-                        // $lastItemSlot = 0;
-                        for($b=0; $b<6; $b++){
-                            // if($b == 6){
-                            //     for($c=0; $c<$noItemCounter; $c++){
-                            //         $returnString .= '<div class="item'.($lastItemSlot+1).'">';
-                            //         $returnString .= '<img src="/clashapp/data/misc/0.webp" width="32" loading="lazy">';
-                            //         $returnString .= '</div>';
-                            //         $lastItemSlot++;
-                            //     }
-                            //     $returnString .= '<div class="trinket">';
-                            // }
-                            $allItems = "item".$b;
-                            $itemId = $inhalt->info->participants[$in]->$allItems;
-                            if($itemId == 0){
-                                $noItemCounter += 1;
-                            } else {
-                                $returnString .= '<div class="item'.($b - $noItemCounter).'">';
-                                if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
-                                    $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon represents an equipped item at the end of a game">';
-                                } else if(file_exists('/hdd1/clashapp/data/misc/'.$itemId.'.webp')){
-                                    $returnString .= '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon represents an equipped special ornn item at the end of the game or other exceptions">';
-                                } else {
-                                    $returnString .= '<img src="/clashapp/data/misc/0.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon will only be visible of neither the data dragon nor the local files contain the corresponding image">';
-                                }
-                                // $lastItemSlot = $b;
-                                $returnString .= "</div>";
-                            }
-                        }
-                        for($i=0; $i<$noItemCounter; $i++){
-                            $returnString .= '<div class="emptySlot block w-8 h-8 rounded bg-dark opacity-40"></div>';
-                        }
-                        $returnString .= "</div>";
-                        // Calculate own Takedowns of Kill Participation
-                        $ownTakedowns = 0;
-                        $ownTakedowns += $inhalt->info->participants[$in]->kills;
-                        $ownTakedowns += $inhalt->info->participants[$in]->assists;
-                    }
-                }
-
-                $returnString .= '</div>';
-                $returnString .= '<div class="additional-info px-2" x-cloak x-show="advanced || advancedGlobal" x-transition><div class="additional-info-1 grid twok:grid-cols-[1fr_1fr_1fr_1fr_46px_auto] fullhd:twok:grid-cols-[1fr_1fr_1fr_1fr_37.375px_auto] twok:text-base fullhd:text-[13px] grid-rows-3 justify-center items-center gap-1 mt-2 text-sm">';
-                // Display of enemy champions icon in lane
-                    for($i = 0; $i < 10; $i++){
-                        if (($inhalt->info->participants[$i]->teamPosition == $matchLane) && ($inhalt->info->participants[$i]->championName != $champion)){
-                        $returnString .= '<div class="lane-opponent col-span-1 row-span-1 h-full flex justify-center items-center gap-2"><span>vs. </span>';
-                        $enemyChamp = $inhalt->info->participants[$i]->championName;
-                        if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
-                        if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp')){
-                            $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
-                        } else {
-                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents a value not being available"></div>';
-                        }
-                        }
-                        if ($inhalt->info->participants[$i]->teamId == $teamID){
-                            $totalTeamTakedowns += $inhalt->info->participants[$i]->kills;
-                        }
-                    }
-
-                    $returnString .= '<div class="damage-dealt col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Dealt.webp" width="24" height="26" class="twok:max-w-[24px] fullhd:max-w-[19.5px]" loading="lazy" alt="An icon of a sword clashing through a bone">';
-                    $returnString .= '<span>'.$dealt.'</span>';
-                    $returnString .= '</div>';
-
-
-                    $returnString .= '<div class="kill-participation col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/KillParticipation.webp" width="32" height="26" class="max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="An icon of two swords clashing with each other">';
-                        if($totalTeamTakedowns != 0){
-                            $returnString .= "<span>".number_format(($ownTakedowns/$totalTeamTakedowns)*100, 0). "%</span>";
-                        } else {
-                            $returnString .= "<span>0%</span>";
-                        }
-                    $returnString .= '</div>';
-
-                    $returnString .= '<div class="visionscore col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/VisionScore.webp" width="36" height="23" class="max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a vision ward from League of Legends">';
-                    $returnString .= '<span>'.$visionScore.'</span>';
-                    $returnString .= "</div>";
-
-                    $returnString .= '<div class="col-span-1 row-span-2 h-full flex justify-center items-center">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Turret.webp" width="36" height="76" class="twok:max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a tower from League of Legends">';
-                    $returnString .= '</div>';
-
-                    $returnString .= '<div class="damage-to-objectives col-span-1 row-span-1 h-full flex justify-center items-center">';
-                    $returnString .= __("Objs").": ".$objs;
-                    $returnString .= "</div>";
-
-                    $returnString .= '<div class="creepscore col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Creepscore.webp" width="32" height="19" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="An icon of two coins">';
-                    $returnString .= '<span>'.$creepScore.'</span>';
-                    $returnString .= "</div>";
-
-                    $returnString .= '<div class="damage-tanked col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Tanked.webp" width="20.5" height="26" class="twok:max-w-[20.5px] fullhd:max-w-[16.65625px]" loading="lazy" alt="An icon of a shield with two cracks">';
-                    $returnString .= '<span>'.$tanked.'</span>';
-                    $returnString .= '</div>';
-
-                    $returnString .= '<div class="damage-healed-and-shielded col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/Shealed.webp" width="27" height="28" class="twok:max-w-[27px] fullhd:max-w-[21.9375px]" loading="lazy" alt="An icon of a plus symbol converging into a shield">';
-                    $returnString .= '<span>'.$shealed.'</span>';
-                    $returnString .= "</div>";
-
-                    $returnString .= '<div class="control-wards col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
-                    $returnString .= '<img src="/clashapp/data/misc/icons/ControlWard.webp" width="36" height="25" class="twok:max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a control ward from League of Legends">';
-                    $returnString .= '<span>'.$visionWards.'</span>';
-                    $returnString .= "</div>";
-
-                    $returnString .= '<div class="turret-platings col-span-1 row-span-1 h-full flex justify-center items-center">';
-                    $returnString .= __("Platings").': '.$turretPlatings;
-                    $returnString .= "</div>";
-
-                    $returnString .= '<div class="match-tag-container col-span-6 row-span-1 h-full flex justify-start items-center gap-4 ">';
-                    // $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Tag 1</div>';
-                    // $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Testtag 2</div>';
-                    // $returnString .= '<div class="list-none border border-solid border-[#141624] py-2 px-3 rounded-3xl text-[#cccccc] bg-[#0e0f18] cursor-help">Verspeisen Sie Arsch?</div>';
-                    $returnString .= "</div>";
-
-                    $returnString .= '</div></div>';
-                    $returnString .= '<button type="button" class="collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4" @click="advanced = !advanced" x-text="advanced ? \'&#11165;\' : \'&#11167;\'"></button>';
-                    $returnString .= '</div>';
-
-                $totalTeamTakedowns = 0; // Necessary to reset Kill Participation
-            }
+    foreach ($matchIDArray as $matchId) {
+        if(isset($matchDataCache[$matchId])){
+            $matchDataCache[$matchId]->metadata->cached = true;
+            $matchTestTempArray[] = (array)$matchDataCache[$matchId];
         }
     }
+    // Überschneidung vom Cache und Parameter von mongodb query entfernen
+    $intersection = array_intersect($matchIDArray, array_keys($matchDataCache));
+    $matchIDArrayWithoutCached = array_values(array_diff($matchIDArray, $intersection));
+
+    $fieldsToRetrieve = [
+        'metadata.matchId',
+        'info.gameDuration',
+        'info.queueId',
+        'info.gameEndTimestamp',
+        'metadata.participants',
+        'info.participants.puuid',
+        'info.participants.teamId',
+        'info.participants.gameEndedInEarlySurrender',
+        'info.participants.win',
+        'info.participants.championName',
+        'info.participants.championTransform',
+        'info.participants.champLevel',
+        'info.participants.teamPosition',
+        'info.participants.summoner1Id',
+        'info.participants.summoner2Id',
+        'info.participants.perks.styles.selections.perk',
+        'info.participants.perks.styles.style',
+        'info.participants.kills',
+        'info.participants.deaths',
+        'info.participants.assists',
+        'info.participants.item0',
+        'info.participants.item1',
+        'info.participants.item2',
+        'info.participants.item3',
+        'info.participants.item4',
+        'info.participants.item5',
+        'info.participants.totalDamageDealtToChampions',
+        'info.participants.totalDamageTaken',
+        'info.participants.challenges.effectiveHealAndShielding',
+        'info.participants.damageDealtToObjectives',
+        'info.participants.detectorWardsPlaced',
+        'info.participants.totalMinionsKilled',
+        'info.participants.neutralMinionsKilled',
+        'info.participants.visionScore',
+        'info.participants.challenges.turretPlatesTaken',
+    ];
+    $result = $mdb->findDocumentsByMatchIds('matches', 'metadata.matchId', $matchIDArrayWithoutCached, $fieldsToRetrieve);
+    $timeArray[$puuid]["PrintMatchHistoryTop"]["Time"] = number_format((microtime(true) - $startPrintMatchHistoryTop), 2, ',', '.')." s";
+
+    $startPrintMatchHistoryBottom = microtime(true);
+    if($result['success']){
+        $matchDataArray = $result['documents'];
+        // Combine cached data with new queried data
+        $mergedMatchData = array_merge((array)$matchDataArray, $matchTestTempArray);
+        $matchDataArray = json_decode(json_encode($mergedMatchData));
+        foreach($matchDataArray as $inhalt){
+            // Cache MongoDB Query Data (if not already cached) for future requests
+            addToGlobalMatchDataCache($inhalt);
+            if(isset($inhalt->metadata->cached)){
+                echo "<script>cached++;</script>";
+            }
+            if(isset($inhalt->metadata->participants) && $inhalt->info->gameDuration != 0) {
+                if(in_array($puuid, (array) $inhalt->metadata->participants)){
+                    $count++;
+                    for($in = 0; $in < 10; $in++){
+                        if($inhalt->info->participants[$in]->puuid == $puuid) {
+                            $teamID = $inhalt->info->participants[$in]->teamId;
+                            if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
+                                $returnString .= '<div class="w-full bg-gray-800 border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$inhalt->metadata->matchId.'>';
+                            } elseif ($inhalt->info->participants[$in]->win == false){
+                                $returnString .= '<div class="w-full bg-lose border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$inhalt->metadata->matchId.'>';
+                            } else {
+                                $returnString .= '<div class="w-full bg-win border-b border-[4px] border-dark" x-data="{ advanced: false }" @page-advanced="advanced = true" style="content-visibility: auto;" data-matchid='.$inhalt->metadata->matchId.'>';
+                            }
+                                $returnString .= '<div id="match-header" class="inline-flex w-full gap-2 pt-2 px-2">';
+                                    $returnString .= '<div class="match-result mb-2">';
+                                    // Display of W(in) or L(ose)
+                                    if($inhalt->info->participants[$in]->gameEndedInEarlySurrender){
+                                        $returnString .= '<span class="text-white font-bold">'.__("R").'</span>';
+                                    } elseif($inhalt->info->participants[$in]->win == true) {
+                                        $returnString .= '<span class="text-online font-bold">'.__("W").'</span>';
+                                    } else {
+                                        $returnString .= '<span class="text-offline font-bold">'.__("L").'</span>';
+                                    }
+                                    $returnString .= '</div>';
+
+                                    $returnString .= '<div class="match-type-and-time">';
+                                    // Display of Ranked Queuetype & Gamelength
+                                    switch ($inhalt->info->queueId) {
+                                        case 420:
+                                            $returnString .= "<span>".__("Solo/Duo")." ";
+                                            break;
+                                        case 440:
+                                            $returnString .= "<span>".__("Flex")." ";
+                                            break;
+                                        case 700:
+                                            $returnString .= "<span>".__("Clash")." ";
+                                            break;
+                                    }
+                                    $returnString .= gmdate("i:s", $inhalt->info->gameDuration)."</span>";
+                                    $returnString .= "</div>";
+
+                                    // $returnString .= "<div class='match-id hidden'>".$matchIDJSON."</div>";
+
+                                    $returnString .= '<div id="match-time-ago" class="ml-auto">';
+
+                                    // Display when the game date was, if > than 23h -> day format, if > than 30d -> month format, etc.
+                                    $returnString .= "<span>".secondsToTime(strtotime('now')-intdiv($inhalt->info->gameEndTimestamp, 1000))."</span></div>";
+                                    $returnString .= '</div>';
+
+                                    // Display of the played champions icon
+                                    $returnString .= '<div class="champion-data flex gap-2 twok:h-[68px] fullhd:h-[56px] justify-between px-2"><div class="champion-data-left inline-flex gap-2"><div class="champion-icon">';
+                                    if ($inhalt->info->participants[$in])
+                                    $champion = $inhalt->info->participants[$in]->championName;
+                                    if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** TODO: One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
+                                    if($champion == "Kayn"){
+                                        if($inhalt->info->participants[$in]->championTransform == "1"){
+                                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/webp/kayn_rhaast_darkin.webp')){
+                                                $returnString .= '<img src="/clashapp/data/misc/webp/kayn_rhaast_darkin.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                                $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                            }
+                                        } else if($inhalt->info->participants[$in]->championTransform == "2") {
+                                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/webp/kayn_shadow_assassin.webp')){
+                                                $returnString .= '<img src="/clashapp/data/misc/webp/kayn_shadow_assassin.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                                $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                            }
+                                        } else {
+                                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
+                                                $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                                $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                            }
+                                        }
+                                    } else {
+                                        if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp')){
+                                            $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
+                                            $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.webp" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
+                                        } else {
+                                            $returnString .= '<img src="/clashapp/data/misc/na.webp" width="68" height="68" class="align-middle twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] rounded" loading="lazy" alt="This icon represents a value not being available">';
+                                        }
+                                    }
+
+                                    // Save values dealt for later print below
+                                    $dealt = isset($inhalt->info->participants[$in]->totalDamageDealtToChampions) ? number_format($inhalt->info->participants[$in]->totalDamageDealtToChampions, 0) : __("N/A");
+                                    $tanked = isset($inhalt->info->participants[$in]->totalDamageTaken) ? number_format($inhalt->info->participants[$in]->totalDamageTaken, 0) : __("N/A");
+                                    $shealed = isset($inhalt->info->participants[$in]->challenges->effectiveHealAndShielding) ? number_format($inhalt->info->participants[$in]->challenges->effectiveHealAndShielding, 0) : __("N/A");
+                                    $objs = isset($inhalt->info->participants[$in]->damageDealtToObjectives) ? number_format($inhalt->info->participants[$in]->damageDealtToObjectives, 0) : __("N/A");
+                                    $visionWards = isset($inhalt->info->participants[$in]->detectorWardsPlaced) ? $inhalt->info->participants[$in]->detectorWardsPlaced : __("N/A");
+                                    $creepScore = isset($inhalt->info->participants[$in]->totalMinionsKilled, $inhalt->info->participants[$in]->neutralMinionsKilled) ? $inhalt->info->participants[$in]->totalMinionsKilled + $inhalt->info->participants[$in]->neutralMinionsKilled : __("N/A");
+                                    $visionScore = isset($inhalt->info->participants[$in]->visionScore) ? $inhalt->info->participants[$in]->visionScore : __("N/A");
+                                    $turretPlatings = isset($inhalt->info->participants[$in]->challenges->turretPlatesTaken) ? $inhalt->info->participants[$in]->challenges->turretPlatesTaken : __("N/A");
+                                    
+
+                            // Display of champion level at end of game
+                            $returnString .= '<div class="champion-level flex relative w-4 h-4 max-w-[16px] min-w-[16px] z-20 -ml-4 twok:bottom-[17px] twok:-right-[17px] twok:text-[13px] fullhd:bottom-[8px] fullhd:-right-[15px] fullhd:text-[12px] justify-center items-center">';
+                            $returnString .= $inhalt->info->participants[$in]->champLevel;
+                            $returnString .= '</div>';
+
+                            // Display of played Position
+                            $returnString .= "<div class='champion-lane flex relative w-4 h-4 twok:max-w-[16px] twok:min-w-[16px] z-20 -ml-4 twok:bottom-[33px] twok:-right-[66px] fullhd:max-w-[14px] fullhd:min-w-[14px] fullhd:bottom-[25px] fullhd:-right-[56px] justify-center items-center'>";
+                            $matchLane = $inhalt->info->participants[$in]->teamPosition;
+                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$matchLane.'.webp')){
+                                $returnString .= '<img src="/clashapp/data/misc/lanes/'.$matchLane.'.webp" width="16" height="16"  loading="lazy" class="max-w-[16px] min-w-[16px] saturate-0 brightness-150" alt="Icon of a league of legends position for '.$matchLane.'">';
+                            }
+                            $returnString .= "</div>";
+                            $returnString .= "</div>";
+
+                            // Display summoner spells
+                            $returnString .= '<div class="summoner-spells grid grid-rows-2 gap-1 twok:max-w-[32px] fullhd:max-w-[26px]">';
+                            $summoner1Id = $inhalt->info->participants[$in]->summoner1Id;
+                            $summoner2Id = $inhalt->info->participants[$in]->summoner2Id;
+                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).".webp")){
+                                $returnString .= '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner1Id).'.webp" width="32" height="32" class="rounded" loading="lazy" alt="Icon of a players first selected summoner spell">';
+                            }
+                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).".webp")){
+                                $returnString .= '<img src="/clashapp/data/misc/summoners/'.summonerSpellFetcher($summoner2Id).'.webp" width="32" height="32" class="rounded" loading="lazy" alt="Icon of a players second selected summoner spell">';
+                            }
+                            $returnString .= "</div>";
+
+
+
+                            // Display of the equipped keyrune + secondary tree
+                            $returnString .= '<div class="rune-container grid grid-cols-2 grid-rows-2 gap-y-1">';
+                            $returnString .= "<div class='flex col-span-2 row-span-1 justify-start items-center gap-1'>";
+                            $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
+                            $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
+                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp')){
+                                $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.webp" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
+                            } else {
+                                $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
+                            }
+                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp')){
+                                $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.webp" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
+                            } else {
+                                $returnString .= '<img src="/clashapp/data/misc/na.webp" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
+                            }
+                            $returnString .= "</div>";
+
+                            // calculate of Match Score 1-10
+                            foreach ($matchRankingArray as $matchID => $rankingValue){
+                                // print_r($matchID."<br>");
+                                if($matchID == $inhalt->metadata->matchId){
+                                    $matchScore = $matchRankingArray[$matchID];
+                                }
+                            }
+
+                            // Display Matchscore
+                            $returnString .= '<div class="matchscore-container flex row-span-1 col-span-2 justify-center items-center">';
+                            if($matchScore == "" || $matchScore == "N/A"){
+                                $returnString .= "<span class='cursor-help' onmouseenter='showTooltip(this, \"".__("Game length below minimum of 10min")."\", 500, \"top-right\")' onmouseleave='hideTooltip(this)'>&Oslash; N/A</span>";
+                            } else {
+                                $returnString .= '<span>&Oslash; '.$matchScore.'</span>';
+                            }
+                            $returnString .= "</div></div></div>";
+
+                            // Display of the players Kills/Deaths/Assists
+                            $returnString .= '<div class="kda-stats flex flex-col justify-center items-center"><div class="stats twok:text-[1.75rem] twok:tracking-tighter fullhd:text-[1.3rem] fullhd:-tracking-[.15rem]">';
+                            $kills = $inhalt->info->participants[$in]->kills;
+                            $deaths = $inhalt->info->participants[$in]->deaths;
+                            $assists = $inhalt->info->participants[$in]->assists;
+                            $returnString .= $kills . " / ";
+                            $returnString .= "<div class='inline text-threat-s'>".$deaths."</div> / ";
+                            $returnString .= $assists;
+                            $returnString .= '</div><div class="kda text-xs">';
+                            if($deaths != 0){
+                                $returnString .= __("KDA").": ".number_format(($kills+$assists)/$deaths, 2)."</div>";
+                            } else {
+                                $returnString .= __("KDA").": ".number_format(($kills+$assists)/1, 2)."</div>";
+                            }
+                            $returnString .= "</div>";
+
+                            // Display of the last items the user had at the end of the game in his inventory
+                            $returnString .= '<div class="items grid grid-rows-2 grid-cols-3 twok:max-w-[104px] twok:min-w-[104px] fullhd:max-w-[84.5px] fullhd:min-w-[84.5px] gap-1">';
+                            $noItemCounter = 0;
+                            // $lastItemSlot = 0;
+                            for($b=0; $b<6; $b++){
+                                // if($b == 6){
+                                //     for($c=0; $c<$noItemCounter; $c++){
+                                //         $returnString .= '<div class="item'.($lastItemSlot+1).'">';
+                                //         $returnString .= '<img src="/clashapp/data/misc/0.webp" width="32" loading="lazy">';
+                                //         $returnString .= '</div>';
+                                //         $lastItemSlot++;
+                                //     }
+                                //     $returnString .= '<div class="trinket">';
+                                // }
+                                $allItems = "item".$b;
+                                $itemId = $inhalt->info->participants[$in]->$allItems;
+                                if($itemId == 0){
+                                    $noItemCounter += 1;
+                                } else {
+                                    $returnString .= '<div class="item'.($b - $noItemCounter).'">';
+                                    if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/item/'.$itemId.'.webp')){
+                                        $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/item/' . $itemId . '.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon represents an equipped item at the end of a game">';
+                                    } else if(fileExistsWithCache('/hdd1/clashapp/data/misc/'.$itemId.'.webp')){
+                                        $returnString .= '<img src="/clashapp/data/misc/'.$itemId.'.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon represents an equipped special ornn item at the end of the game or other exceptions">';
+                                    } else {
+                                        $returnString .= '<img src="/clashapp/data/misc/0.webp" width="32" height="32" loading="lazy" class="rounded" alt="This icon will only be visible of neither the data dragon nor the local files contain the corresponding image">';
+                                    }
+                                    // $lastItemSlot = $b;
+                                    $returnString .= "</div>";
+                                }
+                            }
+                            for($i=0; $i<$noItemCounter; $i++){
+                                $returnString .= '<div class="emptySlot block w-8 h-8 rounded bg-dark opacity-40"></div>';
+                            }
+                            $returnString .= "</div>";
+                            // Calculate own Takedowns of Kill Participation
+                            $ownTakedowns = 0;
+                            $ownTakedowns += $inhalt->info->participants[$in]->kills;
+                            $ownTakedowns += $inhalt->info->participants[$in]->assists;
+                        }
+                    }
+
+                    $returnString .= '</div>';
+                    $returnString .= '<div class="additional-info px-2" x-cloak x-show="advanced || advancedGlobal" x-transition><div class="additional-info-1 grid twok:grid-cols-[1fr_1fr_1fr_1fr_46px_auto] fullhd:twok:grid-cols-[1fr_1fr_1fr_1fr_37.375px_auto] twok:text-base fullhd:text-[13px] grid-rows-3 justify-center items-center gap-1 mt-2 text-sm">';
+                    // Display of enemy champions icon in lane
+                        for($i = 0; $i < 10; $i++){
+                            if (($inhalt->info->participants[$i]->teamPosition == $matchLane) && ($inhalt->info->participants[$i]->championName != $champion)){
+                            $returnString .= '<div class="lane-opponent col-span-1 row-span-1 h-full flex justify-center items-center gap-2"><span>vs. </span>';
+                            $enemyChamp = $inhalt->info->participants[$i]->championName;
+                            if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
+                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp')){
+                                $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.webp" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
+                            } else {
+                                $returnString .= '<img src="/clashapp/data/misc/na.webp" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents a value not being available"></div>';
+                            }
+                            }
+                            if ($inhalt->info->participants[$i]->teamId == $teamID){
+                                $totalTeamTakedowns += $inhalt->info->participants[$i]->kills;
+                            }
+                        }
+
+                        $returnString .= '<div class="damage-dealt col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
+                        $returnString .= '<img src="/clashapp/data/misc/icons/Dealt.webp" width="24" height="26" class="twok:max-w-[24px] fullhd:max-w-[19.5px]" loading="lazy" alt="An icon of a sword clashing through a bone">';
+                        $returnString .= '<span>'.$dealt.'</span>';
+                        $returnString .= '</div>';
+
+
+                        $returnString .= '<div class="kill-participation col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
+                        $returnString .= '<img src="/clashapp/data/misc/icons/KillParticipation.webp" width="32" height="26" class="max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="An icon of two swords clashing with each other">';
+                            if($totalTeamTakedowns != 0){
+                                $returnString .= "<span>".number_format(($ownTakedowns/$totalTeamTakedowns)*100, 0). "%</span>";
+                            } else {
+                                $returnString .= "<span>0%</span>";
+                            }
+                        $returnString .= '</div>';
+
+                        $returnString .= '<div class="visionscore col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
+                        $returnString .= '<img src="/clashapp/data/misc/icons/VisionScore.webp" width="36" height="23" class="max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a vision ward from League of Legends">';
+                        $returnString .= '<span>'.$visionScore.'</span>';
+                        $returnString .= "</div>";
+
+                        $returnString .= '<div class="col-span-1 row-span-2 h-full flex justify-center items-center">';
+                        $returnString .= '<img src="/clashapp/data/misc/icons/Turret.webp" width="36" height="76" class="twok:max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a tower from League of Legends">';
+                        $returnString .= '</div>';
+
+                        $returnString .= '<div class="damage-to-objectives col-span-1 row-span-1 h-full flex justify-center items-center">';
+                        $returnString .= __("Objs").": ".$objs;
+                        $returnString .= "</div>";
+
+                        $returnString .= '<div class="creepscore col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
+                        $returnString .= '<img src="/clashapp/data/misc/icons/Creepscore.webp" width="32" height="19" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="An icon of two coins">';
+                        $returnString .= '<span>'.$creepScore.'</span>';
+                        $returnString .= "</div>";
+
+                        $returnString .= '<div class="damage-tanked col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
+                        $returnString .= '<img src="/clashapp/data/misc/icons/Tanked.webp" width="20.5" height="26" class="twok:max-w-[20.5px] fullhd:max-w-[16.65625px]" loading="lazy" alt="An icon of a shield with two cracks">';
+                        $returnString .= '<span>'.$tanked.'</span>';
+                        $returnString .= '</div>';
+
+                        $returnString .= '<div class="damage-healed-and-shielded col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
+                        $returnString .= '<img src="/clashapp/data/misc/icons/Shealed.webp" width="27" height="28" class="twok:max-w-[27px] fullhd:max-w-[21.9375px]" loading="lazy" alt="An icon of a plus symbol converging into a shield">';
+                        $returnString .= '<span>'.$shealed.'</span>';
+                        $returnString .= "</div>";
+
+                        $returnString .= '<div class="control-wards col-span-1 row-span-1 h-full flex justify-start items-center gap-1">';
+                        $returnString .= '<img src="/clashapp/data/misc/icons/ControlWard.webp" width="36" height="25" class="twok:max-w-[36px] fullhd:max-w-[29.25px]" loading="lazy" alt="An icon of a control ward from League of Legends">';
+                        $returnString .= '<span>'.$visionWards.'</span>';
+                        $returnString .= "</div>";
+
+                        $returnString .= '<div class="turret-platings col-span-1 row-span-1 h-full flex justify-center items-center">';
+                        $returnString .= __("Platings").': '.$turretPlatings;
+                        $returnString .= "</div>";
+
+                        $returnString .= '<div class="match-tag-container col-span-6 row-span-1 h-full flex justify-start items-center gap-4 ">';
+                        $returnString .= "</div>";
+
+                        $returnString .= '</div></div>';
+                        $returnString .= '<button type="button" class="collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4" @click="advanced = !advanced" x-text="advanced ? \'&#11165;\' : \'&#11167;\'"></button>';
+                        $returnString .= '</div>';
+
+                    $totalTeamTakedowns = 0; // Necessary to reset Kill Participation
+                    }
+                }
+            }
+        } else {
+        return "";
+    }
+    
 
     $returnString .= "</div>";
+    $timeArray[$puuid]["PrintMatchHistoryBottom"]["Time"] = number_format((microtime(true) - $startPrintMatchHistoryBottom), 2, ',', '.')." s";
+    echo "<script>console.log(".json_encode($timeArray).");</script>";
     return $returnString;
     // End of Matchdetail Table & Counttext of local specific amount
     // $returnString += "<br>Es wurden " . $count ." lokale Matchdaten gefunden<br>";
@@ -957,7 +1022,7 @@ function printMasteryInfo($masteryArray, $index){
     global $currentPatch;
 
     // Print image if it exists
-    if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp')){
+    if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp')){
         echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$masteryArray[$index]["Filename"].'.webp" width="64" height="64" alt="A league of legends champion icon of '.$masteryArray[$index]["Filename"].'"><br>';
     }
 
@@ -1951,7 +2016,7 @@ function showBanSelector(){
         $imgPath = substr($champData->image->full, 0, -4).".webp";
         $dataId = $champData->id;
         if($i<15){
-            if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
+            if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion' style='content-visibility: auto;'>";
                     echo '<div class="ban-hoverer inline-grid group" onclick="addToFile(this.parentElement);">';
                         echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'"
@@ -1962,7 +2027,7 @@ function showBanSelector(){
             echo "</div>";
             }
         } else {
-            if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
+            if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion' style='content-visibility: auto;'>";
                     echo '<div class="ban-hoverer inline-grid group" onclick="addToFile(this.parentElement);">';
                         echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'"
@@ -3035,6 +3100,32 @@ function objectToArray($object) {
     }
 }
 
+function fileExistsWithCache($filePath)
+{
+    global $fileExistsCache;
+
+    // Check if the file existence is already cached
+    if (isset($fileExistsCache[$filePath])) {
+        return $fileExistsCache[$filePath];
+    }
+
+    // If not cached, perform the file existence check
+    $exists = file_exists($filePath);
+
+    // Cache the result
+    $fileExistsCache[$filePath] = $exists;
+
+    return $exists;
+}
+
+function addToGlobalMatchDataCache($inhalt){
+    global $matchDataCache;
+
+    if (!isset($matchDataCache[$inhalt->metadata->matchId])) {
+        $matchDataCache[$inhalt->metadata->matchId] = $inhalt;
+    }
+    return;
+}
 
 /** Always active "function" to collect the teamID of a given Summoner Name
  * This function calls an API request as soon as the sumname gets posted from the team.php
