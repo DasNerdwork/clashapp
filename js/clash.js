@@ -562,69 +562,74 @@ function createAutosuggestItem(key, icon, currentPatch, variant) {
 
 document.addEventListener('DOMContentLoaded', function () {
   const sliderContainers = document.querySelectorAll('.slider-container');
-
-  sliderContainers.forEach((slider) => {
-    let isDown = false;
-    let startX;
-    let scrollLeft;
-    let snapPoints = []; // Array to store the snap points
-
-    // Calculate snap points based on the slider item width including the gap
-    const sliderItemWidth = slider.querySelector('.slider-item').offsetWidth;
-    const gapWidth = 32; // Adjust this value to match your Tailwind gap class (e.g., gap-8 = 2rem)
-
-    for (let i = 0; i < slider.scrollWidth; i += sliderItemWidth + gapWidth) {
-      snapPoints.push(i);
-    }
-
-    const end = () => {
-      isDown = false;
-
-      // Find the closest snap point to the current scroll position
-      const currentScrollLeft = slider.scrollLeft;
-      const closestSnapPoint = snapPoints.reduce((prev, curr) => {
-        return Math.abs(curr - currentScrollLeft) < Math.abs(prev - currentScrollLeft) ? curr : prev;
-      });
-
-      // Snap to the closest snap point
-      slider.scrollTo({
-        left: closestSnapPoint,
-        behavior: 'smooth', // You can use 'auto' for instant snap
-      });
-    }
-
-    const start = (e) => {
-      isDown = true;
-      startX = e.pageX || e.touches[0].pageX - slider.offsetLeft;
-      scrollLeft = slider.scrollLeft;
-    }
-
-    const move = (e) => {
-      if (!isDown) return;
-
-      e.preventDefault();
-      const x = e.pageX || e.touches[0].pageX - slider.offsetLeft;
-      const dist = (x - startX);
-      slider.scrollLeft = scrollLeft - dist;
-    }
-
-    // Add event listeners to the slider for mouse and touch events
-    slider.addEventListener('mousedown', start);
-    slider.addEventListener('touchstart', start, {passive: true});
-    slider.addEventListener('mousemove', move);
-    slider.addEventListener('touchmove', move, {passive: true});
-    slider.addEventListener('mouseup', end);
-    slider.addEventListener('touchend', end);
-    slider.addEventListener('mouseleave', end);
-    slider.addEventListener('dragstart', (e) => {e.preventDefault();});
-
-    // Add scroll wheel event listener for whole-element scrolling
-    slider.addEventListener('wheel', (e) => {
-      if (e.deltaY > 0) {
-        slider.scrollLeft += sliderItemWidth + gapWidth;
-      } else {
-        slider.scrollLeft -= sliderItemWidth + gapWidth;
+  if(sliderContainers != null){
+    sliderContainers.forEach((slider) => {
+      let isDown = false;
+      let startX;
+      let scrollLeft;
+      let snapPoints = []; // Array to store the snap points
+  
+      // Calculate snap points based on the slider item width including the gap
+      let sliderItem = slider.querySelector('.slider-item');
+      if(sliderItem){
+        const sliderItemWidth = slider.querySelector('.slider-item').offsetWidth;
+        const gapWidth = 32; // Adjust this value to match your Tailwind gap class (e.g., gap-8 = 2rem)
+    
+        for (let i = 0; i < slider.scrollWidth; i += sliderItemWidth + gapWidth) {
+          snapPoints.push(i);
+        }
+    
+        const end = () => {
+          isDown = false;
+    
+          // Find the closest snap point to the current scroll position
+          const currentScrollLeft = slider.scrollLeft;
+          const closestSnapPoint = snapPoints.reduce((prev, curr) => {
+            return Math.abs(curr - currentScrollLeft) < Math.abs(prev - currentScrollLeft) ? curr : prev;
+          });
+    
+          // Snap to the closest snap point
+          slider.scrollTo({
+            left: closestSnapPoint,
+            behavior: 'smooth', // You can use 'auto' for instant snap
+          });
+        }
+    
+        const start = (e) => {
+          isDown = true;
+          startX = e.pageX || e.touches[0].pageX - slider.offsetLeft;
+          scrollLeft = slider.scrollLeft;
+        }
+    
+        const move = (e) => {
+          if (!isDown) return;
+    
+          e.preventDefault();
+          const x = e.pageX || e.touches[0].pageX - slider.offsetLeft;
+          const dist = (x - startX);
+          slider.scrollLeft = scrollLeft - dist;
+        }
+    
+        // Add event listeners to the slider for mouse and touch events
+        slider.addEventListener('mousedown', start);
+        slider.addEventListener('touchstart', start, {passive: true});
+        slider.addEventListener('mousemove', move);
+        slider.addEventListener('touchmove', move, {passive: true});
+        slider.addEventListener('mouseup', end);
+        slider.addEventListener('touchend', end);
+        slider.addEventListener('mouseleave', end);
+        slider.addEventListener('dragstart', (e) => {e.preventDefault();});
+    
+        // Add scroll wheel event listener for whole-element scrolling
+        slider.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          if (e.deltaY > 0 || e.deltaX > 0) {
+            slider.scrollLeft += sliderItemWidth + gapWidth;
+          } else {
+            slider.scrollLeft -= sliderItemWidth + gapWidth;
+          }
+        }, {passive: false});
       }
-    }, {passive: true});
-  });
+    });
+  }
 });
