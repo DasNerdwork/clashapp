@@ -133,3 +133,7 @@ function getCookie(name) {
         return parts.pop().split(';').shift();
     }
 }
+
+function insertAfter(referenceNode, newNode) {
+  referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+}

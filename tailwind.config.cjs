@@ -6,6 +6,7 @@ module.exports = {
     "./js/*.js",
     "./live/*.php",
     "./templates/*.{html,php}",
+    "./ajax/*.php",
   ],
   safelist: [
     'bg-lose',
@@ -82,6 +83,8 @@ module.exports = {
         'dark' : '#141624',
         'darker': '#0e0f18',
         'whiteblue': '#ccd0eb',
+        'loading': '#565656',
+        'loading-light': '#acacac',
       },
       gridTemplateColumns: {
         'topbartwok': '25% 328px auto 328px 25%',
