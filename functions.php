@@ -77,7 +77,7 @@ function getPlayerData($type, $id){
         case "sumid":
             $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/";
             break;
-    }    
+    }
 
     // Curl API request block
     $ch = curl_init();
@@ -538,10 +538,10 @@ function getMatchData($matchIDArray){
             ],
         ],
     ];
-    
+
     // Call the aggregation pipeline
     $cursor = $mdb->aggregate("matches", $pipeline, []);
-    
+
     // Process the results as needed
     foreach ($cursor as $document) {
         if(memory_get_usage() - $startMemory > "268435456") return $matchData; // If matchData array bigger than 256MB size or more than 500 matches -> stop and return
@@ -625,7 +625,6 @@ function secondsToTime($seconds) {
  */
 
 function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
-    $startPrintMatchHistoryTop = microtime(true);
     global $mdb;
     global $currentPatch;
     global $currentTimestamp;
@@ -639,7 +638,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
     // Initiating Matchdetail Table
     $returnString .= "<button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full'
-            :aria-label=\"'Toggle Matchhistory ' . ($open ? 'expanded' : 'collapsed') \"
+            :aria-label=\"'Toggle Matchhistory ' + (open ? 'expanded' : 'collapsed') \"
             @click='open = !open'
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
     $returnString .= "<div class='smooth-transition w-full overflow-hidden twok:min-h-[2300px] fullhd:min-h-[1868.75px]' x-show='open' x-transition x-cloak>";
@@ -693,13 +692,13 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     ];
     $result = $mdb->findDocumentsByMatchIds('matches', 'metadata.matchId', $matchIDArrayWithoutCached, $fieldsToRetrieve);
 
-    $startPrintMatchHistoryBottom = microtime(true);
     if($result['success']){
         $matchDataArray = $result['documents'];
         // Combine cached data with new queried data
         $mergedMatchData = array_merge((array)$matchDataArray, $matchTestTempArray);
         $matchDataArray = json_decode(json_encode($mergedMatchData));
-        foreach($matchDataArray as $inhalt){
+        $sortedMatchData = sortByMatchIds($matchDataArray);
+        foreach($sortedMatchData as $inhalt){
             // Cache MongoDB Query Data (if not already cached) for future requests
             addToGlobalMatchDataCache($inhalt);
             if(isset($inhalt->metadata->cached)){
@@ -794,7 +793,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                                     $creepScore = isset($inhalt->info->participants[$in]->totalMinionsKilled, $inhalt->info->participants[$in]->neutralMinionsKilled) ? $inhalt->info->participants[$in]->totalMinionsKilled + $inhalt->info->participants[$in]->neutralMinionsKilled : __("N/A");
                                     $visionScore = isset($inhalt->info->participants[$in]->visionScore) ? $inhalt->info->participants[$in]->visionScore : __("N/A");
                                     $turretPlatings = isset($inhalt->info->participants[$in]->challenges->turretPlatesTaken) ? $inhalt->info->participants[$in]->challenges->turretPlatesTaken : __("N/A");
-                                    
+
 
                             // Display of champion level at end of game
                             $returnString .= '<div class="champion-level flex relative w-4 h-4 max-w-[16px] min-w-[16px] z-20 -ml-4 twok:bottom-[17px] twok:-right-[17px] twok:text-[13px] fullhd:bottom-[8px] fullhd:-right-[15px] fullhd:text-[12px] justify-center items-center">';
@@ -991,7 +990,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $returnString .= "</div>";
 
                         $returnString .= '</div></div>';
-                        $returnString .= '<button type="button" :aria-label=\'Toggle Matchhistory ' . ($advanced ? "expanded" : "collapsed") . '\' . class="collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4" @click="advanced = !advanced" x-text="advanced ? \'&#11165;\' : \'&#11167;\'"></button>';
+                        $returnString .= "<button type='button' :aria-label=\"'Toggle Details ' + (advanced ? 'expanded' : 'collapsed') \"  class='collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4' @click='advanced = !advanced' x-text='advanced ? \"&#11165;\" : \"&#11167;\"'></button>";
                         $returnString .= '</div>';
 
                     $totalTeamTakedowns = 0; // Necessary to reset Kill Participation
@@ -1001,7 +1000,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
         } else {
         return "";
     }
-    
+
 
     $returnString .= "</div>";
     return $returnString;
@@ -1278,7 +1277,7 @@ function getPlayerTags($matchDaten, $puuid, $playerLanes){
                     $tempAverageArray[$participant->teamPosition]["gameCount"]++;
                 } else {
                     $tempAverageArray[$participant->teamPosition]["gameCount"] = 1;
-                }                
+                }
                 foreach($participant->challenges as $challenge => $value) { // Get all challenge sums
                     if(!isset($tempAverageArray[$participant->teamPosition][$challenge])){
                         $tempAverageArray[$participant->teamPosition][$challenge] = $value;
@@ -1339,7 +1338,7 @@ function getPlayerTags($matchDaten, $puuid, $playerLanes){
                     $difference = (($value - $averageValue) / abs($averageValue));
                     if ($difference <= -0.5 || $difference >= 0.5) { // Only save difference if relevant
                         $tagReturnArray[$lane][$key] = number_format($difference, 2);
-                    } 
+                    }
                 }
             }
         }
@@ -2832,7 +2831,7 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
 function generateTag($tagText, $bgColor, $tooltipText, $additionalData = "") {
     $translatedTagText = __($tagText);
     $translatedTooltipText = __($tooltipText);
-    if(isset($_COOKIE["tagOptions"])){ 
+    if(isset($_COOKIE["tagOptions"])){
         if($_COOKIE["tagOptions"] == "multi-colored"){
             return "<div class='playerTag list-none border border-solid border-[#141624] py-2 px-3 rounded h-fit text-[#cccccc] $bgColor cursor-help'
                     onmouseenter='showTooltip(this, \"$translatedTooltipText\", 500, \"top-right\")'
@@ -3092,6 +3091,14 @@ function tagSelector($tagArray) {
     return $returnString;
 }
 
+/**
+ * Converts an object to an array
+ *
+ * @param object $object The full path of the file as a string, just as file_exists would need
+ *
+ * @return array|boolean Returns either the converted array as an object or false if it fails
+ *
+ */
 function objectToArray($object) {
     if (is_object($object) || is_array($object)) {
         $result = [];
@@ -3100,28 +3107,43 @@ function objectToArray($object) {
         }
         return $result;
     } else {
-        return $object;
+        return false;
     }
 }
 
+/**
+ * Caches the I/O extensive file_exists request for subsequent calls or in other words
+ * checks if a file existence check was already performed and returns the result if so
+ *
+ * @param string $filePath The full path of the file as a string, just as file_exists would need
+ *
+ * @return boolean Returns the cached existence query result (true/false)
+ *
+ */
 function fileExistsWithCache($filePath)
 {
     global $fileExistsCache;
 
-    // Check if the file existence is already cached
+    // Check if already cached
     if (isset($fileExistsCache[$filePath])) {
         return $fileExistsCache[$filePath];
     }
 
-    // If not cached, perform the file existence check
+    // If not, perform check and cache
     $exists = file_exists($filePath);
-
-    // Cache the result
     $fileExistsCache[$filePath] = $exists;
 
     return $exists;
 }
 
+/**
+ * Adds the contents of the specified matchdata ($inhalt) to the global match data cache for subsequent player requests
+ *
+ * @param object $inhalt An object with the matchdata of a specific match, e.g. EUW_XXXXXXX 
+ *
+ * @return void
+ *
+ */
 function addToGlobalMatchDataCache($inhalt){
     global $matchDataCache;
 
@@ -3129,6 +3151,119 @@ function addToGlobalMatchDataCache($inhalt){
         $matchDataCache[$inhalt->metadata->matchId] = $inhalt;
     }
     return;
+}
+
+/**
+ * Necessary helper function to sort the matchdata in correct order after merging database and cache matchdata
+ *
+ * @param array $matchDataArray An array containing the merged cached and database requested matchdata
+ *
+ * @return array $matchDataArray the sorted array
+ *
+ */
+function sortByMatchIds($matchDataArray) {
+    usort($matchDataArray, function ($a, $b) {
+        $matchIdA = isset($a->metadata->matchId) ? $a->metadata->matchId : '';
+        $matchIdB = isset($b->metadata->matchId) ? $b->metadata->matchId : '';
+        $numericIdA = intval(substr($matchIdA, strrpos($matchIdA, '_') + 1));
+        $numericIdB = intval(substr($matchIdB, strrpos($matchIdB, '_') + 1));
+        return $numericIdB - $numericIdA;
+    });
+    return $matchDataArray;
+}
+
+function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, $reload) {
+    return "<script>
+    console.log('Starting ".$requestIterator.". generatePlayerColumnData');
+
+    var xhrPCD".$requestIterator." = new XMLHttpRequest();
+    xhrPCD".$requestIterator.".open('POST', '/ajax/generatePlayerColumn.php', true);
+    xhrPCD".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    xhrPCD".$requestIterator.".onreadystatechange = function() {
+        if (xhrPCD".$requestIterator.".readyState === 4 && xhrPCD".$requestIterator.".status === 200) {
+            var response = JSON.parse(xhrPCD".$requestIterator.".responseText);
+            console.log('Receiving ajax data from ".$requestIterator.". generatePlayerColumnData');
+            var scriptContent = response.script;
+            var scriptElement = document.createElement('script');
+            scriptElement.text = scriptContent;
+            document.head.appendChild(scriptElement);
+            document.getElementById('animate-body-".$requestIterator."').classList = [];
+            document.getElementById('queuerole-".$requestIterator."').classList.replace('brightness-100', 'brightness-150');
+            let loadingTextElements = document.getElementById('single-player-column-".$requestIterator."').querySelectorAll('.text-loading-light');
+            loadingTextElements.forEach(function(element) {
+                element.classList.remove('text-loading-light');
+            });
+            if(response.profileIconSrc){
+                let profileIcon = document.getElementById('profileicon-".$requestIterator."');
+                profileIcon.removeAttribute('style');
+                profileIcon.src = response.profileIconSrc;
+                if(response.upperPlate && response.upperContent){
+                    profileIcon.insertAdjacentHTML('afterend', response.upperPlate);
+                    profileIcon.nextElementSibling.insertAdjacentHTML('afterend', response.upperContent);
+                }
+                if(response.lowerPlate){
+                    profileIcon.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.lowerPlate);
+                }
+                if(response.profileBorder){
+                    document.querySelectorAll('.profileborder-030').forEach(e => e.remove());
+                    if(response.upperPlate || response.upperContent || response.lowerPlate){
+                        profileIcon.nextElementSibling.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.profileBorder);                
+                    } else {
+                        profileIcon.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.profileBorder);                
+                    }
+                }
+            }
+            if(response.playerLevel){
+                let playerLevelElement = document.querySelector('#single-player-column-".$requestIterator." .playerlevel');
+                playerLevelElement.classList.replace('text-loading-light', 'text-[#e8dfcc]');
+                playerLevelElement.innerText = response.playerLevel;
+            }
+            if(response.playerName){
+                let playerNameElement = document.getElementById('playername-".$requestIterator."');
+                playerNameElement.classList.remove('text-loading-light');
+                playerNameElement.innerText = response.playerName;
+            }
+            if(response.playerTag){
+                let playerTagElement = document.getElementById('playertag-".$requestIterator."');
+                playerTagElement.classList.replace('bg-loading', 'bg-searchtitle');
+                playerTagElement.classList.replace('text-gray-300', 'text-[#9ea4bd]');
+                playerTagElement.innerText = '#'+response.playerTag;
+            }
+            if(response.roleWarning){
+                document.getElementById('queuerole-".$requestIterator."').insertAdjacentHTML('afterend', response.roleWarning);
+            }
+            if(response.playerMainRoleSrc){
+                let mainRoleElement = document.getElementById('mainrole-".$requestIterator."')
+                mainRoleElement.classList.replace('brightness-100', 'brightness-150');
+                mainRoleElement.src = response.playerMainRoleSrc;
+            }
+            if(response.playerSecondaryRoleSrc){
+                let secRoleElement = document.getElementById('secrole-".$requestIterator."');
+                secRoleElement.classList.replace('brightness-100', 'brightness-150');
+                secRoleElement.src = response.playerSecondaryRoleSrc;
+            } else {
+                document.getElementById('secrole-".$requestIterator."').remove();
+            }
+            if(response.matchScore){
+                document.getElementById('matchscore-".$requestIterator."').innerText = response.matchScore;
+            }
+            if(response.rankedContent){
+                document.getElementById('rankcontent-".$requestIterator."').innerHTML = response.rankedContent;
+            }
+            if(response.masteryContent){
+                let masteryContent =  document.getElementById('masterycontent-".$requestIterator."');
+                masteryContent.classList.remove('justify-center');
+                masteryContent.innerHTML = response.masteryContent;
+            }
+            if(response.tagList){
+                document.getElementById('taglist-".$requestIterator."').innerHTML = response.tagList;
+            }
+        }
+    };
+    var data = 'iteration=".$requestIterator."&sumid=".$sumid."&teamid=".$teamID."&queuedas=".$queuedAs."&reload=".$reload."';
+    xhrPCD".$requestIterator.".send(data);
+    </script>";
 }
 
 /** Always active "function" to collect the teamID of a given Summoner Name
@@ -3165,7 +3300,7 @@ if(isset($_POST['sumname'])){
     curl_close($ch);
 
     if($httpCode == "200"){
-        
+
         if(empty(json_decode($tournamentsOutput, true))){
             echo $playerName;
         } else {
@@ -3177,7 +3312,7 @@ if(isset($_POST['sumname'])){
             $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);
-        
+
             // 429 Too Many Requests
             if($httpCode == "429"){
                 sleep(5);
@@ -3188,7 +3323,7 @@ if(isset($_POST['sumname'])){
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
                 curl_close($ch);
             }
-        
+
             // Decode and echo returned data, if not existent send to 404 page
             $clashData = json_decode($clashOutput, true);
             if(isset($clashData[0]["teamId"])){
