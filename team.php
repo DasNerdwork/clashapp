@@ -293,7 +293,7 @@ echo '
 
                                     if(!$execOnlyOnce) $startProfileIconBorders = microtime(true);
                                     $memProfileIconBorders = memory_get_usage();
-                                    $randomIconPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*"))];
+                                    $randomIconPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.webp")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.webp"))];
                                     echo "
                                         <div id='single-player-column-".$currentPlayerNumber2."' class='h-40 mt-4 grid grid-cols-2 gap-4 single-player-column' data-sumid='".$player["summonerId"]."'>
                                         <div class='relative flex justify-center'>
@@ -373,7 +373,7 @@ echo '
                                         ";
                                         $maxScore = 300;
                                         for ($i=0; $i < 4; $i++) { 
-                                            $randomChampPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*"))];
+                                            $randomChampPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.webp")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.webp"))];
                                             $randomScore = rand(30, $maxScore); echo "
                                             <div><div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab'>
                                                 <img src='".str_replace('/hdd1', '', $randomChampPath)."?version=".md5_file("{$randomChampPath}")."' width='64' height='64' class='block relative z-0' style='filter: grayscale(100%)' alt='A champion icon of the league of legends champion ".pathinfo(basename($randomChampPath), PATHINFO_FILENAME)."'>
