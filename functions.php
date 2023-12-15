@@ -3174,8 +3174,6 @@ function sortByMatchIds($matchDataArray) {
 
 function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, $reload) {
     return "<script>
-    console.log('Starting ".$requestIterator.". generatePlayerColumnData');
-
     var xhrPCD".$requestIterator." = new XMLHttpRequest();
     xhrPCD".$requestIterator.".open('POST', '/ajax/generatePlayerColumn.php', true);
     xhrPCD".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -3183,7 +3181,6 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
     xhrPCD".$requestIterator.".onreadystatechange = function() {
         if (xhrPCD".$requestIterator.".readyState === 4 && xhrPCD".$requestIterator.".status === 200) {
             var response = JSON.parse(xhrPCD".$requestIterator.".responseText);
-            console.log('Receiving ajax data from ".$requestIterator.". generatePlayerColumnData');
             var scriptContent = response.script;
             var scriptElement = document.createElement('script');
             scriptElement.text = scriptContent;
@@ -3237,6 +3234,8 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
                 let mainRoleElement = document.getElementById('mainrole-".$requestIterator."')
                 mainRoleElement.classList.replace('brightness-100', 'brightness-150');
                 mainRoleElement.src = response.playerMainRoleSrc;
+            } else {
+                document.getElementById('mainrole-".$requestIterator."').remove();
             }
             if(response.playerSecondaryRoleSrc){
                 let secRoleElement = document.getElementById('secrole-".$requestIterator."');
@@ -3258,6 +3257,9 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
             }
             if(response.tagList){
                 document.getElementById('taglist-".$requestIterator."').innerHTML = response.tagList;
+            }
+            if(response.matchHistoryContent){
+                document.getElementById('matchhistory-".$requestIterator."').innerHTML = response.matchHistoryContent;
             }
         }
     };
