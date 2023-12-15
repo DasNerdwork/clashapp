@@ -37,8 +37,9 @@ $requestIterator = 0;
 //     updateProfile($_POST["username"], 150);
 // }
 
-function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
+function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
     if($id != ""){
+        $returnScriptContent = "";
         $mdb = new MongoDBHelper();
         $playerData = getPlayerData($type,$id);
         $playerName = $playerData["GameName"];
@@ -85,19 +86,19 @@ function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
                     }
                 }
                 if(empty($tempAjaxMatchIDArray)){
-                    echo "<script>console.log('All matches of ".$playerName." already local.');
+                    $returnScriptContent .= "console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
                     xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
                     processResponseData($ajaxUniquifier)
                     ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
                     if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
-                        callAllFinish($requestIterator)
+                        callAllFinish($requestIterator, $teamID)
                         ."
                     }</>";
                 } else {
                 // THIS REQUEST IS SENT IF A PLAYER IS MISSING SOME MATCH IDS IN THEIR PLAYERFILE
-                echo "<script>
+                $returnScriptContent .= "
                 var startTime".$requestIterator." = new Date().getTime();
                 var xhr".$requestIterator." = new XMLHttpRequest();
 
@@ -117,7 +118,7 @@ function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
                         ."
                         xhrAfter".$ajaxUniquifier.".send(xhrMessage);
                         if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
-                            callAllFinish($requestIterator)
+                            callAllFinish($requestIterator, $teamID)
                             ."
                         }
                     }
@@ -126,7 +127,7 @@ function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
                 var data = 'matches=".json_encode($tempAjaxMatchIDArray)."&playerName=".$playerName."';
 
                 xhr".$requestIterator.".send(data);
-                </script>
+                
                 ";
                 $return = false;
                 }
@@ -161,19 +162,19 @@ function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
             
             if($existingJson == ""){
                 if(empty($tempAjaxMatchIDArray)){
-                    echo "<script>console.log('All matches of ".$playerName." already local.');
+                    $returnScriptContent .= "console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
                     xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
                     processResponseData($ajaxUniquifier)
                     ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
                     if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
-                        callAllFinish($requestIterator)
+                        callAllFinish($requestIterator, $teamID)
                         ."
-                    }</script>";
+                    }";
                 } else {
                 // THIS REQUEST IS SENT IF NO PLAYER FILE EXISTS / LINE 69 IS SKIPPED
-                echo "<script>
+                $returnScriptContent .= "
                 var startTime".$requestIterator." = new Date().getTime();
                 var xhr".$requestIterator." = new XMLHttpRequest();
 
@@ -193,7 +194,7 @@ function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
                         ."
                         xhrAfter".$ajaxUniquifier.".send(xhrMessage);
                         if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
-                            callAllFinish($requestIterator)
+                            callAllFinish($requestIterator, $teamID)
                             ."
                         }
                     }
@@ -202,13 +203,14 @@ function updateProfile($id, $maxMatchIds, $type="riot-id", $tempMatchIDs=null){
                 var data = 'matches=".json_encode($tempAjaxMatchIDArray)."&playerName=".$playerName."';
 
                 xhr".$requestIterator.".send(data);
-                </script>
+                
                 ";
                 }
             }
         }
     }
     $requestIterator++;
+    return $returnScriptContent;
 }
 
 function processResponseData($ajaxUniquifier){
@@ -278,7 +280,7 @@ function processResponseData($ajaxUniquifier){
     };";
 }
 
-function callAllFinish($requestIterator) {
+function callAllFinish($requestIterator, $teamID) {
     return "
     console.log('ALL PLAYERS FINISHED');
 
@@ -295,7 +297,7 @@ function callAllFinish($requestIterator) {
         }
     };
     sumids = Object.keys(requests).join(',');
-    teamID = '".filter_var($_GET["name"], FILTER_SANITIZE_URL)."';
+    teamID = '".$teamID."';
     var data = 'sumids=' + sumids + '&teamid=' + teamID;
     setTimeout(function() {
         xhrFinal".$requestIterator.".send(data);
