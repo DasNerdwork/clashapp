@@ -1,6 +1,7 @@
 <?php
 include_once('/hdd1/clashapp/functions.php');
 require_once '/hdd1/clashapp/mongo-db.php';
+include_once('/hdd1/clashapp/update.php');
 
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
@@ -18,6 +19,7 @@ if(isset($_POST['sumid'])){
     $rankedContent = "";
     $masteryContent = "";
     $tagList = "";
+    $matchHistoryContent = "";
     $recalculateSuggestedBanData = false;
     $upToDate = false;
     global $currentPatch;
@@ -37,7 +39,7 @@ if(isset($_POST['sumid'])){
                     }
                 }
                 if((array_keys($playerDataJSON["MatchIDs"])[0] != $tempMatchIDs[0]) || $matchInPlayerJsonButNotExistent){ // If first matchid is outdated -> call updateProfile below because $sumid is still unset from above
-                    $scriptContent .= "<script>console.log('INFO: ".$playerDataJSON["PlayerData"]["GameName"]." was out-of-date -> Force updating.'); requests['".$tempSumid."'] = 'Pending';</script>";
+                    $scriptContent .= "console.log('INFO: ".$playerDataJSON["PlayerData"]["GameName"]." was out-of-date -> Force updating.'); requests['".$tempSumid."'] = 'Pending';";
                     $recalculateSuggestedBanData = true;
                 } else {
                     $playerName = $playerDataJSON["PlayerData"]["GameName"];
@@ -49,7 +51,7 @@ if(isset($_POST['sumid'])){
                     $masteryData = $playerDataJSON["MasteryData"];
                     $matchids = array_keys($playerDataJSON["MatchIDs"]);
 
-                    $scriptContent .= "<script>console.log('".$playerName." already up to date.'); requests['".$tempSumid."'] = 'Done';</script>";
+                    $scriptContent .= "console.log('".$playerName." already up to date.'); requests['".$tempSumid."'] = 'Done';";
                     $recalculateMatchIDs = false;
                     $recalculatePlayerLanes = false;
                     foreach($playerDataJSON["MatchIDs"] as $singleMatchID => $score){
@@ -81,11 +83,11 @@ if(isset($_POST['sumid'])){
                     }
 
                     if($recalculatePlayerLanes || $recalculateMatchIDs){
-                        $scriptContent .= "<script>
+                        $scriptContent .= "
                         ".processResponseData($iteration)."
                         var data = '".$xhrMessage."';
                         xhrAfter".$iteration.".send(data);
-                        </script>
+                        
                         ";
                     } else {
                         $upToDate = true;
@@ -126,22 +128,23 @@ if(isset($_POST['sumid'])){
                 if($recalculatePlayerLanes){
                     if($recalculateMatchIDs){
                         // If both player lanes and matchscores are missing/wrong in players .json
-                        $xhrMessage = "mode=both&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid."&sumid=".$sumid;
+                        $xhrMessage = "mode=both&matchids=".json_encode($playerDataJSON["MatchIDs"])."&puuid=".$puuid."&sumid=".$sumid;
                     } else {
                         // if only player lanes are missing/wrong
-                        $xhrMessage = "mode=lanes&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&puuid=".$puuid;
+                        $xhrMessage = "mode=lanes&matchids=".json_encode($playerDataJSON["MatchIDs"])."&puuid=".$puuid;
                     }
                 } elseif($recalculateMatchIDs){
                     // if only matchscores are wrong/missing
-                    $xhrMessage = "mode=scores&matchids=".json_encode($playerDataJSON["MatchIDs"])."&path=".$playerDataJSONPath."&sumid=".$sumid;
+                    $xhrMessage = "mode=scores&matchids=".json_encode($playerDataJSON["MatchIDs"])."&sumid=".$sumid;
                 }
 
                 if($recalculatePlayerLanes || $recalculateMatchIDs){
-                    $scriptContent .= "<script>
+                    $scriptContent .= "
+                    console.log('we gotta goooo');
                     ".processResponseData($iteration)."
                     var data = '".$xhrMessage."';
                     xhrAfter".$iteration.".send(data);
-                    </script>
+                    
                     ";
                 } else {
                     $upToDate = true;
@@ -150,8 +153,8 @@ if(isset($_POST['sumid'])){
         }
     }
     if(!isset($sumid) && $tempSumid != "") {
-        $scriptContent .= "<script>console.log('No playerfile found or out of date (".$tempSumid.")'); requests['".$tempSumid."'] = 'Pending';</script>";
-        updateProfile($tempSumid, 15, "sumid");
+        $scriptContent .= "console.log('No playerfile found or out of date (".$tempSumid.")'); requests['".$tempSumid."'] = 'Pending';";
+        $scriptContent .= updateProfile($tempSumid, $teamID, "sumid");
         $playerDataRequest = $mdb->getPlayerBySummonerId($tempSumid);
         if($playerDataRequest["success"]){
             $playerDataJSONString = json_encode($playerDataRequest["data"]);
@@ -178,22 +181,22 @@ if(isset($_POST['sumid'])){
     // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
         if ($rankOrLevelArray["HighEloLP"] != ""){
             if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.webp')){
-                $upperPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.webp').'" width="64" height="24" class="absolute z-20 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
-                $upperContent = "<div class='font-bold color-[#e8dfcc] absolute mt-[0.3rem] text-xs z-20'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
+                $upperPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.webp').'" width="64" height="24" class="z-[9] absolute pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+                $upperContent = "<div class='font-bold color-[#e8dfcc] absolute mt-[0.3rem] text-xs z-[9]'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
             } 
         } else {
             if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp')){
-                $upperPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="30" height="18" class="absolute z-20 mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
-                $upperContent = "<div class='font-bold color-[#e8dfcc] absolute mt-[0.85rem] text-xs z-20'>".$rankOrLevelArray["RankNumber"]."</div>";
+                $upperPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="30" height="18" class="z-[9] absolute mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+                $upperContent = "<div class='font-bold color-[#e8dfcc] absolute mt-[0.85rem] text-xs z-[9]'>".$rankOrLevelArray["RankNumber"]."</div>";
             }
         }
-        $lowerPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="38" height="26" class="absolute z-20 mt-[6.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+        $lowerPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="38" height="26" class="z-[9] absolute mt-[6.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
         if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.webp')){
-            $profileBorder = '<img src="/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.webp').'" width="384" height="384" class="twok:max-w-[110%] fullhd:max-w-[148%] twok:top-[-8.25rem] fullhd:top-[-130px] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: linear-gradient(0deg, white 50%, transparent 65%); mask-image: linear-gradient(0deg, white 50%, transparent 65%);" alt="The profile border corresponding to a players rank">';
+            $profileBorder = '<img src="/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.webp').'" width="384" height="384" class="z-[8] twok:max-w-[110%] fullhd:max-w-[148%] twok:top-[-8.25rem] fullhd:top-[-130px] absolute pointer-events-none select-none" style="-webkit-mask-image: linear-gradient(0deg, white 50%, transparent 65%); mask-image: linear-gradient(0deg, white 50%, transparent 65%);" alt="The profile border corresponding to a players rank">';
         }
     } else if($rankOrLevelArray["Type"] === "Level") {
         if(fileExistsWithCache('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp')){
-            $profileBorder = '<img src="/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp?version='.md5_file('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp').'" width="190" height="190" class="absolute -mt-[2.05rem] z-10 pointer-events-none select-none" style="-webkit-mask-image: linear-gradient(0deg, white 75%, transparent 90%); mask-image: linear-gradient(0deg, white 75%, transparent 90%);" alt="The profile border corresponding to a players level">';
+            $profileBorder = '<img src="/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp?version='.md5_file('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp').'" width="190" height="190" class="z-[8] absolute -mt-[2.05rem] pointer-events-none select-none" style="-webkit-mask-image: linear-gradient(0deg, white 75%, transparent 90%); mask-image: linear-gradient(0deg, white 75%, transparent 90%);" alt="The profile border corresponding to a players level">';
         }
     }
 
@@ -207,7 +210,7 @@ if(isset($_POST['sumid'])){
         if($queuedAs != $playerLanes[0] && $queuedAs != $playerLanes[1]){
             if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$queuedAs.'.webp')){
                 $roleWarning = '<span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5 cursor-help px-1.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp?version='.md5_file('/hdd1/clashapp/data/misc/webp/exclamation-yellow.webp').'" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
-                <div class="bg-black/50 text-white text-center text-xs rounded-lg w-40 whitespace-pre-line py-2 px-3 absolute z-30 -ml-16 twok:bottom-[49.75rem] fullhd:bottom-[34.75rem]" x-show="exclamation" x-transition x-cloak>'.__("This player did not queue on their main position").'
+                <div class="bg-black/50 text-white text-center text-xs rounded-lg w-40 whitespace-pre-line py-2 px-3 absolute z-30 -ml-16 twok:bottom-[35.75rem] fullhd:bottom-[34.75rem]" x-show="exclamation" x-transition x-cloak>'.__("This player did not queue on their main position").'
                 <svg class="absolute text-black h-2 w-full left-0 ml-14 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve">
                 <polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg></div>';
             } 
@@ -278,6 +281,14 @@ if(isset($_POST['sumid'])){
         }
     }
     
+    $matchids_sliced = array_slice($matchids, 0, 15);
+    $matchHistoryContent .= "
+    <td x-data='{ open: true }' class='single-player-match-history' data-puuid='".$puuid."' data-sumid='".$sumid."'>";
+        if($upToDate){
+            $matchHistoryContent .= printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $playerDataJSON["MatchIDs"]);
+        }
+        $matchHistoryContent .= "
+    </td>";
 
 
     $responseArray["script"] = $scriptContent;
@@ -297,6 +308,7 @@ if(isset($_POST['sumid'])){
     if($rankedContent !== "") $responseArray["rankedContent"] = $rankedContent;
     if($masteryContent !== "") $responseArray["masteryContent"] = $masteryContent;
     if($tagList !== "") $responseArray["tagList"] = $tagList;
+    if($matchHistoryContent !== "") $responseArray["matchHistoryContent"] = $matchHistoryContent;
 
     echo json_encode($responseArray);
 }
