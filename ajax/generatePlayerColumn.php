@@ -245,10 +245,10 @@ if(isset($_POST['sumid'])){
     if(sizeof($masteryData) >= 1){
         for($i=0; $i<count($masteryData); $i++){
             $masteryContent .= "
-            <div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab'>
-                <img src='/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp?version=".md5_file("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp")."' width='64' height='64' class='block relative z-0' alt='A champion icon of the league of legends champion {$masteryData[$i]["Champion"]}'>
+            <div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab' style='content-visibility: auto;'>
+                <img loading='lazy' src='/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp?version=".md5_file("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp")."' width='64' height='64' class='block relative z-0' alt='A champion icon of the league of legends champion {$masteryData[$i]["Champion"]}'>
                 <span class='max-w-[64px] text-ellipsis overflow-hidden whitespace-nowrap block'>{$masteryData[$i]["Champion"]}</span>
-                <img src='/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp?version=".md5_file("/hdd1/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp")."' width='32' height='32' class='relative -top-[5.75rem] -right-11 z-10 "; $masteryContent .= ($masteryData[$i]["Lvl"] == 5) ? 'pb-0.5' : ''; $masteryContent .= "' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'>";
+                <img loading='lazy' src='/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp?version=".md5_file("/hdd1/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp")."' width='32' height='32' class='relative -top-[5.75rem] -right-11 z-10 "; $masteryContent .= ($masteryData[$i]["Lvl"] == 5) ? 'pb-0.5' : ''; $masteryContent .= "' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'>";
                 if (str_replace(',', '', $masteryData[$i]["Points"]) > 999999) {
                     $masteryContent .= "<div class='-mt-7 text-" . getMasteryColor(str_replace(',', '', $masteryData[$i]["Points"])) . "/100'>" . str_replace(",", ".", substr($masteryData[$i]["Points"], 0, 4)) . "m</div>";
                 } else {
