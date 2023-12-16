@@ -638,7 +638,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
 
     // Initiating Matchdetail Table
     $returnString .= "<button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full'
-            :aria-label=\"'Toggle Matchhistory ' + (open ? 'expanded' : 'collapsed') \"
+            :aria-label='(open ? \"&#11167;\" : \"&#11165;\")'
             @click='open = !open'
             x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
     $returnString .= "<div class='smooth-transition w-full overflow-hidden twok:min-h-[2300px] fullhd:min-h-[1868.75px]' x-show='open' x-transition x-cloak>";
@@ -990,7 +990,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
                         $returnString .= "</div>";
 
                         $returnString .= '</div></div>';
-                        $returnString .= "<button type='button' :aria-label=\"'Toggle Details ' + (advanced ? 'expanded' : 'collapsed') \"  class='collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4' @click='advanced = !advanced' x-text='advanced ? \"&#11165;\" : \"&#11167;\"'></button>";
+                        $returnString .= "<button type='button' :aria-label='(advanced ? \"&#11165;\" : \"&#11167;\")'  class='collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4' @click='advanced = !advanced' x-text='advanced ? \"&#11165;\" : \"&#11167;\"'></button>";
                         $returnString .= '</div>';
 
                     $totalTeamTakedowns = 0; // Necessary to reset Kill Participation
@@ -2018,10 +2018,10 @@ function showBanSelector(){
             if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion' style='content-visibility: auto;'>";
                     echo '<div class="ban-hoverer inline-grid group" onclick="addToFile(this.parentElement);">';
-                        echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'').'"
+                        echo '<img loading="lazy" width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'').'"
                         alt="A league of legends champion icon of '.$imgPath.'">';
-                        echo '<img width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp?version='.md5_file('/hdd1/clashapp/data/misc/icon-ban.webp').'" alt="Prohibition overlay icon in grey">';
-                        echo '<img width="56" height="56" class="min-h-8 ban-overlay-red twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp?version='.md5_file('/hdd1/clashapp/data/misc/icon-ban-red.webp').'" alt="Prohibition overlay icon in red"></div>';
+                        echo '<img loading="lazy" width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp?version='.md5_file('/hdd1/clashapp/data/misc/icon-ban.webp').'" alt="Prohibition overlay icon in grey">';
+                        echo '<img loading="lazy" width="56" height="56" class="min-h-8 ban-overlay-red twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp?version='.md5_file('/hdd1/clashapp/data/misc/icon-ban-red.webp').'" alt="Prohibition overlay icon in red"></div>';
                     echo "<span class='caption text-ellipsis overflow-hidden whitespace-nowrap block'>".$champName."</span>";
             echo "</div>";
             }
@@ -2029,10 +2029,10 @@ function showBanSelector(){
             if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath)){
                 echo "<div class='align-top inline-block text-center h-18 fullhd:w-[4.25rem] twok:w-[4.75rem] champ-select-champion' style='content-visibility: auto;'>";
                     echo '<div class="ban-hoverer inline-grid group" onclick="addToFile(this.parentElement);">';
-                        echo '<img width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'').'"
+                        echo '<img loading="lazy" width="56" height="56" class="min-h-8 champ-select-icon twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11" data-id="' . $dataId . '" data-abbr="' . abbreviationFetcher($champName) . '" src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$imgPath.'').'"
                         alt="A league of legends champion icon of '.$imgPath.'" loading="lazy">';
-                        echo '<img width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp?version='.md5_file('/hdd1/clashapp/data/misc/icon-ban.webp').'" loading="lazy" alt="Prohibition overlay icon in grey">';
-                        echo '<img width="56" height="56" class="min-h-8 ban-overlay-red twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp?version='.md5_file('/hdd1/clashapp/data/misc/icon-ban-red.webp').'" loading="lazy" alt="Prohibition overlay icon in red"></div>';
+                        echo '<img loading="lazy" width="56" height="56" class="min-h-8 ban-overlay twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100" src="/clashapp/data/misc/icon-ban.webp?version='.md5_file('/hdd1/clashapp/data/misc/icon-ban.webp').'" loading="lazy" alt="Prohibition overlay icon in grey">';
+                        echo '<img loading="lazy" width="56" height="56" class="min-h-8 ban-overlay-red twok:h-14 twok:w-14 fullhd:h-11 fullhd:w-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-active:opacity-100" draggable="false" src="/clashapp/data/misc/icon-ban-red.webp?version='.md5_file('/hdd1/clashapp/data/misc/icon-ban-red.webp').'" loading="lazy" alt="Prohibition overlay icon in red"></div>';
                     echo "<span class='caption text-ellipsis overflow-hidden whitespace-nowrap block'>".$champName."</span>";
             echo "</div>";
             }
