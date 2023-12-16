@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 include_once('/hdd1/clashapp/functions.php');
-$_SERVER['HTTP_HOST'] = "clashscout.com";
+$_SERVER['HTTP_REFERER'] = "https://clashscout.com/";
 include_once('/hdd1/clashapp/lang/translate.php');
 
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
