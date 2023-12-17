@@ -58,8 +58,8 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                             if(executeOnlyOnce){
                                 html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24 opacity-0" style="animation: .5s ease-in-out '+animateTimer+'s 1 fadeIn; animation-fill-mode: forwards;">'+
                                             '<div class="hoverer group' + (element.status === "locked" ? ' locked' : '') + '" ' + (element.status === "locked" ? 'draggable="false" ' : 'draggable="true" ') + 'onclick="' + (element.status === "locked" ? '' : 'removeFromFile(this.parentElement);') + '">'+
-                                                '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="' + versionedChampImg + '" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '">'+
-                                                '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="' + versionedRemovalOverlayImg + '">'+
+                                                '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="' + versionedChampImg + '" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '" alt="A champion icon of the league of legends champion '+ element["name"]+'">'+
+                                                '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="' + versionedRemovalOverlayImg + '" alt="Removal overlay icon in red">'+
                                             '</div>'+
                                         '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
                                         '</div>';
@@ -71,8 +71,8 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                                     html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24">';
                                 }
                                 html += '<div class="hoverer group' + (element.status === "locked" ? ' locked' : '') + '" ' + (element.status === "locked" ? '' : ' draggable="true"') + '" ' + (element.status === "locked" ? '' : 'onclick="removeFromFile(this.parentElement);"') + '>'+
-                                            '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="' + versionedChampImg + '" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '">'+
-                                            '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="' + versionedRemovalOverlayImg + '">'+
+                                            '<img class="selected-ban-icon twok:max-h-14 fullhd:max-h-11" data-id="' + element["id"] + '" src="' + versionedChampImg + '" style="filter: ' + (element.status === "locked" ? 'grayscale(100%)' : 'none') + '" alt="A champion icon of the league of legends champion '+ element["name"]+'">'+
+                                            '<img class="removal-overlay twok:max-h-14 fullhd:max-h-11 fullhd:-mt-11 twok:-mt-14 opacity-0 group-hover:opacity-100' + (element.status === "locked" ? ' hidden' : '') + '" src="' + versionedRemovalOverlayImg + '" alt="Removal overlay icon in red">'+
                                         '</div>'+
                                     '<span class="selected-ban-caption block">' + element["name"] + '</span>'+
                                     '</div>';
@@ -158,6 +158,8 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                         newImg.src = versionedPath;
                     });
                     newImg.width = "32";
+                    newImg.height = "32";
+                    newImg.alt = "An icon of a random monster from League of Legends";
                     newImg.classList.add("align-middle","mr-2.5","no-underline","inline-flex");
                     newP.id = "highlighter";
                     newP.classList.add("inline", "underline","decoration-2","text-"+messageAsJson.color+"/100");
@@ -209,6 +211,10 @@ function addToFile(el){
     ws.send(JSON.stringify(sendInfo))
 }
 
+ws.onerror = (error) => {
+    console.error('WebSocket Error:', error);
+};
+
 function removeFromFile(el){
     let name = el.getElementsByTagName("span")[0].innerText;
     let id = el.getElementsByTagName("img")[0].dataset.id;
@@ -247,7 +253,7 @@ function showIdentityNotice(boolean){
 function addHistoryMessage(message){
     const historyContainer = document.getElementById("historyContainer");
     const textMessage = document.createElement("span");
-    textMessage.classList.add("text-[#333344]");
+    textMessage.classList.add("text-[#8984a5]");
     __(message).then(function (result) {
         textMessage.innerText = result;
         historyContainer.insertBefore(textMessage, historyContainer.firstChild.nextSibling);

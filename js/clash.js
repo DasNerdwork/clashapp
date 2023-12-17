@@ -6,6 +6,16 @@ function ready(fn) {
   document.addEventListener('DOMContentLoaded', fn);
 }
 
+if (typeof getCookie !== 'function') {
+  function getCookie(name) {
+      var value = '; ' + document.cookie;
+      var parts = value.split('; ' + name + '=');
+      if (parts.length === 2) {
+          return parts.pop().split(';').shift();
+      }
+  }
+}
+
 ready(function() {
   // var allClashPages = RegExp("(\/clash\/).+$");
   var allTeamPages = RegExp("(\/team\/).+$");
