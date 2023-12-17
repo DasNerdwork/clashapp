@@ -75,16 +75,14 @@ function __(string) {
     // Check if the translation is in cache, if it is return it.
     if (cache[lang + '_' + string]) {
       resolve(cache[lang + '_' + string]);
-      return;
     }
-
     // Check if the translation data has already been loaded, the following if block will only load on the first call of this function
     if (!translationDataLoaded) {
       // Load the translation data from the csv file.
       var xhr = new XMLHttpRequest();
       xhr.open('GET', '/lang/' + lang + '.csv', true);
       xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.readyState == 4) {
           if (xhr.status === 200) {
             var lines = xhr.responseText.split("\r\n");
             var translations = {};
@@ -113,6 +111,8 @@ function __(string) {
             }
 
             resolve(string); // Finally resolve Promise
+          } else {
+            console.error('Error loading translation data:', xhr.status, xhr.statusText);
           }
         }
       };
@@ -120,18 +120,21 @@ function __(string) {
     } else { 
       // If the translation data has already been loaded and the transation data is not in cache, just resolve promise with the untranslated
       resolve(string);
-      return;
     }
+  }).catch(error => {
+    console.error('Error during translation:', error);
   });
 }
 
 
-function getCookie(name) {
-    var value = '; ' + document.cookie;
-    var parts = value.split('; ' + name + '=');
-    if (parts.length === 2) {
-        return parts.pop().split(';').shift();
-    }
+if (typeof getCookie !== 'function') {
+  function getCookie(name) {
+      var value = '; ' + document.cookie;
+      var parts = value.split('; ' + name + '=');
+      if (parts.length === 2) {
+          return parts.pop().split(';').shift();
+      }
+  }
 }
 
 function insertAfter(referenceNode, newNode) {
