@@ -252,7 +252,7 @@ echo '
                         <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1 twok:h-[13rem] fullhd:h-[13.5rem]'>";
                             showBanSelector(); echo "
                         </div>
-                        <div id='emptySearchEmote' class='hidden items-center justify-center gap-2 h-3/5 relative -top-48'><img src='/clashapp/data/misc/webp/empty_search.webp?version=".md5_file('/hdd1/clashapp/data/misc/webp/empty_search.webp')."' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
+                        <div id='emptySearchEmote' loading='lazy' class='hidden items-center justify-center gap-2 h-3/5 relative -top-48'><img src='/clashapp/data/misc/webp/empty_search.webp?version=".md5_file('/hdd1/clashapp/data/misc/webp/empty_search.webp')."' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
                     </form>
                 </div>
             </div>";
