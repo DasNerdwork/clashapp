@@ -169,7 +169,7 @@ echo "<div class='h-72 m-4 upper-banner-part bg-dark rounded grid grid-cols-7 ga
         $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/wings_*'.strtolower($rankOrLevelArray["HighestRank"]).'.avif', GlobIterator::CURRENT_AS_PATHNAME)))[0];
         $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
         if(file_exists($profileBorderPath)){
-            echo '<img src="'.$webBorderPath.'" width="384" height="384" class="twok:max-w-[150%] fullhd:max-w-[150%] twok:top-[-10.5rem] fullhd:top-[-130px] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
+            echo '<img fetchpriority="high" src="'.$webBorderPath.'" width="384" height="384" class="twok:max-w-[150%] fullhd:max-w-[150%] twok:top-[-10.5rem] fullhd:top-[-130px] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
         }
         // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
         if ($rankOrLevelArray["HighEloLP"] != ""){
