@@ -172,44 +172,44 @@ if(isset($_POST['sumid'])){
 
     // PRINT SHIT
 
-    if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
-        $profileIconSrc = '/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp');
+    if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif')){
+        $profileIconSrc = '/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif');
     }
 
     $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
     if($rankOrLevelArray["Type"] === "Rank"){ // If user has a rank
     // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
         if ($rankOrLevelArray["HighEloLP"] != ""){
-            if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.webp')){
-                $upperPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.webp').'" width="64" height="24" class="z-[9] absolute pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+            if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.avif')){
+                $upperPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.avif?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate-big.avif').'" width="64" height="24" class="z-[9] absolute pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
                 $upperContent = "<div class='font-bold color-[#e8dfcc] absolute mt-[0.3rem] text-xs z-[9]'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
             } 
         } else {
-            if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp')){
-                $upperPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="30" height="18" class="z-[9] absolute mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+            if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif')){
+                $upperPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif').'" width="30" height="18" class="z-[9] absolute mt-3 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
                 $upperContent = "<div class='font-bold color-[#e8dfcc] absolute mt-[0.85rem] text-xs z-[9]'>".$rankOrLevelArray["RankNumber"]."</div>";
             }
         }
-        $lowerPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp').'" width="38" height="26" class="z-[9] absolute mt-[6.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
-        if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.webp')){
-            $profileBorder = '<img src="/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.webp?version='.md5_file('/hdd1/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.webp').'" width="384" height="384" class="z-[8] twok:max-w-[110%] fullhd:max-w-[148%] twok:top-[-8.25rem] fullhd:top-[-130px] absolute pointer-events-none select-none" style="-webkit-mask-image: linear-gradient(0deg, white 50%, transparent 65%); mask-image: linear-gradient(0deg, white 50%, transparent 65%);" alt="The profile border corresponding to a players rank">';
+        $lowerPlate = '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif?version='.md5_file('/hdd1/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif').'" width="38" height="26" class="z-[9] absolute mt-[6.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+        if(fileExistsWithCache('/hdd1/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.avif')){
+            $profileBorder = '<img src="/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.avif?version='.md5_file('/hdd1/clashapp/data/misc/ranks/wings_'.strtolower($rankOrLevelArray["HighestRank"]).'.avif').'" width="384" height="384" class="z-[8] twok:max-w-[110%] fullhd:max-w-[148%] twok:top-[-8.25rem] fullhd:top-[-130px] absolute pointer-events-none select-none" style="-webkit-mask-image: linear-gradient(0deg, white 50%, transparent 65%); mask-image: linear-gradient(0deg, white 50%, transparent 65%);" alt="The profile border corresponding to a players rank">';
         }
     } else if($rankOrLevelArray["Type"] === "Level") {
-        if(fileExistsWithCache('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp')){
-            $profileBorder = '<img src="/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp?version='.md5_file('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp').'" width="190" height="190" class="z-[8] absolute -mt-[2.05rem] pointer-events-none select-none" style="-webkit-mask-image: linear-gradient(0deg, white 75%, transparent 90%); mask-image: linear-gradient(0deg, white 75%, transparent 90%);" alt="The profile border corresponding to a players level">';
+        if(fileExistsWithCache('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.avif')){
+            $profileBorder = '<img src="/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.avif?version='.md5_file('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.avif').'" width="190" height="190" class="z-[8] absolute -mt-[2.05rem] pointer-events-none select-none" style="-webkit-mask-image: linear-gradient(0deg, white 75%, transparent 90%); mask-image: linear-gradient(0deg, white 75%, transparent 90%);" alt="The profile border corresponding to a players level">';
         }
     }
 
     if(isset($playerLanes)){
-        if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$playerLanes[0].'.webp')){
-            $playerMainRoleSrc = '/clashapp/data/misc/lanes/'.$playerLanes[0].'.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$playerLanes[0].'.webp');
+        if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$playerLanes[0].'.avif')){
+            $playerMainRoleSrc = '/clashapp/data/misc/lanes/'.$playerLanes[0].'.avif?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$playerLanes[0].'.avif');
         }
-        if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$playerLanes[1].'.webp')){
-            $playerSecondaryRoleSrc = '/clashapp/data/misc/lanes/'.$playerLanes[1].'.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$playerLanes[1].'.webp');
+        if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$playerLanes[1].'.avif')){
+            $playerSecondaryRoleSrc = '/clashapp/data/misc/lanes/'.$playerLanes[1].'.avif?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$playerLanes[1].'.avif');
         }
         if($queuedAs != $playerLanes[0] && $queuedAs != $playerLanes[1]){
-            if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$queuedAs.'.webp')){
-                $roleWarning = '<span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5 cursor-help px-1.5" src="/clashapp/data/misc/webp/exclamation-yellow.webp?version='.md5_file('/hdd1/clashapp/data/misc/webp/exclamation-yellow.webp').'" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
+            if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$queuedAs.'.avif')){
+                $roleWarning = '<span class="text-yellow-400 absolute z-40 text-xl -mr-12 font-bold mt-0.5 cursor-help px-1.5" src="/clashapp/data/misc/webp/exclamation-yellow.avif?version='.md5_file('/hdd1/clashapp/data/misc/webp/exclamation-yellow.avif').'" width="16" loading="lazy" @mouseover="exclamation = true" @mouseout="exclamation = false">!</span>
                 <div class="bg-black/50 text-white text-center text-xs rounded-lg w-40 whitespace-pre-line py-2 px-3 absolute z-30 -ml-16 twok:bottom-[35.75rem] fullhd:bottom-[34.75rem]" x-show="exclamation" x-transition x-cloak>'.__("This player did not queue on their main position").'
                 <svg class="absolute text-black h-2 w-full left-0 ml-14 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve">
                 <polygon class="fill-current" points="0,0 127.5,127.5 255,0"></polygon></svg></div>';
@@ -246,9 +246,9 @@ if(isset($_POST['sumid'])){
         for($i=0; $i<count($masteryData); $i++){
             $masteryContent .= "
             <div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab' style='content-visibility: auto;'>
-                <img loading='lazy' src='/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp?version=".md5_file("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.webp")."' width='64' height='64' class='block relative z-0' alt='A champion icon of the league of legends champion {$masteryData[$i]["Champion"]}'>
+                <img loading='lazy' src='/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.avif?version=".md5_file("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/{$masteryData[$i]["Filename"]}.avif")."' width='64' height='64' class='block relative z-0' alt='A champion icon of the league of legends champion {$masteryData[$i]["Champion"]}'>
                 <span class='max-w-[64px] text-ellipsis overflow-hidden whitespace-nowrap block'>{$masteryData[$i]["Champion"]}</span>
-                <img loading='lazy' src='/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp?version=".md5_file("/hdd1/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.webp")."' width='32' height='32' class='relative -top-[5.75rem] -right-11 z-10 "; $masteryContent .= ($masteryData[$i]["Lvl"] == 5) ? 'pb-0.5' : ''; $masteryContent .= "' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'>";
+                <img loading='lazy' src='/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.avif?version=".md5_file("/hdd1/clashapp/data/misc/mastery-{$masteryData[$i]["Lvl"]}.avif")."' width='32' height='32' class='relative -top-[5.75rem] -right-11 z-10 "; $masteryContent .= ($masteryData[$i]["Lvl"] == 5) ? 'pb-0.5' : ''; $masteryContent .= "' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'>";
                 if (str_replace(',', '', $masteryData[$i]["Points"]) > 999999) {
                     $masteryContent .= "<div class='-mt-7 text-" . getMasteryColor(str_replace(',', '', $masteryData[$i]["Points"])) . "/100'>" . str_replace(",", ".", substr($masteryData[$i]["Points"], 0, 4)) . "m</div>";
                 } else {

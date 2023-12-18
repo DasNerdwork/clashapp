@@ -12,7 +12,7 @@ $mdb = new MongoDBHelper();
 
 echo '
 <script>
-document.body.style.backgroundImage = "url(/clashapp/data/misc/webp/background.webp)";
+document.body.style.backgroundImage = "url(/clashapp/data/misc/webp/background.avif)";
 document.body.style.backgroundRepeat = "no-repeat";
 document.body.style.backgroundPosition = "50% 20%";
 document.body.style.backgroundSize = "40%";

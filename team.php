@@ -56,7 +56,7 @@ $currentPlayerNumber2 = 1;
 $xhrPCDcount = 1;
 $upToDate = false;
 $allUpToDate = 0;
-$emoteSources = array("/clashapp/data/misc/webp/ok.webp?version=".md5_file("/hdd1/clashapp/data/misc/webp/ok.webp"),"/clashapp/data/misc/webp/teemo.webp?version=".md5_file("/hdd1/clashapp/data/misc/webp/teemo.webp"),"/clashapp/data/misc/webp/priceless.webp?version=".md5_file("/hdd1/clashapp/data/misc/webp/priceless.webp"));
+$emoteSources = array("/clashapp/data/misc/webp/ok.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/ok.avif"),"/clashapp/data/misc/webp/teemo.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/teemo.avif"),"/clashapp/data/misc/webp/priceless.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/priceless.avif"));
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 $autosuggestRequest = $mdb->getAutosuggestAggregate();
 $championDataArray = json_decode(file_get_contents("/hdd1/clashapp/data/patch/".$currentPatch."/data/en_US/champion.json"), true);
@@ -134,10 +134,10 @@ echo '
             <div id='team-info' class='h-[26rem] row-span-2'>
                 <div class='p-4 rounded bg-[#141624] h-[26rem] grid grid-rows-teaminfo'>
                     <h1 id='teamname' class='inline-flex items-center gap-4'>";
-                    if(fileExistsWithCache("/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp")){
-                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.webp?version=".md5_file('/hdd1/clashapp/data/misc/clash/logos/'.$teamDataArray["Icon"].'/1_64.webp')."' width='64' alt='The in league of legends selected logo of the clash team'>";
+                    if(fileExistsWithCache("/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.avif")){
+                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/".$teamDataArray["Icon"]."/1_64.avif?version=".md5_file('/hdd1/clashapp/data/misc/clash/logos/'.$teamDataArray["Icon"].'/1_64.avif')."' width='64' alt='The in league of legends selected logo of the clash team'>";
                     } else {
-                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/0/1_64.webp?version=".md5_file('/hdd1/clashapp/data/misc/clash/logos/0/1_64.webp')."' width='64' alt='The in league of legends selected logo of the clash team'>";
+                        echo "<img id='team-logo' src='/clashapp/data/misc/clash/logos/0/1_64.avif?version=".md5_file('/hdd1/clashapp/data/misc/clash/logos/0/1_64.avif')."' width='64' alt='The in league of legends selected logo of the clash team'>";
                     } echo "
                         <span id='team-title' class='text-2xl break-all'>".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])." (".__("Tier")." ".$teamDataArray["Tier"].")</span>
                     </h1>
@@ -243,16 +243,16 @@ echo '
                                 <input type='text' name='champName' id='champSelector' class='mb-[5px] h-8 p-2 twok:pr-10 fullhd:w-[55%]' value='' placeholder='".__("Championname")."'>
                                 <button id='champSelectorClear' class='bg-transparent text-gray-500 hover:text-gray-700 focus:outline-none -ml-7 px-2 py-1' onclick='this.previousElementSibling.value=\"\";'>x</button>
                             </div>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer' src='/clashapp/data/misc/lanes/UTILITY.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/UTILITY.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='sup' alt='An icon for the support lane'>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/BOTTOM.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/BOTTOM.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='adc' alt='An icon for the bottom lane'>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/MIDDLE.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/MIDDLE.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='mid' alt='An icon for the middle lane'>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/JUNGLE.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/JUNGLE.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='jgl' alt='An icon for the jungle'>
-                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/TOP.webp?version=".md5_file('/hdd1/clashapp/data/misc/lanes/TOP.webp')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='top' alt='An icon for the top lane'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer' src='/clashapp/data/misc/lanes/UTILITY.avif?version=".md5_file('/hdd1/clashapp/data/misc/lanes/UTILITY.avif')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='sup' alt='An icon for the support lane'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/BOTTOM.avif?version=".md5_file('/hdd1/clashapp/data/misc/lanes/BOTTOM.avif')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='adc' alt='An icon for the bottom lane'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/MIDDLE.avif?version=".md5_file('/hdd1/clashapp/data/misc/lanes/MIDDLE.avif')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='mid' alt='An icon for the middle lane'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/JUNGLE.avif?version=".md5_file('/hdd1/clashapp/data/misc/lanes/JUNGLE.avif')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='jgl' alt='An icon for the jungle'>
+                            <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/TOP.avif?version=".md5_file('/hdd1/clashapp/data/misc/lanes/TOP.avif')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='top' alt='An icon for the top lane'>
                         </div>
                         <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1 twok:h-[13rem] fullhd:h-[13.5rem]'>";
                             showBanSelector(); echo "
                         </div>
-                        <div id='emptySearchEmote' loading='lazy' class='hidden items-center justify-center gap-2 h-3/5 relative -top-48'><img src='/clashapp/data/misc/webp/empty_search.webp?version=".md5_file('/hdd1/clashapp/data/misc/webp/empty_search.webp')."' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
+                        <div id='emptySearchEmote' loading='lazy' class='hidden items-center justify-center gap-2 h-3/5 relative -top-48'><img src='/clashapp/data/misc/webp/empty_search.avif?version=".md5_file('/hdd1/clashapp/data/misc/webp/empty_search.avif')."' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
                     </form>
                 </div>
             </div>";
@@ -293,13 +293,13 @@ echo '
 
                                     if(!$execOnlyOnce) $startProfileIconBorders = microtime(true);
                                     $memProfileIconBorders = memory_get_usage();
-                                    $randomIconPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.webp")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.webp"))];
+                                    $randomIconPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.avif"))];
                                     echo "
                                         <div id='single-player-column-".$currentPlayerNumber2."' class='h-40 mt-4 grid grid-cols-2 gap-4 single-player-column' data-sumid='".$player["summonerId"]."'>
                                         <div class='relative flex justify-center'>
                                         <img id='profileicon-".$currentPlayerNumber2."' src='".str_replace('/hdd1', '', $randomIconPath)."?version=".md5_file($randomIconPath)."' width='84' height='84' style='filter: grayscale(100%)' class='rounded-full mt-6 z-0 max-h-[84px] max-w-[84px] pointer-events-none select-none' alt='The custom profile icon of a player'>
                                         <div class='playerlevel text-loading-light absolute mt-[6.8rem] text-xs z-[9]'>30</div>
-                                        <img src='/clashapp/data/misc/levels/prestige_crest_lvl_030.webp?version=".md5_file("/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_030.webp")."' width='190' height='190' style='filter: grayscale(100%)' class='profileborder-030 absolute -mt-[2.05rem] z-[8] pointer-events-none select-none' style='-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);' alt='The profile border corresponding to a players level'>
+                                        <img src='/clashapp/data/misc/levels/prestige_crest_lvl_030.avif?version=".md5_file("/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_030.avif")."' width='190' height='190' style='filter: grayscale(100%)' class='profileborder-030 absolute -mt-[2.05rem] z-[8] pointer-events-none select-none' style='-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);' alt='The profile border corresponding to a players level'>
                                         <div class='absolute mt-[8.75rem] z-[9]'><span id='playername-".$currentPlayerNumber2."' class='text-loading-light'>".__("Player")." ".$currentPlayerNumber2."</span><span id='playertag-".$currentPlayerNumber2."' class='z-[9] bg-loading px-1 rounded ml-1 text-sm text-gray-300'>#EUW</span></div></div>";
 
                             if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
@@ -317,16 +317,16 @@ echo '
                                         <div class='flex h-8 items-center justify-between'>
                                             <span class='text-loading-light'>".__("Queued as").":</span>
                                             <div class='inline-flex w-[4.5rem] justify-center' x-data='{ exclamation: false }'>";
-                                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp')){
-                                                echo '<img id="queuerole-'.$currentPlayerNumber2.'" class="saturate-0 brightness-100" src="/clashapp/data/misc/lanes/'.$queueRole.'.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.webp').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
+                                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.avif')){
+                                                echo '<img id="queuerole-'.$currentPlayerNumber2.'" class="saturate-0 brightness-100" src="/clashapp/data/misc/lanes/'.$queueRole.'.avif?version='.md5_file('/hdd1/clashapp/data/misc/lanes/'.$queueRole.'.avif').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players position as which he queued up in clash">';
                                             } echo "</div>
                                         </div>
                                         <div class='flex h-8 items-center justify-between'>
                                             <span class='lane-positions text-loading-light'>".__("Position(s)").":</span>
                                             <div class='inline-flex gap-2 w-[72px] justify-center'>";
-                                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/UNKNOWN.webp')){
-                                                echo '<img id="mainrole-'.$currentPlayerNumber2.'" class="saturate-0 brightness-100" src="/clashapp/data/misc/lanes/UNKNOWN.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/UNKNOWN.webp').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
-                                                echo '<img id="secrole-'.$currentPlayerNumber2.'" class="saturate-0 brightness-100" src="/clashapp/data/misc/lanes/UNKNOWN.webp?version='.md5_file('/hdd1/clashapp/data/misc/lanes/UNKNOWN.webp').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players secondary position">';
+                                            if(fileExistsWithCache('/hdd1/clashapp/data/misc/lanes/UNKNOWN.avif')){
+                                                echo '<img id="mainrole-'.$currentPlayerNumber2.'" class="saturate-0 brightness-100" src="/clashapp/data/misc/lanes/UNKNOWN.avif?version='.md5_file('/hdd1/clashapp/data/misc/lanes/UNKNOWN.avif').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players main position">';
+                                                echo '<img id="secrole-'.$currentPlayerNumber2.'" class="saturate-0 brightness-100" src="/clashapp/data/misc/lanes/UNKNOWN.avif?version='.md5_file('/hdd1/clashapp/data/misc/lanes/UNKNOWN.avif').'" width="32" height="32" alt="A league of legends lane icon corresponding to a players secondary position">';
                                             } echo "
                                             </div>
                                         </div>";
@@ -355,7 +355,7 @@ echo '
                             <tr>
                                 <td class='text-center h-32 min-h-[8rem]'> 
                                     <div id='rankcontent-".$currentPlayerNumber2."' class='inline-flex w-full justify-evenly'>
-                                        <div class='flex items-center gap-2 rounded bg-[#0e0f18] p-2'><img src='/clashapp/data/misc/webp/unranked_emote.webp?version=".md5_file("/hdd1/clashapp/data/misc/webp/unranked_emote.webp")."' style='filter: grayscale(100%)' width='64' height='64' loading='lazy' class='w-16' alt='A blitzcrank emote with a questionmark in case this player has no retrievable ranked data'><span class='min-w-[5.5rem] text-loading-light'>".__("Unranked")."</span></div>
+                                        <div class='flex items-center gap-2 rounded bg-[#0e0f18] p-2'><img src='/clashapp/data/misc/webp/unranked_emote.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/unranked_emote.avif")."' style='filter: grayscale(100%)' width='64' height='64' loading='lazy' class='w-16' alt='A blitzcrank emote with a questionmark in case this player has no retrievable ranked data'><span class='min-w-[5.5rem] text-loading-light'>".__("Unranked")."</span></div>
                                     </div>
                                 </td>
                             </tr>";
@@ -373,12 +373,12 @@ echo '
                                         ";
                                         $maxScore = 300;
                                         for ($i=0; $i < 4; $i++) { 
-                                            $randomChampPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.webp")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.webp"))];
+                                            $randomChampPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.avif"))];
                                             $randomScore = rand(30, $maxScore); echo "
                                             <div><div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab'>
                                                 <img src='".str_replace('/hdd1', '', $randomChampPath)."?version=".md5_file("{$randomChampPath}")."' width='64' height='64' class='block relative z-0' style='filter: grayscale(100%)' alt='A champion icon of the league of legends champion ".pathinfo(basename($randomChampPath), PATHINFO_FILENAME)."'>
                                                 <span class='max-w-[64px] text-ellipsis overflow-hidden whitespace-nowrap block text-loading-light'>".pathinfo(basename($randomChampPath), PATHINFO_FILENAME)."</span>
-                                                <img src='/clashapp/data/misc/mastery-7.webp?version=".md5_file('/hdd1/clashapp/data/misc/mastery-7.webp')."' width='32' height='32' style='filter: grayscale(100%)' class='relative -top-[5.75rem] -right-11 z-10' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'><div class='-mt-7 text-loading-light'>{$randomScore}k</div>
+                                                <img src='/clashapp/data/misc/mastery-7.avif?version=".md5_file('/hdd1/clashapp/data/misc/mastery-7.avif')."' width='32' height='32' style='filter: grayscale(100%)' class='relative -top-[5.75rem] -right-11 z-10' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'><div class='-mt-7 text-loading-light'>{$randomScore}k</div>
                                             </div></div>";
                                             $maxScore = $randomScore;
                                         } echo "
@@ -529,7 +529,7 @@ echo '
         foreach($suggestedBanArray as $champname => $banChampion){
             echo '<div class="suggested-ban-champion inline-block text-center w-16 h-16 opacity-0 relative" style="animation: .5s ease-in-out '.$timer.'s 1 fadeIn; animation-fill-mode: forwards; z-index: '.$zIndex.';" x-data="{ showExplanation: false }">
             <div class="ban-hoverer inline-grid" onclick="addToFile(this.parentElement);" @mouseover="showExplanation=true" @mouseout="showExplanation=false">
-                <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion->Filename . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.webp?version='.md5_file('/hdd1/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.webp').'" alt="A league of legends champion icon of ' . $champname . '"></div>
+                <img class="cursor-help fullhd:w-12 twok:w-14" width="56" height="56" data-id="' . $banChampion->Filename . '" src="/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.avif?version='.md5_file('/hdd1/clashapp/data/patch/' . $currentPatch . '/img/champion/' . str_replace(' ', '', $banChampion->Filename) . '.avif').'" alt="A league of legends champion icon of ' . $champname . '"></div>
             <span class="suggested-ban-caption w-16 block">' . $champname . '</span>
             <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3 z-50" x-show="showExplanation" x-transition x-transition:enter.delay.500ms x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
             <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark text-end">'.__('Category').'</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Addition').'</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">'.__('Explanation').'</div>';
