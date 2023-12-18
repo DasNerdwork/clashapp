@@ -10,7 +10,7 @@ $mdb = new MongoDBHelper();
 	<div class="flex h-16">
 		<div class="w-44 -mr-2.5 float-left p-2">
 			<a href="/" class="block no-underline text-white align-middle w-full">
-				<img src="/clashapp/data/misc/webp/logo.webp?version= <?= md5_file("/hdd1/clashapp/data/misc/webp/logo.webp") ?>" alt="The main logo of the website" width="160" height="44">
+				<img src="/clashapp/data/misc/webp/logo.avif?version= <?= md5_file("/hdd1/clashapp/data/misc/webp/logo.avif") ?>" alt="The main logo of the website" width="160" height="44">
 			</a>
 		</div>
 		<nav class="m-2.5 p-1">
@@ -40,7 +40,7 @@ $mdb = new MongoDBHelper();
         <?php if($_SERVER['REQUEST_URI'] == "/"){ echo '
             <form class="h-10 w-[800px] flex absolute left-2/4 -translate-x-2/4 -translate-y-2/4 top-[60%]" action="" onsubmit="return false;" method="GET" autocomplete="off">
                 <input type="text" name="name" class="h-16 w-full py-2.5 pl-2.5 pr-16 text-xl border-none text-black font-normal rounded-l-full indent-5 outline-none focus:pl-2.5 focus:text-xl" value="" placeholder='.__("'Search Teams, Players or Champions'").'>
-                <input type="submit" name="submitBtn" class=\'h-16 w-20 py-2.5 pl-2.5 pr-16 text-xl border-none bg-white text-black cursor-pointer rounded-r-full bg-[length:50%] bg-[url("/clashapp/data/misc/webp/searchicon.webp?version='.md5_file("/hdd1/clashapp/data/misc/webp/searchicon.webp").'")] bg-no-repeat bg-center focus:text-xl active:bg-[#ccc]\' value="" onclick="sanitize(this.form.name.value);">
+                <input type="submit" name="submitBtn" class=\'h-16 w-20 py-2.5 pl-2.5 pr-16 text-xl border-none bg-white text-black cursor-pointer rounded-r-full bg-[length:50%] bg-[url("/clashapp/data/misc/webp/searchicon.avif?version='.md5_file("/hdd1/clashapp/data/misc/webp/searchicon.avif").'")] bg-no-repeat bg-center focus:text-xl active:bg-[#ccc]\' value="" onclick="sanitize(this.form.name.value);">
                 <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
                 <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
                 </div>
@@ -73,13 +73,13 @@ $mdb = new MongoDBHelper();
             ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
                 <?php echo '<a class="group" href="https://clashscout.com/profile/'.strtolower($headerJson["PlayerData"]["GameName"]).'/'.strtolower($headerJson["PlayerData"]["Tag"]).'">';
-                      echo '<img width="32" height="32" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.webp').'" class="align-middle mr-2.5 no-underline inline-flex" alt="A custom profile icon of a player">';
+                      echo '<img width="32" height="32" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$headerJson["PlayerData"]["Icon"].'.avif').'" class="align-middle mr-2.5 no-underline inline-flex" alt="A custom profile icon of a player">';
                       echo '<p id="highlighter" data-username="'.$dataName.'" class="inline decoration-2 group-hover:text-[#fff] group-hover:underline group-hover:text-[#fff]" style="text-decoration-skip-ink: none;"><span class="text-white">'.$headerJson["PlayerData"]["GameName"].'</span></p><span class="bg-searchtitle px-1 rounded ml-1 text-sm decoration-2 group-hover:text-[#fff] group-hover:text-[#fff] text-[#9ea4bd]">#'.$headerJson["PlayerData"]["Tag"].'</span></a>'; ?>
             </div>
             <?php } else if(isset($_SESSION['user']['username'])){ ?>
             <div class="flex justify-center items-center px-4 mt-[3px]">
                 <a href="https://clashscout.com/settings">
-                    <img width="32" height="32" src="/clashapp/data/misc/profile-icon.webp?version= <?= md5_file("/hdd1/clashapp/data/misc/profile-icon.webp") ?>" class="align-middle mr-2.5 no-underline inline-flex" alt="The sandard profile icon if no league of legends account is connected">
+                    <img width="32" height="32" src="/clashapp/data/misc/profile-icon.avif?version= <?= md5_file("/hdd1/clashapp/data/misc/profile-icon.avif") ?>" class="align-middle mr-2.5 no-underline inline-flex" alt="The sandard profile icon if no league of legends account is connected">
                     <?php echo '<span id="highlighter" class="hover:text-[#fff] hover:underline decoration-2 active:text-[#ddd]" style="text-decoration-skip-ink: none;">'.$_SESSION['user']['username'].'</span></a>'; ?> 
             </div>
             <?php } ?>
@@ -112,7 +112,7 @@ $mdb = new MongoDBHelper();
             <?php } ?>
             <div id="settings-button" class="flex items-center ml-2 mr-4">
                 <a href="/settings">
-                    <img src="/clashapp/data/misc/settings-wheel.webp?version= <?= md5_file("/hdd1/clashapp/data/misc/settings-wheel.webp") ?>" width="20" height="20" alt="A settings wheel icon which looks like a gear" title="<?= __("Settings") ?>"></img>
+                    <img src="/clashapp/data/misc/settings-wheel.avif?version= <?= md5_file("/hdd1/clashapp/data/misc/settings-wheel.avif") ?>" width="20" height="20" alt="A settings wheel icon which looks like a gear" title="<?= __("Settings") ?>"></img>
                 </a>
             </div>
         </div>
