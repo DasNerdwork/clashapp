@@ -232,7 +232,7 @@ function processResponseData($ajaxUniquifier){
                                 let laneContainerPath = item.children[1].children[0].children[1].children[1];
                                 let newImage = document.createElement('img');
                                 newImage.className = 'saturate-0 brightness-150 transition-opacity duration-500 easy-in-out opacity-0';
-                                newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.webp';
+                                newImage.src = '/clashapp/data/misc/lanes/' + singleLane + '.avif';
                                 newImage.width = 32;
                                 newImage.height = 32;
                                 newImage.alt = 'A league of legends lane icon corresponding to a players main position';
