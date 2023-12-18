@@ -1564,8 +1564,8 @@ video {
   background-color: rgb(238 238 238 / var(--tw-bg-opacity));
 }
 
-.bg-\[url\(\"\/clashapp\/data\/misc\/webp\/searchicon\.webp\"\)\] {
-  background-image: url("/clashapp/data/misc/webp/searchicon.webp");
+.bg-\[url\(\"\/clashapp\/data\/misc\/webp\/searchicon\.avif\"\)\] {
+  background-image: url("/clashapp/data/misc/webp/searchicon.avif");
 }
 
 .bg-\[length\:50\%\] {
