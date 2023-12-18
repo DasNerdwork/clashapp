@@ -40,9 +40,9 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                 .then(response => { return response.text();
                 }).then(currentpatch => {
                     const championImagePromises  = messageAsJson["SuggestedBans"].map(element => {
-                        return getVersionedUrl('/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.webp');
+                        return getVersionedUrl('/clashapp/data/patch/' + currentpatch + '/img/champion/' + element["id"] + '.avif');
                     });
-                    const removalOverlayPromise = getVersionedUrl('/clashapp/data/misc/RemovalOverlay.webp');
+                    const removalOverlayPromise = getVersionedUrl('/clashapp/data/misc/RemovalOverlay.avif');
                     const allPromises = [...championImagePromises, removalOverlayPromise];
 
                     Promise.all(allPromises)
@@ -65,7 +65,7 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                                         '</div>';
                                 animateTimer += 0.1;
                             } else {
-                                if (!(selectedBans.innerHTML.includes("/champion/" + element["id"] + ".webp"))) {
+                                if (!(selectedBans.innerHTML.includes("/champion/" + element["id"] + ".avif"))) {
                                     html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24" style="animation: .1s ease-in-out 0s 1 slideIn; animation-fill-mode: forwards;">';
                                 } else {
                                     html += '<div class="selected-ban-champion h-fit fullhd:w-16 twok:w-24">';
@@ -154,7 +154,7 @@ ws.onmessage = (event) => { // Do this when the WS-Server sends a message to cli
                     newSpan.setAttribute("onmouseover", "showIdentityNotice(true)");
                     newSpan.setAttribute("onmouseout", "showIdentityNotice(false)");
                     newParentDiv.classList.add("z-20","w-40","h-8");
-                    getVersionedUrl("/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".webp").then(versionedPath => {
+                    getVersionedUrl("/clashapp/data/misc/monsters/"+messageAsJson.name.toLowerCase()+".avif").then(versionedPath => {
                         newImg.src = versionedPath;
                     });
                     newImg.width = "32";

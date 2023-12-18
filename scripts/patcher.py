@@ -3,6 +3,9 @@ from urllib.request import urlopen
 from datetime import datetime
 from pathlib import Path
 from PIL import Image
+from concurrent.futures import ThreadPoolExecutor
+import fnmatch
+import pillow_avif
 import logging
 import logging.handlers as handlers
 import json
@@ -13,29 +16,31 @@ import tarfile
 import shutil
 import time
 
-def convert_to_webp(source):
-    """Convert image to WebP. Via https://www.webucator.com/tutorial/using-python-to-convert-images-to-webp/
-
-    Args:
-        source (pathlib.Path): Path to source image
-
-    Returns:
-        pathlib.Path: path to new image
-    """
+def convert_to_avif(source):
     try:
         with Image.open(source) as img:
             pass
     except (FileNotFoundError, OSError):
         raise ValueError("Unsupported file format")
 
-    destination = source.with_suffix(".webp")
+    root, ext = os.path.splitext(source)
+    destination = f"{root}.avif"
+
+    # Check if AVIF file already exists
+    if os.path.exists(destination):
+        print(f"AVIF file already exists: {destination}")
+        return None
 
     image = Image.open(source)  # Open image
     width, height = image.size
-    if(width < 16000 and height < 16000):
-        image.save(destination, format="webp")  # Convert image to webp
+    if width < 16000 and height < 16000:
+        image.save(destination, format="AVIF", quality=60)  # Convert image to AVIF
 
     return destination
+
+def process_files(file_paths):
+    with ThreadPoolExecutor() as executor:
+        executor.map(convert_to_avif, file_paths)
 
 # Function to update abbreviations.json based on champion.json
 def update_abbreviations(newPatch):
@@ -78,7 +83,6 @@ def update_abbreviations(newPatch):
         json.dump(abbreviations_data, abbr_file, separators=(",", ":"), ensure_ascii=False) # seperators attribute to reduce filesize
 
     return True
-
 
 # Start count of whole program time
 start_patcher = time.time() 
@@ -133,30 +137,27 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     end_extraction = str(round(time.time() - start_extraction, 2))
     logger.info("All files extracted and overwritten. Time elapsed: " + end_extraction + " seconds")
 
-    # Convert all .png and .jpg to .webp
+    # Convert all .png and .jpg to .avif
     start_time = time.time()
     max_duration = 600 # 10 Minuten
     timed_out = False # Flag für Zeitüberschreitung
 
     # Conversion Part
-    paths = Path('/hdd1/clashapp/data/patch/').glob("**/*.png")
-    for path in paths:
-        webp_path = convert_to_webp(path)
-        if time.time() - start_time >= max_duration:
-            timed_out = True
-            break
-    
-    paths2 = Path('/hdd1/clashapp/data/patch/').glob("**/*.jpg")
-    for path2 in paths2:
-        webp_path2 = convert_to_webp(path2)
-        if time.time() - start_time >= max_duration:
-            timed_out = True
-            break
+    logger.info("Starting image conversion of all available .png and .jpg images")
+    png_paths = list(Path('/hdd1/clashapp/data/patch/').glob("**/*.png"))
+    jpg_paths = list(Path('/hdd1/clashapp/data/patch/').glob("**/*.jpg"))
+
+    all_paths = png_paths + jpg_paths
+
+    process_files(all_paths)
+
+    if time.time() - start_time >= max_duration:
+        timed_out = True
 
     if timed_out:
-        logger.info("Time limit exceeded. Converted all available .png and .jpg to .webp")
+        logger.info("Time limit exceeded. Converted all available .png and .jpg to .avif")
     else:
-        logger.info("Converted all available .png and .jpg to .webp")
+        logger.info("Converted all available .png and .jpg to .avif")
 
     # End of extraction and start of old file deletion
     os.remove(target_path) # Delete tar.gz
@@ -180,15 +181,10 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
 
     # Restart WebSocket Server after update
     try:
-        subprocess.run("screen -r 'WS-Server' -X quit", shell=True, check=True)
-        logger.info("WebSocket server stopped successfully.")
-        try:
-            subprocess.run("screen -AmdS 'WS-Server' node /hdd1/clashapp/websocket/server.js", shell=True, check=True)
-            logger.info("WebSocket server started successfully.")
-        except subprocess.CalledProcessError as e:
-            logger.info(f"Error starting WebSocket server: {e}")
+        subprocess.run("pm2 restart 'WS-Server'", shell=True, check=True)
+        logger.info("WebSocket server restarted successfully.")
     except subprocess.CalledProcessError as e:
-        logger.info(f"Error stopping WebSocket server: {e}")
+        logger.info(f"Error restarting WebSocket server: {e}")
 else:
     # Only update version.txt with newest patch
     logger.info("Outdated version.txt although database up-to-date")

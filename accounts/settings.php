@@ -253,7 +253,7 @@ if (!empty($success_message)) {
             <?php } else { 
                 $currentPlayerData = getPlayerData("puuid", $_SESSION['user']['puuid']);
                 echo '<div class="account-link mt-2" id="account-link"><span class="block">Linked to:</span>
-                    <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.webp" class="m-auto inline-flex justify-center max-w-[32px] max-h-[32px]" width="32" loading="lazy">
+                    <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.avif" class="m-auto inline-flex justify-center max-w-[32px] max-h-[32px]" width="32" loading="lazy">
                     '.$currentPlayerData["GameName"]."#".$currentPlayerData["Tag"].'</div>';
                 ?> 
             <div id="lower-dcform">
@@ -310,9 +310,9 @@ if (!empty($success_message)) {
                         <div id="connect-account-area" class="border-y-2 border-[#21222c] border-dashed pt-2" x-cloak x-transition x-show="confirmLeague">
                             <div class="mb-4 text-xl">Found account for: '.$playerDataArray['GameName']."#".$playerDataArray['Tag'].'</div>'.'
                             <div class="flex justify-center items-center gap-8 mb-4">
-                                <img id="current-profile-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerDataArray["Icon"].'.webp" class="w-20" loading="lazy">
+                                <img id="current-profile-icon" src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerDataArray["Icon"].'.avif" class="w-20" loading="lazy">
                                 <span>&#10148;</span>
-                                <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$randomIcon.'.webp" class="w-20" loading="lazy">
+                                <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$randomIcon.'.avif" class="w-20" loading="lazy">
                             </div>
                             <div class="text-sm text-justify block account-desc">Temporarily change your summoner icon to the one on the <b>right</b> and click on the connect button to verify your league account.</div>
                             <div class="text-sm text-justify block account-desc my-4">Note: The temporary icon was given to you right after the account creation. You can find it by clicking on your profile picture, selecting "all" and scrolling completely down to the bottom.</div>
@@ -361,10 +361,10 @@ if (!empty($success_message)) {
                 <span class='text-sm text-justify block' id="auth-desc">By clicking on one of the images below you will be redirected to the Google Authenticator app store page.</span>
                 <div class="mx-4 mt-4 mb-1" id="auth-images">
                     <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2" class="no-underline inline-block my-auto mx-1">
-                        <img src="/clashapp/data/misc/webp/playstore.webp" width="140">
+                        <img src="/clashapp/data/misc/webp/playstore.avif" width="140">
                     </a>
                     <a href="itms-apps://apps.apple.com/de/app/google-authenticator/id388497605" class="no-underline inline-block my-auto mx-1">
-                        <img src="/clashapp/data/misc/webp/appstore.webp" width="140">
+                        <img src="/clashapp/data/misc/webp/appstore.avif" width="140">
                     </a>
                 </div>
             </div>

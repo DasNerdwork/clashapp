@@ -157,8 +157,8 @@ if (!empty($success_message)) {
 
 echo "<div class='h-72 m-4 upper-banner-part bg-dark rounded grid grid-cols-7 gap-4'>
     <div class='relative flex justify-center overflow-hidden profile-icon'>";
-    if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp')){
-        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.webp" width="128" height="128" class="rounded-full mt-[3.75rem] z-0 max-h-[128px] max-w-[128px] pointer-events-none select-none" alt="The custom profile icon of a player">';
+    if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif')){
+        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif" width="128" height="128" class="rounded-full mt-[3.75rem] z-0 max-h-[128px] max-w-[128px] pointer-events-none select-none" alt="The custom profile icon of a player">';
     } else {
         echo "Missing Img"; // FIXME: Create Fallback
     }
@@ -166,23 +166,23 @@ echo "<div class='h-72 m-4 upper-banner-part bg-dark rounded grid grid-cols-7 ga
     $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
     if($rankOrLevelArray["Type"] === "Rank"){ // If user has a rank
         // Print the profile border image url for current highest rank
-        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/wings_*'.strtolower($rankOrLevelArray["HighestRank"]).'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/wings_*'.strtolower($rankOrLevelArray["HighestRank"]).'.avif', GlobIterator::CURRENT_AS_PATHNAME)))[0];
         $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
         if(file_exists($profileBorderPath)){
             echo '<img src="'.$webBorderPath.'" width="384" height="384" class="twok:max-w-[150%] fullhd:max-w-[150%] twok:top-[-10.5rem] fullhd:top-[-130px] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
         }
         // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
         if ($rankOrLevelArray["HighEloLP"] != ""){
-            echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="30" height="18" class="absolute z-20 mt-[3.25rem] pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+            echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif" width="30" height="18" class="absolute z-20 mt-[3.25rem] pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
             echo "<div class='font-bold color-[#e8dfcc] absolute mt-[3.35rem] text-xs z-20'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
         } else {
-            echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="30" height="18" class="absolute z-20 mt-[3.25rem] pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+            echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif" width="30" height="18" class="absolute z-20 mt-[3.25rem] pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
             echo "<div class='font-bold color-[#e8dfcc] absolute mt-[3.35rem] text-xs z-20'>".$rankOrLevelArray["RankNumber"]."</div>";
         }
-        echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.webp" width="38" height="26" class="absolute z-20 mt-[11.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
+        echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif" width="38" height="26" class="absolute z-20 mt-[11.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
         echo "<div class='color-[#e8dfcc] absolute mt-[11.8rem] text-xs z-20'>".$playerData["Level"]."</div>"; // Always current lvl at the bottom
     } else if($rankOrLevelArray["Type"] === "Level") { // Else set to current level border
-        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.webp', GlobIterator::CURRENT_AS_PATHNAME)))[0];
+        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.avif', GlobIterator::CURRENT_AS_PATHNAME)))[0];
         $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
         if(file_exists($profileBorderPath)){
             echo '<img src="'.$webBorderPath.'" width="190" height="190" class="absolute -mt-[2.05rem] z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);" alt="The profile border corresponding to a players level">';
@@ -201,11 +201,11 @@ if($formattedInput != "") {
     $playerMainRole = $playerLanes[0];
     $playerSecondaryRole = $playerLanes[1];
     echo "<div style='display: flex; justify-content: center; width: 200px;'>";
-    if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.webp')){
-        echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.webp" width="32">';
+    if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.avif')){
+        echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.avif" width="32">';
     }
-    if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp')){
-        echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.webp" width="32"><br>';
+    if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.avif')){
+        echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.avif" width="32"><br>';
     }
     echo "</div>";
     echo "<table class='table' style='width:100%'><tr><td>";
