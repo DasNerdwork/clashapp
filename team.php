@@ -376,9 +376,9 @@ echo '
                                             $randomChampPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.avif"))];
                                             $randomScore = rand(30, $maxScore); echo "
                                             <div><div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab'>
-                                                <img src='".str_replace('/hdd1', '', $randomChampPath)."?version=".md5_file("{$randomChampPath}")."' width='64' height='64' class='block relative z-0' style='filter: grayscale(100%)' alt='A champion icon of the league of legends champion ".pathinfo(basename($randomChampPath), PATHINFO_FILENAME)."'>
+                                                <img loading='lazy' src='".str_replace('/hdd1', '', $randomChampPath)."?version=".md5_file("{$randomChampPath}")."' width='64' height='64' class='block relative z-0' style='filter: grayscale(100%)' alt='A champion icon of the league of legends champion ".pathinfo(basename($randomChampPath), PATHINFO_FILENAME)."'>
                                                 <span class='max-w-[64px] text-ellipsis overflow-hidden whitespace-nowrap block text-loading-light'>".pathinfo(basename($randomChampPath), PATHINFO_FILENAME)."</span>
-                                                <img src='/clashapp/data/misc/mastery-7.avif?version=".md5_file('/hdd1/clashapp/data/misc/mastery-7.avif')."' width='32' height='32' style='filter: grayscale(100%)' class='relative -top-[5.75rem] -right-11 z-10' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'><div class='-mt-7 text-loading-light'>{$randomScore}k</div>
+                                                <img loading='lazy' src='/clashapp/data/misc/mastery-7.avif?version=".md5_file('/hdd1/clashapp/data/misc/mastery-7.avif')."' width='32' height='32' style='filter: grayscale(100%)' class='relative -top-[5.75rem] -right-11 z-10' alt='A mastery hover icon on top of the champion icon in case the player has achieved level 5 or higher'><div class='-mt-7 text-loading-light'>{$randomScore}k</div>
                                             </div></div>";
                                             $maxScore = $randomScore;
                                         } echo "
@@ -548,16 +548,8 @@ echo '
             }
             if (isset($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause)) {
                 echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Matching Laners').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->MatchingLanersPrio->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">';
-                // foreach ($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause as $laner) {
-                //     if ($laner == reset($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause)) {
-                //         echo "A";
-                //     } else if ($laner == end($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause)) {
-                //         echo " & " . "B";
-                //     } else {
-                //         echo ", " . "C";
-                //     }
-                // }
-                echo __('Multiple players are able to perform with').' '.$champname.' '.__('while matching lanes').' (';
+                echo count($suggestedBanArray->{$champname}->MatchingLanersPrio->Cause);
+                echo ' '.__('players are able to perform with').' '.$champname.' '.__('while matching lanes').' ('; 
                 foreach ($suggestedBanArray->{$champname}->MatchingLanersPrio->Lanes as $lane) {
                     if ($lane == reset($suggestedBanArray->{$champname}->MatchingLanersPrio->Lanes)) {
                         echo ucfirst(strtolower($lane));
@@ -567,7 +559,7 @@ echo '
                         echo ", " . ucfirst(strtolower($lane));
                     }
                 }
-                echo ').</div>  ';
+                echo ').</div>';
             }
             echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Last Played').':</div>
             <div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->LastPlayed->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('The last time someone played').' '.$champname.' '.__('was').' '.timeDiffToText($suggestedBanArray->{$champname}->LastPlayed->Value).'.</div>';

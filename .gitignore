@@ -1,6 +1,7 @@
 /vendor
 /node_modules
 /data
+/logs
 /mongodb
 /plugins
 /iconcaptcha
