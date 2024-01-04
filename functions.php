@@ -624,7 +624,7 @@ function secondsToTime($seconds) {
  * @todo possibility to make more beautiful and/or write a testcase?
  */
 
-function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
+function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray, $withButton = true){
     global $mdb;
     global $currentPatch;
     global $currentTimestamp;
@@ -637,11 +637,13 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray)
     $advanced = true;
 
     // Initiating Matchdetail Table
-    $returnString .= "<button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full'
-            :aria-label='(open ? \"&#11167;\" : \"&#11165;\")'
-            @click='open = !open'
-            x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
-    $returnString .= "<div class='smooth-transition w-full overflow-hidden twok:min-h-[2300px] fullhd:min-h-[1868.75px]' x-show='open' x-transition x-cloak>";
+    if($withButton) {
+        $returnString .= "<button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full'
+                :aria-label='(open ? \"&#11167;\" : \"&#11165;\")'
+                @click='open = !open'
+                x-text='open ? \"&#11167;\" : \"&#11165;\" '></button>";
+    }
+    $returnString .= "<div class='smooth-transition w-full overflow-hidden' x-show='open' x-transition>";
 
     foreach ($matchIDArray as $matchId) {
         if(isset($matchDataCache[$matchId])){
@@ -3265,6 +3267,30 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
     };
     var data = 'iteration=".$requestIterator."&sumid=".$sumid."&teamid=".$teamID."&queuedas=".$queuedAs."&reload=".$reload."';
     xhrPCD".$requestIterator.".send(data);
+    </script>";
+}
+
+function generateSinglePlayerData($playerName, $playerTag, $reload) {
+    return "<script>
+    var xhrSPD = new XMLHttpRequest();
+    xhrSPD.open('POST', '/ajax/generatePlayerColumn.php', true);
+    xhrSPD.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+
+    xhrSPD.onreadystatechange = function() {
+        if (xhrSPD.readyState === 4 && xhrSPD.status === 200) {
+            var response = JSON.parse(xhrSPD.responseText);
+            var scriptContent = response.script;
+            var scriptElement = document.createElement('script');
+            scriptElement.text = scriptContent;
+            document.head.appendChild(scriptElement);
+            console.log(response);
+            if(response.matchHistoryContent){
+                document.getElementById('matchhistory').innerHTML = response.matchHistoryContent;
+            }
+        }
+    };
+    var data = 'name=".$playerName."&tag=".$playerTag."&reload=".$reload."';
+    xhrSPD.send(data);
     </script>";
 }
 

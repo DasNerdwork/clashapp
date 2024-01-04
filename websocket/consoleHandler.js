@@ -93,6 +93,26 @@ async function deleteAllTeams(close = false) {
   }
 }
 
+async function deleteAll(close = false) {
+  try {
+    // Use Promise.all to await all delete operations
+    await Promise.all([
+      deleteAllPlayers(),
+      deleteAllMatches(),
+      deleteAllTeams(),
+    ]);
+
+    console.log('\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Deleted all documents from the collections.', new Date().toLocaleTimeString());
+  } catch (err) {
+    console.error('\x1b[2m[%s]\x1b[0m [\x1b[35mLocal\x1b[0m]: Error deleting documents: ', new Date().toLocaleTimeString(), err);
+  } finally {
+    if (close) {
+      // Close the MongoDB connection
+      await mongoClient.close();
+    }
+  }
+}
+
 // Listen for input from the console
 rl.on('line', (input) => {
     logStream.write('['+new Date().toLocaleTimeString()+'] [User-Input]: '+input+'\n');
@@ -110,9 +130,7 @@ rl.on('line', (input) => {
     } else if (input.trim().toLowerCase() === 'clear teams') {
       deleteAllTeams();
     } else if (input.trim().toLowerCase() === 'clear all') {
-      deleteAllPlayers(true);
-      deleteAllMatches(true);
-      deleteAllTeams(true);
+      deleteAll(true);
     } else if (input.trim().toLowerCase() === 'status') {
       exec('pm2 list', (error, stdout) => {
         if (error) {
