@@ -9,47 +9,14 @@
             alert("[" + d.toLocaleTimeString() + "] ERROR: Eingabe fehlerhaft oder unvollständig.\n\nErlaubte Zeichen sind a-Z, 0-9 und Alphabete andere Sprachen.\nZudem muss ein Beschwörername zwischen 3-16 Zeichen lang sein.");
         }
      }
-    function showLoader(){
-        document.getElementById("loader").style.opacity = 1;
-        document.getElementById("name").disabled = true;
-        document.getElementById("updateBtn").disabled = true;
-        document.getElementById("submitBtn").disabled = true;
-        document.getElementById("updateBtn").innerHTML = "Aktualisiere...";
-    }
-    function hideLoader(){
-        document.getElementById("loader").style.opacity = 0;
-        document.getElementById("name").disabled = false;
-        document.getElementById("updateBtn").disabled = false;
-        document.getElementById("submitBtn").disabled = false;
-        document.getElementById("updateBtn").innerHTML = "Aktualisieren";
-    }
-    function disableUpdateBtn(){
-        document.getElementById("updateBtn").disabled = true;
-    }
-    function searchStatTable() {
-    // Declare variables
-    var input, filter, table, tr, td, i, txtValue;
-    input = document.getElementById("statTableSearch");
-    filter = input.value.toUpperCase();
-    table = document.getElementById("stattable");
-    tr = table.getElementsByTagName("tr");
-
-    // Loop through all table rows, and hide those who don't match the search query
-    for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[0];
-        if (td) {
-        txtValue = td.textContent || td.innerText;
-        if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-        } else {
-            tr[i].style.display = "none";
-        }
-        }
-    }
-    }
 </script>
 <?php 
+
+
 if (session_status() === PHP_SESSION_NONE) session_start();
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 include('/hdd1/clashapp/templates/head.php');
 setCodeHeader('Profile', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
 include('/hdd1/clashapp/templates/header.php');
@@ -65,12 +32,30 @@ include('/hdd1/clashapp/templates/header.php');
  *
  */
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // $startWhole = microtime(true);
 $ladezeiten = array();
+$emoteSources = array("/clashapp/data/misc/webp/ok.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/ok.avif"),"/clashapp/data/misc/webp/teemo.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/teemo.avif"),"/clashapp/data/misc/webp/priceless.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/priceless.avif"));
+$autosuggestRequest = $mdb->getAutosuggestAggregate();
+$championDataArray = json_decode(file_get_contents("/hdd1/clashapp/data/patch/".$currentPatch."/data/en_US/champion.json"), true);
+$championArray = array();
+foreach ($championDataArray['data'] as $championKey => $championInfo) {
+    $championArray["{$championInfo['name']}"] = "{$championInfo['image']['full']}";
+}
+if($autosuggestRequest["success"]){
+    $autosuggestData = $autosuggestRequest["data"];
+    echo "<script>const autosuggestData = " . json_encode(array_map('trim', $autosuggestData)) . ";</script>";
+} else {
+    echo "<script>const autosuggestData = '';</script>";
+}
+echo "
+<script>
+const requests = {};
+var cached = 0;
+const currentPatch = " . json_encode($currentPatch) . ";
+const championData = " . json_encode($championArray) . ";
+const containerTitle = '" . __("Summoner") . "';
+const searchHistoryTitle = '" . __("Recently Searched") . "';
+</script>";
 
 include_once('/hdd1/clashapp/functions.php');
 include_once('/hdd1/clashapp/update.php');
@@ -79,63 +64,17 @@ if (isset($_GET["name"])){
     // Format text field input to swap spaces with '+' for correct api requests
     $formattedInput = preg_replace('/\s+/', '+', $_GET["name"]);
     
-
-?>
-    <script>
-        $('#updateBtn').click(function() {
-            $.ajax({
-            type: "POST",
-            url: "../clashapp/update.php",
-            data: { username: "<?=$formattedInput ?>" }
-            }).done(function( msg ) {
-                var statusJson = JSON.parse(msg);
-                if(statusJson.status == "up-to-date"){
-                    var d = new Date();
-                    alert("[" + d.toLocaleTimeString() + "] Benutzerdaten bereits auf dem neusten Stand\n");
-                    hideLoader();
-                }else{
-                    window.location.reload();
-                }
-            });
-        });
-    </script>
-
-<?php
 // $startFetchPlayerData = microtime(true);
 $error_message = array();
 $success_message = array();
-
-
 
 $riotIdArray = explode('/', $formattedInput);
 $playerName = $riotIdArray[0];
 $playerTag = $riotIdArray[1];
 $existsInDB = false;
-$playerDataRequest = $mdb->getPlayerByRiotId($playerName, $playerTag);
-if($playerDataRequest["success"]){
-    $existsInDB = true;
-} else if($formattedInput != "" ){
-    updateProfile($formattedInput, 75);
-    $playerDataRequest = $mdb->getPlayerByRiotId($playerName, $playerTag);
-    if($playerDataRequest["success"]){
-        $existsInDB = true;
-    }
-}
-if($existsInDB){
-    $playerDataJSONString = json_encode($playerDataRequest["data"]);
-    $playerDataJSON = json_decode($playerDataJSONString, true);
-    $playerData = $playerDataJSON["PlayerData"];
-    $playerName = $playerDataJSON["PlayerData"]["GameName"];
-    $sumid = $playerDataJSON["PlayerData"]["SumID"];
-    $puuid = $playerDataJSON["PlayerData"]["PUUID"];
-    $rankData = $playerDataJSON["RankData"];
-    $masteryData = $playerDataJSON["MasteryData"];
-    $matchids = $playerDataJSON["MatchIDs"];
-}
+$forceReload = false;
 
-// $ladezeiten["FetchPlayerData"] = number_format(microtime(true) - $startFetchPlayerData, 4);
-
-// $startPrintData = microtime(true);
+echo generateSinglePlayerData($playerName, $playerTag, $forceReload);
 
 if (!empty($success_message)) { 
     foreach($success_message as $su){
@@ -155,161 +94,93 @@ if (!empty($success_message)) {
     }
 }
 
-echo "<div class='h-72 m-4 upper-banner-part bg-dark rounded grid grid-cols-7 gap-4'>
-    <div class='relative flex justify-center overflow-hidden profile-icon'>";
-    if(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif')){
-        echo '<img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif" width="128" height="128" class="rounded-full mt-[3.75rem] z-0 max-h-[128px] max-w-[128px] pointer-events-none select-none" alt="The custom profile icon of a player">';
-    } else {
-        echo "Missing Img"; // FIXME: Create Fallback
-    }
+$randomIconPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.avif"))];
+echo "
+<div class='h-[26rem] flex justify-center items-center mx-4 mt-4 upper-banner-part bg-dark rounded'>
+    <div class='w-[calc(100%-696px)] grid grid-cols-5 gap-4 h-[calc(100%-2rem)]'>
+        <div class='relative flex justify-center pt-32 border-darker/25 border-r-4 border-dashed h-full'>
+            <img id='profileicon' src='".str_replace('/hdd1', '', $randomIconPath)."?version=".md5_file($randomIconPath)."' width='84' height='84' style='filter: grayscale(100%)' class='rounded-full mt-6 z-0 max-h-[84px] max-w-[84px] pointer-events-none select-none' alt='The custom profile icon of a player'>
+            <div class='playerlevel text-loading-light absolute mt-[6.8rem] text-xs z-[9]'>30</div>
+            <img src='/clashapp/data/misc/levels/prestige_crest_lvl_030.avif?version=".md5_file("/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_030.avif")."' width='190' height='190' style='filter: grayscale(100%)' class='profileborder-030 absolute -mt-[2.05rem] z-[8] pointer-events-none select-none' style='-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);' alt='The profile border corresponding to a players level'>
+            <div class='absolute mt-[8.75rem] z-[9]'>
+                <span id='playername' class='text-loading-light'>".__("Player")." </span>
+                <span id='playertag' class='z-[9] bg-loading px-1 rounded ml-1 text-sm text-gray-300'>#EUW</span>
+            </div>
+        </div>
+        <div class='border-darker/25 border-r-4 border-dashed h-full flex justify-center items-end'>Placeolder Solo/Duo</div>
+        <div class='border-darker/25 border-r-4 border-dashed h-full flex justify-center items-end'>Placeolder Flex</div>
+        <div class='border-darker/25 border-r-4 border-dashed h-full flex justify-center items-end'>Placeolder Mastery</div>
+        <div class='h-full flex justify-center items-end'>Placeholder Settings</div>
+    </div>
+</div>
 
-    $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
-    if($rankOrLevelArray["Type"] === "Rank"){ // If user has a rank
-        // Print the profile border image url for current highest rank
-        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/ranks/wings_*'.strtolower($rankOrLevelArray["HighestRank"]).'.avif', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-        $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
-        if(file_exists($profileBorderPath)){
-            echo '<img fetchpriority="high" src="'.$webBorderPath.'" width="384" height="384" class="twok:max-w-[150%] fullhd:max-w-[150%] twok:top-[-10.5rem] fullhd:top-[-130px] absolute z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 25%, transparent 75%); mask-image: radial-gradient(circle at center, white 20%, transparent 33%);" alt="The profile border corresponding to a players rank">';
-        }
-        // Additionally print LP count if user is Master+ OR print the rank number (e.g. IV)
-        if ($rankOrLevelArray["HighEloLP"] != ""){
-            echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif" width="30" height="18" class="absolute z-20 mt-[3.25rem] pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
-            echo "<div class='font-bold color-[#e8dfcc] absolute mt-[3.35rem] text-xs z-20'>".$rankOrLevelArray["HighEloLP"]." LP</div>";
-        } else {
-            echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif" width="30" height="18" class="absolute z-20 mt-[3.25rem] pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
-            echo "<div class='font-bold color-[#e8dfcc] absolute mt-[3.35rem] text-xs z-20'>".$rankOrLevelArray["RankNumber"]."</div>";
-        }
-        echo '<img src="/clashapp/data/misc/ranks/plates/'.strtolower($rankOrLevelArray["HighestRank"]).'-plate.avif" width="38" height="26" class="absolute z-20 mt-[11.5rem] mr-0.5 pointer-events-none select-none" alt="A plate background image as placeholder for a ranks tier or level">';
-        echo "<div class='color-[#e8dfcc] absolute mt-[11.8rem] text-xs z-20'>".$playerData["Level"]."</div>"; // Always current lvl at the bottom
-    } else if($rankOrLevelArray["Type"] === "Level") { // Else set to current level border
-        $profileBorderPath = array_values(iterator_to_array(new GlobIterator('/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_'.$rankOrLevelArray["LevelFileName"].'.avif', GlobIterator::CURRENT_AS_PATHNAME)))[0];
-        $webBorderPath = str_replace("/hdd1","",$profileBorderPath);
-        if(file_exists($profileBorderPath)){
-            echo '<img src="'.$webBorderPath.'" width="190" height="190" class="absolute -mt-[2.05rem] z-10 pointer-events-none select-none" style="-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);" alt="The profile border corresponding to a players level">';
-            }
-    echo "<div class='absolute text-[#e8dfcc] mt-24 text-xs z-20 twok:mt-[6.8rem]'>".$playerData["Level"]."</div>";
-    } echo "
-<div class='absolute mt-[14.75rem] z-20'><span class='text-xl'>".$playerName."</span><span class='bg-searchtitle px-1 rounded ml-1 text-base text-[#9ea4bd]'>#".$playerTag."</span></div></div></div>";
-
-echo "<div class='m-4 px-4 pb-4 center-part bg-dark rounded justify-center'>";
-
-if($formattedInput != "") {
-
-    $matchDaten = getMatchData($matchids);
-    $playerLanes = getLanePercentages($matchDaten, $puuid);
-
-    $playerMainRole = $playerLanes[0];
-    $playerSecondaryRole = $playerLanes[1];
-    echo "<div style='display: flex; justify-content: center; width: 200px;'>";
-    if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerMainRole.'.avif')){
-        echo '<img src="/clashapp/data/misc/lanes/'.$playerMainRole.'.avif" width="32">';
-    }
-    if(file_exists('/hdd1/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.avif')){
-        echo '<img src="/clashapp/data/misc/lanes/'.$playerSecondaryRole.'.avif" width="32"><br>';
-    }
-    echo "</div>";
-    echo "<table class='table' style='width:100%'><tr><td>";
-    echo "Name: " . $playerData["Name"] . "<br>";
-    echo "Level: " . $playerData["Level"] . "<br>";
-    foreach($rankData as $rankedQueue){
-    echo "Rank: " . $rankedQueue["Tier"] . " " . $rankedQueue["Rank"] . " mit " . $rankedQueue["LP"] . " LP in " . $rankedQueue["Queue"] . "<br>";
-    echo "Wins: " . $rankedQueue["Wins"] . " / Losses: " . $rankedQueue["Losses"] . " - Winrate: " . round((($rankedQueue["Wins"]/($rankedQueue["Wins"]+$rankedQueue["Losses"]))*100),2) . "%<br><br>";
-    }
-    echo "<b>! For Testing Purposes Only !</b><br>";
-    echo "PUUID: " . $playerData["PUUID"] . "<br>";
-    echo "SumID: " . $playerData["SumID"] . "<br>";
-    echo "AccountID: " . $playerData["AccountID"] . "<br>";
-    echo "LastChange: " . $playerData["LastChange"] . "<br><br>";
-
-    echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
-    printMasteryInfo($masteryData, 0);
-    echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
-    printMasteryInfo($masteryData, 1);
-    echo "</td><td style='width:300px; text-align: center; vertical-align:middle;'>";
-    printMasteryInfo($masteryData, 2);
-    echo "</td></table>"; 
-    // $ladezeiten["printData"] = number_format(microtime(true) - $startPrintData, 4); 
-
-    // $startMatchDataGrab = microtime(true);
-    // $ladezeiten["MatchDataGrab"] = number_format(microtime(true) - $startMatchDataGrab, 4);
-    // $startMostCommon = microtime(true);
-    $mostCommonAttributes = array("kills", "deaths" ,"assists", "teamPosition", "championName", "detectorWardsPlaced", "visionScore");
-    // $ladezeiten["MostCommon"] = number_format(microtime(true) - $startMostCommon, 4);
-    $mostCommonReturn = getMostCommon($mostCommonAttributes, $matchDaten, $puuid, 2);
-    echo "<pre>";
-    print_r($mostCommonReturn);
-    echo "</pre>";
-    
-    
-    $playerLane = array_key_first(array_slice($mostCommonReturn['teamPosition'], 0, 1, true));
-
-
-
-    // $startAverage = microtime(true);
-    $averageAttributes = array_keys(json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true)["FILL"]);
-    // $ladezeiten["Average"] = number_format(microtime(true) - $startAverage, 4);
-    getAverage($averageAttributes, $matchDaten, $puuid, $playerLane);
-    
-    // $startMostPlayedWith = microtime(true);
-    mostPlayedWith($matchDaten, $puuid);
-    // $ladezeiten["MostPlayedWith"] = number_format(microtime(true) - $startMostPlayedWith, 4);
-
-    echo "<br>";
-    echo "Most Losses in Lane against: ";
-    // $startMostLossesAgainst = microtime(true);
-    getMostLossesAgainst("lane", $matchDaten, $puuid);
-    // $ladezeiten["MostLossesAgainst"] = number_format(microtime(true) - $startMostLossesAgainst, 4);
-    echo "<br>";
-    echo "Most Losses in Total against: ";
-    getMostLossesAgainst("general", $matchDaten, $puuid);
-    echo "<br>";
-    echo "Highest Winrate in Lane against: ";
-    // $startHighestWinrateAgainst = microtime(true);
-    getHighestWinrateAgainst("lane", $matchDaten, $puuid);
-    // $ladezeiten["HighestWinrateAgainst"] = number_format(microtime(true) - $startHighestWinrateAgainst, 4);
-    echo "<br>";
-    echo "Highest Winrate in Total against: ";
-    getHighestWinrateAgainst("general", $matchDaten, $puuid);
-    echo "<br><br>";
-    // $startHighestWinrateWith = microtime(true);
-    getHighestWinrateWith("FILL", $matchDaten, $puuid);
-    getHighestWinrateWith("TOP", $matchDaten, $puuid);
-    getHighestWinrateWith("JUNGLE", $matchDaten, $puuid);
-    getHighestWinrateWith("MID", $matchDaten, $puuid);
-    getHighestWinrateWith("BOT", $matchDaten, $puuid);
-    getHighestWinrateWith("UTILITY", $matchDaten, $puuid);
-    // $ladezeiten["HighestWInrateWith"] = number_format(microtime(true) - $startHighestWinrateWith, 4);
-    // $startMatchDetailList = microtime(true);
-    // getMatchDetailsByPUUID($matchids, $puuid);
-    // $ladezeiten["MatchDetailsList"] = number_format(microtime(true) - $startMatchDetailList, 4);
-    // $ladezeiten["whole"] = number_format(microtime(true) - $startWhole, 4);
-    echo "<pre>";
-    print_r($ladezeiten);
-    echo "</pre>";
-    }
+<table class='w-full table table-fixed border-separate border-spacing-4'>
+    <tr id='match-history' x-data='{ advancedGlobal: true }'>
+        <td class='w-[332px] min-w-[316px] align-top'>
+            <div class='row-span-2 p-4 flex items-center justify-center rounded bg-[#141624]'>
+                <div class='h-[37.5rem] min-w-[300px] bg-black'>
+                    "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                    <span class='h-[37.5rem] flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
+                    } else { echo "
+                        <div class='lazyhtml' data-lazyhtml onvisible>
+                            <script type='text/lazyhtml'>
+                            <!--
+                            <ins class='adsbygoogle'
+                                    style='display:block;height:600px;width:100%'
+                                    data-ad-client='ca-pub-8928684248089281'
+                                    data-ad-slot='5772151527'
+                                    data-full-width-responsive='true'></ins>
+                            <script>
+                                    (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                            -->
+                            </script>
+                        </div>
+                    "; } echo "
+                </div>
+            </div>  
+        </td>
+        <td class='w-auto align-top'>
+            <div class='bg-dark rounded p-4 h-[40rem]'>
+            </div>
+        </td>
+        <td class='align-top w-auto opacity-0 bg-dark p-4' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
+            <table class='rounded-b bg-[#141624] w-full'>
+                <tr id='matchhistory'>
+                </tr>
+            </table>
+        </td>
+        <td class='w-auto align-top'>
+            <div class='bg-dark rounded p-4 h-[40rem]'>
+            </div>
+        </td>
+        <td class='w-[332px] min-w-[316px] align-top'>
+            <div class='row-span-2 p-4 flex items-center justify-center rounded bg-[#141624]'>
+                <div class='h-[37.5rem] min-w-[300px] bg-black'>
+                    "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                    <span class='h-[37.5rem] flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
+                    } else { echo "
+                        <div class='lazyhtml' data-lazyhtml onvisible>
+                            <script type='text/lazyhtml'>
+                            <!--
+                            <ins class='adsbygoogle'
+                                    style='display:block;height:600px;width:100%'
+                                    data-ad-client='ca-pub-8928684248089281'
+                                    data-ad-slot='7994990182'
+                                    data-full-width-responsive='true'></ins>
+                            <script>
+                                    (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                            -->
+                            </script>
+                        </div>
+                    "; } echo "
+                </div>
+            </div>        
+        </td>
+    </tr>
+</table>";
 }
 
 include('/hdd1/clashapp/templates/footer.php');
-
-// if (strstr($_SERVER['HTTP_REFERER'],"clashscout.com/clash")) {
-//     if (isset($_POST["load"])) {
-//         $query = preg_replace('/\s+/', '+', $_POST["search"]);
-//         $puuid = getPlayerData($query)["PUUID"];
-//         grabMatches($puuid, $_POST["search"]);
-//     }
-
-
-
-
-
-
-
-
-
-// } else {
-//     http_response_code("403");
-// }
 ?>
-
-
-
