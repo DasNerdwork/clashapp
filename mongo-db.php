@@ -165,36 +165,32 @@ class MongoDBHelper {
      */
     public function insertDocument($collectionName, $document) {
         $bulk = new MongoDB\Driver\BulkWrite;
-        if ($collectionName === 'matches') {
-            if (isset($document['metadata']['matchId'])) {
-                $alreadyExists = $this->findDocumentByField('matches', 'metadata.matchId', $document['metadata']['matchId'])['success'];
-            }
-        } elseif ($collectionName === 'players') {
-            if (isset($document['PlayerData']['PUUID'])) {
-                $alreadyExists = $this->findDocumentByField('players', 'PlayerData.PUUID', $document['PlayerData']['PUUID'])['success'];
-            }
-        } elseif ($collectionName === 'teams') {
-            if (isset($document['TeamID'])) {
-                $alreadyExists = $this->findDocumentByField('teams', 'TeamID', $document['TeamID'])['success'];
-            }
-        }
-
-        if (!$alreadyExists) {
+        try {
+            // Try to insert the document
             $bulk->insert($document);
             $this->client->executeBulkWrite("{$this->mdb}.$collectionName", $bulk);
-            return array('success' => true, 'code' => '8AMZLM', 'message' => 'Successfully inserted document into '.$collectionName);
-        } else {
-            $filter = [];
-            if ($collectionName === 'matches') {
-                $filter = ['metadata.matchId' => $document['metadata']['matchId']];
-            } elseif ($collectionName === 'players') {
-                $filter = ['PlayerData.PUUID' => $document['PlayerData']['PUUID']];
-            } elseif ($collectionName === 'teams') {
-                $filter = ['TeamID' => $document['TeamID']];
+    
+            return [
+                'success' => true,
+                'code' => '8AMZLM',
+                'message' => 'Successfully inserted document into ' . $collectionName,
+            ];
+        } catch (MongoDB\Driver\Exception\BulkWriteException $e) {
+            if ($e->getCode() == 11000) {
+                // Duplicate key error
+                return [
+                    'success' => false,
+                    'code' => 'MXZ4P5',
+                    'message' => 'Document with the same key already exists in ' . $collectionName,
+                ];
+            } else {
+                // Handle other errors
+                return [
+                    'success' => false,
+                    'code' => 'MXZZLM',
+                    'message' => 'An error occurred: ' . $e->getMessage(),
+                ];
             }
-            $bulk->update($filter, ['$set' => $document]);
-            $this->client->executeBulkWrite("{$this->mdb}.$collectionName", $bulk);
-            return array('success' => false, 'code' => 'MXZ4P5', 'message' => 'Successfully updated document in '.$collectionName);
         }
     }
 

@@ -3,6 +3,7 @@
 /data
 /logs
 /mongodb
+/mongo
 /plugins
 /iconcaptcha
 /css/output.css
