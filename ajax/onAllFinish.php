@@ -7,13 +7,31 @@ require_once '/hdd1/clashapp/mongo-db.php';
 // error_reporting(E_ALL);
 
 if(isset($_POST['sumids'])){
+    // Data Validation checks
+    try {
+        $playerNameTeamArray = explode(',', $_POST['sumids']);
+    } catch (ValueError $e) {
+        die("Failed to explode sumids: " . $e->getMessage());
+    }
+    foreach ($playerNameTeamArray as $sumid) {
+        if (!isValidID($sumid)) {
+            die("Invalid sumid: " . $sumid);
+        }
+    }
+    if(isset($_POST['teamid'])){
+        if(!isValidID($_POST['teamid'])){
+            die("Invalid teamid: " . $_POST['teamid']);
+        } else {
+            $teamID = $_POST['teamid'];
+        }
+    }
+    // End of Data Validation checks
     $mdb = new MongoDBHelper();
     $matchIDTeamArray = array();
     $masteryDataTeamArray = array();
     $playerLanesTeamArray = array();
     $playerNameTeamArray = explode(',', $_POST['sumids']);
     $playerSumidTeamArray = array_flip($playerNameTeamArray);
-    $teamID = $_POST['teamid'];
     $returnString = "";
     global $currentPatch;
     foreach(array_keys($playerSumidTeamArray) as $playerSumid){

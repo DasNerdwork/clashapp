@@ -273,7 +273,7 @@ echo '
         <table class='w-full table table-fixed border-separate border-spacing-4' x-data='{ advancedGlobal: ".$matchesExpanded." }'>
             <tr>";
                 $playerSpawnDelay = 0;
-                isset($_GET["reload"]) ? $forceReload = true : $forceReload = false;
+                $forceReload = isset($_GET["reload"]) ? true : false;
                 foreach($teamDataArray["Players"] as $key => $player){ 
                     echo generatePlayerColumnData($xhrPCDcount, $player["summonerId"], $teamID, $player["position"], $forceReload);
                     $xhrPCDcount++;

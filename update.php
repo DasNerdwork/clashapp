@@ -88,7 +88,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 if(empty($tempAjaxMatchIDArray)){
                     $returnScriptContent .= "console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
-                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
+                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
                     processResponseData($ajaxUniquifier)
                     ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
@@ -113,7 +113,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                         var playerName = xhr".$requestIterator.".responseText;
                         console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
                         requests['".$sumid."'] = 'Done';
-                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
+                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
                         processResponseData($ajaxUniquifier)
                         ."
                         xhrAfter".$ajaxUniquifier.".send(xhrMessage);
@@ -164,7 +164,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 if(empty($tempAjaxMatchIDArray)){
                     $returnScriptContent .= "console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
-                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
+                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
                     processResponseData($ajaxUniquifier)
                     ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
@@ -189,7 +189,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                         var playerName = xhr".$requestIterator.".responseText;
                         console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
                         requests['".$sumid."'] = 'Done';
-                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&path=".$sumid.".json&puuid=".$puuid."&sumid=".$sumid."';".
+                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
                         processResponseData($ajaxUniquifier)
                         ."
                         xhrAfter".$ajaxUniquifier.".send(xhrMessage);
