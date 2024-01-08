@@ -7,6 +7,44 @@ include_once('/hdd1/clashapp/update.php');
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
+// Data Validation checks
+if(isset($_POST['iteration'])){
+    if(!isValidIterator($_POST['iteration'])){
+        die("Invalid iterator: " . $_POST['iteration']);
+    }
+}
+if(isset($_POST['name'])){
+    if(!isValidPlayerName($_POST['name'])){
+        die("Invalid playerName: " . $_POST['name']);
+    }
+}
+if(isset($_POST['tag'])){
+    if(!isValidPlayerTag($_POST['tag'])){
+        die("Invalid tag: " . $_POST['tag']);
+    }
+}
+if(isset($_POST['sumid'])){
+    if(!isValidID($_POST['sumid'])){
+        die("Invalid sumid: " . $_POST['sumid']);
+    }
+}
+if(isset($_POST['teamid'])){
+    if(!isValidID($_POST['teamid'])){
+        die("Invalid teamid: " . $_POST['teamid']);
+    }
+}
+if(isset($_POST['queuedas'])){
+    if(!isValidPosition($_POST['queuedas'])){
+        die("Invalid position: " . $_POST['queuedas']);
+    }
+}
+if(isset($_POST['reload'])){
+    if(!is_bool($_POST['reload']) && $_POST['reload'] != ''){
+        die("Invalid or non-empty reload boolean: " . $_POST['reload']);
+    }
+}
+// End of Data Validation checks
+
 if(isset($_POST['name'])){
     $iteration = "1";
     $playerName = $_POST['name'];

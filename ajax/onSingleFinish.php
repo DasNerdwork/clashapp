@@ -1,15 +1,48 @@
 <?php
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 include_once('/hdd1/clashapp/functions.php');
 require_once '/hdd1/clashapp/mongo-db.php';
 
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// error_reporting(E_ALL);
+
+// Data Validation checks
+if(isset($_POST['mode'])){
+    if(!in_array($_POST['mode'], ["both", "lanes", "scores"])){
+        die("Invalid mode: " . $_POST['mode']);
+    }
+}
+if(isset($_POST['matchids'])){
+    try {
+        $decodedMatchIds = json_decode($_POST['matchids'], true, JSON_THROW_ON_ERROR);
+    } catch (JsonException $e) {
+        die("Failed to decode matchids: " . $e->getMessage());
+    }
+    if ($decodedMatchIds !== null && is_array($decodedMatchIds)) {
+        $matchids = array_keys($decodedMatchIds);
+    } else {
+        die("Invalid matchids format");
+    }
+    foreach($matchids as $singleMatchID){
+        if (!isValidMatchID($singleMatchID)) {
+            die("Invalid matchId: " . $singleMatchID);
+        }
+    }
+}
+if(isset($_POST['sumid'])){
+    if(!isValidID($_POST['sumid'])){
+        die("Invalid sumid: " . $_POST['sumid']);
+    }
+}
+if(isset($_POST['puuid'])){
+    if(!isValidID($_POST['puuid'])){
+        die("Invalid puuid: " . $_POST['puuid']);
+    }
+}
+// End of Data Validation checks
+
 if(isset($_POST['mode'])){
     $mdb = new MongoDBHelper();
-    $matchids = array_keys(json_decode($_POST['matchids'], true));
     $response = array('sumid' => $_POST['sumid']);
     $recalculatedMatchIDsArray = array();
     // load players full match data into RAM array for fast access after page load
