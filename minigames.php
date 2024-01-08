@@ -95,6 +95,20 @@ $db = new DB();
     }
 </style>
 <script>
+    if (typeof getCookie !== 'function') {
+        function getCookie(name) {
+            var value = '; ' + document.cookie;
+            var parts = value.split('; ' + name + '=');
+            if (parts.length === 2) {
+                return parts.pop().split(';').shift();
+            }
+        }
+    }
+    if (typeof setCookie !== 'function') {
+        function setCookie(name, value, time = (new Date(Date.now()+ 86400*1000*365)).toUTCString()) {
+            document.cookie = name+"="+value+"; expires="+time+"; path=/";
+        }
+    }
     let championName = "";
     let fullImageSource = "";
     var ownUsername = "";
