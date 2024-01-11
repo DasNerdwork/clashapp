@@ -1,4 +1,5 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) session_start();
 include_once('/hdd1/clashapp/functions.php');
 require_once '/hdd1/clashapp/mongo-db.php';
 include_once('/hdd1/clashapp/update.php');
@@ -8,6 +9,11 @@ include_once('/hdd1/clashapp/update.php');
 // error_reporting(E_ALL);
 
 // Data Validation checks
+if(isset($_POST['csrf_token'])){
+    if(!isValidCSRF($_POST['csrf_token'])){
+        die("Invalid csrf_token: " . $_POST['csrf_token']);
+    }
+}
 if(isset($_POST['iteration'])){
     if(!isValidIterator($_POST['iteration'])){
         die("Invalid iterator: " . $_POST['iteration']);
@@ -363,6 +369,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
     if($masteryContent !== "") $responseArray["masteryContent"] = $masteryContent;
     if($tagList !== "") $responseArray["tagList"] = $tagList;
     if($matchHistoryContent !== "") $responseArray["matchHistoryContent"] = $matchHistoryContent;
+    if(isset($_POST['csrf_token'])) $responseArray["csrfToken"] = $_POST['csrf_token'];
 
     echo json_encode($responseArray);
 }
