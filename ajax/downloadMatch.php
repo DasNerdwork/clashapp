@@ -1,6 +1,6 @@
 <?php
 include_once('/hdd1/clashapp/functions.php');
-if(isset($_POST['matches']) && isset($_POST['playerName'])){
+if(isset($_POST['matches'], $_POST['playerName'])){
     $logPath = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
     $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
     $matchesArray = json_decode($_POST['matches']);

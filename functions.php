@@ -3573,89 +3573,91 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
     xhrPCD".$requestIterator.".onreadystatechange = function() {
         if (xhrPCD".$requestIterator.".readyState === 4 && xhrPCD".$requestIterator.".status === 200) {
             var response = JSON.parse(xhrPCD".$requestIterator.".responseText);
-            var scriptContent = response.script;
-            var scriptElement = document.createElement('script');
-            scriptElement.text = scriptContent;
-            document.head.appendChild(scriptElement);
-            document.getElementById('animate-body-".$requestIterator."').classList = [];
-            document.getElementById('queuerole-".$requestIterator."').classList.replace('brightness-100', 'brightness-150');
-            let loadingTextElements = document.getElementById('single-player-column-".$requestIterator."').querySelectorAll('.text-loading-light');
-            loadingTextElements.forEach(function(element) {
-                element.classList.remove('text-loading-light');
-            });
-            if(response.profileIconSrc){
-                let profileIcon = document.getElementById('profileicon-".$requestIterator."');
-                profileIcon.removeAttribute('style');
-                profileIcon.src = response.profileIconSrc;
-                if(response.upperPlate && response.upperContent){
-                    profileIcon.insertAdjacentHTML('afterend', response.upperPlate);
-                    profileIcon.nextElementSibling.insertAdjacentHTML('afterend', response.upperContent);
-                }
-                if(response.lowerPlate){
-                    profileIcon.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.lowerPlate);
-                }
-                if(response.profileBorder){
-                    document.querySelectorAll('.profileborder-030').forEach(e => e.remove());
-                    if(response.upperPlate || response.upperContent || response.lowerPlate){
-                        profileIcon.nextElementSibling.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.profileBorder);                
-                    } else {
-                        profileIcon.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.profileBorder);                
+            if(response.csrfToken == '".$_SESSION['csrf_token']."'){
+                var scriptContent = response.script;
+                var scriptElement = document.createElement('script');
+                scriptElement.text = scriptContent;
+                document.head.appendChild(scriptElement);
+                document.getElementById('animate-body-".$requestIterator."').classList = [];
+                document.getElementById('queuerole-".$requestIterator."').classList.replace('brightness-100', 'brightness-150');
+                let loadingTextElements = document.getElementById('single-player-column-".$requestIterator."').querySelectorAll('.text-loading-light');
+                loadingTextElements.forEach(function(element) {
+                    element.classList.remove('text-loading-light');
+                });
+                if(response.profileIconSrc){
+                    let profileIcon = document.getElementById('profileicon-".$requestIterator."');
+                    profileIcon.removeAttribute('style');
+                    profileIcon.src = response.profileIconSrc;
+                    if(response.upperPlate && response.upperContent){
+                        profileIcon.insertAdjacentHTML('afterend', response.upperPlate);
+                        profileIcon.nextElementSibling.insertAdjacentHTML('afterend', response.upperContent);
+                    }
+                    if(response.lowerPlate){
+                        profileIcon.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.lowerPlate);
+                    }
+                    if(response.profileBorder){
+                        document.querySelectorAll('.profileborder-030').forEach(e => e.remove());
+                        if(response.upperPlate || response.upperContent || response.lowerPlate){
+                            profileIcon.nextElementSibling.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.profileBorder);                
+                        } else {
+                            profileIcon.nextElementSibling.nextElementSibling.insertAdjacentHTML('afterend', response.profileBorder);                
+                        }
                     }
                 }
-            }
-            if(response.playerLevel){
-                let playerLevelElement = document.querySelector('#single-player-column-".$requestIterator." .playerlevel');
-                playerLevelElement.classList.replace('text-loading-light', 'text-[#e8dfcc]');
-                playerLevelElement.innerText = response.playerLevel;
-            }
-            if(response.playerName){
-                let playerNameElement = document.getElementById('playername-".$requestIterator."');
-                playerNameElement.classList.remove('text-loading-light');
-                playerNameElement.innerText = response.playerName;
-            }
-            if(response.playerTag){
-                let playerTagElement = document.getElementById('playertag-".$requestIterator."');
-                playerTagElement.classList.replace('bg-loading', 'bg-searchtitle');
-                playerTagElement.classList.replace('text-gray-300', 'text-[#9ea4bd]');
-                playerTagElement.innerText = '#'+response.playerTag;
-            }
-            if(response.roleWarning){
-                document.getElementById('queuerole-".$requestIterator."').insertAdjacentHTML('afterend', response.roleWarning);
-            }
-            if(response.playerMainRoleSrc){
-                let mainRoleElement = document.getElementById('mainrole-".$requestIterator."')
-                mainRoleElement.classList.replace('brightness-100', 'brightness-150');
-                mainRoleElement.src = response.playerMainRoleSrc;
-            } else {
-                document.getElementById('mainrole-".$requestIterator."').remove();
-            }
-            if(response.playerSecondaryRoleSrc){
-                let secRoleElement = document.getElementById('secrole-".$requestIterator."');
-                secRoleElement.classList.replace('brightness-100', 'brightness-150');
-                secRoleElement.src = response.playerSecondaryRoleSrc;
-            } else {
-                document.getElementById('secrole-".$requestIterator."').remove();
-            }
-            if(response.matchScore){
-                document.getElementById('matchscore-".$requestIterator."').innerText = response.matchScore;
-            }
-            if(response.rankedContent){
-                document.getElementById('rankcontent-".$requestIterator."').innerHTML = response.rankedContent;
-            }
-            if(response.masteryContent){
-                let masteryContent =  document.getElementById('masterycontent-".$requestIterator."');
-                masteryContent.classList.remove('justify-center');
-                masteryContent.innerHTML = response.masteryContent;
-            }
-            if(response.tagList){
-                document.getElementById('taglist-".$requestIterator."').innerHTML = response.tagList;
-            }
-            if(response.matchHistoryContent){
-                document.getElementById('matchhistory-".$requestIterator."').innerHTML = response.matchHistoryContent;
+                if(response.playerLevel){
+                    let playerLevelElement = document.querySelector('#single-player-column-".$requestIterator." .playerlevel');
+                    playerLevelElement.classList.replace('text-loading-light', 'text-[#e8dfcc]');
+                    playerLevelElement.innerText = response.playerLevel;
+                }
+                if(response.playerName){
+                    let playerNameElement = document.getElementById('playername-".$requestIterator."');
+                    playerNameElement.classList.remove('text-loading-light');
+                    playerNameElement.innerText = response.playerName;
+                }
+                if(response.playerTag){
+                    let playerTagElement = document.getElementById('playertag-".$requestIterator."');
+                    playerTagElement.classList.replace('bg-loading', 'bg-searchtitle');
+                    playerTagElement.classList.replace('text-gray-300', 'text-[#9ea4bd]');
+                    playerTagElement.innerText = '#'+response.playerTag;
+                }
+                if(response.roleWarning){
+                    document.getElementById('queuerole-".$requestIterator."').insertAdjacentHTML('afterend', response.roleWarning);
+                }
+                if(response.playerMainRoleSrc){
+                    let mainRoleElement = document.getElementById('mainrole-".$requestIterator."')
+                    mainRoleElement.classList.replace('brightness-100', 'brightness-150');
+                    mainRoleElement.src = response.playerMainRoleSrc;
+                } else {
+                    document.getElementById('mainrole-".$requestIterator."').remove();
+                }
+                if(response.playerSecondaryRoleSrc){
+                    let secRoleElement = document.getElementById('secrole-".$requestIterator."');
+                    secRoleElement.classList.replace('brightness-100', 'brightness-150');
+                    secRoleElement.src = response.playerSecondaryRoleSrc;
+                } else {
+                    document.getElementById('secrole-".$requestIterator."').remove();
+                }
+                if(response.matchScore){
+                    document.getElementById('matchscore-".$requestIterator."').innerText = response.matchScore;
+                }
+                if(response.rankedContent){
+                    document.getElementById('rankcontent-".$requestIterator."').innerHTML = response.rankedContent;
+                }
+                if(response.masteryContent){
+                    let masteryContent =  document.getElementById('masterycontent-".$requestIterator."');
+                    masteryContent.classList.remove('justify-center');
+                    masteryContent.innerHTML = response.masteryContent;
+                }
+                if(response.tagList){
+                    document.getElementById('taglist-".$requestIterator."').innerHTML = response.tagList;
+                }
+                if(response.matchHistoryContent){
+                    document.getElementById('matchhistory-".$requestIterator."').innerHTML = response.matchHistoryContent;
+                }
             }
         }
     };
-    var data = 'iteration=".$requestIterator."&sumid=".$sumid."&teamid=".$teamID."&queuedas=".$queuedAs."&reload=".$reload."';
+    var data = 'iteration=".$requestIterator."&sumid=".$sumid."&teamid=".$teamID."&queuedas=".$queuedAs."&reload=".$reload."&csrf_token=".$_SESSION['csrf_token']."';
     xhrPCD".$requestIterator.".send(data);
     </script>";
 }
@@ -3665,24 +3667,37 @@ function generateSinglePlayerData($playerName, $playerTag, $reload) {
     var xhrSPD = new XMLHttpRequest();
     xhrSPD.open('POST', '/ajax/generatePlayerColumn.php', true);
     xhrSPD.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-
     xhrSPD.onreadystatechange = function() {
         if (xhrSPD.readyState === 4 && xhrSPD.status === 200) {
             var response = JSON.parse(xhrSPD.responseText);
-            var scriptContent = response.script;
-            var scriptElement = document.createElement('script');
-            scriptElement.text = scriptContent;
-            document.head.appendChild(scriptElement);
-            console.log(response);
-            if(response.matchHistoryContent){
-                var cleanContent = sanitizeAndRenderHTML(response.matchHistoryContent);
-                document.getElementById('matchhistory').innerHTML = cleanContent;
+            if(response.csrfToken == '".$_SESSION['csrf_token']."'){
+                var scriptContent = response.script;
+                var scriptElement = document.createElement('script');
+                scriptElement.text = scriptContent;
+                document.head.appendChild(scriptElement);
+                console.log(response);
+                if(response.matchHistoryContent){
+                    var cleanContent = sanitizeAndRenderHTML(response.matchHistoryContent);
+                    document.getElementById('matchhistory').innerHTML = cleanContent;
+                }
             }
         }
     };
-    var data = 'name=".$playerName."&tag=".$playerTag."&reload=".$reload."';
+    var data = 'name=".$playerName."&tag=".$playerTag."&reload=".$reload."&csrf_token=".$_SESSION['csrf_token']."';
     xhrSPD.send(data);
     </script>";
+}
+
+/**
+ * Match pattern: The string contains only characters '0' to '9' and 'a' to 'f' (or 'A' to 'F').
+ *
+ * @param string $csrf A string containing the to-be-checked csrfToken
+ *
+ * @return boolean True | False depending on if the format is correct
+ *
+ */
+function isValidCSRF($csrf) {
+    return preg_match('/^[0-9a-fA-F]{64}$/', $csrf) === 1;
 }
 
 /**
