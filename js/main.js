@@ -64,6 +64,21 @@ function selectLang(lang){
     location.reload();
 }
 
+function escapeHtml(text) {
+  return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+}
+
+function sanitizeAndRenderHTML(htmlString) {
+  var esacpedHtml = escapeHtml(htmlString)
+  var doc = new DOMParser().parseFromString(esacpedHtml, 'text/html');
+  return doc.body.textContent || "";
+}
+
 let cache = {};
 let translationDataLoaded = false;
 
