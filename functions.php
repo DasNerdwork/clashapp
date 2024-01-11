@@ -3675,8 +3675,8 @@ function generateSinglePlayerData($playerName, $playerTag, $reload) {
             document.head.appendChild(scriptElement);
             console.log(response);
             if(response.matchHistoryContent){
-                const clean = DOMPurify.sanitize(response.matchHistoryContent)
-                document.getElementById('matchhistory').innerHTML = clean;
+                var cleanContent = sanitizeAndRenderHTML(response.matchHistoryContent);
+                document.getElementById('matchhistory').innerHTML = cleanContent;
             }
         }
     };
