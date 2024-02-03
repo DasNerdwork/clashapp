@@ -4,6 +4,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once '/hdd1/clashapp/mongo-db.php';
+include_once('/hdd1/clashapp/redis/redis.php');
 
 /** Main functions.php containing overall used functions throughout different php files
  * @author Florian Falk <dasnerdwork@gmail.com>
@@ -151,10 +152,6 @@ function getPlayerData($type, $id){
     return $playerDataArray;
 }
 
-
-
-
-
 /** Get info about summoners mastery scores
  * This function retrieves the all available mastery score info about a summoner
  *
@@ -173,52 +170,64 @@ function getMasteryScores($puuid){
     global $headers, $apiRequests;
     $masteryDataArray = array();
     $masteryReturnArray = array();
+    $retryAttempts = 0;
 
-    // Curl API request block
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/".$puuid);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $output = curl_exec($ch); $apiRequests["getMasteryScores"]++;
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    // 403 Forbidden
-    if($httpCode == "403"){
-        echo "<h2>403 Forbidden MasteryScores</h2>";
-    }
-    // 429 Too Many Requests
-    if($httpCode == "429"){
-        sleep(10);
+    do {
+        // Curl API request block
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-summoner/".$puuid);
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/".$puuid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $output = curl_exec($ch); $apiRequests["getMasteryScores"]++;
+        curl_setopt($ch, CURLOPT_HEADER, 1); // Include headers in the response
+
+        $response = curl_exec($ch); $apiRequests["getMasteryScores"]++;
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $responseHeader = substr($response, 0, $header_size);
+        $output = substr($response, $header_size);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        // Check for 429 (Rate Limit Exceeded)
+        if ($httpCode == 429) {
+            preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
+            $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+
+            sleep($retryAfterValue);
+
+            $retryAttempts++;
+        } else {
+            $retryAttempts = 0; // Reset retry attempts if successful response is received
+        }
+
         curl_close($ch);
-    }
 
+        // 403 Forbidden
+        if ($httpCode == 403) {
+            echo "<h2>403 Forbidden MasteryScores</h2>";
+        }
 
+    } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
 
-    // Resolving return values
-    foreach(json_decode($output, true) as $masteryArray){
-        if($masteryArray["championLevel"] > 4 || $masteryArray["championPoints"] > 19999){
-            $masteryDataArray["Champion"] = championIdToName($masteryArray["championId"]);
-            $masteryDataArray["Filename"] = championIdToFilename($masteryArray["championId"]);
-            $masteryDataArray["Lvl"] = $masteryArray["championLevel"];
-            $masteryDataArray["Points"] = number_format($masteryArray["championPoints"]);
-            $masteryDataArray["LastPlayed"] = $masteryArray["lastPlayTime"]/1000; // to get human-readable one -> date('d.m.Y H:i:s', $masteryData["LastPlayed"]);
-            // in case tokens for lvl 6 or 7 in inventory add them too
-            if($masteryArray["tokensEarned"] > 0){
-                $masteryDataArray["LvlUpTokens"] = $masteryArray["tokensEarned"];
+    if ($retryAttempts < 3 && $httpCode == 200) {
+        $jsonOutput = json_decode($output, true);
+        foreach ($jsonOutput as $masteryArray){
+            if ($masteryArray["championLevel"] > 4 || $masteryArray["championPoints"] > 19999){
+                $masteryDataArray["Champion"] = championIdToName($masteryArray["championId"]);
+                $masteryDataArray["Filename"] = championIdToFilename($masteryArray["championId"]);
+                $masteryDataArray["Lvl"] = $masteryArray["championLevel"];
+                $masteryDataArray["Points"] = number_format($masteryArray["championPoints"]);
+                $masteryDataArray["LastPlayed"] = $masteryArray["lastPlayTime"]/1000; // to get human-readable one -> date('d.m.Y H:i:s', $masteryData["LastPlayed"]);
+                // in case tokens for lvl 6 or 7 in inventory add them too
+                if ($masteryArray["tokensEarned"] > 0){
+                    $masteryDataArray["LvlUpTokens"] = $masteryArray["tokensEarned"];
+                }
+                $masteryReturnArray[] = $masteryDataArray;
             }
-            $masteryReturnArray[] = $masteryDataArray;
         }
     }
 
     return $masteryReturnArray;
 }
+
 
 /** Fetch ranked info of user via sumid
  * This function retrieves the all available ranked info about a summoner
@@ -233,47 +242,65 @@ function getMasteryScores($puuid){
  * Returnvalue:
  * @return array $rankReturnArray Just a rename of the $rankDataArray
  */
-function getCurrentRank($sumid){
+function getCurrentRank($sumid) {
     global $headers, $apiRequests;
     $rankDataArray = array();
     $rankReturnArray = array();
+    $retryAttempts = 0;
 
-    // Curl API request block
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $output = curl_exec($ch); $apiRequests["getCurrentRank"]++;
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    // 403 Forbidden
-    if($httpCode == "403"){
-        echo "<h2>403 Forbidden CurrentRank</h2>";
-    }
-
-    // 429 Too Many Requests
-    if($httpCode == "429"){
-        sleep(10);
+    do {
+        // Curl API request block
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HEADER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $output = curl_exec($ch); $apiRequests["getCurrentRank"]++;
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-    }
 
-    // Resolving return values
-    foreach(json_decode($output, true) as $requestArray){
-        if($requestArray["queueType"] == "RANKED_SOLO_5x5" || $requestArray["queueType"] == "RANKED_FLEX_SR"){
-            $rankDataArray["Queue"] = $requestArray["queueType"];
-            $rankDataArray["Tier"] = $requestArray["tier"];
-            $rankDataArray["Rank"] = $requestArray["rank"];
-            $rankDataArray["LP"] = $requestArray["leaguePoints"];
-            $rankDataArray["Wins"] = $requestArray["wins"];
-            $rankDataArray["Losses"] = $requestArray["losses"];
-            $rankReturnArray[] = $rankDataArray;
+        $response = curl_exec($ch); $apiRequests["getCurrentRank"]++;
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $responseHeader = substr($response, 0, $header_size);
+        $output = substr($response, $header_size);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        // Check for 429 (Rate Limit Exceeded)
+        if ($httpCode == 429) {
+            // Extract the Retry-After header value
+            preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
+            $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+
+            // Rate limit exceeded. Retry after {$retryAfterValue} seconds
+
+            sleep($retryAfterValue);
+
+            // Retry the request
+            $retryAttempts++;
+        } else {
+            $retryAttempts = 0; // Reset retry attempts if successful response is received
+        }
+
+        curl_close($ch);
+
+        // 403 Forbidden
+        if ($httpCode == 403) {
+            echo "<h2>403 Forbidden CurrentRank</h2>";
+        }
+
+    } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
+
+    if ($retryAttempts < 3 && $httpCode == 200) {
+        $jsonOutput = json_decode($output, true);
+        if (is_array($jsonOutput)) {
+            foreach ($jsonOutput as $requestArray) {
+                if (isset($requestArray["queueType"]) && ($requestArray["queueType"] == "RANKED_SOLO_5x5" || $requestArray["queueType"] == "RANKED_FLEX_SR")) {
+                    $rankDataArray["Queue"] = $requestArray["queueType"];
+                    $rankDataArray["Tier"] = $requestArray["tier"];
+                    $rankDataArray["Rank"] = $requestArray["rank"];
+                    $rankDataArray["LP"] = $requestArray["leaguePoints"];
+                    $rankDataArray["Wins"] = $requestArray["wins"];
+                    $rankDataArray["Losses"] = $requestArray["losses"];
+                    $rankReturnArray[] = $rankDataArray;
+                }
+            }
         }
     }
     return $rankReturnArray;
@@ -782,7 +809,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray,
                                             $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.avif').'" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
                                             $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.avif?version='.md5_file('/hdd1/clashapp/data/misc/LevelAndLaneOverlay.avif').'" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
                                         } else {
-                                            $returnString .= '<img src="/clashapp/data/misc/na.avif?version='.md5_file('/hdd1/clashapp/data/misc/na.avif').'" width="68" height="68" class="align-middle twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] rounded" loading="lazy" alt="This icon represents a value not being available">';
+                                            $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="68" height="68" class="align-middle twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] rounded" loading="lazy" alt="This icon represents a value not being available">';
                                         }
                                     }
 
@@ -833,12 +860,12 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray,
                             if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif')){
                                 $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif').'" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                             } else {
-                                $returnString .= '<img src="/clashapp/data/misc/na.avif?version='.md5_file('/hdd1/clashapp/data/misc/na.avif').'" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
+                                $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                             }
                             if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif')){
                                 $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif').'" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                             } else {
-                                $returnString .= '<img src="/clashapp/data/misc/na.avif?version='.md5_file('/hdd1/clashapp/data/misc/na.avif').'" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
+                                $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                             }
                             $returnString .= "</div>";
 
@@ -928,7 +955,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray,
                             if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif')){
                                 $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif').'" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
                             } else {
-                                $returnString .= '<img src="/clashapp/data/misc/na.avif?version='.md5_file('/hdd1/clashapp/data/misc/na.avif').'" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents a value not being available"></div>';
+                                $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents a value not being available"></div>';
                             }
                             }
                             if ($inhalt->info->participants[$i]->teamId == $teamID){
@@ -1172,7 +1199,7 @@ function getTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
                                     $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$champion.'.avif').'" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded" loading="lazy" alt="Main icon of the league of legends champion '.$champion.'">';
                                     $returnString .= '<img src="/clashapp/data/misc/LevelAndLaneOverlay.avif?version='.md5_file('/hdd1/clashapp/data/misc/LevelAndLaneOverlay.avif').'" width="68" height="68" class="twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded" loading="lazy" alt="Overlay image as background for level and lane icon">';
                                 } else {
-                                    $returnString .= '<img src="/clashapp/data/misc/na.avif?version='.md5_file('/hdd1/clashapp/data/misc/na.avif').'" width="68" height="68" class="align-middle twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] rounded" loading="lazy" alt="This icon represents a value not being available">';
+                                    $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="68" height="68" class="align-middle twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] rounded" loading="lazy" alt="This icon represents a value not being available">';
                                 }
                             }
 
@@ -1223,12 +1250,12 @@ function getTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
                             if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif')){
                                 $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif').'" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                             } else {
-                                $returnString .= '<img src="/clashapp/data/misc/na.avif?version='.md5_file('/hdd1/clashapp/data/misc/na.avif').'" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
+                                $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                             }
                             if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif')){
                                 $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif').'" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                             } else {
-                                $returnString .= '<img src="/clashapp/data/misc/na.avif?version='.md5_file('/hdd1/clashapp/data/misc/na.avif').'" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
+                                $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                             }
                             $returnString .= "</div>";
 
@@ -1318,7 +1345,7 @@ function getTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
                             if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif')){
                                 $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif').'" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
                             } else {
-                                $returnString .= '<img src="/clashapp/data/misc/na.avif?version='.md5_file('/hdd1/clashapp/data/misc/na.avif').'" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents a value not being available"></div>';
+                                $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents a value not being available"></div>';
                             }
                             }
                             if ($inhalt->info->participants[$i]->teamId == $teamID){
@@ -3183,7 +3210,7 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
         $resultArray["MasteryDataSus"] = 1;
     } else {
         foreach($masteryData as $champMastery){
-            $totalMastery += str_replace(',', '.', $champMastery["Points"]);
+            $totalMastery += str_replace(',', '.', (int)$champMastery["Points"]);
         }
     }
     if ($totalMastery == 0) { // Keine Champion Mastery
