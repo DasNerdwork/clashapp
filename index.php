@@ -1,14 +1,15 @@
 <?php if (session_status() === PHP_SESSION_NONE) session_start(); 
 include_once('/hdd1/clashapp/functions.php');
 require_once '/hdd1/clashapp/mongo-db.php';
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
+include_once('/hdd1/clashapp/redis/redis.php');
+
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 include('/hdd1/clashapp/templates/head.php');
 setCodeHeader('Clash', $css = true, $javascript = true, $alpinejs = false, $websocket = false);
 include('/hdd1/clashapp/templates/header.php');
-
-$mdb = new MongoDBHelper();
 
 echo '
 <script>
@@ -36,44 +37,9 @@ $statNameArray = [
     'totalHeal', 'totalHealsOnTeammates', 'totalMinionsKilled', 'totalTimeCCDealt', 'totalTimeSpentDead', 'tripleKills', 'trueDamageDealt', 'trueDamageDealtToChampions', 'trueDamageTaken', 'turretKills', 'turretTakedowns', 'turretsLost',
     'visionScore', 'visionWardsBoughtInGame', 'wardsKilled', 'wardsPlaced'];
 
-$averageStatsJson = json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true);
+// $averageStatsJson = json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true);
 
-$lane = 'FILL';
-$pipeline = [
-    [
-        '$unwind' => '$info.participants',
-    ],
-    [
-        '$match' => [
-            '$or' => [
-                ['info.participants.teamPosition' => $lane],
-                ['info.participants.individualPosition' => $lane],
-                ['info.participants.lane' => $lane],
-            ],
-        ],
-    ],
-    [
-        '$group' => [
-            '_id' => null,
-            'abilityUses' => ['$avg' => '$info.participants.challenges.abilityUses'],
-            'acesBefore15Minutes' => ['$avg' => '$info.participants.challenges.acesBefore15Minutes'],
-            'assists' => ['$avg' => '$info.participants.assists'],
-            'baronKills' => ['$avg' => '$info.participants.baronKills'],
-            // Add more aggregation expressions for other challenges and stats here
-        ],
-    ],
-];
-
-// Execute the aggregation pipeline
-$cursor = $mdb->aggregate('matches', $pipeline);
-
-// Fetch the results
-$result = $cursor->toArray();
-
-// Return the result as JSON
-echo "<pre>";
-// print_r($result);
-echo "<pre>";
+// addToQueue('api_queue', 'playerData', ['type' => 'puuid', 'id' => 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA']);
 
 
 
