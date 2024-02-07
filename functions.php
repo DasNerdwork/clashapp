@@ -66,88 +66,171 @@ $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipa
 function getPlayerData($type, $id){
     global $headers, $apiRequests;
     $playerDataArray = array();
+    $retryAttempts = 0;
 
-    switch ($type) {
-        case "riot-id":
-            $id = str_replace("#","/",$id);
-            $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/";
-            break;
-        case "puuid":
-            $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
-            break;
-        case "sumid":
-            $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/";
-            break;
-    }
+    do {
+        switch ($type) {
+            case "riot-id":
+                $id = str_replace("#","/",$id);
+                $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/";
+                break;
+            case "puuid":
+                $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
+                break;
+            case "sumid":
+                $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/";
+                break;
+        }
 
-    // Curl API request block
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $id);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    $output = curl_exec($ch); $apiRequests["getPlayerData"]++;
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    // 403 Access forbidden -> Outdated API Key
-    if($httpCode == "403"){
-        echo "<h2>403 Forbidden GetPlayerData</h2>";
-        // print_r(curl_getinfo($ch));
-    }
-
-    // 429 Too Many Requests
-    if($httpCode == "429"){
-        sleep(10);
+        // Curl API request block
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $id);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch); $apiRequests["getPlayerData"]++;
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-    }
-
-    if($httpCode == "200" && ($type == "riot-id" || $type == "puuid")){
-        $type == "puuid" ? $gameName = json_decode($output)->gameName : $gameName = "";
-        $type == "puuid" ? $tag = json_decode($output)->tagLine : $tag = "";
-        $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $requestUrlVar . json_decode($output)->puuid);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $output = curl_exec($ch); $apiRequests["getPlayerData"]++;
+        curl_setopt($ch, CURLOPT_HEADER, 1); // Include headers in the response
+        $response = curl_exec($ch);
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $responseHeader = substr($response, 0, $header_size);
+        $output = substr($response, $header_size);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-    }
+        $apiRequests["getPlayerData"]++; // Increment API requests count
 
-    // fetch puuid with sumid and then playername (because standard name is deprecated -> riotid)
-    if($httpCode == "200" && $type == "sumid") {
-        $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $requestUrlVar . json_decode($output)->puuid);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $riotIdSumidOutput = curl_exec($ch); $apiRequests["getPlayerData"]++;
-        $gameName = json_decode($riotIdSumidOutput)->gameName;
-        $tag = json_decode($riotIdSumidOutput)->tagLine;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-    }
 
-    // Collect requested values in returnarray
-    $playerDataArray["Icon"] = json_decode($output)->profileIconId;
-    $playerDataArray["Name"] = json_decode($output)->name;
-    if($type == "riot-id"){
-        $playerDataArray["GameName"] = explode("/", $id)[0];
-        $playerDataArray["Tag"] = explode("/", $id)[1];
-    } else {
-        $playerDataArray["GameName"] = $gameName;
-        $playerDataArray["Tag"] = $tag;
+        // Check for 429 (Rate Limit Exceeded)
+        if ($httpCode == 429) {
+            // Extract the Retry-After header value
+            preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
+            $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+
+            // Uncomment the line below if you want to keep track of the API requests count
+            // $apiRequests["getPlayerData"]++;
+
+            // Implement additional handling if needed
+            // For example, you may want to wait for a specific duration and then retry the request.
+            sleep($retryAfterValue);
+
+            // Retry the request
+            $retryAttempts++;
+        } else {
+            $retryAttempts = 0; // Reset retry attempts if successful response is received
+        }
+
+        curl_close($ch);
+
+        // 403 Access forbidden -> Outdated API Key
+        if ($httpCode == 403) {
+            echo "<h2>403 Forbidden GetPlayerData</h2>";
+        }
+
+    } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
+
+    
+    if ($httpCode == 200) {
+        if ($type == "riot-id" || $type == "puuid") {
+            $type == "puuid" ? $gameName = json_decode($output)->gameName : $gameName = "";
+            $type == "puuid" ? $tag = json_decode($output)->tagLine : $tag = "";
+            $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
+            
+            // Additional API requests with the same 429 treatment
+            do {
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $requestUrlVar . json_decode($output)->puuid);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_HEADER, 1); // Include headers in the response
+                $response = curl_exec($ch);
+                $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+                $responseHeader = substr($response, 0, $header_size);
+                $output = substr($response, $header_size);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $apiRequests["getPlayerData"]++; // Increment API requests count
+
+                // Check for 429 (Rate Limit Exceeded)
+                if ($httpCode == 429) {
+                    // Extract the Retry-After header value
+                    preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
+                    $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+
+                    // Uncomment the line below if you want to keep track of the API requests count
+                    // $apiRequests["getPlayerData"]++;
+
+                    // Implement additional handling if needed
+                    // For example, you may want to wait for a specific duration and then retry the request.
+                    sleep($retryAfterValue);
+
+                    // Retry the request
+                    $retryAttempts++;
+                } else {
+                    $retryAttempts = 0; // Reset retry attempts if successful response is received
+                }
+
+                curl_close($ch);
+
+            } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
+        }
+
+        // fetch puuid with sumid and then playername (because standard name is deprecated -> riotid)
+        if ($type == "sumid") {
+            $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
+            
+            // Additional API requests with the same 429 treatment
+            do {
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $requestUrlVar . json_decode($output)->puuid);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_HEADER, 1); // Include headers in the response
+                $response = curl_exec($ch);
+                $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+                $riotIdResponseHeader = substr($response, 0, $header_size);
+                $riotIdSumidOutput = substr($response, $header_size);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $apiRequests["getPlayerData"]++; // Increment API requests count
+                $gameName = json_decode($riotIdSumidOutput)->gameName;
+                $tag = json_decode($riotIdSumidOutput)->tagLine;
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+                // Check for 429 (Rate Limit Exceeded)
+                if ($httpCode == 429) {
+                    // Extract the Retry-After header value
+                    preg_match('/Retry-After: (\d+)/', $riotIdResponseHeader, $matches);
+                    $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+
+                    // Uncomment the line below if you want to keep track of the API requests count
+                    // $apiRequests["getPlayerData"]++;
+
+                    // Implement additional handling if needed
+                    // For example, you may want to wait for a specific duration and then retry the request.
+                    sleep($retryAfterValue);
+
+                    // Retry the request
+                    $retryAttempts++;
+                } else {
+                    $retryAttempts = 0; // Reset retry attempts if successful response is received
+                }
+
+                curl_close($ch);
+
+            } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
+        }
+
+        // Collect requested values in returnarray
+        $playerDataArray["Icon"] = json_decode($output)->profileIconId;
+        $playerDataArray["Name"] = json_decode($output)->name;
+        if ($type == "riot-id") {
+            $playerDataArray["GameName"] = explode("/", $id)[0];
+            $playerDataArray["Tag"] = explode("/", $id)[1];
+        } else {
+            $playerDataArray["GameName"] = $gameName;
+            $playerDataArray["Tag"] = $tag;
+        }
+        $playerDataArray["Level"] = json_decode($output)->summonerLevel;
+        $playerDataArray["PUUID"] = json_decode($output)->puuid;
+        $playerDataArray["SumID"] = json_decode($output)->id;
+        $playerDataArray["AccountID"] = json_decode($output)->accountId;
+        $playerDataArray["LastChange"] = json_decode($output)->revisionDate;
     }
-    $playerDataArray["Level"] = json_decode($output)->summonerLevel;
-    $playerDataArray["PUUID"] = json_decode($output)->puuid;
-    $playerDataArray["SumID"] = json_decode($output)->id;
-    $playerDataArray["AccountID"] = json_decode($output)->accountId;
-    $playerDataArray["LastChange"] = json_decode($output)->revisionDate;
 
     return $playerDataArray;
 }
@@ -306,7 +389,7 @@ function getCurrentRank($sumid) {
     return $rankReturnArray;
 }
 
-/** Array of MatchIDs
+/** Array of MatchIDs TODO: Fix Max exection timeout error?
  * This function retrieves all match IDs of a given PUUID up to a specified maximum
  * Eq. to https://developer.riotgames.com/apis#match-v5/GET_getMatchIdsByPUUID
  *
@@ -328,96 +411,146 @@ function getMatchIDs($puuid, $maxMatchIDs){
     $gameType = "ranked";
     $start = 0;
     $matchCount = "100";
+    $retryAttempts = 0;
+    $clashFinished = false;
+    $soloDuoFinished = false;
+    $flexFinished = false;
 
-    while ($start < $maxMatchIDs) {
-        // If next iterations would exceed the max
-        if(($start + 100) > $maxMatchIDs){
-            $matchCount = 100 - (($start + 100) - $maxMatchIDs);
+    do {
+        while ($start < $maxMatchIDs) {
+            // If next iterations would exceed the max
+            if(($start + 100) > $maxMatchIDs){
+                $matchCount = 100 - (($start + 100) - $maxMatchIDs);
+            }
+
+            if(!$clashFinished){
+                // Curl API request block for clash matches
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=700&type=normal&start=" . $start . "&count=" . $matchCount);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_HEADER, 1);
+                $response = curl_exec($ch); $apiRequests["getMatchIDs"]++;
+                $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+                $responseHeader = substr($response, 0, $header_size);
+                $clashidOutput = substr($response, $header_size);
+                $httpCode1 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                $clashidOutputArray = json_decode($clashidOutput);
+
+                // 429 Too Many Requests
+                if ($httpCode1 == 429) {
+                    // Extract the Retry-After header value
+                    preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
+                    $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+        
+                    // Rate limit exceeded. Retry after {$retryAfterValue} seconds
+        
+                    sleep($retryAfterValue);
+        
+                    // Retry the request
+                    $retryAttempts++;
+                } else {
+                    if($httpCode1 == 200 && count($clashidOutputArray) >= $maxMatchIDs){
+                        $clashFinished = true;
+                    }
+                    $retryAttempts = 0; // Reset retry attempts if successful response is received
+                }
+
+                foreach ($clashidOutputArray as $clashMatch) {
+                    $clashIDArray[] = $clashMatch;
+                }
+            }
+
+            // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+            if(!$flexFinished){
+                // Curl API request for flex matches
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_HEADER, 1);
+                $response = curl_exec($ch); $apiRequests["getMatchIDs"]++;
+                $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+                $responseHeader = substr($response, 0, $header_size);
+                $flexidOutput = substr($response, $header_size);
+                $httpCode2 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                $flexidOutputArray = json_decode($flexidOutput);
+
+                // 429 Too Many Requests
+                if ($httpCode2 == 429) {
+                    // Extract the Retry-After header value
+                    preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
+                    $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+        
+                    // Rate limit exceeded. Retry after {$retryAfterValue} seconds
+        
+                    sleep($retryAfterValue);
+        
+                    // Retry the request
+                    $retryAttempts++;
+                } else {
+                    if($httpCode2 == 200 && count($flexidOutputArray) >= $maxMatchIDs){
+                        $flexFinished = true;
+                    }
+                    $retryAttempts = 0; // Reset retry attempts if successful response is received
+                }
+                
+                foreach ($flexidOutputArray as $flexMatch) {
+                    $flexIDArray[] = $flexMatch;
+                }
+            }
+
+            // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            if(!$soloDuoFinished){
+                // Curl API request for solo duo matches
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                curl_setopt($ch, CURLOPT_HEADER, 1);
+                $response = curl_exec($ch); $apiRequests["getMatchIDs"]++;
+                $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+                $responseHeader = substr($response, 0, $header_size);
+                $soloduoidOutput = substr($response, $header_size);
+                $httpCode3 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                $soloduoidOutputArray = json_decode($soloduoidOutput);
+
+                // 429 Too Many Requests
+                if ($httpCode3 == 429) {
+                    // Extract the Retry-After header value
+                    preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
+                    $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+        
+                    // Rate limit exceeded. Retry after {$retryAfterValue} seconds
+        
+                    sleep($retryAfterValue);
+        
+                    // Retry the request
+                    $retryAttempts++;
+                } else {
+                    if($httpCode3 == 200 && count($soloduoidOutputArray) >= $maxMatchIDs){
+                        $soloDuoFinished = true;
+                    }
+                    $retryAttempts = 0; // Reset retry attempts if successful response is received
+                }
+
+                foreach ($soloduoidOutputArray as $soloduoMatch) {
+                    $soloduoIDArray[] = $soloduoMatch;
+                }
+            }
+            $start += 100;
         }
-
-        // Curl API request block for clash matches
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=700&type=normal&start=" . $start . "&count=" . $matchCount);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $clashidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        // 429 Too Many Requests
-        if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
-            sleep(5);
-            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=700&type=normal&start=".$start."&count=" . $matchCount);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $clashidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-        }
-
-        // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        // Curl API request for flex matches
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $flexidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        // 429 Too Many Requests
-        if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
-            sleep(5);
-            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=440&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $flexidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            echo "<script>matchIdCalls++;</script>";
-        }
-
-        // -------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-        // Curl API request for solo duo matches
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=" . $start . "&count=" . $matchCount);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        $soloduoidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        // 429 Too Many Requests
-        if($httpCode == "429"){ /** TODO: fetch function with switch to handle and log every httpcode error */
-            sleep(5);
-            curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/" . $puuid . "/ids?queue=420&type=" . $gameType . "&start=".$start."&count=" . $matchCount);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            $soloduoidOutput = curl_exec($ch); $apiRequests["getMatchIDs"]++;
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            echo "<script>matchIdCalls++;</script>";
-        }
-
-        // Add each matchID to return array
-        foreach (json_decode($soloduoidOutput) as $soloduoMatch) {
-            $soloduoIDArray[] = $soloduoMatch;
-        }
-        foreach (json_decode($flexidOutput) as $flexMatch) {
-            $flexIDArray[] = $flexMatch;
-        }
-        foreach (json_decode($clashidOutput) as $clashMatch) {
-            $clashIDArray[] = $clashMatch;
-        }
-        $start += 100;
-    }
+    } while ($retryAttempts < 3 && ($httpCode1 == 429 || $httpCode2 == 429 || $httpCode3 == 429) && isset($retryAfterValue));
 
     // Merge and sort clash matchids and ranked match ids
     $returnArray = array_merge($flexIDArray, $soloduoIDArray, $clashIDArray);
     rsort($returnArray);
-    $returnArray = array_slice($returnArray,0 ,$maxMatchIDs);
+    $returnArray = array_slice($returnArray, 0, $maxMatchIDs);
 
     return $returnArray;
 }
