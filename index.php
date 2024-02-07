@@ -41,7 +41,5 @@ $statNameArray = [
 
 // addToQueue('api_queue', 'playerData', ['type' => 'puuid', 'id' => 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA']);
 
-
-
 include('/hdd1/clashapp/templates/footer.php');
 ?>
