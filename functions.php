@@ -20,11 +20,11 @@ include_once('/hdd1/clashapp/redis/redis.php');
  * @global int $currenttimestam The current time stamp usable as a global variable
  */
 
-// putenv('API_KEY=***REMOVED***'); // TODO: FIXME: TODO: FIXME: --- ONLY FOR TESTING --- TODO: FIXME: TODO: FIXME:
 $apiKey = getenv('API_KEY');
 $mdb = new MongoDBHelper();
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
+global $headers; // Necessary for PHPUnit
 $headers = array(
     "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36",
     "Accept-Language: de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -32,6 +32,7 @@ $headers = array(
     "Origin: https://clashscout.com/",
     "X-Riot-Token: ".$apiKey
 );
+global $apiRequests; // Necessary for PHPUnit
 $apiRequests = array(
     "total" => 0,
     "getPlayerData" => 0,

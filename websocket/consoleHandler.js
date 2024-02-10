@@ -5,7 +5,7 @@ import fs from 'fs';
 import mongodb from 'mongodb';
 
 // Create a write stream to the log file
-const mongoURL = '***REMOVED***';
+const mongoURL = process.env.MDB_URL
 
 // Create a write stream to the log file
 const logStream = fs.createWriteStream('/hdd1/clashapp/data/logs/server.log', { flags: 'a' });
