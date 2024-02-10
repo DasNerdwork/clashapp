@@ -24,18 +24,17 @@ logger.info("Starting statFetcher and initializing dicts, vars and arrays of sta
 
 class MongoDBHelper:
     def __init__(self):
-        self.host = 'dasnerdwork.net'
-        self.port = 17171
-        self.username ***REMOVED***
-        self.password = '***REMOVED***'
-        self.auth_source ***REMOVED***
-        self.tls_ca_file = '***REMOVED***'
-        self.database_name ***REMOVED***
+        self.host = os.getenv('MDB_HOST')
+        self.username = os.getenv('MDB_USER')
+        self.password = os.getenv('MDB_PW')
+        self.auth_source = os.getenv('MDB_DB')
+        self.tls_ca_file = os.getenv('MDB_PATH')
+        self.database_name = os.getenv('MDB_DB')
         self.client = self._connect_to_mongodb()
         self.mdb = self.database_name
 
     def _connect_to_mongodb(self):
-        connection_uri = f"mongodb://{self.username}:{self.password}@{self.host}:{self.port}/{self.auth_source}?authMechanism=SCRAM-SHA-1&tls=true&tlsCAFile={self.tls_ca_file}"
+        connection_uri = f"mongodb://{self.username}:{self.password}@{self.host}/{self.auth_source}?authMechanism=SCRAM-SHA-1&tls=true&tlsCAFile={self.tls_ca_file}"
         return MongoClient(connection_uri)
 
     def get_collection(self, collection_name):
