@@ -6,12 +6,12 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
         
 class MongoDBHelper {
-    private $host = '***REMOVED***';
-    private $username ***REMOVED***;
-    private $password = '***REMOVED***';
-    private $auth = '***REMOVED***';
-    private $tlsPath = '***REMOVED***'; 
-    private $databaseName ***REMOVED***;
+    private $host;
+    private $username;
+    private $password;
+    private $auth;
+    private $tlsPath; 
+    private $databaseName;
     private $client;
     private $mdb;
     
@@ -26,6 +26,12 @@ class MongoDBHelper {
      * @param string $databaseName - The name of the MongoDB database.
      */
     public function __construct() {
+        $this->host = getenv('MDB_HOST');
+        $this->username = getenv('MDB_USER');
+        $this->password = getenv('MDB_PW');
+        $this->auth = getenv('MDB_AUTH');
+        $this->tlsPath = getenv('MDB_TLS');
+        $this->databaseName = getenv('MDB_DB');
         $connectionString = 'mongodb://'.$this->username.':'.$this->password.'@'.$this->host.'/'.$this->auth.'&'.$this->tlsPath;
         $this->client = new MongoDB\Driver\Manager($connectionString);
         $this->mdb = $this->databaseName;

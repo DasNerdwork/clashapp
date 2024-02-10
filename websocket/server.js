@@ -8,7 +8,7 @@ import util from 'util';
 import '/hdd1/clashapp/websocket/consoleHandler.js';
 import mongodb from 'mongodb';
 
-const mongoURL = '***REMOVED***';
+const mongoURL = process.env.MDB_URL;
 const logStream = fs.createWriteStream('/hdd1/clashapp/data/logs/server.log', { flags: 'a' });
 const logPath = '/hdd1/clashapp/data/logs/server.log';
 const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes

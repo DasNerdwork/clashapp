@@ -11,4 +11,5 @@ package-lock.json
 .git
 .vscode
 ads.txt
+robots.txt
 *.min.js

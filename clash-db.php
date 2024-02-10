@@ -5,13 +5,18 @@
 // error_reporting(E_ALL);
 
 class DB {
-    private $dbHost     = "***REMOVED***";
-    private $dbUsername = "***REMOVED***";
-    private $dbPassword = "***REMOVED***";
-    private $dbName     = "***REMOVED***";
+    private $dbHost;
+    private $dbUsername;
+    private $dbPassword;
+    private $dbName;
     private $db;
   
     public function __construct() {
+        $this->dbHost = getenv('HOST');
+        $this->dbUsername = getenv('DB_USER');
+        $this->dbPassword = getenv('DB_PW');
+        $this->dbName = getenv('DB_NAME');
+
         if(!isset($this->db)){
             // Connect to the database
             mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
