@@ -59,26 +59,10 @@ $upToDate = false;
 $allUpToDate = 0;
 $emoteSources = array("/clashapp/data/misc/webp/ok.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/ok.avif"),"/clashapp/data/misc/webp/teemo.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/teemo.avif"),"/clashapp/data/misc/webp/priceless.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/priceless.avif"));
 $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
-$autosuggestRequest = $mdb->getAutosuggestAggregate();
-$championDataArray = json_decode(file_get_contents("/hdd1/clashapp/data/patch/".$currentPatch."/data/en_US/champion.json"), true);
-$championArray = array();
-foreach ($championDataArray['data'] as $championKey => $championInfo) {
-    $championArray["{$championInfo['name']}"] = "{$championInfo['image']['full']}";
-}
-if($autosuggestRequest["success"]){
-    $autosuggestData = $autosuggestRequest["data"];
-    echo "<script>const autosuggestData = " . json_encode(array_map('trim', $autosuggestData)) . ";</script>";
-} else {
-    echo "<script>const autosuggestData = '';</script>";
-}
 echo "
 <script>
 const requests = {};
 var cached = 0;
-const currentPatch = " . json_encode($currentPatch) . ";
-const championData = " . json_encode($championArray) . ";
-const containerTitle = '" . __("Summoner") . "';
-const searchHistoryTitle = '" . __("Recently Searched") . "';
 </script>";
 
 
