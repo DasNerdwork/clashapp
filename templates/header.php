@@ -2,7 +2,25 @@
 require_once '/hdd1/clashapp/mongo-db.php';
 $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
 $mdb = new MongoDBHelper();
-// include_once('/hdd1/clashapp/lang/translate.php');
+$autosuggestRequest = $mdb->getAutosuggestAggregate();
+$championDataArray = json_decode(file_get_contents("/hdd1/clashapp/data/patch/".$currentPatch."/data/en_US/champion.json"), true);
+$championArray = array();
+foreach ($championDataArray['data'] as $championKey => $championInfo) {
+    $championArray["{$championInfo['name']}"] = "{$championInfo['image']['full']}";
+}
+if($autosuggestRequest["success"]){
+    $autosuggestData = $autosuggestRequest["data"];
+    echo "<script>const autosuggestData = " . json_encode(array_map('trim', $autosuggestData)) . ";</script>";
+} else {
+    echo "<script>const autosuggestData = '';</script>";
+}
+echo "
+<script>
+const currentPatch = " . json_encode($currentPatch) . ";
+const championData = " . json_encode($championArray) . ";
+const containerTitle = '" . __("Summoner") . "';
+const searchHistoryTitle = '" . __("Recently Searched") . "';
+</script>";
 ?>
 <!DOCTYPE html>
 <div class="min-h-[calc(100vh_-_90px)]">
@@ -38,13 +56,20 @@ $mdb = new MongoDBHelper();
 			</ul>
 		</nav>
         <?php if($_SERVER['REQUEST_URI'] == "/"){ echo '
-            <form class="h-10 w-[800px] flex absolute left-2/4 -translate-x-2/4 -translate-y-2/4 top-[60%]" action="" onsubmit="return false;" method="GET" autocomplete="off">
-                <input type="text" name="name" class="h-16 w-full py-2.5 pl-2.5 pr-16 text-xl border-none text-black font-normal rounded-l-full indent-5 outline-none focus:pl-2.5 focus:text-xl" value="" placeholder='.__("'Search Teams, Players or Champions'").'>
-                <input type="submit" name="submitBtn" class=\'h-16 w-20 py-2.5 pl-2.5 pr-16 text-xl border-none bg-white text-black cursor-pointer rounded-r-full bg-[length:50%] bg-[url("/clashapp/data/misc/webp/searchicon.avif?version='.md5_file("/hdd1/clashapp/data/misc/webp/searchicon.avif").'")] bg-no-repeat bg-center focus:text-xl active:bg-[#ccc]\' value="" onclick="sanitize(this.form.name.value);">
-                <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
-                <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
+            <div class="flex w-[50rem] absolute left-2/4 -translate-x-2/4 translate-y-1/4 flex-col top-[55%] bg-black">
+                <form class="h-14 flex" action="" onsubmit="return false;" method="GET" autocomplete="off">
+                    <div class="relative">
+                        <div id="tagLineSuggest" class="absolute -z-10 px-2.5 text-xl w-full h-full bg-white flex items-center"></div>
+                        <input id="main-input" type="text" name="name" class="bg-transparent px-2.5 text-xl w-[45rem] h-full !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-xl" value="" placeholder='.__("'Search Teams, Players or Champions'").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false" maxlength="22">
+                    </div>
+                    <input type="submit" name="submitBtn" class="w-20 text-xl bg-white text-black cursor-pointer focus:text-xl active:bg-[#ccc]" value="'.__('Search').'" onclick="sanitize(this.form.name.value);">
+                    <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
+                    <div class="border-4 border-solid border-t-transparent animate-spin rounded-2xl h-6 w-6" id="loader"></div>
+                    </div>
+                </form>
+                <div id="autosuggest-container" class="absolute w-[50rem] mt-16 text-whiteblue hidden">
                 </div>
-            </form>';
+            </div>';
         } else { echo '
             <div class="flex absolute left-2/4 -translate-x-2/4 translate-y-1/4 flex-col z-50 bg-black">
                 <form class="h-10 flex" action="" onsubmit="return false;" method="GET" autocomplete="off">

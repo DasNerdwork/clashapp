@@ -496,7 +496,7 @@ function createAutosuggestItem(key, icon, currentPatch, variant) {
     imgElement.src = `/clashapp/data/patch/${currentPatch}/img/profileicon/${icon}.avif`;
     imgElement.alt = `Current League of Legends Summoner Icon of ${key}`;
   } else if(variant == 'champion'){
-    imgElement.src = `/clashapp/data/patch/${currentPatch}/img/champion/${icon.replace("png", "webp")}`;
+    imgElement.src = `/clashapp/data/patch/${currentPatch}/img/champion/${icon.replace("png", "avif")}`;
     imgElement.alt = `Current League of Legends Champion Icon of ${key}`;
   }
 
