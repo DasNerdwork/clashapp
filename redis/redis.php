@@ -1,7 +1,7 @@
 <?php
 require '/hdd1/clashapp/vendor/autoload.php';
 
-// Verbindung zu Redis herstellen (Standardkonfiguration: ***REMOVED***, Port 6379)
+// Verbindung zu Redis herstellen (Standardkonfiguration: localhost, Port 6379)
 $redis = new Predis\Client();
 
 // Funktion zum Hinzufügen von Anfragen zur Warteschlange

@@ -3,7 +3,7 @@ require '/hdd1/clashapp/vendor/autoload.php';
 include_once('/hdd1/clashapp/functions.php');
 include_once('/hdd1/clashapp/redis/redis.php');
 
-// Verbindung zu Redis herstellen (Standardkonfiguration: ***REMOVED***, Port 6379)
+// Verbindung zu Redis herstellen (Standardkonfiguration: localhost, Port 6379)
 $logPath = '/hdd1/clashapp/data/logs/queue.log';
 
 // Define rate limits
