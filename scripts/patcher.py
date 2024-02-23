@@ -28,7 +28,7 @@ def convert_to_avif(source):
 
     # Check if AVIF file already exists
     if os.path.exists(destination):
-        print(f"AVIF file already exists: {destination}")
+        # print(f"AVIF file already exists: {destination}")
         return None
 
     image = Image.open(source)  # Open image

@@ -330,7 +330,11 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
     if(isset($playerDataJSON["Tags"], $playerDataJSON["LanePercentages"])){
         if(isset($playerDataJSON["LanePercentages"][0]) && $playerDataJSON["LanePercentages"][0] != ""){
             if($playerDataJSON["LanePercentages"][0] != "FILL"){
-                $tagList .= tagSelector($playerDataJSON["Tags"][$playerDataJSON["LanePercentages"][0]]);
+                if(isset($playerDataJSON["Tags"][$playerDataJSON["LanePercentages"][0]])){
+                    $tagList .= tagSelector($playerDataJSON["Tags"][$playerDataJSON["LanePercentages"][0]]);
+                } else {
+                    $tagList .= tagSelector(reset($playerDataJSON["Tags"]));
+                }
             } else {
                 $tagList .= tagSelector($playerDataJSON["Tags"]["FILL"]);
             }

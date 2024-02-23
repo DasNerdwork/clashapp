@@ -214,11 +214,11 @@ echo '
                     </div>
                 </div>
                 <div class='flex flex-wrap justify-center rounded bg-[#141624] overflow-hidden h-fit pt-1.5 pb-3 transition-all ease-out'>
-                    <div class='rotation-title -mb-1.5 flex w-full fullhd:text-sm twok:text-base twok:px-11 max-h-[27px]'>
+                    <div class='rotation-title -mb-1.5 flex w-full fullhd:text-sm twok:text-base twok:px-10 max-h-[27px]'>
                         <div class='flex justify-center items-center font-bold w-3/5 bg-lose twok:pb-[6.75rem] fullhd:pb-[6rem] pt-4 rounded-l-md'>".__("First Rotation")."</div>
                         <div class='flex justify-center items-center font-bold w-2/5 bg-mid bg-opacity-10 twok:pb-[6.75rem] fullhd:pb-[6rem] pt-4 rounded-r-md'>".__("Second Rotation")."</div>
                     </div>
-                    <div id='selectedBans' class='w-full max-w-[40rem] h-fit flex flex-wrap text-center twok:gap-x-4 twok:px-11 fullhd:pl-[3px] fullhd:gap-x-3 gap-y-2 fullhd:min-h-[85px] twok:min-h-[97px]'>
+                    <div id='selectedBans' class='w-full max-w-[40rem] h-fit flex flex-wrap text-center twok:gap-x-4 twok:px-10 fullhd:pl-[3px] fullhd:gap-x-3 gap-y-2 fullhd:min-h-[85px] twok:min-h-[97px]'>
                     </div>
                 </div>
                 <div class='flex justify-center rounded bg-[#141624] twok:h-[16.5rem] fullhd:h-[17rem] transition-all ease-out'>
@@ -234,7 +234,7 @@ echo '
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/JUNGLE.avif?version=".md5_file('/hdd1/clashapp/data/misc/lanes/JUNGLE.avif')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='jgl' alt='An icon for the jungle'>
                             <img class='lane-selector saturate-0 brightness-50 float-right cursor-pointer mr-2.5 fullhd:mr-1' src='/clashapp/data/misc/lanes/TOP.avif?version=".md5_file('/hdd1/clashapp/data/misc/lanes/TOP.avif')."' width='28' height='28' onclick='highlightLaneIcon(this);' data-lane='top' alt='An icon for the top lane'>
                         </div>
-                        <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[97%] twok:ml-1 twok:h-[13rem] fullhd:h-[13.5rem]'>";
+                        <div id='champSelect' class='overflow-y-scroll twok:gap-2 twok:gap-y-4 fullhd:gap-y-1 pl-[10px] inline-flex flex-wrap w-full -ml-[0.3rem] pt-1 twok:w-[98%] twok:ml-1 twok:h-[13rem] fullhd:h-[13.5rem]'>";
                             showBanSelector(); echo "
                         </div>
                         <div id='emptySearchEmote' loading='lazy' class='hidden items-center justify-center gap-2 h-3/5 relative -top-48'><img src='/clashapp/data/misc/webp/empty_search.avif?version=".md5_file('/hdd1/clashapp/data/misc/webp/empty_search.avif')."' class='w-16' alt='A frog emoji with a questionmark'><span>".__("Whoops, did you mistype?")."</span></div>
