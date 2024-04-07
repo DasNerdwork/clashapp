@@ -139,6 +139,7 @@ Finalscore,Finalwertung
 "Game length below minimum of 10min","Spieldauer unter Minimum von 10min"
 "Average Matchscore of all ranked & clash games (without remakes or <10min games)","Durchschnittliche Wertung von allen Ranglisten- oder Clashspielen (Ohne Remakes oder <10min Spiele)"
 "adjScoreTooltipMargin","-mt-24"
+"This is a test translation for %s","Das ist ein Übersetzungstest für %s"
 "It was: ","Es war: "
 "Difficulty: ","Schwierigkeit: "
 "Easy","Einfach"

@@ -4,7 +4,6 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 require_once '/hdd1/clashapp/mongo-db.php';
-include_once('/hdd1/clashapp/redis/redis.php');
 
 /** Main functions.php containing overall used functions throughout different php files
  * @author Florian Falk <dasnerdwork@gmail.com>
@@ -21,7 +20,9 @@ include_once('/hdd1/clashapp/redis/redis.php');
  */
 
 $apiKey = getenv('API_KEY');
+global $mdb;
 $mdb = new MongoDBHelper();
+global $currentPatch;
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 $counter = 0;
 global $headers; // Necessary for PHPUnit
@@ -48,6 +49,7 @@ $fileExistsCache = array();
 $matchDataCache = array();
 $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillParticipation", "CS", "Gold", "VisionScore", "WardTakedowns", "WardsPlaced", "WardsGuarded", "VisionWards", "Consumables", "TurretPlates", "TotalTakedowns", "TurretTakedowns",
 "InhibitorTakedowns", "DragonTakedowns", "HeraldTakedowns", "DamageToBuildings", "DamageToObjectives", "DamageMitigated", "DamageDealtToChampions", "DamageTaken", "TeamShielded", "TeamHealed", "TimeCC", "DeathTime", "SkillshotsDodged", "SkillshotsHit");
+global $cleanAttributeArray;
 $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
 "takedowns", "turretTakedowns", "inhibitorTakedowns", "dragonTakedowns", "riftHeraldTakedowns", "damageDealtToBuildings", "damageDealtToObjectives", "damageSelfMitigated", "totalDamageDealtToChampions", "totalDamageTaken", "totalDamageShieldedOnTeammates",
 "totalHealsOnTeammates", "totalTimeCCDealt", "totalTimeSpentDead", "skillshotsDodged", "skillshotsHit", "championName", "championTransform", "individualPosition", "teamPosition", "lane", "puuid", "summonerId","summonerName", "win", "neutralMinionsKilled");
@@ -308,7 +310,6 @@ function getMasteryScores($puuid){
             }
         }
     }
-
     return $masteryReturnArray;
 }
 
@@ -590,6 +591,7 @@ function downloadMatchesByID($matchids, $username = null){
         }
 
         // Only download if file doesn't exist yet
+
         if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $matchid)["success"]){
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, "https://europe.api.riotgames.com/lol/match/v5/matches/" . $matchid);
@@ -668,10 +670,9 @@ function downloadMatchesByID($matchids, $username = null){
  * @return array $matchData Array full of all given MatchID.json file contents up to the below maximum
  */
 function getMatchData($matchIDArray){
-    global $mdb;
+    global $mdb, $cleanAttributeArray;
     $startMemory = memory_get_usage();
     $matchData = array();
-    global $cleanAttributeArray;
 
     $pipeline = [
         [

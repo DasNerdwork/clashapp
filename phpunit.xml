@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" bootstrap="vendor/autoload.php" cacheDirectory=".phpunit.cache" executionOrder="depends,defects" requireCoverageMetadata="true" beStrictAboutCoverageMetadata="true" beStrictAboutOutputDuringTests="true" failOnRisky="true" failOnWarning="true" displayDetailsOnTestsThatTriggerWarnings="true">
+  <testsuites>
+    <testsuite name="ClashScout Test Suite">
+      <directory>test</directory>
+    </testsuite>
+  </testsuites>
+  <coverage>
+    <report>
+      <html outputDirectory="test/results"/>
+      <text outputFile="php://stdout" showUncoveredFiles="false"/>
+    </report>
+  </coverage>
+  <source>
+    <include>
+      <directory suffix=".php">.</directory>
+    </include>
+    <exclude>
+      <directory>test/</directory>
+      <directory>vendor/</directory>
+      <directory>plugins/</directory>
+      <directory>ajax/</directory>
+      <file>accounts/connect.php</file>
+      <file>accounts/login.php</file>
+      <file>accounts/logout.php</file>
+      <file>accounts/register.php</file>
+      <file>accounts/reset.php</file>
+      <file>accounts/settings.php</file>
+      <file>accounts/verify.php</file>
+      <file>accounts/verify2fa.php</file>
+      <file>templates/footer.php</file>
+      <file>templates/header.php</file>
+      <file>404.php</file>
+      <file>graphs-and-formulas.php</file>
+      <file>index.php</file>
+      <file>minigames.php</file>
+      <file>profile.php</file>
+      <file>team.php</file>
+    </exclude>
+  </source>
+</phpunit>

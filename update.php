@@ -42,17 +42,17 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
         $returnScriptContent = "";
         $mdb = new MongoDBHelper();
         $playerData = getPlayerData($type,$id);
-        addToQueue('api_queue', 'playerData', ['type' => $type, 'id' => $id]);
+        // addToQueue('api_queue', 'playerData', ['type' => $type, 'id' => $id]); // DEPRECATED
         $playerName = $playerData["GameName"];
         $sumid = $playerData["SumID"];
         $puuid = $playerData["PUUID"];
         $masteryData = getMasteryScores($puuid);
-        addToQueue('api_queue', 'masteryScores', ['puuid' => $puuid]);
+        // addToQueue('api_queue', 'masteryScores', ['puuid' => $puuid]);// DEPRECATED
         $rankData = getCurrentRank($sumid);
-        addToQueue('api_queue', 'currentRank', ['sumid' => $sumid]);
+        // addToQueue('api_queue', 'currentRank', ['sumid' => $sumid]);// DEPRECATED
         if($tempMatchIDs == null){
             $matchIDs = getMatchIDs($puuid, 15);
-            addToQueue('api_queue', 'matchIds', ['puuid' => $puuid, 'maxMatchIDs' => 15]);
+            // addToQueue('api_queue', 'matchIds', ['puuid' => $puuid, 'maxMatchIDs' => 15]);// DEPRECATED
         } else {
             $matchIDs = $tempMatchIDs;
         }

@@ -13,7 +13,7 @@ if (isset($_POST['icon'])) {
         if($db->connect_account($playerDataArray["PUUID"], $_POST['sessionUsername'])){
             echo json_encode(array('status' => 'success', 'message' => 'Successfully linked accounts'));
         } else {
-            echo json_encode(array('status' => 'error', 'message' => 'Could not connect accounts in database'.$_POST['sessionUsername'].' + '.$playerDataArray["PUUID"]));
+            echo json_encode(array('status' => 'error', 'message' => 'Could not connect accounts in database '.$_POST['sessionUsername'].' + '.$playerDataArray["PUUID"]));
         }
     } else {
         echo json_encode(array('status' => 'error', 'message' => 'Icons do not match'));

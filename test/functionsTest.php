@@ -1,11 +1,15 @@
 <?php
 use PHPUnit\Framework\TestCase;
 include_once('/hdd1/clashapp/functions.php');
+$_SERVER['SERVER_NAME'] = "clashscout.com";
 $_SERVER['HTTP_REFERER'] = "https://clashscout.com/";
-
+include_once('/hdd1/clashapp/lang/translate.php');
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 
 class FunctionsTest extends TestCase {
+    /**
+     * @covers getPlayerData
+     */
     public function testGetPlayerDataByName() {
         $actualData = getPlayerData("riot-id", "dasnerdwork#nerdy");
 
@@ -34,7 +38,11 @@ class FunctionsTest extends TestCase {
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\p{L}]{3,16}$/', $actualData['Name'], "Name is not in the valid format");
     }
 
-
+    /**
+     * @covers getMasteryScores
+     * @uses championIdToFilename
+     * @uses championIdToName
+     */
     public function testGetMasteryScores() {
         global $currentPatch;
         $championJson = json_decode(file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), true);
@@ -77,6 +85,9 @@ class FunctionsTest extends TestCase {
         return false;
     }
 
+    /**
+     * @covers getCurrentRank
+     */
     public function testGetCurrentRank() {
         $rankReturnArray = getCurrentRank("kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw");
 
@@ -109,6 +120,9 @@ class FunctionsTest extends TestCase {
         }
     }
 
+    /**
+     * @covers getMatchIDs
+     */
     public function testGetMatchIDs() {
         $matchIDArray = getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 100);
 
@@ -129,15 +143,19 @@ class FunctionsTest extends TestCase {
         }
     }
 
+    /**
+     * @covers downloadMatchesByID
+     * @uses MongoDBHelper
+     * @uses getMatchIDs
+     */
     public function testDownloadMatchesByID() {
         $mdb = new MongoDBHelper();
-        $testMatchId = getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 1)[0];
+        $testMatchId = getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 1)[0]; // EUW1_6877507628
         $downloadableFlag = false;
         if($mdb->findDocumentByField('matches', 'metadata.matchId', $testMatchId)["success"]) {
             if($mdb->deleteDocumentByField('matches', 'metadata.matchId', $testMatchId)["success"]){
                 $downloadableFlag = true;
             } else {
-                echo "Unable to delete ".$testMatchId." from database";
                 return;
             }
         } else {
@@ -150,6 +168,11 @@ class FunctionsTest extends TestCase {
         }
     }
 
+    /**
+     * @covers getMatchData
+     * @uses MongoDBHelper
+     * @uses getMatchIDs
+     */
     public function testGetMatchData() {
         $testMatchId = getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 1)[0];
         $matchData = (array) getMatchData([$testMatchId]);
@@ -158,12 +181,13 @@ class FunctionsTest extends TestCase {
         $this->assertNotEmpty($matchData, "Fetched MatchData is empty");
 
         $expectedKeys = [
+            'endOfGameResult',
             'gameCreation',
             'gameDuration',
             'gameEndTimestamp',
             'gameStartTimestamp',
             'gameVersion',
-            'participants'
+            'participants',
         ];
 
         $matchDataArray = (array) $matchData[$testMatchId];
@@ -243,6 +267,10 @@ class FunctionsTest extends TestCase {
         }
     }
 
+    /**
+     * @covers secondsToTime
+     * @uses __
+     */
     public function testSecondsToTime() {
         // Test cases for non-positive values
         $timeStringNeg1 = secondsToTime(-1);
@@ -305,6 +333,9 @@ class FunctionsTest extends TestCase {
         $this->assertEquals("296533308798 years ago", $timeStringMaxInt, "Time string for PHP_INT_MAX is incorrect");
     }    
 
+    /**
+     * @covers getRandomIcon
+     */
     public function testGetRandomIcon()
     {
         // Test with a valid currentIconID (between 1 and 28)
@@ -333,6 +364,9 @@ class FunctionsTest extends TestCase {
         $this->assertTrue($randomIconID >= 1 && $randomIconID <= 28, "Random icon ID ($randomIconID) should be within the valid range (1 to 28).");
     }
 
+    /**
+     * @covers summonerSpellFetcher
+     */
     public function testSummonerSpellFetcher()
     {
         global $currentPatch;
@@ -347,6 +381,9 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedIconID, $actualIconID, "Returned icon ID ($actualIconID) does not match the expected icon ID ($expectedIconID).");
     }
 
+    /**
+     * @covers runeTreeIconFetcher
+     */
     public function testRuneTreeIconFetcher()
     {
         global $currentPatch;
@@ -365,6 +402,9 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedIconPath, $actualIconPath, "Returned icon path ($actualIconPath) does not match the expected icon path ($expectedIconPath).");
     }
 
+    /**
+     * @covers runeIconFetcher
+     */
     public function testRuneIconFetcher()
     {
         global $currentPatch;
@@ -383,6 +423,9 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedIconPath, $actualIconPath, "Returned icon path ($actualIconPath) does not match the expected icon path ($expectedIconPath).");
     }
 
+    /**
+     * @covers championIdToName
+     */
     public function testChampionIdToName()
     {
         global $currentPatch;
@@ -402,6 +445,9 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedChampionName, $actualChampionName, "Returned champion name ($actualChampionName) does not match the expected champion name ($expectedChampionName).");
     }
 
+    /**
+     * @covers championIdToFilename
+     */
     public function testChampionIdToFilename()
     {
         global $currentPatch;
@@ -421,6 +467,13 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedChampionFilename, $actualChampionFilename, "Returned champion filename ($actualChampionFilename) does not match the expected champion filename ($expectedChampionFilename).");
     }
 
+    /**
+     * @covers getLanePercentages
+     * @uses MongoDBHelper
+     * @uses getMatchData
+     * @uses getMatchIDs
+     * @uses getMostCommon
+     */
     public function testGetLanePercentages()
     {
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';

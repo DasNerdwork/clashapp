@@ -7,9 +7,13 @@
 /plugins
 /iconcaptcha
 /css/output.css
+/test/results
+/test/cache
 package-lock.json
 .git
 .vscode
+.phpunit.cache
 ads.txt
 robots.txt
 *.min.js
+/test/results.xml

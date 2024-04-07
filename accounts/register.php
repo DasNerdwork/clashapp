@@ -85,11 +85,8 @@ if (isset($_POST['submit'])) {
     
         // Confirm the captcha was validated.
         if($validation->success()) {
-            $options = [
-                'cost' => 11,
-            ];
             $verifier = bin2hex(random_bytes(5));
-            $response = $db->create_account($_POST['username'], $_POST['region'], $_POST['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options), $verifier);
+            $response = $db->create_account($_POST['username'], $_POST['region'], $_POST['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, ['cost' => 11]), $verifier);
             $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email']);
             if ($response['status'] == 'success') {
                 if(isset($_POST['stay-logged-in'])) {

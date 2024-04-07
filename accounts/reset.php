@@ -60,7 +60,7 @@ if (isset($_POST['submit'])) {
         $options = [
             'cost' => 11,
         ];
-        $reset = $db->reset_password($response['id'], $response['username'], $response['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options));
+        $reset = $db->reset_password($response['username'], $response['email'], password_hash($_POST['password'], PASSWORD_BCRYPT, $options));
         if($reset['status'] == 'success'){
             header('Location: https://clashscout.com/login?password=reset');
         }

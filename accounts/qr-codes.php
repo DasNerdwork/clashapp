@@ -33,6 +33,9 @@ function generateQR($username){
     return array("qr" => base64_encode($writer->writeString($qrCodeUrl)), "secret" => $QRsecret);
 }
 
+/**
+ * @codeCoverageIgnore
+ */
 function verifyEntered2FA($email, $userInput){
     $db = new DB();
     $google2fa = new Google2FA();
@@ -44,6 +47,9 @@ function verifyEntered2FA($email, $userInput){
     }
 }
 
+/**
+ * @codeCoverageIgnore
+ */
 function verifyLocal2FA($secret, $userInput){
     $google2fa = new Google2FA();
     if ($google2fa->verifyKey($secret, $userInput)) {

@@ -10,7 +10,10 @@ class DB {
     private $dbPassword;
     private $dbName;
     private $db;
-  
+
+    /**
+     * @codeCoverageIgnore
+     */
     public function __construct() {
         $this->dbHost = getenv('HOST');
         $this->dbUsername = getenv('DB_USER');
@@ -46,14 +49,18 @@ class DB {
 
             if ($row['status'] == '1' || $row['status'] == '2') {
                 if (password_verify($password, $row['password'])) {
-                    return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'puuid' => $row['puuid']);
+                    return array('status' => 'success', 'id' => $row['id'], 'region' => $row['region'], 'username' => $row['username'], 'email' => $row['email'], 'puuid' => $row['puuid'], 'label' => 'Allowed');
                 }
-                return array('status' => 'error', 'message' => 'Email/Username or password is invalid.'); // The Password decrypt was unsuccessful
+                return array('status' => 'error', 'message' => 'Email/Username or password is invalid.', 'label' => 'Forbidden'); // The Password decrypt was unsuccessful
+            } else { // The Users status is set to 0 (deactivated account)
+                if (password_verify($password, $row['password'])) {
+                    return array('status' => 'error', 'message' => 'Your account was deactivated. If you did not take this action please reach out to an administrator.', 'label' => 'Deactivated'); // Only Disabled
+                } else {
+                    return array('status' => 'error', 'message' => 'Your account was deactivated. If you did not take this action please reach out to an administrator.', 'label' => 'Forbidden'); // Unauthorized & Disabled
+                }
             }
- 
-            return array('status' => 'error', 'message' => 'Your account was deactivated. If you did not take this action please reach out to an administrator.'); // The Users status is set to 0 (deactivated account)
         }
-        return array('status' => 'error', 'message' => 'The given account does not exist.'); // Cannot find email/username in database
+        return array('status' => 'error', 'message' => 'Email/Username or password is invalid.', 'label' => 'Unknown'); // Cannot find email/username in database
     }
 
     public function get_credentials_2fa($mailorname = '') {
@@ -77,9 +84,13 @@ class DB {
         return array('status' => 'error', 'message' => 'Unable to fetch userdata, please contact an administrator.'); // The Password decrypt was unsuccessful
     }
 
-    public function account_exists($email = '', $username = '') {
+    public function account_exists($mailorname = '', $username = '') {
         $sql = $this->db->prepare("SELECT id FROM users WHERE email = ? OR username = ?");
-        $sql->bind_param('ss', $email, $username);
+        if($username != ''){
+            $sql->bind_param('ss', $mailorname, $username);
+        } else {
+            $sql->bind_param('ss', $mailorname, $mailorname);
+        }
         $sql->execute();
         $result = $sql->get_result();
 
@@ -90,13 +101,17 @@ class DB {
         }
     } 
 
-    public function connect_account($puuid, $username = '') {
-        $sql = $this->db->prepare("UPDATE users SET puuid = ? WHERE username = ?");
-        $sql->bind_param('ss', $puuid, $username);
+    public function connect_account($puuid, $mailorname = '') {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("UPDATE users SET puuid = ? WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("UPDATE users SET puuid = ? WHERE username = ?");
+        }
+        $sql->bind_param('ss', $puuid, $mailorname);
         $sql->execute();
         $result = $sql->affected_rows;
 
-        if($result > 0) {
+        if($result >= 0 && $this->account_exists($mailorname)) {
             return true;
         } else {
             return false;
@@ -113,42 +128,65 @@ class DB {
         $sql->execute();
         $result = $sql->affected_rows;
 
-        if($result > 0) {
+        if($result >= 0 && $this->account_exists($mailorname)) {
             return true;
         } else {
             return false;
         }
     }
 
-    public function getPremium($mailOrName) {
-        $column = (str_contains($mailOrName, '@')) ? 'email' : 'username';
-        $sql = $this->db->prepare("SELECT is_premium FROM users WHERE $column = ?");
-        $sql->bind_param('s', $mailOrName);
+    public function get_stay_code($mailorname = '') {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("SELECT staycode FROM users WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("SELECT staycode FROM users WHERE username = ?");
+        }
+        $sql->bind_param('s', $mailorname);
         $sql->execute();
         $result = $sql->get_result();
-        
-        if ($result->num_rows > 0) {
+    
+        if($result->num_rows) {
             $row = $result->fetch_assoc();
-            return $row['is_premium']; // Assuming 'is_premium' is the name of the boolean field.
+            return $row['staycode'];
         } else {
-            return false; // For example, returning false if the user is not found.
+            return null; // Return null if no staycode is found
         }
     }
     
-    public function setPremium($isPremium, $mailOrName) {
-        $column = (str_contains($mailOrName, '@')) ? 'email' : 'username';
-        $sql = $this->db->prepare("UPDATE users SET is_premium = ? WHERE $column = ?");
-        $sql->bind_param('is', $isPremium, $mailOrName);
+    public function setPremium($isPremium, $mailorname) {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("UPDATE users SET is_premium = ? WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("UPDATE users SET is_premium = ? WHERE username = ?");
+        }
+        $sql->bind_param('is', $isPremium, $mailorname);
         $sql->execute();
         $result = $sql->affected_rows;
     
-        if ($result > 0) {
+        if ($result >= 0 && $this->account_exists($mailorname)) {
             return true;
         } else {
             return false;
         }
     }
-    
+
+    public function getPremium($mailorname) {
+        if(str_contains($mailorname, '@')){
+            $sql = $this->db->prepare("SELECT is_premium FROM users WHERE email = ?");
+        } else {
+            $sql = $this->db->prepare("SELECT is_premium FROM users WHERE username = ?");
+        }
+        $sql->bind_param('s', $mailorname);
+        $sql->execute();
+        $result = $sql->get_result();
+        
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['is_premium'];
+        } else {
+            return false;
+        }
+    }
 
     public function get_data_via_stay_code($staycode) {
         $sql = $this->db->prepare("SELECT id, region, username, email, puuid FROM users WHERE staycode = ?");
@@ -170,7 +208,7 @@ class DB {
         $sql->execute();
         $result = $sql->affected_rows;
 
-        if($result > 0) {
+        if($result > 0 && $this->account_exists($username)) {
             return true;
         } else {
             return false;
@@ -178,14 +216,20 @@ class DB {
     } 
 
     public function create_account($username, $region, $email, $password, $verifier) {
-        $sql = $this->db->prepare("INSERT INTO users (username, region, email, password, verifier, status) VALUES (?, ?, ?, ?, ?, 2)"); 
-        $sql->bind_param('sssss', $username, $region, $email, $password, $verifier);
-        $sql->execute();
-        $result = $sql->get_result();
+        if(!$this->account_exists($email)){
+            $sql = $this->db->prepare("INSERT INTO users (username, region, email, password, verifier, status) VALUES (?, ?, ?, ?, ?, 2)"); 
+            $sql->bind_param('sssss', $username, $region, $email, $password, $verifier);
+            $sql->execute();
+            $result = $sql->get_result();
 
-        if(is_numeric($sql->insert_id)){
-            return array('status' => 'success', 'message' => 'Account successfully created!', 'id' => $sql->insert_id, 'region' => $region, 'username' => $username, 'email' => $email);
-        }else{
+            if(is_numeric($sql->insert_id)){
+                return array('status' => 'success', 'message' => 'Account successfully created!', 'id' => $sql->insert_id, 'region' => $region, 'username' => $username, 'email' => $email);
+            } else {
+                // @codeCoverageIgnoreStart
+                return array('status' => 'error', 'message' => 'Unable to create account.');
+                // @codeCoverageIgnoreEnd
+            }
+        } else {
             return array('status' => 'error', 'message' => 'Unable to create account.');
         }
     }
@@ -238,16 +282,18 @@ class DB {
 
             switch ($row['status']) {
                 case "0":
-                    return array('status' => 'error', 'message' => 'This account has been deactivated.');
+                    return array('status' => 'error', 'message' => 'This account has been deactivated.', 'label' => 'Deactivated');
                 case "1":
-                    return array('status' => 'success', 'message' => '');
+                    return array('status' => 'success', 'message' => '', 'label' => 'Verified');
                 case "2":
-                    return array('status' => 'error', 'message' => 'Your account has not been verified yet. Please check your mails (including spam folder) to be able to use all functionalities.');
+                    return array('status' => 'error', 'message' => 'Your account has not been verified yet. Please check your mails (including spam folder) to be able to use all functionalities.', 'label' => 'Unverified');
                 default:
-                    return array('status' => 'error', 'message' => 'Unknown account status. Please contact an administrator.');
+                // @codeCoverageIgnoreStart
+                    return array('status' => 'error', 'message' => 'Unknown account status. Please contact an administrator.', 'label' => 'Unknown');
+                // @codeCoverageIgnoreEnd
             }
         } else {
-            return array('status' => 'unknown', 'message' => 'Cannot find user in database. Please contact an administrator.');
+            return array('status' => 'error', 'message' => 'Unknown account status. Please contact an administrator.', 'label' => 'Unknown');
         }
     }
 
@@ -262,7 +308,7 @@ class DB {
         $sql->execute();
         $result = $sql->affected_rows;
 
-        if($result > 0) {
+        if($result >= 0 && $this->account_exists($mailorname)) {
             return true;
         } else {
             return false;
@@ -283,7 +329,7 @@ class DB {
             $row = $result->fetch_assoc();
             return array('resetter' => $row['resetter'], 'timestamp' => $row['resetdate']);
         } else {
-            return;
+            return false;
         }
     }
 
@@ -303,9 +349,9 @@ class DB {
         }
     }
 
-    public function reset_password($id = '', $username = '', $email = '', $password = '') {
-        $sql = $this->db->prepare("UPDATE users SET resetdate = NULL, password = ?, status = '1', resetter = NULL WHERE id = ? AND username = ? AND email = ?");
-        $sql->bind_param('siss', $password, $id, $username, $email);
+    public function reset_password($username = '', $email = '', $password = '') {
+        $sql = $this->db->prepare("UPDATE users SET resetdate = NULL, password = ?, status = '1', resetter = NULL WHERE username = ? AND email = ?");
+        $sql->bind_param('sss', $password, $username, $email);
         $sql->execute();
         $result = $sql->affected_rows;
 
@@ -335,7 +381,27 @@ class DB {
         }
     }
 
-    public function set_2fa_code($code, $mailorname) {
+    public function force_delete_account($id, $username, $region, $email, $password) {
+        $check = $this->check_credentials($email, $password);
+        if($check['label'] == 'Deactivated'){
+            $sql = $this->db->prepare("DELETE FROM users WHERE id = ? AND username = ? AND region = ? AND email = ?");
+            $sql->bind_param('isss', $id, $username, $region, $email);
+            $sql->execute();
+            $result = $sql->affected_rows;
+
+            if($result > 0) {
+                return array('status' => 'success', 'message' => 'Account successfully force-deleted!');
+            } else {
+                // @codeCoverageIgnoreStart
+                return array('status' => 'error', 'message' => 'Unable to delete account. Please contact an administrator.');
+                // @codeCoverageIgnoreEnd
+            }
+        } else {
+            return array('status' => 'error', 'message' => 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.');
+        }
+    }
+
+    public function set_2fa_code($mailorname, $code) {
         if(str_contains($mailorname, '@')){
             $sql = $this->db->prepare("UPDATE users SET 2fa = ? WHERE email = ?");
         } else {
@@ -345,7 +411,7 @@ class DB {
         $sql->execute();
         $result = $sql->affected_rows;
 
-        if($result > 0) {
+        if($result >= 0 && $this->account_exists($mailorname)) {
             return true;
         } else {
             return false;
@@ -380,13 +446,16 @@ class DB {
         $sql->execute();
         $result = $sql->affected_rows;
 
-        if($result > 0) {
+        if($result >= 0 && $this->account_exists($mailorname)) {
             return true;
         } else {
             return false;
         }
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function addPoints($username, $points) {
         $sql = $this->db->prepare("UPDATE minigames SET points = points + ? WHERE username = ?");
         $sql->bind_param('is', $points, $username);
@@ -397,6 +466,9 @@ class DB {
         }
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getPoints($username) {
         $sql = $this->db->prepare("SELECT points FROM minigames WHERE username = ?");
         $sql->bind_param('s', $username);
@@ -410,7 +482,10 @@ class DB {
             return false;
         }
     }
-
+    
+    /**
+     * @codeCoverageIgnore
+     */
     public function removePoints($username, $points) {
         $sql = $this->db->prepare("UPDATE minigames SET points = GREATEST(0, points - ?) WHERE username = ?");
         $sql->bind_param('is', $points, $username);
@@ -421,6 +496,9 @@ class DB {
         }
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function getTopPlayers() {
         $sql = "SELECT username, points FROM minigames ORDER BY points DESC LIMIT 10";
         $stmt = $this->db->prepare($sql);

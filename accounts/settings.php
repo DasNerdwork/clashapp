@@ -53,10 +53,7 @@ if (isset($_POST['current-password']) && isset($_POST['new-password']) && isset(
                 if(!$uppercase || !$lowercase || !$number || !$specialChars || strlen($_POST['new-password']) < 8 || strlen($_POST['new-password']) > 32) {
                     $error_message[] = "Password should be at least 8 characters in length and should include at least one upper case letter, one number, and one special character."; 
                 } else {
-                    $options = [
-                        'cost' => 11,
-                    ];
-                    $reset = $db->reset_password($_SESSION['user']['id'], $_SESSION['user']['username'], $_SESSION['user']['email'], password_hash($_POST['new-password'], PASSWORD_BCRYPT, $options));
+                    $reset = $db->reset_password($_SESSION['user']['username'], $_SESSION['user']['email'], password_hash($_POST['new-password'], PASSWORD_BCRYPT, ['cost' => 11]));
                     $success_message[] = $reset['message'];
                 }
             }
@@ -128,7 +125,7 @@ if (isset($_POST['twofa-input'])){
     if($_SESSION['user']['secret'] != null){
         if(verifyLocal2FA($_SESSION['user']['secret'], $_POST['twofa-input'])){
             $db = new DB();
-            if($db->set_2fa_code($_SESSION['user']['secret'], $_SESSION['user']['email'])){
+            if($db->set_2fa_code($_SESSION['user']['email']), $_SESSION['user']['secret']){
                 unset($_SESSION['user']['secret']);
                 $_SESSION['user']['2fa'] = "true";
                 echo "<script>setError('Successfully enabled Two-Factor Authentication.', false);</script>";
