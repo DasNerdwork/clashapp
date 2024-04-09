@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-include_once('/hdd1/clashapp/accounts/qr-codes.php');
+require_once('/hdd1/clashapp/accounts/qr-codes.php');
 
 class AccountsTest extends TestCase {
     /**

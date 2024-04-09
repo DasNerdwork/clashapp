@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-include_once('/hdd1/clashapp/templates/head.php');
+require_once('/hdd1/clashapp/templates/head.php');
 
 class TemplatesTest extends TestCase {
     /**

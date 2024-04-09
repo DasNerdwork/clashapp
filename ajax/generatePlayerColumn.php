@@ -88,7 +88,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
         }
         $playerDataJSONString = json_encode($playerDataRequest["data"]);
         $playerDataJSON = json_decode($playerDataJSONString, true);
-        if(isset($tempTeamJSON) && (((time() - $tempTeamJSON->LastUpdate) > 1800) || ($tempTeamJSON->LastUpdate == 0) || ($forceReload))){
+        if(isset($tempTeamJSON) && (((time() - $tempTeamJSON["LastUpdate"]) > 1800) || ($tempTeamJSON["LastUpdate"] == 0) || ($forceReload))){
             $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);                                           
             $matchInPlayerJsonButNotExistent = false;
             foreach(array_keys($playerDataJSON["MatchIDs"]) as $matchid) {
@@ -150,7 +150,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
                 } else {
                     $upToDate = true;
                     if($iteration == 5){ // Reset anti-request timer if all people are up to date and onAllFinish not called
-                        // $tempTeamJSON->LastUpdate = time();
+                        // $tempTeamJSON["LastUpdate"] = time();
                         $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
                     }
                 }

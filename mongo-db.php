@@ -24,6 +24,7 @@ class MongoDBHelper {
      * @param string $auth - The authentication parameters.
      * @param string $tlsPath - The path to the TLS CA file.
      * @param string $databaseName - The name of the MongoDB database.
+     * @codeCoverageIgnore
      */
     public function __construct() {
         $this->host = getenv('MDB_HOST');
@@ -50,7 +51,7 @@ class MongoDBHelper {
      *   'message' describes the outcome of the operation.
      *   'document' contains the retrieved document (if found).
      */
-    public function findDocumentByField($collectionName, $fieldName, $fieldValue, $returnAsArray = false) {
+    public function findDocumentByField($collectionName, $fieldName, $fieldValue) {
         $filter = [$fieldName => $fieldValue];
         $query = new MongoDB\Driver\Query($filter);
         $cursor = $this->client->executeQuery("{$this->mdb}.$collectionName", $query);
@@ -59,11 +60,7 @@ class MongoDBHelper {
             return array('success' => false, 'code' => '68CSZ1', 'message' => 'Unable to find field in document');
         } else {
             $document = current($cursor->toArray());
-            if ($returnAsArray) {
-                return array('success' => true, 'code' => 'M2GJCU', 'message' => 'Successfully found document by field', 'document' => (array)$document);
-            } else {
-                return array('success' => true, 'code' => 'M54ND7', 'message' => 'Successfully found document by field', 'document' => $document);
-            }
+            return array('success' => true, 'code' => 'M54ND7', 'message' => 'Successfully found document by field', 'document' => (array)$document);
         }
     }
 
@@ -91,20 +88,38 @@ class MongoDBHelper {
         $command = new MongoDB\Driver\Command([
             'aggregate' => $collectionName,
             'pipeline' => $pipeline,
-            'cursor' => new stdClass, // Add this line
+            'cursor' => new stdClass,
         ]);
     
         $cursor = $this->client->executeCommand($this->mdb, $command);
 
         if ($cursor->isDead()) {
-            return array('success' => false, 'code' => '68CSZ1', 'message' => 'Unable to find fields in documents');
+            // @codeCoverageIgnoreStart
+            return array('success' => false, 'code' => '68CSZ1', 'message' => 'An unexpected error occured, aggregate should have returned something but was completely empty');
+            // @codeCoverageIgnoreEnd
         } else {
             $documents = $cursor->toArray();
-            $result = array_map(function ($document) use ($returnAsArray) {
-                return $returnAsArray ? (array)$document : $document;
-            }, $documents);
 
-            return array('success' => true, 'code' => 'MO34LAN', 'message' => 'Successfully found documents by match IDs', 'documents' => $result);
+            $isEmptyInfo = false;
+            foreach ($documents as $document) {
+                if (empty((array)$document->info)) {
+                    $isEmptyInfo = true;
+                    break;
+                }
+            }
+
+            if (!empty($documents)) {
+                if ($isEmptyInfo) {
+                    return array('success' => true, 'code' => 'D4NG3R', 'message' => 'Documents found, but some have empty "info" key', 'documents' => $documents);
+                } else {
+                    $result = array_map(function ($document) use ($returnAsArray) {
+                        return $returnAsArray ? (array)$document : $document;
+                    }, $documents);
+                    return array('success' => true, 'code' => 'MO34LAN', 'message' => 'Successfully found documents by match IDs', 'documents' => $result);
+                }
+            } else {
+                return array('success' => false, 'code' => 'KB6DL0', 'message' => 'Document content is empty');
+            }
         }
     }
     
@@ -124,12 +139,6 @@ class MongoDBHelper {
     
         return $projection;
     }
-    
-    
-    
-    
-    
-
 
     /**
      * Deletes a document from a MongoDB collection based on a specified field's value.

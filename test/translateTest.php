@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 $_SERVER['SERVER_NAME'] = "clashscout.com";
-include_once('/hdd1/clashapp/lang/translate.php');
+require_once('/hdd1/clashapp/lang/translate.php');
 
 class TranslateTest extends TestCase {
     /**

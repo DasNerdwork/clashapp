@@ -504,9 +504,9 @@ echo '
 
     // -------------------------------------------------------------------------------v- CALCULATE & PRINT SUGGESTED BAN DATA  -v------------------------------------------------------------------------------- //
 
-    // $recalculateSuggestedBanData = true; // uncomment to force recalc
+    $recalculateSuggestedBanData = true; // uncomment to force recalc
     // Check if suggested ban data is already locally stored
-    $currentTeamJSON = $mdb->findDocumentByField('teams', 'TeamID', $teamID, true)["document"];
+    $currentTeamJSON = $mdb->findDocumentByField('teams', 'TeamID', $teamID)["document"];
     if(isset($currentTeamJSON["SuggestedBanData"])){
         $suggestedBanArray = $currentTeamJSON["SuggestedBanData"];
         $timer = 0;
