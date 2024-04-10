@@ -153,6 +153,8 @@ class MongoDBHelper {
      *   - 'message' (string): A message providing additional information about the operation result.
      */
     public function deleteDocumentByField($collectionName, $fieldName, $fieldValue) {
+        $documentExists = $this->findDocumentByField($collectionName, $fieldName, $fieldValue)['success'];
+        if(!$documentExists) return array('success' => false, 'code' => 'DL4MN2', 'message' => 'Unable to delete non-existent document');
         $filter = [$fieldName => $fieldValue];
         $options = ['limit' => 1]; // Limit to deleting one matching document
     
@@ -161,9 +163,15 @@ class MongoDBHelper {
     
         try {
             $this->client->executeBulkWrite("{$this->mdb}.$collectionName", $bulkWrite);
-            return array('success' => true, 'code' => 'BD8M4L', 'message' => 'Document deleted successfully');
+            if(!$this->findDocumentByField($collectionName, $fieldName, $fieldValue)['success']){
+                return array('success' => true, 'code' => 'BD8M4L', 'message' => 'Document deleted successfully');
+            } else {
+                // @codeCoverageIgnoreStart
+                return array('success' => false, 'code' => 'D3NF12', 'message' => 'Unable to delete document because of unknown reason');
+            }
         } catch (MongoDB\Driver\Exception\Exception $e) {
             return array('success' => false, 'code' => 'LE84NG', 'message' => 'Error deleting document: ' . $e->getMessage());
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -199,12 +207,13 @@ class MongoDBHelper {
                     'message' => 'Document with the same key already exists in ' . $collectionName,
                 ];
             } else {
-                // Handle other errors
+                // @codeCoverageIgnoreStart
                 return [
                     'success' => false,
                     'code' => 'MXZZLM',
                     'message' => 'An error occurred: ' . $e->getMessage(),
                 ];
+                // @codeCoverageIgnoreEnd
             }
         }
     }
@@ -223,18 +232,24 @@ class MongoDBHelper {
      *   'message' describes the outcome of the operation.
      *   'data' contains the retrieved data (if found).
      */
-    public function getDocumentField($collectionName, $filterField, $filterValue, $fieldName) {
+    public function getDocumentField($collectionName, $filterField, $filterValue, $fieldName = null) {
         $filter = [$filterField => $filterValue];
-        $options = ['projection' => [$fieldName => 1]];
+        $options = [];
+        if ($fieldName !== null) $options['projection'] = [$fieldName => 1];
         $query = new MongoDB\Driver\Query($filter, $options);
         $cursor = $this->client->executeQuery("{$this->mdb}.$collectionName", $query);
 
         if (!$cursor->isDead()) {
             $document = current($cursor->toArray());
-            if (isset($document->{$fieldName})) {
+            
+            if ($fieldName !== null && isset($document->{$fieldName})) {
                 return array('success' => true, 'code' => 'VZDDEB', 'message' => 'Successfully retrieved field value of document.', 'data' => $document->{$fieldName});
-            } else {
-                return array('success' => false, 'code' => '5QNYRM', 'message' => 'Field not found.');
+            } 
+            elseif ($fieldName === null) {
+                return array('success' => true, 'code' => 'DM83BG', 'message' => 'Successfully retrieved whole document.', 'data' => $document);
+            }
+            else {
+                return array('success' => false, 'code' => '5QNYRM', 'message' => 'An unknown error occured with field value.');
             }
         } else {
             return array('success' => false, 'code' => 'FMLYAW', 'message' => 'Document not found or not identifiable.');
@@ -263,8 +278,15 @@ class MongoDBHelper {
         $bulk->update($filter, $update, $options);
     
         $this->client->executeBulkWrite("{$this->mdb}.$collectionName", $bulk);
-    
-        return array('success' => true, 'code' => '8AMZLM', 'message' => 'Successfully added or updated element in '.$collectionName);
+
+        $result = $this->findDocumentByField($collectionName, $arrayField, $elementToAdd);
+        if($result['success']) {
+            return array('success' => true, 'code' => '8AMZLM', 'message' => 'Successfully added or updated element in '.$collectionName);
+        } else {
+            // @codeCoverageIgnoreStart
+            return array('success' => false, 'code' => 'CN4NA1', 'message' => 'Getting document by newly added field was not successful.');
+            // @codeCoverageIgnoreEnd
+        }
     }
     
     /**
@@ -390,7 +412,9 @@ class MongoDBHelper {
         if (!empty($result)) {
             return array('success' => true, 'code' => 'DJF64L', 'message' => 'Successfully retrieved and sorted PlayerData.', 'data' => $result);
         } else {
+            // @codeCoverageIgnoreStart
             return array('success' => false, 'code' => '0DL3MU', 'message' => 'No PlayerData found.');
+            // @codeCoverageIgnoreEnd
         }
     }
 
@@ -412,7 +436,20 @@ class MongoDBHelper {
 
         $cursor = $this->client->executeCommand($this->mdb, $command);
 
-        return $cursor;
+        try {
+            $cursor = $this->client->executeCommand($this->mdb, $command);
+            $documents = $cursor->toArray();
+    
+            if (empty($documents)) {
+                return null;
+            }
+    
+            return $documents;
+            // @codeCoverageIgnoreStart
+        } catch (\Exception $e) {
+            return null;
+            // @codeCoverageIgnoreEnd
+        }
     }
 }
 ?>
