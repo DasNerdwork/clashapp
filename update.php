@@ -217,6 +217,9 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
     return $returnScriptContent;
 }
 
+/**
+ * @codeCoverageIgnore
+ */
 function processResponseData($ajaxUniquifier){
     return "
     var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
@@ -284,6 +287,9 @@ function processResponseData($ajaxUniquifier){
     };";
 }
 
+/**
+ * @codeCoverageIgnore
+ */
 function callAllFinish($requestIterator, $teamID) {
     return "
     console.log('ALL PLAYERS FINISHED');
