@@ -34,8 +34,8 @@ class FunctionsTest extends TestCase {
         $this->assertArrayHasKey('AccountID', $actualData, "AccountID key is missing");
         $this->assertEquals('NoudYpU8MTqtQ7BvYx4kbQt8boAaDeemjWwOv42nQpH4q98', $actualData['AccountID'], "AccountID is not equal");
 
-        $this->assertArrayHasKey('Name', $actualData, "Name key is missing");
-        $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\p{L}]{3,16}$/', $actualData['Name'], "Name is not in the valid format");
+        $this->assertArrayHasKey('GameName', $actualData, "Name key is missing");
+        $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\p{L}]{3,16}$/', $actualData['GameName'], "Name is not in the valid format");
     }
 
     /**
@@ -487,5 +487,117 @@ class FunctionsTest extends TestCase {
         $this->assertNotNull(getLanePercentages($matchData, $puuid)[1], "Second lane in the lane percentage array is null.");
         $this->assertContains(getLanePercentages($matchData, $puuid)[0], $expectedResultArray, "First lane in the lane percentage array is not within the expected result array.");
         $this->assertContains(getLanePercentages($matchData, $puuid)[1], $expectedResultArray, "Second lane in the lane percentage array is not within the expected result array.");
+    }
+
+    /**
+     * @covers isValidCSRF
+     */
+    public function testIsValidCSRF()
+    {
+        $this->assertTrue(isValidCSRF('0123456789abcdef0123456789ABCDEF0123456789abcdef0123456789ABCDEF'), 'Valid CSRF did not pass validation.');
+        $this->assertTrue(isValidCSRF('6566203363206236203566203730206437203062206231203534203632203339'), 'Valid CSRF did not pass validation.');
+        $this->assertTrue(isValidCSRF('9876543210ABCDEF9876543210abcdef9876543210ABCDEF9876543210abcdef'), 'Valid CSRF did not pass validation.');
+        $this->assertTrue(isValidCSRF('ABCDEF0123456789abcdef0123456789abcdef0123456789abcdefABCDEF0010'), 'Valid CSRF did not pass validation.');
+
+        $this->assertFalse(isValidCSRF('EUW1_688439750445436234234'), 'Invalid CSRF should not pass validation.');
+        $this->assertFalse(isValidCSRF('필릭스'), 'Invalid CSRF should not pass validation.');
+        $this->assertFalse(isValidCSRF(';'), 'Invalid CSRF should not pass validation.');
+        $this->assertFalse(isValidCSRF(10), 'Invalid CSRF should not pass validation.');
+    }
+
+    /**
+     * @covers isValidMatchID
+     */
+    public function testIsValidMatchID()
+    {
+        $this->assertTrue(isValidMatchID('EUW1_6884397504'), 'Valid MatchID did not pass validation.');
+        $this->assertTrue(isValidMatchID('EUW1_4816389533'), 'Valid MatchID did not pass validation.');
+        $this->assertTrue(isValidMatchID('KR1_2848239562'), 'Valid MatchID did not pass validation.');
+        $this->assertTrue(isValidMatchID('EUNE1_1536746424'), 'Valid MatchID did not pass validation.');
+
+        $this->assertFalse(isValidMatchID('EUW1_688439750445436234234'), 'Invalid MatchID should not pass validation.');
+        $this->assertFalse(isValidMatchID('필릭스'), 'Invalid MatchID should not pass validation.');
+        $this->assertFalse(isValidMatchID(';'), 'Invalid MatchID should not pass validation.');
+        $this->assertFalse(isValidMatchID(10), 'Invalid MatchID should not pass validation.');
+    }
+
+    /**
+     * @covers isValidIterator
+     */
+    public function testIsValidIterator()
+    {
+        $this->assertTrue(isValidIterator(0), 'Valid Iterator did not pass validation.');
+        $this->assertTrue(isValidIterator(1), 'Valid Iterator did not pass validation.');
+        $this->assertTrue(isValidIterator(5), 'Valid Iterator did not pass validation.');
+        $this->assertTrue(isValidIterator(9), 'Valid Iterator did not pass validation.');
+
+        $this->assertFalse(isValidIterator('*.,-feddichisdasmondjesichd'), 'Invalid Iterator should not pass validation.');
+        $this->assertFalse(isValidIterator('필릭스'), 'Invalid Iterator should not pass validation.');
+        $this->assertFalse(isValidIterator(';'), 'Invalid Iterator should not pass validation.');
+        $this->assertFalse(isValidIterator(10), 'Invalid Iterator should not pass validation.');
+    }
+
+    /**
+     * @covers isValidID
+     */
+    public function testIsValidID()
+    {
+        $this->assertTrue(isValidID('lMPVJegBts5TsSd7vKrf9j_oMPZN9N8ul2CBtviFNcuIzlGdWG1d4riiG9f4lNNoyzq-HVDRA8IzcA'), 'Valid ID did not pass validation.');
+        $this->assertTrue(isValidID('MceGjIqeHx6ty7IFgkE7tkXVprFMlx-GiDY52e_9phuQrHHL'), 'Valid ID did not pass validation.');
+        $this->assertTrue(isValidID('wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA'), 'Valid ID did not pass validation.');
+        $this->assertTrue(isValidID('kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw'), 'Valid ID did not pass validation.');
+
+        $this->assertFalse(isValidID('*.,-feddichisdasmondjesichd'), 'Invalid ID should not pass validation.');
+        $this->assertFalse(isValidID('필릭스'), 'Invalid ID should not pass validation.');
+        $this->assertFalse(isValidID(';'), 'Invalid ID should not pass validation.');
+        $this->assertFalse(isValidID('SQL DROP DATABASE;'), 'Invalid ID should not pass validation.');
+    }
+
+    /**
+     * @covers isValidPosition
+     */
+    public function testIsValidPosition()
+    {
+        $this->assertTrue(isValidPosition('bot'), 'Valid position did not pass validation.');
+        $this->assertTrue(isValidPosition('MIDDLE'), 'Valid position did not pass validation.');
+        $this->assertTrue(isValidPosition('Support'), 'Valid position did not pass validation.');
+        $this->assertTrue(isValidPosition('unselected'), 'Valid position did not pass validation.');
+
+        $this->assertFalse(isValidPosition('adc'), 'Invalid position should not pass validation.');
+        $this->assertFalse(isValidPosition('MiDlAnEr'), 'Invalid position should not pass validation.');
+        $this->assertFalse(isValidPosition(';'), 'Invalid position should not pass validation.');
+        $this->assertFalse(isValidPosition('SQL DROP DATABASE;'), 'Invalid position should not pass validation.');
+    }
+
+    /**
+     * @covers isValidPlayerName
+     */
+    public function testIsValidPlayerName()
+    {
+        $this->assertTrue(isValidPlayerName('DasNerdwork'), 'Valid player name did not pass validation.');
+        $this->assertTrue(isValidPlayerName('ŠUŠŇOJED'), 'Valid player name did not pass validation.');
+        $this->assertTrue(isValidPlayerName('TTV KERBEROS LOL'), 'Valid player name did not pass validation.');
+        $this->assertTrue(isValidPlayerName('필릭스'), 'Valid player name did not pass validation.');
+
+        $this->assertFalse(isValidPlayerName('abcdefghijklmnopqrstuvwxyz'), 'Invalid player name should not pass validation.');
+        $this->assertFalse(isValidPlayerName('</_dasd_>#yeet'), 'Invalid player name should not pass validation.');
+        $this->assertFalse(isValidPlayerName(';'), 'Invalid player name should not pass validation.');
+        $this->assertFalse(isValidPlayerName('SQL DROP DATABASE;'), 'Invalid player name should not pass validation.');
+    }
+
+    /**
+     * @covers isValidPlayerTag
+     */
+    public function testIsValidPlayerTag()
+    {
+        $this->assertTrue(isValidPlayerTag('KR1'), 'Valid player tag did not pass validation.');
+        $this->assertTrue(isValidPlayerTag('EUNE'), 'Valid player tag did not pass validation.');
+        $this->assertTrue(isValidPlayerTag('nerdy'), 'Valid player tag did not pass validation.');
+        $this->assertTrue(isValidPlayerTag('필릭스'), 'Valid player tag did not pass validation.');
+
+        $this->assertFalse(isValidPlayerTag('abcdefghijkl'), 'Invalid player tag should not pass validation.');
+        $this->assertFalse(isValidPlayerTag('1'), 'Invalid player tag should not pass validation.');
+        $this->assertFalse(isValidPlayerTag(';'), 'Invalid player tag should not pass validation.');
+        $this->assertFalse(isValidPlayerTag('SQL DROP DATABASE;'), 'Invalid player tag should not pass validation.');
     }
 }

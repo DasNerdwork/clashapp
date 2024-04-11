@@ -220,7 +220,7 @@ function getPlayerData($type, $id){
 
         // Collect requested values in returnarray
         $playerDataArray["Icon"] = json_decode($output)->profileIconId;
-        $playerDataArray["Name"] = json_decode($output)->name;
+        isset($playerDataArray["Name"]) ? json_decode($output)->name : NULL;
         if ($type == "riot-id") {
             $playerDataArray["GameName"] = explode("/", $id)[0];
             $playerDataArray["Tag"] = explode("/", $id)[1];
@@ -3726,6 +3726,9 @@ function sortByMatchIds($matchDataArray) {
     return $matchDataArray;
 }
 
+/**
+ * @codeCoverageIgnore
+ */
 function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, $reload) {
     return "<script>
     var xhrPCD".$requestIterator." = new XMLHttpRequest();
@@ -3824,6 +3827,9 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
     </script>";
 }
 
+/**
+ * @codeCoverageIgnore
+ */
 function generateSinglePlayerData($playerName, $playerTag, $reload) {
     return "<script>
     var xhrSPD = new XMLHttpRequest();
@@ -3897,7 +3903,7 @@ function isValidIterator($iterator) {
  */
 function isValidID($id) {
     $pattern = '/^[a-zA-Z0-9_\-]+$/';
-    return preg_match($pattern, $id);
+    return preg_match($pattern, $id) === 1;
 }
 
 /**
@@ -3923,8 +3929,8 @@ function isValidPosition($position) {
  *
  */
 function isValidPlayerName($playerName) {
-    // Match pattern: letters from any alphabet, numbers, underscore, hyphen, any whitespace character, length between 7 and 22
-    return preg_match('/^[\p{L}0-9_\s-]{7,22}$/u', $playerName) === 1;
+    // Match pattern: letters from any alphabet, numbers, underscore, hyphen, any whitespace character, length between 3 and 22
+    return preg_match('/^[\p{L}0-9_\s\-#]{3,22}$/u', $playerName) === 1;
 }
 
 
