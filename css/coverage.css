@@ -1,0 +1,80 @@
+.breadcrumb, .progress {
+    background-color: rgb(35, 38, 39);
+}
+
+body {
+    color: rgb(209, 205, 199);
+    background-color: rgb(24, 26, 27);
+}
+
+.table tbody tr.warning, .table tbody td.warning, li.warning, span.warning {
+    background-color: rgb(74 75 19);
+}
+
+.table tbody tr.danger, .table tbody td.danger, li.danger, span.danger {
+    background-color: rgb(56, 22, 22);
+}
+
+.table tbody tr.covered-by-large-tests, li.covered-by-large-tests, tr.success, td.success, li.success, span.success {
+    background-color: rgb(41, 60, 23);
+}
+
+.table {
+    color: rgb(209, 205, 199);
+}
+
+.table-bordered td, .table-bordered th {
+    border-color: rgb(56, 61, 63);
+}
+
+td span.default {
+    color: rgb(200, 196, 189);
+}
+
+td span.keyword {
+    color: rgb(200, 196, 189);
+}
+
+::-webkit-scrollbar {
+    background-color: #202324;
+    color: #aba499;
+}
+
+::-webkit-scrollbar-corner {
+    background-color: #181a1b;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #454a4d;
+}
+
+a:hover {
+    color: rgb(97, 183, 255);
+    text-decoration-color: initial;
+}
+
+a {
+    color: rgb(51, 162, 255);
+    text-decoration-color: initial;
+    background-color: transparent;
+}
+
+.covered-by-small-tests {
+    background-color: rgb(76, 110, 46);
+}
+
+.covered-by-medium-tests {
+    background-color: rgb(55, 81, 31);
+}
+
+.covered-by-large-tests {
+    background-color: rgb(41, 60, 23);
+}
+
+.not-covered {
+    background-color: rgb(56, 22, 22);
+}
+
+.not-coverable {
+    background-color: rgb(47, 40, 5);
+}

@@ -7,7 +7,7 @@
   </testsuites>
   <coverage>
     <report>
-      <html outputDirectory="test/results"/>
+      <html outputDirectory="test/results" customCssFile="/hdd1/clashapp/css/coverage.css"/>
       <text outputFile="php://stdout" showUncoveredFiles="false"/>
     </report>
   </coverage>
