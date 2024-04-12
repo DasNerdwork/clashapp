@@ -469,10 +469,10 @@ class FunctionsTest extends TestCase {
 
     /**
      * @covers getLanePercentages
+     * @covers getMostCommon
      * @uses MongoDBHelper
      * @uses getMatchData
      * @uses getMatchIDs
-     * @uses getMostCommon
      */
     public function testGetLanePercentages()
     {
@@ -487,6 +487,218 @@ class FunctionsTest extends TestCase {
         $this->assertNotNull(getLanePercentages($matchData, $puuid)[1], "Second lane in the lane percentage array is null.");
         $this->assertContains(getLanePercentages($matchData, $puuid)[0], $expectedResultArray, "First lane in the lane percentage array is not within the expected result array.");
         $this->assertContains(getLanePercentages($matchData, $puuid)[1], $expectedResultArray, "Second lane in the lane percentage array is not within the expected result array.");
+    }
+
+    /**
+     * @covers tagSelector
+     * @covers generateTag
+     * @uses __
+     */
+    public function testTagSelectorWithTags()
+    {
+        $testTagArray1 = ['dragonTakedowns' => 0.5, 'kda' => 0.3];
+        $testTagArray2 = ['dragonTakedowns' => -0.5, 'kda' => -0.3];
+
+        $result1 = tagSelector($testTagArray1);
+        $result2 = tagSelector($testTagArray2);
+
+        $this->assertStringContainsString('Dragonmaster', $result1, 'Generated data is missing content that should have been generated.');
+        $this->assertStringContainsString('Dragonfumbler', $result2, 'Generated data is missing content that should have been generated.');
+        $this->assertStringNotContainsString('Dragonfumbler', $result1, 'Generated data contains content that should not have been generated.');
+        $this->assertStringNotContainsString('Dragonmaster', $result2, 'Generated data contains content that should not have been generated.');
+        $this->assertStringContainsString('data-type="positive"', $result1, 'Generated data is missing content that should have been generated.');
+        $this->assertStringNotContainsString('data-type="positive"', $result2, 'Generated data contains content that should not have been generated.');
+        $this->assertStringContainsString('K/DA', $result1, 'Generated data is missing content that should have been generated.');
+        $this->assertStringNotContainsString('Careless', $result1, 'Generated data contains content that should not have been generated.');
+        $this->assertStringContainsString('Careless', $result2, 'Generated data is missing content that should have been generated.');
+        $this->assertStringNotContainsString('K/DA', $result2, 'Generated data contains content that should not have been generated.');
+        $this->assertStringNotContainsString('data-type="negative"', $result1, 'Generated data contains content that should not have been generated.');
+        $this->assertStringContainsString('data-type="negative"', $result2, 'Generated data is missing content that should have been generated.');
+        $this->assertStringNotContainsString('Lazy', $result1, 'Generated data contains content that should not have been generated.');
+        $this->assertStringNotContainsString('Lazy', $result2, 'Generated data contains content that should not have been generated.');
+
+        $_COOKIE["tagOptions"] = "multi-colored";
+
+        $testTagGenerate1 = generateTag("Tag Text", "green", "Tooltip Text", "additionalData");
+
+        $this->assertStringContainsString("Tag Text", $testTagGenerate1, 'Generated data is missing content that should have been generated.');
+        $this->assertStringContainsString("Tooltip Text", $testTagGenerate1, 'Generated data is missing content that should have been generated.');
+        $this->assertStringContainsString("green", $testTagGenerate1, 'Generated data is missing content that should have been generated.');
+        $this->assertStringNotContainsString("Unknown tag option", $testTagGenerate1, 'Generating data was not successful.');
+
+        $_COOKIE["tagOptions"] = "invalid-value";
+
+        $testTagGenerate2 = generateTag("Tag Text", "blue", "Tooltip Text", "additionalData");
+
+        $this->assertEquals("Unknown tag option", $testTagGenerate2, 'Generating data was successful although it should not have been.');
+
+        unset($_COOKIE["tagOptions"]);
+
+        $testTagGenerate3 = generateTag("Tag Text", "red", "Tooltip Text");
+
+        $this->assertEquals("Unknown tag option", $testTagGenerate3, 'Generating data was successful although it should not have been.');
+    }
+
+    /**
+     * @covers generateCSRFToken
+     * @uses isValidCSRF
+     */
+    public function testGenerateCSRFToken()
+    {
+        $testGenerateCSRF = generateCSRFToken();
+
+        $this->assertNotNull($testGenerateCSRF, 'Generating a CSRF token was not possible.');
+        $this->assertTrue(isValidCSRF($testGenerateCSRF), 'The returned CSRF token did not pass as valid.');
+        $this->assertArrayHasKey('csrf_token', $_SESSION, 'The session did not get a new CSRF token set.');
+        $this->assertEquals($testGenerateCSRF, $_SESSION['csrf_token'], 'The CSRF token generated and set in the session do not match');
+    }
+
+    /**
+     * @covers objectToArray
+     */
+    public function testObjectToArray()
+    {
+        // Simple approach
+        $object = (object) [
+            'key1' => 'value1',
+            'key2' => 'value2',
+        ];
+
+        $resultObject = objectToArray($object);
+
+        $this->assertEquals(['key1' => 'value1', 'key2' => 'value2'], $resultObject, 'Object was not successfully transformed to an array.');
+
+        $array = [
+            'key1' => 'value1',
+            'key2' => 'value2',
+        ];
+
+        $resultArray = objectToArray($array);
+
+        $this->assertEquals($array, $resultArray, 'Array was modified instead of leaving it as an array.');
+
+        // Complex nested approach
+        {
+            $mixedStructure = [
+                'key1' => 'value1',
+                'key2' => [
+                    'subkey1' => 'subvalue1',
+                    'subkey2' => (object) ['subkey3' => 'subvalue3'],
+                    'subkey3' => [
+                        'subsubkey1' => 'subsubvalue1',
+                        'subsubkey2' => ['subsubsubkey1' => 'subsubsubvalue1']
+                    ]
+                ],
+                'key3' => (object) [
+                    'subkey4' => 'subvalue4',
+                    'subkey5' => ['subsubkey3' => 'subsubvalue3'],
+                    'subkey6' => [
+                        'subsubkey4' => 'subsubvalue4',
+                        'subsubkey5' => (object) ['subsubsubkey2' => 'subsubsubvalue2']
+                    ]
+                ]
+            ];
+    
+            $result = objectToArray($mixedStructure);
+    
+            $expectedResult = [
+                'key1' => 'value1',
+                'key2' => [
+                    'subkey1' => 'subvalue1',
+                    'subkey2' => ['subkey3' => 'subvalue3'],
+                    'subkey3' => [
+                        'subsubkey1' => 'subsubvalue1',
+                        'subsubkey2' => ['subsubsubkey1' => 'subsubsubvalue1']
+                    ]
+                ],
+                'key3' => [
+                    'subkey4' => 'subvalue4',
+                    'subkey5' => ['subsubkey3' => 'subsubvalue3'],
+                    'subkey6' => [
+                        'subsubkey4' => 'subsubvalue4',
+                        'subsubkey5' => ['subsubsubkey2' => 'subsubsubvalue2']
+                    ]
+                ]
+            ];
+    
+            $this->assertEquals($expectedResult, $result, 'Object to array did not run successful on mixed/nested elements.');
+
+            $wrongApproach = objectToArray("test123");
+            
+            $this->assertFalse($wrongApproach, 'Object to array someone accepted different element than array and/or object.');
+        }
+    }
+
+    /**
+     * @covers fileExistsWithCache
+     */
+    public function testFileExistsWithCache()
+    {
+        global $fileExistsCache;
+        $fileExistsCache = [];
+
+        $filePath = '/hdd1/clashapp/README.md';
+        $nonExistentFilePath = '/hdd1/clashapp/DONTREADME.md';
+
+        $exists1 = fileExistsWithCache($filePath);
+
+        $this->assertTrue($exists1, 'Existing file returns as non-existing.');
+        $this->assertArrayHasKey($filePath, $fileExistsCache, 'Existing file is missing from cache.');
+        $this->assertTrue($fileExistsCache[$filePath], 'Cached existence answer is not the same as non-cached one.');
+
+        $exists2 = fileExistsWithCache($nonExistentFilePath);
+
+        $this->assertFalse($exists2, 'Non-Existing file returns as existing.');
+        $this->assertArrayHasKey($nonExistentFilePath, $fileExistsCache, 'Non-Existing file is missing from cache.');
+        $this->assertFalse($fileExistsCache[$nonExistentFilePath], 'Cached existence answer is not the same as non-cached one.');
+
+        $exists3 = fileExistsWithCache($filePath);
+
+        $this->assertTrue($exists3, 'Already before existing file suddenly returns as non-existing.');
+        $this->assertArrayHasKey($filePath, $fileExistsCache, 'Already before existing file is suddenly missing from cache.');
+        $this->assertTrue($fileExistsCache[$filePath], 'Already existing cached existence answer is not the same as non-cached one.');
+    }
+
+    /**
+     * @covers addToGlobalMatchDataCache
+     */
+    public function testAddToGlobalMatchDataCache()
+    {
+        global $matchDataCache;
+        $matchDataCache = [];
+
+        $testMatch = (object) ['metadata' => (object) ['matchId' => 'EUW1_6881740123']];
+
+        addToGlobalMatchDataCache($testMatch);
+
+        $this->assertArrayHasKey('EUW1_6881740123', $matchDataCache, 'Adding to match data cache was not successful.');
+        $this->assertEquals($testMatch, $matchDataCache['EUW1_6881740123'], 'Match data in cache is not the same as before.');
+    }
+
+    /**
+     * @covers sortByMatchIds
+     */
+    public function testSortByMatchIds()
+    {
+        $matchDataArray = [
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_6881740123']],
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_6881740789']],
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_6881740456']],
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_6926482653']],
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_1234567890']],
+        ];
+
+        $expected = [
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_6926482653']],
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_6881740789']],
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_6881740456']],
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_6881740123']],
+            (object) ['metadata' => (object) ['matchId' => 'EUW1_1234567890']],
+        ];
+
+        $result = sortByMatchIds($matchDataArray);
+
+        $this->assertEquals($expected, $result, 'Sorting matchids in descending ordner was not successful.');
     }
 
     /**

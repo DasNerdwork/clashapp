@@ -3251,12 +3251,6 @@ function getMasteryColor($masteryPoints){
     }
 }
 
-function generateCSRFToken() {
-    $token = bin2hex(random_bytes(32)); // Generiere einen zufälligen Token-Wert
-    $_SESSION['csrf_token'] = $token; // Speichere den Token in der Sitzungsvariablen
-    return $token; // Gib den Token-Wert zurück
-}
-
 function calculateSmurfProbability($playerData, $rankData, $masteryData) {
     $resultArray = array();
 
@@ -3396,7 +3390,7 @@ function generateTag($tagText, $bgColor, $tooltipText, $additionalData = "") {
             return "Unknown tag option";
         }
     } else {
-        if(isset($additionalData)){
+        if(isset($additionalData) && $additionalData != ""){
             $bgClass = ($additionalData == "positive") ? "bg-tag-lime" : "bg-tag-red";
             return "<div class='playerTag list-none border border-solid border-[#141624] py-2 px-3 rounded h-fit text-[#cccccc] $bgClass cursor-help'
                     onmouseenter='showTooltip(this, \"$translatedTooltipText\", 500, \"top-right\")'
@@ -3435,6 +3429,7 @@ function tagSelector($tagArray) {
                     $returnString .= generateTag(__("Careless"), "bg-tag-yellow", sprintf(__("The KDA of this player is %s worse than usual"), number_format(($value*-1) * 100) . '%'), "negative");
                 }
                 break;
+            // @codeCoverageIgnoreStart
             case 'killParticipation':
                 if ($value > 0) {
                     $returnString .= generateTag(__("Relevant"), "bg-tag-purple", sprintf(__("%s better kill participation than usual"), number_format($value * 100) . '%'), "positive");
@@ -3640,9 +3635,22 @@ function tagSelector($tagArray) {
                 break;
             default:
                 break;
+            // @codeCoverageIgnoreEnd
         }
     }
     return $returnString;
+}
+
+/**
+ * Generates a CSRF Token to be used in forms
+ *
+ * @return string Returns the CSRF Token and saves it in the current session
+ *
+ */
+function generateCSRFToken() {
+    $token = bin2hex(random_bytes(32)); // Generiere einen zufälligen Token-Wert
+    $_SESSION['csrf_token'] = $token; // Speichere den Token in der Sitzungsvariablen
+    return $token; // Gib den Token-Wert zurück
 }
 
 /**
@@ -3657,7 +3665,7 @@ function objectToArray($object) {
     if (is_object($object) || is_array($object)) {
         $result = [];
         foreach ($object as $key => $value) {
-            $result[$key] = objectToArray($value);
+            $result[$key] = is_object($value) || is_array($value) ? objectToArray($value) : $value;
         }
         return $result;
     } else {
