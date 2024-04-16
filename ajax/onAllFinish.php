@@ -81,10 +81,10 @@ if(isset($_POST['sumids'])){
                 <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3 z-50" x-show="showExplanation" x-transition x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
                 <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Category').'</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Addition').'</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">'.__('Explanation').'</div>';
                 if(isset($suggestedBanArray[$champname]["Points"]["Value"])){
-                    $returnString .= '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["Points"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('A player achieved a mastery score of').' '.$suggestedBanArray[$champname]["Points"]["Value"].' '.__('on').' '.$champname.'.</div>';
+                    $returnString .= '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["Points"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('A player achieved a mastery score of').' '.str_replace(',', '.', $suggestedBanArray[$champname]["Points"]["Value"]).' '.__('on').' '.$champname.'.</div>';
                 }
                 if(isset($suggestedBanArray[$champname]["TotalTeamPoints"]["Value"])){
-                    $returnString .= '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">'.__('Total Team Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["TotalTeamPoints"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('This team has a combined mastery score of').' '.str_replace(".", ",", $suggestedBanArray[$champname]["TotalTeamPoints"]["Value"]).' '.__('on').' '.$champname.'.</div>';
+                    $returnString .= '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark">'.__('Total Team Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ '.number_format($suggestedBanArray[$champname]["TotalTeamPoints"]["Add"],2,'.','').'</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('This team has a combined mastery score of').' '.number_format($suggestedBanArray[$champname]["TotalTeamPoints"]["Value"], 0, ',', '.').' '.__('on').' '.$champname.'.</div>';
                 }
                 if(isset($suggestedBanArray[$champname]["CapablePlayers"]["Value"])){
                     if($suggestedBanArray[$champname]["CapablePlayers"]["Value"] > 1){
@@ -100,7 +100,7 @@ if(isset($_POST['sumids'])){
                 foreach($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"] as $lane){
                     if($lane == reset($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"])){
                         $returnString .= ucfirst(strtolower($lane));
-                    } else if($laner == end($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"])){
+                    } else if($lane == end($suggestedBanArray[$champname]["MatchingLanersPrio"]["Lanes"])){
                         $returnString .= " & ".ucfirst(strtolower($lane));
                     } else {
                         $returnString .= ", ".ucfirst(strtolower($lane));

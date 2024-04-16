@@ -45,8 +45,8 @@ if(isset($_POST['queuedas'])){
     }
 }
 if(isset($_POST['reload'])){
-    if(!is_bool($_POST['reload']) && $_POST['reload'] != ''){
-        die("Invalid or non-empty reload boolean: " . $_POST['reload']);
+    if(($_POST['reload'] != 1) && $_POST['reload'] != ''){
+        die("Invalid or non-empty reload value: " . $_POST['reload']);
     }
 }
 // End of Data Validation checks
@@ -298,7 +298,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
     }
     
     $maxVisibleItems = 20;
-    if(sizeof($masteryData) >= 1){
+    if(count($masteryData) >= 1){
         for($i=0; $i<count($masteryData); $i++){
             $masteryContent .= "
             <div class='slider-item flex-none h-full whitespace-nowrap inline-block cursor-grab'>
@@ -317,15 +317,17 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
                 break;
             }
         }
+    } else if(empty($masteryData)) {
+        $masteryContent = "<img src='/clashapp/data/misc/webp/empty_search.avif?version=".md5_file('/hdd1/clashapp/data/misc/webp/empty_search.avif')."' class='w-20 h-20 mx-auto' alt='A frog emoji with a questionmark'>";
     }
 
     $smurfProbability = calculateSmurfProbability($playerData, $rankData, $masteryData);
     if ($smurfProbability >= 0.4 && $smurfProbability < 0.6){
-        $tagList .= generateTag("Smurf", "bg-tag-yellow", "Low probability");
+        $tagList .= generateTag("Smurf", "bg-tag-yellow", "Low probability", "negative");
     } else if ($smurfProbability >= 0.6 && $smurfProbability <= 0.8){
-        $tagList .= generateTag("Smurf", "bg-tag-orange", "Moderately high probability");
+        $tagList .= generateTag("Smurf", "bg-tag-orange", "Moderately high probability", "negative");
     } else if ($smurfProbability > 0.8){
-        $tagList .= generateTag("Smurf", "bg-tag-red", "Very high probability");
+        $tagList .= generateTag("Smurf", "bg-tag-red", "Very high probability", "negative");
     }
     if(isset($playerDataJSON["Tags"], $playerDataJSON["LanePercentages"])){
         if(isset($playerDataJSON["LanePercentages"][0]) && $playerDataJSON["LanePercentages"][0] != ""){

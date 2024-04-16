@@ -25,7 +25,7 @@ $db = new DB();
 if ((isset($_COOKIE['stay-logged-in'])) && !isset($_SESSION['user'])) {
     $sessionData = $db->get_data_via_stay_code($_COOKIE['stay-logged-in']);
     if($sessionData['status'] !== 'error') {
-        $_SESSION['user'] = array('id' => $sessionData['id'], 'region' => $sessionData['region'], 'username' => $sessionData['username'], 'email' => $sessionData['email'], 'sumid' => $sessionData['sumid']);
+        $_SESSION['user'] = array('id' => $sessionData['id'], 'region' => $sessionData['region'], 'username' => $sessionData['username'], 'email' => $sessionData['email']);
         setcookie("stay-logged-in", $_COOKIE['stay-logged-in'], time() + (86400 * 30), "/");
     }
 }
@@ -504,7 +504,7 @@ echo '
 
     // -------------------------------------------------------------------------------v- CALCULATE & PRINT SUGGESTED BAN DATA  -v------------------------------------------------------------------------------- //
 
-    $recalculateSuggestedBanData = true; // uncomment to force recalc
+    // $recalculateSuggestedBanData = true; // uncomment to force recalc
     // Check if suggested ban data is already locally stored
     $currentTeamJSON = $mdb->findDocumentByField('teams', 'TeamID', $teamID)["document"];
     if(isset($currentTeamJSON["SuggestedBanData"])){
@@ -519,10 +519,10 @@ echo '
             <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3 z-50" x-show="showExplanation" x-transition x-transition:enter.delay.500ms x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
             <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark text-end">'.__('Category').'</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Addition').'</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">'.__('Explanation').'</div>';
             if (isset($suggestedBanArray->{$champname}->Points->Value)) {
-                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->Points->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">' . __('A player achieved a mastery score of') . ' ' . $suggestedBanArray->{$champname}->Points->Value . ' ' . __('on') . ' ' . $champname . '.</div>';
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->Points->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">' . __('A player achieved a mastery score of') . ' ' . str_replace(',', '.', $suggestedBanArray->{$champname}->Points->Value) . ' ' . __('on') . ' ' . $champname . '.</div>';
             }
             if (isset($suggestedBanArray->{$champname}->TotalTeamPoints->Value)) {
-                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Total Team Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->TotalTeamPoints->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('This team has a combined mastery score of').' '.str_replace(".", ",", $suggestedBanArray->{$champname}->TotalTeamPoints->Value).' '.__('on').' '.$champname.'.</div>';
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Total Team Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->TotalTeamPoints->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('This team has a combined mastery score of').' '.number_format($suggestedBanArray->{$champname}->TotalTeamPoints->Value, 0, ',', '.').' '.__('on').' '.$champname.'.</div>';
             }
             if (isset($suggestedBanArray->{$champname}->CapablePlayers->Value)) {
                 if ($suggestedBanArray->{$champname}->CapablePlayers->Value > 1) {

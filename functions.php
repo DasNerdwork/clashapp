@@ -52,7 +52,7 @@ $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillPartici
 global $cleanAttributeArray;
 $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
 "takedowns", "turretTakedowns", "inhibitorTakedowns", "dragonTakedowns", "riftHeraldTakedowns", "damageDealtToBuildings", "damageDealtToObjectives", "damageSelfMitigated", "totalDamageDealtToChampions", "totalDamageTaken", "totalDamageShieldedOnTeammates",
-"totalHealsOnTeammates", "totalTimeCCDealt", "totalTimeSpentDead", "skillshotsDodged", "skillshotsHit", "championName", "championTransform", "individualPosition", "teamPosition", "lane", "puuid", "summonerId","summonerName", "win", "neutralMinionsKilled");
+"totalHealsOnTeammates", "totalTimeCCDealt", "totalTimeSpentDead", "skillshotsDodged", "skillshotsHit", "championName", "championTransform", "individualPosition", "teamId", "teamPosition", "lane", "puuid", "summonerId","summonerName", "win", "neutralMinionsKilled");
 
 /** General Summoner Info
  * This function retrieves all general playerdata of a given username or PUUID
@@ -739,36 +739,35 @@ function getMatchData($matchIDArray){
  * @param int $seconds The amount of seconds given that we wan't to convert to human-readable time words
  *
  * Returnvalue:
- * @return string|void Depending on switch case as seen below, but string sentence
+ * @return string|null Depending on switch case as seen below, but string sentence
  */
 function secondsToTime($seconds) {
-    switch ($seconds) {
-        case ($seconds<0):
+    if(is_numeric($seconds)){
+        if ($seconds < 120) {
             return __("1 minute ago");
-        case ($seconds==0):
-            return __("1 minute ago");
-        case ($seconds<120):
-            return __("1 minute ago");
-        case ($seconds>=120 && $seconds<3600):
+        } elseif ($seconds >= 120 && $seconds < 3600) {
             return sprintf(__("%d minutes ago"), floor($seconds / 60));
-        case ($seconds>=3600 && $seconds<7200):
+        } elseif ($seconds >= 3600 && $seconds < 7200) {
             return __("1 hour ago");
-        case ($seconds>=7200 && $seconds<86400):
+        } elseif ($seconds >= 7200 && $seconds < 86400) {
             return sprintf(__("%d hours ago"), floor($seconds / 3600));
-        case ($seconds>=86400 && $seconds<172800):
+        } elseif ($seconds >= 86400 && $seconds < 172800) {
             return __("1 day ago");
-        case ($seconds>=172800 && $seconds<2592000):
+        } elseif ($seconds >= 172800 && $seconds < 2592000) {
             return sprintf(__("%d days ago"), floor($seconds / 86400));
-        case ($seconds>=2592000 && $seconds<5260000):
+        } elseif ($seconds >= 2592000 && $seconds < 5260000) {
             return __("1 month ago");
-        case ($seconds>=5260000 && $seconds<31104000):
+        } elseif ($seconds >= 5260000 && $seconds < 31104000) {
             return sprintf(__("%d months ago"), floor($seconds / 2592000));
-        case ($seconds>=31104000 && $seconds<62208000):
+        } elseif ($seconds >= 31104000 && $seconds < 62208000) {
             return __("1 year ago");
-        case ($seconds>=62208000):
+        } elseif ($seconds >= 62208000) {
             return sprintf(__("%d years ago"), floor($seconds / 31104000));
         }
-    return;
+    }
+    else {
+        return NULL;
+    }
 }
 
 /** Detailed Team-Information about a specific clash team
@@ -992,13 +991,13 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray,
                             $returnString .= "<div class='flex col-span-2 row-span-1 justify-start items-center gap-1'>";
                             $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                             $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
-                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif')){
-                                $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif').'" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
+                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'.avif')){
+                                $returnString .= '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'.avif').'" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                             } else {
                                 $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                             }
-                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif')){
-                                $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif').'" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
+                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'.avif')){
+                                $returnString .= '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'.avif').'" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                             } else {
                                 $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                             }
@@ -1382,13 +1381,13 @@ function getTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
                             $returnString .= "<div class='flex col-span-2 row-span-1 justify-start items-center gap-1'>";
                             $keyRune = $inhalt->info->participants[$in]->perks->styles[0]->selections[0]->perk;
                             $secRune = $inhalt->info->participants[$in]->perks->styles[1]->style;
-                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif')){
-                                $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.substr(runeIconFetcher($keyRune), 0, -4).'.avif').'" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
+                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'.avif')){
+                                $returnString .= '<img src="/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.runeIconFetcher($keyRune).'.avif').'" width="32" height="32" loading="lazy" alt="Icon of a players first selected rune" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                             } else {
                                 $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="32" height="32" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[26px] twok:max-w-[32px]">';
                             }
-                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif')){
-                                $returnString .= '<img src="/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.substr(runeTreeIconFetcher($secRune), 0, -4).'.avif').'" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
+                            if(fileExistsWithCache('/hdd1/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'.avif')){
+                                $returnString .= '<img src="/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'.avif?version='.md5_file('/hdd1/clashapp/data/patch/img/'.runeTreeIconFetcher($secRune).'.avif').'" height="18" width="18" class="m-auto" loading="lazy" alt="Icon of a players second selected rune" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                             } else {
                                 $returnString .= '<img src="/clashapp/data/misc/0.avif?version='.md5_file('/hdd1/clashapp/data/misc/0.avif').'" width="18" height="18" loading="lazy" alt="This icon represents a value not being available" class="fullhd:max-w-[14.625px] twok:max-w-[18px]">';
                             }
@@ -1570,6 +1569,8 @@ function getTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray){
  *
  * Returnvalue:
  * @return void N/A, just printing values to page TODO: Write possible testcase for this
+ * 
+ * @codeCoverageIgnore
  */
 function printMasteryInfo($masteryArray, $index){
     global $currentPatch;
@@ -1594,7 +1595,7 @@ function printMasteryInfo($masteryArray, $index){
  * @var array $data Content of the runesReforged.json containing any image path for any rune ID
  *
  * Returnvalue:
- * @return string|void $rune->icon Path of Iconimage
+ * @return string $rune->icon Path of Iconimage
  */
 function runeIconFetcher($id){
     global $currentPatch;
@@ -1605,13 +1606,13 @@ function runeIconFetcher($id){
             foreach($keyRunes as $runeid){
                 foreach($runeid as $rune){
                     if($id == $rune->id){
-                        return $rune->icon;
+                        return substr($rune->icon, 0, -4);
                     }
                 }
             }
         }
     }
-    return;
+    return ""; // TODO: Error handling / add missing rune image
 }
 
 /** Returning random icon ID between 1 - 28 except for the current given icon ID
@@ -1623,7 +1624,7 @@ function runeIconFetcher($id){
  * @return int $randomIconID
  */
 function getRandomIcon($currentIconID){
-    if($currentIconID >= 1 || $currentIconID <= 28){
+    if($currentIconID >= 1 && $currentIconID <= 28){
         do {
             $randomIconID = rand(1,28);
         } while($currentIconID == $randomIconID);
@@ -1640,7 +1641,7 @@ function getRandomIcon($currentIconID){
  * @var array $data Content of the summoner.json containing any image path for any summoner icon ID
  *
  * Returnvalue:
- * @return string|void $summoner->id Path of Iconimage
+ * @return string $summoner->id Path of Iconimage
  */
 function summonerSpellFetcher($id){
     global $currentPatch;
@@ -1651,7 +1652,7 @@ function summonerSpellFetcher($id){
             return $summoner->id;
         }
     }
-    return;
+    return "";
 }
 
 /** Fetching runetree icon ID to image path
@@ -1661,7 +1662,7 @@ function summonerSpellFetcher($id){
  * @var array $data Content of the runesReforged.json containing any image path for any rune icon ID
  *
  * Returnvalue:
- * @return string|void $runetree->icon Path of Iconimage
+ * @return string $runetree->icon Path of Iconimage
  */
 function runeTreeIconFetcher($id){
     global $currentPatch;
@@ -1669,10 +1670,10 @@ function runeTreeIconFetcher($id){
     $json = json_decode($data);
     foreach($json as $runetree){
         if($id == $runetree->id){
-            return $runetree->icon;
+            return substr($runetree->icon, 0, -4);
         }
     }
-    return;
+    return ""; // TODO: Error handling / add missing rune image
 }
 
 /** Resolving a championid to the champions clean name
@@ -1779,6 +1780,7 @@ function getLanePercentages($matchDaten, $puuid){
     foreach ($laneCountArray as $key => $count){
         $laneCountArray[$key] = number_format(($count / $matchCount * 100), 2);
     }
+    // @codeCoverageIgnoreStart
     if (array_values($laneCountArray)[0] >= 90){
         $mainLane = array_keys($laneCountArray)[0];
         $secondaryLane = "";
@@ -1795,6 +1797,7 @@ function getLanePercentages($matchDaten, $puuid){
         $mainLane = array_keys($laneCountArray)[0];
         $secondaryLane = array_keys($laneCountArray)[1];
     }
+    // @codeCoverageIgnoreEnd
     $laneReturnArray[0] = $mainLane;
     $laneReturnArray[1] = $secondaryLane;
 
@@ -1806,12 +1809,11 @@ function getLanePercentages($matchDaten, $puuid){
  * This function fetches the tags of a player generated by comparing them with our calculated average stats
  * @param array $matchDaten The compacted information of all matches of a user in a single array (performance reasons)
  * @param string $puuid The personal users ID set by Riot Games and fetched either from the players own json file or via an API request
- * @param array $playerLanes The two most played lanes of a player
  *
  * Returnvalue:
  * @return array $tagReturnArray An array containing all fitting tags of a player
  */
-function getPlayerTags($matchDaten, $puuid, $playerLanes){
+function getPlayerTags($matchDaten, $puuid){
     $tagReturnArray = array();
     $tempAverageArray = array();
     $generalKey = array();
@@ -1859,7 +1861,9 @@ function getPlayerTags($matchDaten, $puuid, $playerLanes){
             if (!isset($generalKey[$key])) {
                 $generalKey[$key] = $value;
             } else {
+                // @codeCoverageIgnoreStart
                 $generalKey[$key] += $value;
+                // @codeCoverageIgnoreEnd
             }
         }
     }
@@ -2021,15 +2025,15 @@ function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, 
                 } else {
                     $ourLane = "N/A";
                 }
-                $returnArray[$matchData->metadata->matchId][] = ["lane" => $ourLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win, "teamID" => $matchData->info->participants[$i]->teamId];
+                $returnArray[key($matchData)][] = ["lane" => $ourLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win, "teamID" => $matchData->info->participants[$i]->teamId];
                 break;
             }
         }
 
-        // Second loop, necessary after the first one because of the if comparison below (!= $returnArray[$matchData->metadata->matchId][0]["win"])
+        // Second loop, necessary after the first one because of the if comparison below (!= $returnArray[key($matchData)][0]["win"])
         // Looping again through all users and collecting users data in returnArray[matchid][1-5] if in enemy team of the user (PUUID) above
         for($i = 0; $i < 10; $i++){
-            if($matchData->info->participants[$i]->win != $returnArray[$matchData->metadata->matchId][0]["win"] && $matchData->info->participants[$i]->teamId != $returnArray[$matchData->metadata->matchId][0]["teamID"]){
+            if($matchData->info->participants[$i]->win != $returnArray[key($matchData)][0]["win"] && $matchData->info->participants[$i]->teamId != $returnArray[key($matchData)][0]["teamID"]){
                 if($matchData->info->participants[$i]->teamPosition != ""){
                     $enemyLane = $matchData->info->participants[$i]->teamPosition;
                 } else if ($matchData->info->participants[$i]->individualPosition != "" && $matchData->info->participants[$i]->individualPosition != "Invalid"){
@@ -2038,7 +2042,7 @@ function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, 
                     $enemyLane = "N/A";
                 }
 
-                $returnArray[$matchData->metadata->matchId][] = ["lane" => $enemyLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win];
+                $returnArray[key($matchData)][] = ["lane" => $enemyLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win];
             }
         }
     }
@@ -2606,7 +2610,7 @@ function showBanSelector(){
  * Returnvalue:
  * @return string $abbreviations is the return string that will get split by "," separator and added into the data-abbr attribute in the html code above
  */
-function abbreviationFetcher($champName){
+function abbreviationFetcher($champName){ // TODO: Change abbreviation working from dark,darki,darkin -> darkin only
     $abbreviations = [];
     $abbrArray = json_decode(file_get_contents('/hdd1/clashapp/data/misc/abbreviations.json'));
     if (isset($abbrArray->{$champName})) {
@@ -2757,8 +2761,8 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
         $banExplainArray[$champData1["Champion"]]["TotalTeamPoints"]["Value"] = 0;
         foreach($sortedMasteryArray as $key2 => $champData2){
             if(($champData1 != $champData2) && ($champData1["Champion"] == $champData2["Champion"])){
-                $sortedMasteryArray[$key1]["TotalTeamPoints"] += str_replace(',', '.', $champData2["Points"]);
-                $banExplainArray[$champData1["Champion"]]["TotalTeamPoints"]["Value"] += str_replace(',', '.', $champData2["Points"]);
+                $sortedMasteryArray[$key1]["TotalTeamPoints"] += str_replace(',', '', $champData2["Points"]);
+                $banExplainArray[$champData1["Champion"]]["TotalTeamPoints"]["Value"] += str_replace(',', '', $champData2["Points"]);
             }
         }
     }
@@ -2942,11 +2946,23 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
         }
     }
     // Additionally this block sums the single matchscores together. E.g. from the values in the comment above -> (5.23 + 6.77 + 4.34) / 3 == 5.44
-    foreach($sortedMasteryArray as $key => $championData){
-        if(isset($sortedMasteryArray[$key]["AverageMatchScore"])){
-            $sortedMasteryArray[$key]["AverageMatchScore"] = number_format(array_sum($sortedMasteryArray[$key]["AverageMatchScore"])/count($sortedMasteryArray[$key]["AverageMatchScore"]), 2, ".", "");
+    foreach ($sortedMasteryArray as $key => $championData) {
+        if (isset($sortedMasteryArray[$key]["AverageMatchScore"])) {
+            $considerableScores = array_filter($sortedMasteryArray[$key]["AverageMatchScore"], function ($score) {
+                return is_numeric($score); // Filter out any unwanted scores (like N/A)
+            });
+    
+            // Check if there are numeric scores before calculating the average
+            if (count($considerableScores) > 0) {
+                $average = number_format(array_sum($considerableScores) / count($considerableScores), 2, ".", "");
+                $sortedMasteryArray[$key]["AverageMatchScore"] = $average;
+            } else {
+                // If there are no numeric scores, set the average to 0
+                $sortedMasteryArray[$key]["AverageMatchScore"] = 0;
+            }
         }
     }
+    
     // print_r($sortedMasteryArray); // Array now contains the average matchscore on a champion if there were occurences in the last games
 
     $sortedMasteryArray = unique_multidim_array($sortedMasteryArray, "Champion"); // Remove any duplicates
@@ -3104,6 +3120,7 @@ function getRankOrLevel($rankData, $playerData){
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
             } else if($rankedQueue["Tier"] == "GOLD" && $rankVal < 4){
+                // @codeCoverageIgnoreStart
                 $rankVal = 4;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
@@ -3132,16 +3149,19 @@ function getRankOrLevel($rankData, $playerData){
                 $rankNumber = "";
                 $highestRank = $rankedQueue["Tier"];
                 $highEloLP = $rankedQueue["LP"];
+                // @codeCoverageIgnoreEnd
             } else if($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 9){
                 $rankVal = 9;
                 $rankNumber = "";
                 $highestRank = $rankedQueue["Tier"];
                 $highEloLP = $rankedQueue["LP"];
+                // @codeCoverageIgnoreStart
             } else if($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 10){
                 $rankVal = 10;
                 $rankNumber = "";
                 $highestRank = $rankedQueue["Tier"];
                 $highEloLP = $rankedQueue["LP"];
+                // @codeCoverageIgnoreEnd
             }
         }
     }
@@ -3151,6 +3171,7 @@ function getRankOrLevel($rankData, $playerData){
         if($playerData["Level"] < 30){
             $levelFileName = "001";
         } else if($playerData["Level"] < 50){
+            // @codeCoverageIgnoreStart
             $levelFileName = "030";
         } else if($playerData["Level"] < 75){
             $levelFileName = "050";
@@ -3188,6 +3209,7 @@ function getRankOrLevel($rankData, $playerData){
             $levelFileName = "450";
         } else if($playerData["Level"] < 500){
             $levelFileName = "475";
+            // @codeCoverageIgnoreEnd
         } else if($playerData["Level"] >= 500){
             $levelFileName = "500";
         }
@@ -3200,54 +3222,26 @@ function getRankOrLevel($rankData, $playerData){
  *
  * Returnvalue:
  * @return string A hexadecimal color code
- *
- * function getRankColor($currentRank){
- *     switch ($currentRank){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution)
- *         case "SILVER":
- *             return "99a0b5";
- *         case "GOLD":
- *             return "d79c5d";
- *         case "BRONZE":
- *             return "cd8d7f";
- *         case "PLATINUM":
- *             return "23af88";
- *         case "IRON":
- *             return "392b28";
- *         case "DIAMOND":
- *             return "617ecb";
- *         case "MASTER":
- *             return "b160f3";
- *         case "GRANDMASTER":
- *             return "cd423a";
- *         case "CHALLENGER":
- *             return "52cfff";
- *     }
- * }
- */
-
-/** This function simply returns a color code corresponding to a textual rank input, e.g. "PLATINUM"
- * @param $currentRank The current rank as capslocked string
- *
- * Returnvalue:
- * @return string|void A hexadecimal color code
  */
 function getMasteryColor($masteryPoints){
-    if ($masteryPoints < 100000){
-        return "threat-xxs";
-    } else if ($masteryPoints >= 100000 && $masteryPoints < 200000){
-        return "threat-xs";
-    } else if ($masteryPoints >= 200000 && $masteryPoints < 300000){
-        return "threat-s";
-    } else if ($masteryPoints >= 300000 && $masteryPoints < 500000){
-        return "threat-m";
-    } else if ($masteryPoints >= 500000 && $masteryPoints < 700000){
-        return "threat-l";
-    } else if ($masteryPoints >= 700000 && $masteryPoints < 1000000){
-        return "threat-xl";
-    } else if ($masteryPoints >= 1000000){
-        return "threat-xxl";
+    if(is_numeric($masteryPoints)){
+        if ($masteryPoints < 100000){
+            return "threat-xxs";
+        } else if ($masteryPoints >= 100000 && $masteryPoints < 200000){
+            return "threat-xs";
+        } else if ($masteryPoints >= 200000 && $masteryPoints < 300000){
+            return "threat-s";
+        } else if ($masteryPoints >= 300000 && $masteryPoints < 500000){
+            return "threat-m";
+        } else if ($masteryPoints >= 500000 && $masteryPoints < 700000){
+            return "threat-l";
+        } else if ($masteryPoints >= 700000 && $masteryPoints < 1000000){
+            return "threat-xl";
+        } else if ($masteryPoints >= 1000000){
+            return "threat-xxl";
+        }
     } else {
-        return;
+        return "";
     }
 }
 
@@ -3256,53 +3250,44 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
 
     // Detect suspicion about last profile change (the longer no change the higher the suspicion)
     $timestamp = intval($playerData["LastChange"] / 1000); // summoner name change, summoner level change, or profile icon change will trigger a reset of this timestamp/suspicion
-    switch ($timestamp){
-        case $timestamp < strtotime("-1 year"): // Über ein Jahr her
-            $resultArray["LastChangeSus"] = 1;
-            break;
-        case $timestamp < strtotime("-6 months"): // Über 6 Monate unter 1 Jahr
-            $resultArray["LastChangeSus"] = 0.8;
-            break;
-        case $timestamp < strtotime("-3 months"): // Über 3 Monate unter 6 Monate
-            $resultArray["LastChangeSus"] = 0.6;
-            break;
-        case $timestamp < strtotime("-1 months"): // Über einen Monat unter 3 Monate
-            $resultArray["LastChangeSus"] = 0.4;
-            break;
-        case $timestamp < strtotime("-2 weeks"): // Über zwei Wochen unter 1 Monat
-            $resultArray["LastChangeSus"] = 0.2;
-            break;
-        case $timestamp > strtotime("-2 weeks"): // Unter zwei Wochen her
-            $resultArray["LastChangeSus"] = 0;
-            break;
+    if ($timestamp < strtotime("-1 year")) { // Über ein Jahr her
+        $resultArray["LastChangeSus"] = 1;
+        // @codeCoverageIgnoreStart
+    } elseif ($timestamp < strtotime("-6 months")) { // Über 6 Monate unter 1 Jahr
+        $resultArray["LastChangeSus"] = 0.8;
+    } elseif ($timestamp < strtotime("-3 months")) { // Über 3 Monate unter 6 Monate
+        $resultArray["LastChangeSus"] = 0.6;
+    } elseif ($timestamp < strtotime("-1 months")) { // Über einen Monat unter 3 Monate
+        $resultArray["LastChangeSus"] = 0.4;
+    } elseif ($timestamp < strtotime("-2 weeks")) { // Über zwei Wochen unter 1 Monat
+        $resultArray["LastChangeSus"] = 0.2;
+        // @codeCoverageIgnoreEnd
+    } else { // Unter zwei Wochen her
+        $resultArray["LastChangeSus"] = 0;
     }
 
     // Level suspicion detection
-    switch ($playerData["Level"]){
-        case $playerData["Level"] <= 30: // Level 30 oder niedriger
-            $resultArray["LevelSus"] = 1;
-            break;
-        case $playerData["Level"] <= 50: // Level 50 oder niedriger
-            $resultArray["LevelSus"] = 0.8;
-            break;
-        case $playerData["Level"] <= 70: // Level 70 oder niedriger
-            $resultArray["LevelSus"] = 0.6;
-            break;
-        case $playerData["Level"] <= 90: // Level 90 oder niedriger
-            $resultArray["LevelSus"] = 0.4;
-            break;
-        case $playerData["Level"] <= 110: // Level 110 oder niedriger
-            $resultArray["LevelSus"] = 0.2;
-            break;
-        case $playerData["Level"] > 110: // Level 111 oder höher
-            $resultArray["LevelSus"] = 0;
-            break;
+    if ($playerData["Level"] <= 30) { // Level 30 oder niedriger
+        $resultArray["LevelSus"] = 1;
+        // @codeCoverageIgnoreStart
+    } elseif ($playerData["Level"] <= 50) { // Level 50 oder niedriger
+        $resultArray["LevelSus"] = 0.8;
+    } elseif ($playerData["Level"] <= 70) { // Level 70 oder niedriger
+        $resultArray["LevelSus"] = 0.6;
+    } elseif ($playerData["Level"] <= 90) { // Level 90 oder niedriger
+        $resultArray["LevelSus"] = 0.4;
+    } elseif ($playerData["Level"] <= 110) { // Level 110 oder niedriger
+        $resultArray["LevelSus"] = 0.2;
+        // @codeCoverageIgnoreEnd
+    } else { // Level 111 oder höher
+        $resultArray["LevelSus"] = 0;
     }
+    
 
     // Ranked Game Count suspicion detection
     $totalRankedMatches = 0;
     if(empty($rankData) || empty(array_intersect(array("RANKED_SOLO_5x5", "RANKED_FLEX_SR"), array_column($rankData,"Queue")))){
-        $resultArray["LevelSus"] = 1;
+        $resultArray["RankedGameCountSus"] = 1;
     } else {
         foreach($rankData as $rankQueue){
             if($rankQueue["Queue"] == "RANKED_SOLO_5x5"){
@@ -3311,26 +3296,21 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
                 $totalRankedMatches += $rankQueue["Wins"] + $rankQueue["Losses"];
             }
         }
-    }
-    switch ($totalRankedMatches){
-        case $totalRankedMatches == 0: // Keine Ranked Games gespielt
+        if ($totalRankedMatches == 0) { // Keine Ranked Games gespielt
+            // @codeCoverageIgnoreStart
             $resultArray["RankedGameCountSus"] = 1;
-            break;
-        case $totalRankedMatches <= 20: // 20 oder weniger gespielt
+        } elseif ($totalRankedMatches <= 20) { // 20 oder weniger gespielt
             $resultArray["RankedGameCountSus"] = 0.8;
-            break;
-        case $totalRankedMatches <= 40: // 40 oder weniger gespielt
+        } elseif ($totalRankedMatches <= 40) { // 40 oder weniger gespielt
             $resultArray["RankedGameCountSus"] = 0.6;
-            break;
-        case $totalRankedMatches <= 60: // 60 oder weniger gespielt
+        } elseif ($totalRankedMatches <= 60) { // 60 oder weniger gespielt
             $resultArray["RankedGameCountSus"] = 0.4;
-            break;
-        case $totalRankedMatches <= 80: // 80 oder weniger gespielt
+        } elseif ($totalRankedMatches <= 80) { // 80 oder weniger gespielt
             $resultArray["RankedGameCountSus"] = 0.2;
-            break;
-        case $totalRankedMatches > 80: // 81 oder mehr gespielt
+            // @codeCoverageIgnoreEnd
+        } else { // 81 oder mehr gespielt
             $resultArray["RankedGameCountSus"] = 0;
-            break;
+        }
     }
 
     // Mastery Data Point suspicion detection
@@ -3339,11 +3319,12 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
         $resultArray["MasteryDataSus"] = 1;
     } else {
         foreach($masteryData as $champMastery){
-            $totalMastery += str_replace(',', '.', (int)$champMastery["Points"]);
+            $totalMastery += str_replace(',', '', (int)$champMastery["Points"]);
         }
     }
     if ($totalMastery == 0) { // Keine Champion Mastery
         $resultArray["MasteryDataSus"] = 1;
+        // @codeCoverageIgnoreStart
     } elseif ($totalMastery <= 40) { // weniger als 40k Punkte
         $resultArray["MasteryDataSus"] = 0.8;
     } elseif ($totalMastery <= 80) { // weniger als 80k Punkte
@@ -3352,6 +3333,7 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
         $resultArray["MasteryDataSus"] = 0.4;
     } elseif ($totalMastery <= 160) { // weniger als 160k Punkte
         $resultArray["MasteryDataSus"] = 0.2;
+        // @codeCoverageIgnoreEnd
     } elseif ($totalMastery > 160) { // mehr als 160k Punkte
         $resultArray["MasteryDataSus"] = 0;
     }
@@ -3376,7 +3358,7 @@ function calculateSmurfProbability($playerData, $rankData, $masteryData) {
  * @return string A generated html tag as a div element with a tooltop hover function
  *
  */
-function generateTag($tagText, $bgColor, $tooltipText, $additionalData = "") {
+function generateTag($tagText, $bgColor, $tooltipText, $additionalData) {
     $translatedTagText = __($tagText);
     $translatedTooltipText = __($tooltipText);
     if(isset($_COOKIE["tagOptions"])){
@@ -3818,7 +3800,12 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
                 }
                 if(response.masteryContent){
                     let masteryContent =  document.getElementById('masterycontent-".$requestIterator."');
-                    masteryContent.classList.remove('justify-center');
+                    if(response.masteryContent.includes('slider-item')){
+                        masteryContent.classList.remove('justify-center');
+                    } else {
+                        masteryContent.classList.remove('overflow-x-scroll');
+                        masteryContent.classList.add('mt-6', 'mb-7', 'items-center');
+                    }
                     masteryContent.innerHTML = response.masteryContent;
                 }
                 if(response.tagList){

@@ -272,14 +272,12 @@ class FunctionsTest extends TestCase {
      * @uses __
      */
     public function testSecondsToTime() {
-        // Test cases for non-positive values
         $timeStringNeg1 = secondsToTime(-1);
         $this->assertEquals("1 minute ago", $timeStringNeg1, "Time string for -1 second is incorrect");
 
         $timeString0 = secondsToTime(0);
         $this->assertEquals("1 minute ago", $timeString0, "Time string for 0 seconds is incorrect");
 
-        // Test cases for exact equals value in the case statement
         $timeString2Below = secondsToTime(119);
         $this->assertEquals("1 minute ago", $timeString2Below, "Time string for 119 seconds is incorrect");
 
@@ -331,6 +329,9 @@ class FunctionsTest extends TestCase {
         $maxInt = PHP_INT_MAX;
         $timeStringMaxInt = secondsToTime($maxInt);
         $this->assertEquals("296533308798 years ago", $timeStringMaxInt, "Time string for PHP_INT_MAX is incorrect");
+
+        $wrongInput = secondsToTime("wronginput");
+        $this->assertNull($wrongInput, "Wrong input did not return as Null.");
     }    
 
     /**
@@ -338,30 +339,23 @@ class FunctionsTest extends TestCase {
      */
     public function testGetRandomIcon()
     {
-        // Test with a valid currentIconID (between 1 and 28)
         for ($currentIconID = 1; $currentIconID <= 28; $currentIconID++) {
             $randomIconID = getRandomIcon($currentIconID);
 
-            // Verify that the randomIconID is different from the currentIconID
             $this->assertNotEquals($currentIconID, $randomIconID, "Random icon ID ($randomIconID) should be different from current icon ID ($currentIconID).");
 
-            // Verify that the randomIconID is within the valid range (1 to 28)
             $this->assertTrue($randomIconID >= 1 && $randomIconID <= 28, "Random icon ID ($randomIconID) should be within the valid range (1 to 28).");
         }
 
-        // Test with an invalid currentIconID (less than 1)
-        $currentIconID = 0;
-        $randomIconID = getRandomIcon($currentIconID);
+        $currentIconIDZero = 0;
+        $randomIconIDZero = getRandomIcon($currentIconIDZero);
 
-        // Verify that the randomIconID is within the valid range (1 to 28)
-        $this->assertTrue($randomIconID >= 1 && $randomIconID <= 28, "Random icon ID ($randomIconID) should be within the valid range (1 to 28).");
+        $this->assertTrue($randomIconIDZero >= 1 && $randomIconIDZero <= 28, "Random icon ID ($randomIconIDZero) should be within the valid range (1 to 28).");
 
-        // Test with an invalid currentIconID (greater than 28)
-        $currentIconID = 30;
-        $randomIconID = getRandomIcon($currentIconID);
+        $currentIconIDHigh = 30;
+        $randomIconIDHigh = getRandomIcon($currentIconIDHigh);
 
-        // Verify that the randomIconID is within the valid range (1 to 28)
-        $this->assertTrue($randomIconID >= 1 && $randomIconID <= 28, "Random icon ID ($randomIconID) should be within the valid range (1 to 28).");
+        $this->assertTrue($randomIconIDHigh >= 1 && $randomIconIDHigh <= 28, "Random icon ID ($randomIconIDHigh) should be within the valid range (1 to 28).");
     }
 
     /**
@@ -379,6 +373,12 @@ class FunctionsTest extends TestCase {
         $actualIconID = summonerSpellFetcher($testSummonerIconKey);
 
         $this->assertEquals($expectedIconID, $actualIconID, "Returned icon ID ($actualIconID) does not match the expected icon ID ($expectedIconID).");
+
+        $testWrongSummonerIconKey = '0'; // Data key for Flash
+        
+        $emptyIconID = summonerSpellFetcher($testWrongSummonerIconKey);
+
+        $this->assertEquals("", $emptyIconID, "Returned an icon ID although none was expected.");
     }
 
     /**
@@ -487,6 +487,280 @@ class FunctionsTest extends TestCase {
         $this->assertNotNull(getLanePercentages($matchData, $puuid)[1], "Second lane in the lane percentage array is null.");
         $this->assertContains(getLanePercentages($matchData, $puuid)[0], $expectedResultArray, "First lane in the lane percentage array is not within the expected result array.");
         $this->assertContains(getLanePercentages($matchData, $puuid)[1], $expectedResultArray, "Second lane in the lane percentage array is not within the expected result array.");
+    }
+
+    /**
+     * @covers getPlayerTags
+     * @uses MongoDBHelper
+     * @uses getMatchData
+     * @uses getMatchIDs
+     */
+    public function testPlayerTags()
+    {
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+        $testMatchIds = getMatchIDs($puuid, 15);
+        $matchData = (array) getMatchData($testMatchIds);
+        $expectedLaneArray = ['MIDDLE', 'TOP', 'BOTTOM', 'JUNGLE', 'UTILITY', 'FILL', ''];
+
+        $tags = getPlayerTags($matchData, $puuid);
+
+        $this->assertIsArray($tags);
+        foreach(array_keys($tags) as $lanes){
+            $this->assertNotEmpty($tags);
+            $this->assertContains(key($tags), $expectedLaneArray);
+        }
+    }
+
+    /**
+     * @covers getHighestWinrateOrMostLossesAgainst
+     * @covers getMostLossesAgainst
+     * @covers getHighestWinrateAgainst
+     * @uses getMatchData
+     * @uses getMatchIDs
+     */
+    public function testGetHighestWinrateOrMostLossesAgainst()
+    {
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+        $testMatchIds = getMatchIDs($puuid, 2);
+        $matchData = (array) getMatchData($testMatchIds);
+
+        $testData1 = getMostLossesAgainst("general", $matchData, $puuid);
+        $testData2 = getHighestWinrateAgainst("lane", $matchData, $puuid);
+
+        print_r($matchData);
+
+        // print_r($testData1);
+        // print_r($testData2);
+    }
+
+    /**
+     * @covers unique_multidim_array
+     */
+    public function testUniqueMultidimArray()
+    {
+        $inputArray = [
+            ["id" => 1, "name" => "John"],
+            ["id" => 2, "name" => "Jane"],
+            ["id" => 1, "name" => "John"],
+            ["id" => 3, "name" => "Doe"],
+            ["id" => 2, "name" => "Jane"],
+            ["id" => 4, "name" => "Smith"]
+        ];
+    
+        $expectedUniqueArray = [
+            ["id" => 1, "name" => "John"],
+            ["id" => 2, "name" => "Jane"],
+            ["id" => 3, "name" => "Doe"],
+            ["id" => 4, "name" => "Smith"]
+        ];
+    
+        $result = unique_multidim_array($inputArray, 'id');
+    
+        $this->assertCount(count($expectedUniqueArray), $result, "The length of the result array is not as expected.");
+    
+        foreach ($expectedUniqueArray as $expectedItem) {
+            $this->assertContains($expectedItem, $result, "The expected item is not found in the result array.");
+        }
+    }
+
+    /**
+     * @covers timeDiffToText
+     * @uses __
+     */
+    public function testTimeDiffToText()
+    {
+        $timestamps = [
+            strtotime("-2 years"),
+            strtotime("-8 months"),
+            strtotime("-4 months"),
+            strtotime("-2 month"),
+            strtotime("-3 weeks"),
+            strtotime("-1 week"),
+            time()
+        ];
+
+        $expectedResults = [
+            __("over a year ago"),
+            __("over 6 months ago"),
+            __("over 3 months ago"),
+            __("over a month ago"),
+            __("over two weeks ago"),
+            __("under two weeks ago"),
+            __("under two weeks ago")
+        ];
+
+        foreach ($timestamps as $index => $timestamp) {
+            $this->assertEquals($expectedResults[$index], timeDiffToText($timestamp), 'Time Difference to Text did not correctly return results.');
+        }
+    }
+
+    /**
+     * @covers abbreviationFetcher
+     */
+    public function testAbbreviationFetcher()
+    {
+        $champName = "Aatrox";
+
+        $expectedResult = 'dark,darki,darkin,top,mid,fighter,ad,tank';
+        $this->assertEquals($expectedResult, abbreviationFetcher($champName), 'Requested abbreviations did not match returned ones.');
+
+        $nonExistingChampName = "NonExistentChamp";
+        $this->assertEmpty(abbreviationFetcher($nonExistingChampName), 'Found a non-existing champion in abbreviations.json');
+    }
+
+    /**
+     * @covers getRankOrLevel
+     */
+    public function testGetRankOrLevel()
+    {
+        $rankDataMid = [
+            [
+              "Queue" => "RANKED_FLEX_SR",
+              "Tier" => "BRONZE",
+              "Rank" => "IV",
+              "LP" => 11,
+              "Wins" => 77,
+              "Losses" => 71
+            ],
+            [
+              "Queue" => "RANKED_SOLO_5x5",
+              "Tier" => "SILVER",
+              "Rank" => "III",
+              "LP" => 2,
+              "Wins" => 30,
+              "Losses" => 37
+            ]
+        ];
+        
+        $playerDataMid = [
+            "Level" => 30, // Sample level value
+        ];
+
+        // Testing when rankVal is set
+        $expectedRankResult = [
+            "Type" => "Rank",
+            "HighestRank" => "SILVER",
+            "HighEloLP" => "",
+            "RankNumber" => "III",
+        ];
+        $this->assertEquals($expectedRankResult, getRankOrLevel($rankDataMid, $playerDataMid), 'Get Rank approach did not correctly return on sample data.');
+
+        $rankDataHighRank = [
+            [
+              "Queue" => "RANKED_FLEX_SR",
+              "Tier" => "GRANDMASTER",
+              "Rank" => "I",
+              "LP" => 273,
+              "Wins" => 37,
+              "Losses" => 41
+            ]
+        ];
+        
+        $playerDataHighRank = [
+            "Level" => 561, // Sample level value
+        ];
+
+        // Testing when rankVal is set
+        $expectedHighRankResult = [
+            "Type" => "Rank",
+            "HighestRank" => "GRANDMASTER",
+            "HighEloLP" => "273",
+            "RankNumber" => "",
+        ];
+        $this->assertEquals($expectedHighRankResult, getRankOrLevel($rankDataHighRank, $playerDataHighRank), 'Get High Rank did not correctly return necessary values.');
+
+        $playerDataLow = ["Level" => 10];
+        $rankDataLow = [];
+        $expectedLevelResult = [
+            "Type" => "Level",
+            "LevelFileName" => "001",
+        ];
+        $this->assertEquals($expectedLevelResult, getRankOrLevel($rankDataLow, $playerDataLow), 'Get Low level did not correctly return low level filename.');
+
+        $playerDataLevelHigh = ["Level" => 673];
+        $rankDataLevelHigh = [];
+        $expectedHighLevelResult = [
+            "Type" => "Level",
+            "LevelFileName" => "500",
+        ];
+        $this->assertEquals($expectedHighLevelResult, getRankOrLevel($rankDataLevelHigh, $playerDataLevelHigh), 'Get High level did not correctly return high level filename.');
+    }
+
+    /**
+     * @covers getMasteryColor
+     */
+    public function testGetMasteryColor()
+    {
+        $testXXSValue = getMasteryColor(20000);
+        $testXSValue = getMasteryColor(130000);
+        $testSValue = getMasteryColor(240000);
+        $testMValue = getMasteryColor(350000);
+        $testLValue = getMasteryColor(600000);
+        $testXLValue = getMasteryColor(880000);
+        $testXXLValue = getMasteryColor(2000000);
+        $testFailValue = getMasteryColor("wrongvalue");
+        
+        $this->assertEquals("threat-xxs", $testXXSValue, "Mastery points did not return correct corresponding threat level.");
+        $this->assertEquals("threat-xs", $testXSValue, "Mastery points did not return correct corresponding threat level.");
+        $this->assertEquals("threat-s", $testSValue, "Mastery points did not return correct corresponding threat level.");
+        $this->assertEquals("threat-m", $testMValue, "Mastery points did not return correct corresponding threat level.");
+        $this->assertEquals("threat-l", $testLValue, "Mastery points did not return correct corresponding threat level.");
+        $this->assertEquals("threat-xl", $testXLValue, "Mastery points did not return correct corresponding threat level.");
+        $this->assertEquals("threat-xxl", $testXXLValue, "Mastery points did not return correct corresponding threat level.");
+        $this->assertEquals("", $testFailValue, "Mastery points did not return correct corresponding threat level.");
+    }
+
+    /**
+     * 
+     * @covers calculateSmurfProbability
+     */
+    public function testCalculateSmurfProbability()
+    {
+        // Mocking player data, rank data, and mastery data for testing
+        $playerDataLow = [
+            "LastChange" => strtotime('-2 years')*1000, // Minimum timestamp value
+            "Level" => 1, // Minimum level value
+        ];
+        $rankDataLow = [];
+        $masteryDataLow = [];
+
+        // Testing with minimum values
+        $this->assertEquals(1, calculateSmurfProbability($playerDataLow, $rankDataLow, $masteryDataLow), 'Smurf Probability was not correclty calculated for full/high indicators.');
+
+        // Testing with maximum values
+        $playerDataHigh = [
+            "LastChange" => strtotime('-1 week')*1000,
+            "Level" => 500
+        ];
+        $rankDataHigh = [
+            [
+              "Queue" => "RANKED_FLEX_SR",
+              "Tier" => "EMERALD",
+              "Rank" => "IV",
+              "LP" => 11,
+              "Wins" => 77,
+              "Losses" => 71
+            ],
+            [
+              "Queue" => "RANKED_SOLO_5x5",
+              "Tier" => "SILVER",
+              "Rank" => "III",
+              "LP" => 2,
+              "Wins" => 30,
+              "Losses" => 37
+            ]
+        ];
+
+        $masteryDataHigh = [
+            [
+                "Champion" => "Yuumi",
+                "Filename" => "Yuumi",
+                "Lvl" => 7,
+                "Points" => "272,592",
+                "LastPlayed" => 1712169256
+            ]
+        ];
+        $this->assertEquals(0, calculateSmurfProbability($playerDataHigh, $rankDataHigh, $masteryDataHigh), 'Smurf Probability was not correclty calculated for no/low indicators.');
     }
 
     /**
