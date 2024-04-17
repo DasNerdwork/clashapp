@@ -16,8 +16,8 @@ use PHPMailer\PHPMailer\Exception;
 require '/hdd1/clashapp/plugins/phpmailer/src/Exception.php';
 require '/hdd1/clashapp/plugins/phpmailer/src/PHPMailer.php';
 require '/hdd1/clashapp/plugins/phpmailer/src/SMTP.php';
-require_once '/hdd1/clashapp/clash-db.php';
-include_once('/hdd1/clashapp/functions.php');
+require_once '/hdd1/clashapp/db/clash-db.php';
+include_once('/hdd1/clashapp/src/functions.php');
  
 $error_message = array();
 $db = new DB();

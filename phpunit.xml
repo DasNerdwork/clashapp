@@ -20,6 +20,7 @@
       <directory>vendor/</directory>
       <directory>plugins/</directory>
       <directory>ajax/</directory>
+      <directory>pages/</directory>
       <file>accounts/connect.php</file>
       <file>accounts/login.php</file>
       <file>accounts/logout.php</file>
@@ -30,12 +31,6 @@
       <file>accounts/verify2fa.php</file>
       <file>templates/footer.php</file>
       <file>templates/header.php</file>
-      <file>404.php</file>
-      <file>graphs-and-formulas.php</file>
-      <file>index.php</file>
-      <file>minigames.php</file>
-      <file>profile.php</file>
-      <file>team.php</file>
     </exclude>
   </source>
 </phpunit>

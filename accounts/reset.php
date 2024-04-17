@@ -5,7 +5,7 @@ if (isset($_SESSION['user'])) {
     header('Location: settings');
 }
 
-require_once '/hdd1/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/db/clash-db.php';
  
 $return_message = '';
 

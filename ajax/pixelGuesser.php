@@ -1,7 +1,7 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-require_once '/hdd1/clashapp/clash-db.php';
-include_once('/hdd1/clashapp/functions.php');
+require_once '/hdd1/clashapp/db/clash-db.php';
+include_once('/hdd1/clashapp/src/functions.php');
 if(isset($_POST['username'], $_POST['points'])){
     if(!isValidPlayerName($_POST['username'])){
         die("Invalid username: " . $_POST['username']);

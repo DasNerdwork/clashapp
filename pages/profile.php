@@ -57,8 +57,8 @@ const containerTitle = '" . __("Summoner") . "';
 const searchHistoryTitle = '" . __("Recently Searched") . "';
 </script>";
 
-include_once('/hdd1/clashapp/functions.php');
-include_once('/hdd1/clashapp/update.php');
+include_once('/hdd1/clashapp/src/functions.php');
+include_once('/hdd1/clashapp/src/update.php');
 
 if (isset($_GET["name"])){
     // Format text field input to swap spaces with '+' for correct api requests

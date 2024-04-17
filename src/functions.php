@@ -3,7 +3,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require_once '/hdd1/clashapp/mongo-db.php';
+require_once '/hdd1/clashapp/db/mongo-db.php';
 
 /** Main functions.php containing overall used functions throughout different php files
  * @author Florian Falk <dasnerdwork@gmail.com>

@@ -7,7 +7,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 // print_r($_SESSION);
 
 require_once '/hdd1/clashapp/accounts/qr-codes.php';
-require_once '/hdd1/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/db/clash-db.php';
  
 include('/hdd1/clashapp/templates/head.php');
 setCodeHeader('Register', $css = true, $javascript = true, $alpinejs = false, $websocket = false);

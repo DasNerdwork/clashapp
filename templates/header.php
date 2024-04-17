@@ -1,5 +1,5 @@
 <?php
-require_once '/hdd1/clashapp/mongo-db.php';
+require_once '/hdd1/clashapp/db/mongo-db.php';
 $currentPatch = file_get_contents("/var/www/html/clash/clashapp/data/patch/version.txt");
 $mdb = new MongoDBHelper();
 $autosuggestRequest = $mdb->getAutosuggestAggregate();

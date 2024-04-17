@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-require_once('/hdd1/clashapp/functions.php');
+require_once('/hdd1/clashapp/src/functions.php');
 $_SERVER['SERVER_NAME'] = "clashscout.com";
 $_SERVER['HTTP_REFERER'] = "https://clashscout.com/";
 include_once('/hdd1/clashapp/lang/translate.php');

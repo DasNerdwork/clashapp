@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-require_once('/hdd1/clashapp/clash-db.php');
+require_once('/hdd1/clashapp/db/clash-db.php');
 
 class ClashDBTest extends TestCase {
     /**

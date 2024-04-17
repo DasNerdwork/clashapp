@@ -1,8 +1,8 @@
 <?php
 if (session_status() === PHP_SESSION_NONE) session_start();
-include_once('/hdd1/clashapp/functions.php');
-require_once '/hdd1/clashapp/mongo-db.php';
-include_once('/hdd1/clashapp/update.php');
+include_once('/hdd1/clashapp/src/functions.php');
+require_once '/hdd1/clashapp/db/mongo-db.php';
+include_once('/hdd1/clashapp/src/update.php');
 
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);

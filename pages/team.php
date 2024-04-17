@@ -9,9 +9,9 @@ error_reporting(E_ALL);
 
 $startInitialTime = microtime(true);
 $memInitialTime = memory_get_usage();
-include_once('/hdd1/clashapp/functions.php');
-require_once '/hdd1/clashapp/clash-db.php';
-require_once '/hdd1/clashapp/mongo-db.php';
+include_once('/hdd1/clashapp/src/functions.php');
+require_once '/hdd1/clashapp/db/clash-db.php';
+require_once '/hdd1/clashapp/db/mongo-db.php';
 
 /**
  * @author Florian Falk <dasnerdwork@gmail.com>

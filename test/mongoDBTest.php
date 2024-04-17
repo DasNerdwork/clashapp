@@ -1,6 +1,6 @@
 <?php
 use PHPUnit\Framework\TestCase;
-require_once('/hdd1/clashapp/mongo-db.php');
+require_once('/hdd1/clashapp/db/mongo-db.php');
 
 class MongoDBTest extends TestCase {
     /**

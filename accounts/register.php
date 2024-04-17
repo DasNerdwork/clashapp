@@ -9,7 +9,7 @@ if (isset($_SESSION['user'])) {
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
-require_once '/hdd1/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/db/clash-db.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 
 use PHPMailer\PHPMailer\PHPMailer;

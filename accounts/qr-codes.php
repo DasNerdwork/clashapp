@@ -13,7 +13,7 @@ use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 
-require_once '/hdd1/clashapp/clash-db.php';
+require_once '/hdd1/clashapp/db/clash-db.php';
 
 function generateQR($username){
     $db = new DB();
