@@ -1990,8 +1990,8 @@ function getAverage($attributesArray, $matchDataArray, $puuid, $lane){
 /** getHighestWinrateOrMostLossesAgainst Aliase
  *  Aliase for the two getHighestWinrateOrMostLossesAgainst function possibilities to make it clearer
  */
-function getMostLossesAgainst($variant, $matchDataArray, $puuid){ getHighestWinrateOrMostLossesAgainst("mostLosses", $variant, $matchDataArray, $puuid);}
-function getHighestWinrateAgainst($variant, $matchDataArray, $puuid){getHighestWinrateOrMostLossesAgainst("highestWinrate", $variant, $matchDataArray, $puuid);}
+function getMostLossesAgainst($variant, $matchDataArray, $puuid){ return getHighestWinrateOrMostLossesAgainst("mostLosses", $variant, $matchDataArray, $puuid);}
+function getHighestWinrateAgainst($variant, $matchDataArray, $puuid){ return getHighestWinrateOrMostLossesAgainst("highestWinrate", $variant, $matchDataArray, $puuid);}
 
 /** Function to retrieve the Highest Winrate Against or Most Losses against a specific champion
  * This function is only printing collected values, also possible to shove into profile.php
@@ -2007,90 +2007,119 @@ function getHighestWinrateAgainst($variant, $matchDataArray, $puuid){getHighestW
  * @var array $champArray In the second half of this function the containing all the champion data from "Win", "Lose", "Count" and "Winrate"
  *
  * Returnvalue:
- * @return void N/A, just printing values to page
+ * @return array $champArray
  */
-function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, $puuid){
+function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, $puuid){ // TODO: Reimplement function to be used on page
     $returnArray = array();
     $maxCountArray = array();
     $champArray = array();
 
     // Looping through all files & collecting the users data in returnArray[matchid][0]
-    foreach ($matchDataArray as $matchData) {
+    foreach ($matchDataArray as $matchDataId => $matchData) {
         for($i = 0; $i < 10; $i++){
             if($matchData->info->participants[$i]->puuid == $puuid){
                 if($matchData->info->participants[$i]->teamPosition != ""){
                     $ourLane = $matchData->info->participants[$i]->teamPosition;
+                    // Fallback to individualPosition or N/A if riot is missing data
+                    // @codeCoverageIgnoreStart
                 } else if ($matchData->info->participants[$i]->individualPosition != "" && $matchData->info->participants[$i]->individualPosition != "Invalid"){
                     $ourLane = $matchData->info->participants[$i]->individualPosition;
                 } else {
                     $ourLane = "N/A";
+                    // @codeCoverageIgnoreEnd
                 }
-                $returnArray[key($matchData)][] = ["lane" => $ourLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win, "teamID" => $matchData->info->participants[$i]->teamId];
+                $returnArray[$matchDataId][] = ["lane" => $ourLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win, "teamID" => $matchData->info->participants[$i]->teamId];
                 break;
             }
         }
 
-        // Second loop, necessary after the first one because of the if comparison below (!= $returnArray[key($matchData)][0]["win"])
+        // Second loop, necessary after the first one because of the if comparison below (!= $returnArray[$matchDataId][0]["win"])
         // Looping again through all users and collecting users data in returnArray[matchid][1-5] if in enemy team of the user (PUUID) above
         for($i = 0; $i < 10; $i++){
-            if($matchData->info->participants[$i]->win != $returnArray[key($matchData)][0]["win"] && $matchData->info->participants[$i]->teamId != $returnArray[key($matchData)][0]["teamID"]){
+            if($matchData->info->participants[$i]->win != $returnArray[$matchDataId][0]["win"] && $matchData->info->participants[$i]->teamId != $returnArray[$matchDataId][0]["teamID"]){
                 if($matchData->info->participants[$i]->teamPosition != ""){
                     $enemyLane = $matchData->info->participants[$i]->teamPosition;
+                    // Fallback to individualPosition or N/A if riot is missing data
+                    // @codeCoverageIgnoreStart
                 } else if ($matchData->info->participants[$i]->individualPosition != "" && $matchData->info->participants[$i]->individualPosition != "Invalid"){
                     $enemyLane = $matchData->info->participants[$i]->individualPosition;
                 } else {
                     $enemyLane = "N/A";
+                    // @codeCoverageIgnoreEnd
                 }
 
-                $returnArray[key($matchData)][] = ["lane" => $enemyLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win];
+                $returnArray[$matchDataId][] = ["lane" => $enemyLane, "champion" => $matchData->info->participants[$i]->championName, "win" => $matchData->info->participants[$i]->win];
             }
         }
     }
 
     // Get Wins, Loses, Count and Winrate on lane sorted in $champArray
     if($variant == "lane"){
-        foreach ($returnArray as $Larray) {
-            $lane = $Larray[0]["lane"];
-
+        foreach ($returnArray as $singleMatch) {
+            $lane = $singleMatch[0]["lane"];
             for($i = 1; $i < 6; $i++){
-                if($lane == $Larray[$i]["lane"] && !$Larray[$i]["win"]){
-                    $champArray[$Larray[$i]["champion"]]["win"]++;
-                }else if($lane == $Larray[$i]["lane"] && $Larray[$i]["win"]){
-                    $champArray[$Larray[$i]["champion"]]["lose"]++;
+                $champion = $singleMatch[$i]["champion"];
+                if (!isset($champArray[$champion])) { // Initialize champion entry if not exists
+                    $champArray[$champion] = ["win" => 0, "lose" => 0, "count" => 0, "winrate" => 0];
                 }
-                if($lane == $Larray[$i]["lane"]){
-                    $champArray[$Larray[$i]["champion"]]["count"] = $champArray[$Larray[$i]["champion"]]["win"] + $champArray[$Larray[$i]["champion"]]["lose"];
-                    $champArray[$Larray[$i]["champion"]]["winrate"] = ($champArray[$Larray[$i]["champion"]]["win"] / $champArray[$Larray[$i]["champion"]]["count"]) * 100;
-                    asort($champArray[$Larray[$i]["champion"]]);
+                if($lane == $singleMatch[$i]["lane"] && !$singleMatch[$i]["win"]){
+                    $champArray[$champion]["win"]++;
+                }else if($lane == $singleMatch[$i]["lane"] && $singleMatch[$i]["win"]){
+                    $champArray[$champion]["lose"]++;
+                }
+                if($lane == $singleMatch[$i]["lane"]){
+                    $champArray[$champion]["count"] = $champArray[$champion]["win"] + $champArray[$champion]["lose"];
+                    $champArray[$champion]["winrate"] = ($champArray[$champion]["count"] > 0) ? ($champArray[$champion]["win"] / $champArray[$champion]["count"]) * 100 : 0;
+                    asort($champArray[$champion]);
                 }
             }
         }
 
+        
+
     // Get Wins, Loses, Count and Winrate in general sorted in $champArray
     } else if ($variant == "general"){
-        foreach ($returnArray as $Larray) {
+        foreach ($returnArray as $singleMatch) {
             for($i = 1; $i < 6; $i++){
-                if(!$Larray[$i]["win"]){
-                    $champArray[$Larray[$i]["champion"]]["win"]++;
-                }else if($Larray[$i]["win"]){
-                    $champArray[$Larray[$i]["champion"]]["lose"]++;
+                $champion = $singleMatch[$i]["champion"];
+                if (!isset($champArray[$champion])) { // Initialize champion entry if not exists
+                    $champArray[$champion] = ["win" => 0, "lose" => 0, "count" => 0, "winrate" => 0];
                 }
-                $champArray[$Larray[$i]["champion"]]["count"] = $champArray[$Larray[$i]["champion"]]["win"] + $champArray[$Larray[$i]["champion"]]["lose"];
-                $champArray[$Larray[$i]["champion"]]["winrate"] = ($champArray[$Larray[$i]["champion"]]["win"] / $champArray[$Larray[$i]["champion"]]["count"]) * 100;
-                asort($champArray[$Larray[$i]["champion"]]);
+
+                if(!$singleMatch[$i]["win"]){
+                    $champArray[$champion]["win"]++;
+                }else if($singleMatch[$i]["win"]){
+                    $champArray[$champion]["lose"]++;
+                }
+                $champArray[$champion]["count"] = $champArray[$champion]["win"] + $champArray[$champion]["lose"];
+                $champArray[$champion]["winrate"] = ($champArray[$champion]["count"] > 0) ? ($champArray[$champion]["win"] / $champArray[$champion]["count"]) * 100 : 0;
+                asort($champArray[$champion]);
             }
         }
     }
 
+
     // Sort descending, from highest to lowest if first element should be of type "highestWinrate"
     if($type == "highestWinrate"){
         uasort($champArray, function($a, $b){
-            return $b['winrate'] <=> $a['winrate'];
+            if ($a['winrate'] != $b['winrate']) {
+                return $b['winrate'] <=> $a['winrate'];
+            }
+            if ($a['count'] != $b['count']) {
+                return $b['count'] <=> $a['count'];
+            }
+            return 0;
         });
     // Sort ascending, from lowest to highest if first element should be of type "mostLosses"
     } else if($type == "mostLosses"){
         uasort($champArray, function($a, $b){
-            return $a['winrate'] <=> $b['winrate'];
+            if ($a['winrate'] != $b['winrate']) {
+                return $a['winrate'] <=> $b['winrate'];
+            }
+            if ($a['count'] != $b['count']) {
+                return $b['count'] <=> $a['count'];
+            }
+            return 0;
         });
     }
 
@@ -2107,16 +2136,13 @@ function getHighestWinrateOrMostLossesAgainst($type, $variant, $matchDataArray, 
             unset($champArray[$key]);
         }
     }
-
-    // print results
-    $result = number_format($champArray[array_key_first($champArray)]["winrate"], 2, ',', ' ');
-    echo array_key_first($champArray) . " (" . $result . "%) in " . $champArray[array_key_first($champArray)]["count"] . " matches";
+    return $champArray;
 }
 
 /** Gets the 5 most-played-with summoners
  * This function temp stores every summoner you played with in your team, sorts them and counts their occurences
  *
- * @param array $matchDataArray Inputarray of all MatchIDs of the user (PUUID) over which we iterate
+ * @param array $matchDataArray Input array of all MatchIDs of the user (PUUID) over which we iterate
  * @param string $puuid The summoners PUUID necessary to confirm that the users matches are in our local stored data
  * @var array $mostPlayedArray The returnvalue array but not printed
  *
@@ -2131,7 +2157,7 @@ function mostPlayedWith($matchDataArray, $puuid){
     foreach ($matchDataArray as $matchData) {
         for($i = 0; $i < 10; $i++){
             if($matchData->info->participants[$i]->puuid != $puuid){
-                $mostPlayedArray[] = $matchData->info->participants[$i]->summonerName;
+                $mostPlayedArray[] = $matchData->info->participants[$i]->puuid;
             }
         }
     }
@@ -2139,16 +2165,15 @@ function mostPlayedWith($matchDataArray, $puuid){
     // Count, Sort & Slice to 5 to retrieve printable data
     $temp = array_count_values($mostPlayedArray);
     arsort($temp);
-    $value = array_slice(array_keys($temp), 0, 5, true);
-    $count = array_slice(array_values($temp), 0, 5, true);
+    
+    $returnArray = [];
+    
+    foreach ($temp as $player => $count) {
+        if ($count > 2) {
+            $returnArray[$player] = $count;
+        }
+    }
 
-    $returnArray[$value[0]] = $count[0];
-    $returnArray[$value[1]] = $count[1];
-    $returnArray[$value[2]] = $count[2];
-    $returnArray[$value[3]] = $count[3];
-    $returnArray[$value[4]] = $count[4];
-
-    // echo $count[0]." mal mit ".$value[0]."<br>".$count[1]." mal mit ".$value[1]."<br>".$count[2]." mal mit ".$value[2]."<br>".$count[3]." mal mit ".$value[3]."<br>".$count[4]." mal mit ".$value[4];
     return $returnArray;
 }
 

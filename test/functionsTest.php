@@ -520,23 +520,59 @@ class FunctionsTest extends TestCase {
      * @covers getHighestWinrateOrMostLossesAgainst
      * @covers getMostLossesAgainst
      * @covers getHighestWinrateAgainst
+     * @uses MongoDBHelper
      * @uses getMatchData
      * @uses getMatchIDs
      */
-    // public function testGetHighestWinrateOrMostLossesAgainst()
-    // {
-    //     $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
-    //     $testMatchIds = getMatchIDs($puuid, 2);
-    //     $matchData = (array) getMatchData($testMatchIds);
+    public function testGetHighestWinrateOrMostLossesAgainst()
+    {
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+        $testMatchIds = getMatchIDs($puuid, 15);
+        $matchData = (array) getMatchData($testMatchIds);
 
-    //     $testData1 = getMostLossesAgainst("general", $matchData, $puuid);
-    //     $testData2 = getHighestWinrateAgainst("lane", $matchData, $puuid);
+        $testMostLossesGeneral = getMostLossesAgainst("general", $matchData, $puuid);
+        $testHighestWinrateLane = getHighestWinrateAgainst("lane", $matchData, $puuid);
 
-    //     // print_r($matchData);
+        $this->assertIsArray($testMostLossesGeneral);
+        $this->assertIsArray($testHighestWinrateLane);
+        $this->assertNotEmpty($testMostLossesGeneral);
+        $this->assertNotEmpty($testHighestWinrateLane);
+        foreach ($testMostLossesGeneral as $champion) {
+            $this->assertArrayHasKey('win', $champion);
+            $this->assertArrayHasKey('winrate', $champion);
+            $this->assertArrayHasKey('lose', $champion);
+            $this->assertArrayHasKey('count', $champion);
+        }
+        foreach ($testHighestWinrateLane as $champion) {
+            $this->assertArrayHasKey('win', $champion);
+            $this->assertArrayHasKey('winrate', $champion);
+            $this->assertArrayHasKey('lose', $champion);
+            $this->assertArrayHasKey('count', $champion);
+        }
+    }
 
-    //     // print_r($testData1);
-    //     // print_r($testData2);
-    // }
+    /**
+     * @covers mostPlayedWith
+     * @uses getMatchData
+     * @uses getMatchIDs
+     * @uses MongoDBHelper
+     * @uses isValidID
+     */
+    public function testMostPlayedWith()
+    {
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+        $testMatchIds = getMatchIDs($puuid, 15);
+        $matchData = (array) getMatchData($testMatchIds);
+
+        $testMostPlayedWith = mostPlayedWith($matchData, $puuid);
+
+        $this->assertIsArray($testMostPlayedWith);
+        $this->assertNotEmpty($testMostPlayedWith);
+        foreach ($testMostPlayedWith as $player => $count) {
+            $this->assertTrue(isValidID($player));
+            $this->assertIsNumeric($count);
+        }
+    }
 
     /**
      * @covers unique_multidim_array
