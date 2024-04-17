@@ -17,7 +17,6 @@ require_once '/hdd1/clashapp/accounts/qr-codes.php';
 
 $error_message = array();
 $success_message = array();
-
 $db = new DB();
 $account_status = $db->check_status($_SESSION['user']['id'], $_SESSION['user']['username']);
 if($account_status['status'] == "error"){
@@ -125,7 +124,7 @@ if (isset($_POST['twofa-input'])){
     if($_SESSION['user']['secret'] != null){
         if(verifyLocal2FA($_SESSION['user']['secret'], $_POST['twofa-input'])){
             $db = new DB();
-            if($db->set_2fa_code($_SESSION['user']['email']), $_SESSION['user']['secret']){
+            if($db->set_2fa_code($_SESSION['user']['email'], $_SESSION['user']['secret'])){
                 unset($_SESSION['user']['secret']);
                 $_SESSION['user']['2fa'] = "true";
                 echo "<script>setError('Successfully enabled Two-Factor Authentication.', false);</script>";
