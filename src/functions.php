@@ -3372,7 +3372,7 @@ function generateTag($tagText, $bgColor, $tooltipText, $additionalData) {
             return "Unknown tag option";
         }
     } else {
-        if(isset($additionalData) && $additionalData != ""){
+        if($additionalData != ""){
             $bgClass = ($additionalData == "positive") ? "bg-tag-lime" : "bg-tag-red";
             return "<div class='playerTag list-none border border-solid border-[#141624] py-2 px-3 rounded h-fit text-[#cccccc] $bgClass cursor-help'
                     onmouseenter='showTooltip(this, \"$translatedTooltipText\", 500, \"top-right\")'

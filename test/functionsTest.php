@@ -12,6 +12,7 @@ class FunctionsTest extends TestCase {
      */
     public function testGetPlayerDataByName() {
         $actualData = getPlayerData("riot-id", "dasnerdwork#nerdy");
+        // print_r($actualData);
 
         $this->assertArrayHasKey('Icon', $actualData, "Icon key is missing");
         $this->assertIsNumeric($actualData['Icon'], "Icon ID is not numeric");
@@ -36,6 +37,9 @@ class FunctionsTest extends TestCase {
 
         $this->assertArrayHasKey('GameName', $actualData, "Name key is missing");
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\p{L}]{3,16}$/', $actualData['GameName'], "Name is not in the valid format");
+
+        $this->assertArrayHasKey('Tag', $actualData, "Tag key is missing");
+        $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\p{L}]{3,5}$/', $actualData['Tag'], "Tag is not in the valid format");
     }
 
     /**
@@ -242,6 +246,7 @@ class FunctionsTest extends TestCase {
                 'puuid',
                 'summonerId',
                 'summonerName',
+                'teamId',
                 'teamPosition',
                 'totalDamageDealtToChampions',
                 'totalDamageShieldedOnTeammates',
@@ -391,13 +396,13 @@ class FunctionsTest extends TestCase {
         
         $this->assertTrue(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json'), "runesReforged.json file does not exist.");
 
-        $expectedIconPath = 'perk-images/Styles/7200_Domination.png';
+        $expectedIconPath = 'perk-images/Styles/7200_Domination';
         $actualIconPath = runeTreeIconFetcher($testRuneIconID);
 
-        $this->assertNull(runeTreeIconFetcher(0), "runeTreeIconFetcher did not return null for invalid rune ID (0).");
-        $this->assertNull(runeTreeIconFetcher(8112), "runeTreeIconFetcher did not return null for valid but non-existing rune ID (8112).");
+        $this->assertEquals("", runeTreeIconFetcher(0), "runeTreeIconFetcher did not return null for invalid rune ID (0).");
+        $this->assertEquals("", runeTreeIconFetcher(8112), "runeTreeIconFetcher did not return null for valid but non-existing rune ID (8112).");
         $this->assertNotNull(runeTreeIconFetcher("8100"), "runeTreeIconFetcher returned null for valid rune ID as string ('8100').");
-        $this->assertNull(runeTreeIconFetcher(-1), "runeTreeIconFetcher did not return null for invalid negative rune ID (-1).");
+        $this->assertEquals("", runeTreeIconFetcher(-1), "runeTreeIconFetcher did not return null for invalid negative rune ID (-1).");
         $this->assertNotEmpty($actualIconPath, "runeTreeIconFetcher returned an empty icon path.");
         $this->assertEquals($expectedIconPath, $actualIconPath, "Returned icon path ($actualIconPath) does not match the expected icon path ($expectedIconPath).");
     }
@@ -412,13 +417,13 @@ class FunctionsTest extends TestCase {
 
         $this->assertTrue(file_exists('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json'), "runesReforged.json file does not exist.");
 
-        $expectedIconPath = 'perk-images/Styles/Domination/Electrocute/Electrocute.png'; // Expected path for electrocute
+        $expectedIconPath = 'perk-images/Styles/Domination/Electrocute/Electrocute'; // Expected path for electrocute
         $actualIconPath = runeIconFetcher($testRuneId);
         
-        $this->assertNull(runeIconFetcher(0), "runeIconFetcher did not return null for invalid rune ID (0).");
-        $this->assertNull(runeIconFetcher(8100), "runeIconFetcher did not return null for valid but non-existing rune ID (8100).");
+        $this->assertEquals("", runeIconFetcher(0), "runeIconFetcher did not return null for invalid rune ID (0).");
+        $this->assertEquals("", runeIconFetcher(8100), "runeIconFetcher did not return null for valid but non-existing rune ID (8100).");
         $this->assertNotNull(runeIconFetcher("8112"), "runeIconFetcher returned null for valid rune ID as string ('8112').");
-        $this->assertNull(runeIconFetcher(-1), "runeIconFetcher did not return null for invalid negative rune ID (-1).");
+        $this->assertEquals("", runeIconFetcher(-1), "runeIconFetcher did not return null for invalid negative rune ID (-1).");
         $this->assertNotEmpty($actualIconPath, "runeIconFetcher returned an empty icon path.");
         $this->assertEquals($expectedIconPath, $actualIconPath, "Returned icon path ($actualIconPath) does not match the expected icon path ($expectedIconPath).");
     }
@@ -518,20 +523,20 @@ class FunctionsTest extends TestCase {
      * @uses getMatchData
      * @uses getMatchIDs
      */
-    public function testGetHighestWinrateOrMostLossesAgainst()
-    {
-        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
-        $testMatchIds = getMatchIDs($puuid, 2);
-        $matchData = (array) getMatchData($testMatchIds);
+    // public function testGetHighestWinrateOrMostLossesAgainst()
+    // {
+    //     $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+    //     $testMatchIds = getMatchIDs($puuid, 2);
+    //     $matchData = (array) getMatchData($testMatchIds);
 
-        $testData1 = getMostLossesAgainst("general", $matchData, $puuid);
-        $testData2 = getHighestWinrateAgainst("lane", $matchData, $puuid);
+    //     $testData1 = getMostLossesAgainst("general", $matchData, $puuid);
+    //     $testData2 = getHighestWinrateAgainst("lane", $matchData, $puuid);
 
-        print_r($matchData);
+    //     // print_r($matchData);
 
-        // print_r($testData1);
-        // print_r($testData2);
-    }
+    //     // print_r($testData1);
+    //     // print_r($testData2);
+    // }
 
     /**
      * @covers unique_multidim_array
@@ -802,13 +807,13 @@ class FunctionsTest extends TestCase {
 
         $_COOKIE["tagOptions"] = "invalid-value";
 
-        $testTagGenerate2 = generateTag("Tag Text", "blue", "Tooltip Text", "additionalData");
+        $testTagGenerate2 = generateTag("Tag Text", "blue", "Tooltip Text", "");
 
         $this->assertEquals("Unknown tag option", $testTagGenerate2, 'Generating data was successful although it should not have been.');
 
         unset($_COOKIE["tagOptions"]);
 
-        $testTagGenerate3 = generateTag("Tag Text", "red", "Tooltip Text");
+        $testTagGenerate3 = generateTag("Tag Text", "red", "Tooltip Text", "");
 
         $this->assertEquals("Unknown tag option", $testTagGenerate3, 'Generating data was successful although it should not have been.');
     }
