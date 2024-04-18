@@ -12,7 +12,6 @@ class FunctionsTest extends TestCase {
      */
     public function testGetPlayerDataByName() {
         $actualData = getPlayerData("riot-id", "dasnerdwork#nerdy");
-        // print_r($actualData);
 
         $this->assertArrayHasKey('Icon', $actualData, "Icon key is missing");
         $this->assertIsNumeric($actualData['Icon'], "Icon ID is not numeric");
@@ -40,6 +39,30 @@ class FunctionsTest extends TestCase {
 
         $this->assertArrayHasKey('Tag', $actualData, "Tag key is missing");
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\p{L}]{3,5}$/', $actualData['Tag'], "Tag is not in the valid format");
+
+        $actualDataPUUID = getPlayerData("puuid", "wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA");
+
+        $this->assertEquals($actualData, $actualDataPUUID, "Data is not the same regarding access type");
+        $this->assertArrayHasKey('Icon', $actualDataPUUID, "Icon key is missing");
+        $this->assertArrayHasKey('GameName', $actualDataPUUID, "Name key is missing");
+        $this->assertArrayHasKey('Tag', $actualDataPUUID, "Tag key is missing");
+        $this->assertArrayHasKey('Level', $actualDataPUUID, "Level key is missing");
+        $this->assertArrayHasKey('PUUID', $actualDataPUUID, "PUUID key is missing");
+        $this->assertArrayHasKey('SumID', $actualDataPUUID, "SumID key is missing");
+        $this->assertArrayHasKey('AccountID', $actualDataPUUID, "AccountID key is missing");
+        $this->assertArrayHasKey('LastChange', $actualDataPUUID, "LastChange key is missing");
+
+        $actualDataSumID = getPlayerData("sumid", "kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw");
+
+        $this->assertEquals($actualData, $actualDataSumID, "Data is not the same regarding access type");
+        $this->assertArrayHasKey('Icon', $actualDataSumID, "Icon key is missing");
+        $this->assertArrayHasKey('GameName', $actualDataSumID, "Name key is missing");
+        $this->assertArrayHasKey('Tag', $actualDataSumID, "Tag key is missing");
+        $this->assertArrayHasKey('Level', $actualDataSumID, "Level key is missing");
+        $this->assertArrayHasKey('PUUID', $actualDataSumID, "PUUID key is missing");
+        $this->assertArrayHasKey('SumID', $actualDataSumID, "SumID key is missing");
+        $this->assertArrayHasKey('AccountID', $actualDataSumID, "AccountID key is missing");
+        $this->assertArrayHasKey('LastChange', $actualDataSumID, "LastChange key is missing");
     }
 
     /**
@@ -517,6 +540,38 @@ class FunctionsTest extends TestCase {
     }
 
     /**
+     * @covers getAverage
+     * @uses MongoDBHelper
+     * @uses getMatchData
+     * @uses getMatchIDs
+     */
+    public function testGetAverage()
+    {
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+        $testMatchIds = getMatchIDs($puuid, 15);
+        $matchData = (array) getMatchData($testMatchIds);
+
+        $testAverage = getAverage(['assists','deaths','killParticipation','kills','wardsPlaced'], $matchData, $puuid, 'JUNGLE');
+        $this->assertArrayHasKey('assists', $testAverage, 'Returnarray is missing input key in output');
+        $this->assertArrayHasKey('deaths', $testAverage, 'Returnarray is missing input key in output');
+        $this->assertArrayHasKey('killParticipation', $testAverage, 'Returnarray is missing input key in output');
+        $this->assertArrayHasKey('kills', $testAverage, 'Returnarray is missing input key in output');
+        $this->assertArrayHasKey('wardsPlaced', $testAverage, 'Returnarray is missing input key in output');
+        foreach ($testAverage as $attribute) {
+            $this->assertArrayHasKey('SELF', $attribute, 'Inner returnarray is missing key SELF');
+            $this->assertArrayHasKey('FILL', $attribute, 'Inner returnarray is missing key FILL');
+            $this->assertArrayHasKey('TOP', $attribute, 'Inner returnarray is missing key TOP');
+            $this->assertArrayHasKey('JUNGLE', $attribute, 'Inner returnarray is missing key JUNGLE');
+            $this->assertArrayHasKey('MIDDLE', $attribute, 'Inner returnarray is missing key MIDDLE');
+            $this->assertArrayHasKey('UTILITY', $attribute, 'Inner returnarray is missing key UTILITY');
+            $this->assertArrayHasKey('BOTTOM', $attribute, 'Inner returnarray is missing key BOTTOM');
+            foreach($attribute as $lane => $value){
+                $this->assertIsNumeric($value, 'The value of an attribute is not numeric');
+            }
+        }
+    }
+
+    /**
      * @covers getHighestWinrateOrMostLossesAgainst
      * @covers getMostLossesAgainst
      * @covers getHighestWinrateAgainst
@@ -571,6 +626,97 @@ class FunctionsTest extends TestCase {
         foreach ($testMostPlayedWith as $player => $count) {
             $this->assertTrue(isValidID($player));
             $this->assertIsNumeric($count);
+        }
+    }
+
+    /**
+     * @covers getHighestWinrateWith
+     * @uses MongoDBHelper
+     * @uses getMatchData
+     * @uses getMatchIDs
+     */
+    public function testGetHighestWinrateWith()
+    {
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+        $testMatchIds = getMatchIDs($puuid, 15);
+        $matchData = (array) getMatchData($testMatchIds);
+
+        $testGetHighestWinrateWith = getHighestWinrateWith('JUNGLE', $matchData, $puuid);
+
+        $this->assertIsArray($testGetHighestWinrateWith);
+        $this->assertNotEmpty($testGetHighestWinrateWith);
+        foreach ($testGetHighestWinrateWith as $champion) {
+            $this->assertArrayHasKey('win', $champion);
+            $this->assertArrayHasKey('winrate', $champion);
+            $this->assertArrayHasKey('lose', $champion);
+            $this->assertArrayHasKey('count', $champion);
+        }
+    }
+
+    /**
+     * @covers getMatchRanking
+     * @uses MongoDBHelper
+     * @uses getMatchData
+     * @uses getMatchIDs
+     * @uses isValidMatchID
+     */
+    public function testGetMatchRanking()
+    {
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
+        $sumid = 'kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw';
+        $testMatchIds = getMatchIDs($puuid, 15);
+        $matchData = (array) getMatchData($testMatchIds);
+        $matchIDArray = $testMatchIds;
+
+        $testGetMatchRanking = getMatchRanking($matchIDArray, $matchData, $sumid);
+
+        $this->assertEquals(15, count($testGetMatchRanking), 'Returned match ranking count does not equal input match count');
+        foreach ($testGetMatchRanking as $matchId => $ranking) {
+            $this->assertTrue(isValidMatchID($matchId), 'Returned match ranking count does not equal input match count');
+            if($ranking != "N/A"){
+                $this->assertIsNumeric($ranking, 'Returned match ranking is neither N/A nor numerical');
+            }
+        }
+    }
+
+    /**
+     * @covers getTeamByTeamID
+     * @uses isValidID
+     * @uses isValidPlayerName
+     * @uses isValidPlayerTag
+     * @uses isValidPosition
+     */
+    public function testGetTeamByTeamID()
+    {  
+        $testGetTeam = getTeamByTeamID('test');
+
+        $this->assertArrayHasKey('Status', $testGetTeam, 'Returnarray is missing key Status');
+        $this->assertArrayHasKey('TeamID', $testGetTeam, 'Returnarray is missing key TeamID');
+        $this->assertArrayHasKey('TournamentID', $testGetTeam, 'Returnarray is missing key TournamentID');
+        $this->assertArrayHasKey('Name', $testGetTeam, 'Returnarray is missing key Name');
+        $this->assertArrayHasKey('Tag', $testGetTeam, 'Returnarray is missing key Tag');
+        $this->assertArrayHasKey('Icon', $testGetTeam, 'Returnarray is missing key Icon');
+        $this->assertArrayHasKey('Tier', $testGetTeam, 'Returnarray is missing key Tier');
+        $this->assertArrayHasKey('Captain', $testGetTeam, 'Returnarray is missing key Captain');
+        $this->assertArrayHasKey('Players', $testGetTeam, 'Returnarray is missing key Players');
+        $this->assertIsNumeric($testGetTeam['Status'], 'Status is not numeric');
+        $this->assertTrue(isValidID($testGetTeam['TeamID']), 'TeamID is not a valid ID');
+        $this->assertTrue(isValidPlayerName($testGetTeam['Name']), 'Teamname does not meet the criterias of validation for player names');
+        $this->assertTrue(isValidPlayerTag($testGetTeam['Tag']), 'Teamtag does not meet the criterias of validation for player tags');
+        $this->assertIsNumeric($testGetTeam['Icon'], 'Icon is not numeric');
+        $this->assertIsNumeric($testGetTeam['Tier'], 'Tier is not numeric');
+        $this->assertGreaterThanOrEqual(0, $testGetTeam['Tier'], 'Tier is not greater than or equal zero');
+        $this->assertLessThanOrEqual(4, $testGetTeam['Tier'], 'Tier is not greater than or equal four');
+        $this->assertTrue(isValidID($testGetTeam['Captain']), 'Captain is not a valid ID');
+        $this->assertIsArray($testGetTeam['Players'], 'Players is not an array');
+        foreach ($testGetTeam['Players'] as $player) {
+            $this->assertIsArray($player, 'Player is not an array');
+            $this->assertArrayHasKey('summonerId', $player, 'Player is missing summonerId');
+            $this->assertArrayHasKey('position', $player, 'Player is missing summonerId');
+            $this->assertArrayHasKey('role', $player, 'Player is missing summonerId');
+            $this->assertTrue(isValidID($player['summonerId']), 'A players sumid is not considered a valid sumid');
+            $this->assertTrue(isValidPosition($player['position']), 'A players position is not considered a valid position');
+            $this->assertContains($player['role'], ['MEMBER', 'CAPTAIN'], 'A player is neither a member nor a captain');
         }
     }
 

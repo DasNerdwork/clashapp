@@ -36,7 +36,4 @@ $statNameArray = [
     'totalHeal', 'totalHealsOnTeammates', 'totalMinionsKilled', 'totalTimeCCDealt', 'totalTimeSpentDead', 'tripleKills', 'trueDamageDealt', 'trueDamageDealtToChampions', 'trueDamageTaken', 'turretKills', 'turretTakedowns', 'turretsLost',
     'visionScore', 'visionWardsBoughtInGame', 'wardsKilled', 'wardsPlaced'];
 
-// $averageStatsJson = json_decode(file_get_contents('/hdd1/clashapp/data/misc/averageStats.json'), true);
-// addToQueue('api_queue', 'playerData', ['type' => 'puuid', 'id' => 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA']);
-
 include('/hdd1/clashapp/templates/footer.php');
