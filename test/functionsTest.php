@@ -782,6 +782,213 @@ class FunctionsTest extends TestCase {
     }
 
     /**
+     * @covers getSuggestedPicksAndTeamstats
+     * @uses MongoDBHelper
+     * @uses getMatchData
+     * @uses getMatchRanking
+     */
+    public function testGetSuggestedPicksAndTeamstats()
+    {
+        $mdb = new MongoDBHelper();
+        $sumids = "MceGjIqeHx6ty7IFgkE7tkXVprFMlx-GiDY52e_9phuQrHHL,KBFbg5b5NWbOFdtOvq5Nr8R5lFHwCR4QS8cTJC6Oau_4Vn6HPW5pFGAiew,cvL-8gEPZWz45ttfrBnWvLF7jgEHzwrW-hz_fQsUyvKd6SH2,kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw,7_MlHF1XF5XJ-O0Hmy-Cjb6ACovIHg5irfmjFmP8lmA7qYyQ";
+        $matchIDTeamArray = array();
+        $playerSumidTeamArray = array_flip(explode(',', $sumids));
+
+        foreach(array_keys($playerSumidTeamArray) as $playerSumid){
+            if(!$mdb->getPlayerBySummonerId($playerSumid)["success"]){
+                echo "Could not find playerfile for ".$playerSumid;
+                return;
+            } else {
+                $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.SumID', $playerSumid)["document"]);
+                $playerDataJSON = json_decode($playerDataJSONString, true);
+                foreach(array_keys($playerDataJSON["MatchIDs"]) as $singleMatchID){
+                    if(!in_array($singleMatchID, $matchIDTeamArray)){
+                        $matchIDTeamArray[] = $singleMatchID;
+                    }
+                }
+            }
+        }
+        $suggestedBanMatchData = getMatchData($matchIDTeamArray);
+        $suggestedPicksAndTeamstatsArray = getSuggestedPicksAndTeamstats(array_keys($playerSumidTeamArray), $matchIDTeamArray, $suggestedBanMatchData);
+
+        $this->assertIsArray($suggestedPicksAndTeamstatsArray);
+        $this->assertNotEmpty($suggestedPicksAndTeamstatsArray);
+        $this->assertArrayHasKey('Teamstats', $suggestedPicksAndTeamstatsArray);
+        $this->assertArrayHasKey('TeamIsWeakAgainst', $suggestedPicksAndTeamstatsArray);
+        $this->assertArrayHasKey('TeamIsStrongAgainst', $suggestedPicksAndTeamstatsArray);
+
+        $this->assertArrayHasKey('Wins', $suggestedPicksAndTeamstatsArray['Teamstats']);
+        $this->assertArrayHasKey('Losses', $suggestedPicksAndTeamstatsArray['Teamstats']);
+        $this->assertArrayHasKey('Winrate', $suggestedPicksAndTeamstatsArray['Teamstats']);
+        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Wins']);
+        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Losses']);
+        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Winrate']);
+        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Wins']);
+        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Winrate']);
+        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Losses']);
+
+        foreach ($suggestedPicksAndTeamstatsArray['TeamIsWeakAgainst'] as $index => $champArray) {
+            $this->assertIsArray($champArray);
+            $this->assertNotEmpty($champArray);
+            $this->assertArrayHasKey('Champion', $champArray);
+            $this->assertArrayHasKey('Matchscore', $champArray);
+            $this->assertIsString($champArray['Champion']);
+            $this->assertIsNumeric($champArray['Matchscore']);
+            $this->assertGreaterThanOrEqual(0, $champArray['Matchscore']);
+        }
+
+        foreach ($suggestedPicksAndTeamstatsArray['TeamIsStrongAgainst'] as $index => $champArray) {
+            $this->assertIsArray($champArray);
+            $this->assertNotEmpty($champArray);
+            $this->assertArrayHasKey('Champion', $champArray);
+            $this->assertArrayHasKey('Matchscore', $champArray);
+            $this->assertIsString($champArray['Champion']);
+            $this->assertIsNumeric($champArray['Matchscore']);
+            $this->assertGreaterThanOrEqual(0, $champArray['Matchscore']);
+        }
+
+    }
+
+    /**
+     * @covers getSuggestedBans
+     * @uses MongoDBHelper
+     * @uses getMatchData
+     * @uses unique_multidim_array
+     * @uses isValidID
+     * @uses isValidPosition
+     * @uses getMatchRanking
+     */
+    public function testGetSuggestedBans()
+    {
+        $mdb = new MongoDBHelper();
+        $sumids = "MceGjIqeHx6ty7IFgkE7tkXVprFMlx-GiDY52e_9phuQrHHL,KBFbg5b5NWbOFdtOvq5Nr8R5lFHwCR4QS8cTJC6Oau_4Vn6HPW5pFGAiew,cvL-8gEPZWz45ttfrBnWvLF7jgEHzwrW-hz_fQsUyvKd6SH2,kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw,7_MlHF1XF5XJ-O0Hmy-Cjb6ACovIHg5irfmjFmP8lmA7qYyQ";
+        $matchIDTeamArray = array();
+        $masteryDataTeamArray = array();
+        $playerLanesTeamArray = array();
+        $playerNameTeamArray = explode(',', $sumids);
+        $playerSumidTeamArray = array_flip($playerNameTeamArray);
+
+        foreach(array_keys($playerSumidTeamArray) as $playerSumid){
+            if(!$mdb->getPlayerBySummonerId($playerSumid)["success"]){
+                echo "Could not find playerfile for ".$playerSumid;
+                return;
+            } else {
+                $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.SumID', $playerSumid)["document"]);
+                $playerDataJSON = json_decode($playerDataJSONString, true);
+                foreach(array_keys($playerDataJSON["MatchIDs"]) as $singleMatchID){
+                    if(!in_array($singleMatchID, $matchIDTeamArray)){
+                        $matchIDTeamArray[] = $singleMatchID;
+                    }
+                }
+                $masteryDataTeamArray[$playerSumid] = $playerDataJSON["MasteryData"];
+                $playerLanesTeamArray[$playerSumid]["Mainrole"] = $playerDataJSON["LanePercentages"][0] ?? "";
+                $playerLanesTeamArray[$playerSumid]["Secrole"] = $playerDataJSON["LanePercentages"][1] ?? "";
+    
+                foreach ($playerNameTeamArray as $singleSumid => $index) {
+                    if($playerDataJSON["PlayerData"]["SumID"] == $singleSumid){
+                        $playerNameTeamArray[$singleSumid] = $playerDataJSON["PlayerData"]["GameName"];
+                    }
+                }
+            }
+        }
+        $suggestedBanMatchData = getMatchData($matchIDTeamArray);
+        $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
+
+        $this->assertIsArray($suggestedBanArray);
+        $this->assertNotEmpty($suggestedBanArray);
+        $this->assertCount(10, $suggestedBanArray);
+        foreach($suggestedBanArray as $singleChampion){
+            $this->assertIsArray($singleChampion);
+            $this->assertNotEmpty($singleChampion);
+            $this->assertArrayHasKey('TotalTeamPoints', $singleChampion);
+            $this->assertIsArray($singleChampion['TotalTeamPoints']);
+            $this->assertNotEmpty($singleChampion['TotalTeamPoints']);
+            $this->assertArrayHasKey('Value', $singleChampion['TotalTeamPoints']);
+            $this->assertArrayHasKey('Add', $singleChampion['TotalTeamPoints']);
+            $this->assertIsNumeric($singleChampion['TotalTeamPoints']['Value']);
+            $this->assertGreaterThan(0, $singleChampion['TotalTeamPoints']['Value']);
+            $this->assertIsNumeric($singleChampion['TotalTeamPoints']['Add']);
+
+            $this->assertArrayHasKey('MatchingLanersPrio', $singleChampion);
+            $this->assertIsArray($singleChampion['MatchingLanersPrio']);
+            $this->assertNotEmpty($singleChampion['MatchingLanersPrio']);
+            $this->assertArrayHasKey('Add', $singleChampion['MatchingLanersPrio']);
+            $this->assertArrayHasKey('Value', $singleChampion['MatchingLanersPrio']);
+            $this->assertIsNumeric($singleChampion['MatchingLanersPrio']['Add']);
+            $this->assertIsNumeric($singleChampion['MatchingLanersPrio']['Value']);
+            if(array_key_exists('Cause', $singleChampion['MatchingLanersPrio'])){
+                $this->assertGreaterThan(0, $singleChampion['MatchingLanersPrio']['Value']);
+                $this->assertArrayHasKey('Lanes', $singleChampion['MatchingLanersPrio']);
+                $this->assertIsArray($singleChampion['MatchingLanersPrio']['Cause']);
+                $this->assertNotEmpty($singleChampion['MatchingLanersPrio']['Cause']);
+                foreach ($singleChampion['MatchingLanersPrio']['Cause'] as $index => $id) {
+                    $this->assertTrue(isValidID($id));
+                }
+                $this->assertIsArray($singleChampion['MatchingLanersPrio']['Lanes']);
+                $this->assertNotEmpty($singleChampion['MatchingLanersPrio']['Lanes']);
+                foreach ($singleChampion['MatchingLanersPrio']['Lanes'] as $index => $lane) {
+                    $this->assertTrue(isValidPosition($lane));
+                }
+            }
+
+            if(array_key_exists('OccurencesInLastGames', $singleChampion)){
+                $this->assertIsArray($singleChampion['OccurencesInLastGames']);
+                $this->assertNotEmpty($singleChampion['OccurencesInLastGames']);
+                $this->assertArrayHasKey('Count', $singleChampion['OccurencesInLastGames']);
+                $this->assertArrayHasKey('Add', $singleChampion['OccurencesInLastGames']);
+                $this->assertArrayHasKey('Games', $singleChampion['OccurencesInLastGames']);
+                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Count']);
+                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Add']);
+                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Games']);
+                $this->assertGreaterThan(0, $singleChampion['OccurencesInLastGames']['Count']);
+                $this->assertGreaterThan(0, $singleChampion['OccurencesInLastGames']['Games']);
+            }
+
+            $this->assertArrayHasKey('Points', $singleChampion);
+            $this->assertArrayHasKey('Add', $singleChampion['Points']);
+            $this->assertArrayHasKey('Value', $singleChampion['Points']);
+            $this->assertArrayHasKey('Cause', $singleChampion['Points']);
+            $this->assertIsNumeric($singleChampion['Points']['Add']);
+            $this->assertIsNumeric($singleChampion['Points']['Value']);
+            $this->assertGreaterThan(0, $singleChampion['Points']['Value']);
+            $this->assertTrue(isValidID($singleChampion['Points']['Cause']));
+
+            $this->assertArrayHasKey('CapablePlayers', $singleChampion);
+            $this->assertArrayHasKey('Add', $singleChampion['CapablePlayers']);
+            $this->assertArrayHasKey('Value', $singleChampion['CapablePlayers']);
+            $this->assertIsNumeric($singleChampion['CapablePlayers']['Add']);
+            $this->assertIsNumeric($singleChampion['CapablePlayers']['Value']);
+            $this->assertGreaterThan(0, $singleChampion['CapablePlayers']['Value']);
+
+            if(array_key_exists('LastPlayed', $singleChampion)){
+                $this->assertIsArray($singleChampion['LastPlayed']);
+                $this->assertNotEmpty($singleChampion['LastPlayed']);
+                $this->assertArrayHasKey('Add', $singleChampion['LastPlayed']);
+                $this->assertArrayHasKey('Value', $singleChampion['LastPlayed']);
+                $this->assertIsNumeric($singleChampion['LastPlayed']['Add']);
+                $this->assertIsNumeric($singleChampion['LastPlayed']['Value']);
+                $this->assertGreaterThan(0, $singleChampion['LastPlayed']['Value']);
+            }
+
+            $this->assertArrayHasKey('Filename', $singleChampion);
+            $this->assertNotEmpty($singleChampion['Filename']);
+
+            if(array_key_exists('AverageMatchScore', $singleChampion)){
+                $this->assertArrayHasKey('AverageMatchScore', $singleChampion);
+                $this->assertIsArray($singleChampion['AverageMatchScore']);
+                $this->assertNotEmpty($singleChampion['AverageMatchScore']);
+                $this->assertArrayHasKey('Add', $singleChampion['AverageMatchScore']);
+                $this->assertArrayHasKey('Value', $singleChampion['AverageMatchScore']);
+                $this->assertIsNumeric($singleChampion['AverageMatchScore']['Add']);
+                $this->assertIsNumeric($singleChampion['AverageMatchScore']['Value']);
+            }
+            $this->assertArrayHasKey('FinalScore', $singleChampion);
+            $this->assertIsNumeric($singleChampion['FinalScore']);
+            $this->assertGreaterThan(0, $singleChampion['FinalScore']);
+        }
+    }
+
+    /**
      * @covers abbreviationFetcher
      */
     public function testAbbreviationFetcher()

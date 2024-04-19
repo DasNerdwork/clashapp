@@ -403,8 +403,6 @@ echo '
                     // break; // Uncomment if we want only 1 player to render
                 }
                 unset($slicedPlayerDataMatchIDs);
-                $startGetSuggestedBans = microtime(true);
-                $memGetSuggestedBans = memory_get_usage();
                 clearstatcache(true, $matchDownloadLog); // Used for proper filesize calculation
                 $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
                 $endofup = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: Start of update for \"".strtoupper($teamDataArray["Tag"])." | ".strtoupper($teamDataArray["Name"])."\" - (Approximate Logsize: ".number_format((filesize($matchDownloadLog)/1048576), 3)." MB)";
