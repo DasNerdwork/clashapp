@@ -10,6 +10,9 @@
     <testsuite name="MongoDB">
       <file>test/mongoDBTest.php</file>
     </testsuite>
+    <testsuite name="Update">
+      <file>test/updateTest.php</file>
+    </testsuite>
     <testsuite name="Templates">
       <file>test/templatesTest.php</file>
     </testsuite>

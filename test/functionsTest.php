@@ -191,7 +191,7 @@ class FunctionsTest extends TestCase {
 
         if($downloadableFlag) {
             $resultBoolean = downloadMatchesByID([$testMatchId], "PHPUnit");
-            $this->assertNotFalse($resultBoolean);
+            $this->assertNotFalse($resultBoolean, 'Downloading a match was not successful');
         }
     }
 
@@ -532,10 +532,10 @@ class FunctionsTest extends TestCase {
 
         $tags = getPlayerTags($matchData, $puuid);
 
-        $this->assertIsArray($tags);
-        foreach(array_keys($tags) as $lanes){
-            $this->assertNotEmpty($tags);
-            $this->assertContains(key($tags), $expectedLaneArray);
+        $this->assertIsArray($tags, 'Tags should be an array.');
+        foreach (array_keys($tags) as $lanes) {
+            $this->assertNotEmpty($tags, 'Tags should not be empty.');
+            $this->assertContains(key($tags), $expectedLaneArray, 'Expected lane not found in tags array.');
         }
     }
 
@@ -588,21 +588,22 @@ class FunctionsTest extends TestCase {
         $testMostLossesGeneral = getMostLossesAgainst("general", $matchData, $puuid);
         $testHighestWinrateLane = getHighestWinrateAgainst("lane", $matchData, $puuid);
 
-        $this->assertIsArray($testMostLossesGeneral);
-        $this->assertIsArray($testHighestWinrateLane);
-        $this->assertNotEmpty($testMostLossesGeneral);
-        $this->assertNotEmpty($testHighestWinrateLane);
+        $this->assertIsArray($testMostLossesGeneral, 'Most losses against general should be an array.');
+        $this->assertNotEmpty($testMostLossesGeneral, 'Most losses against general should not be empty.');
         foreach ($testMostLossesGeneral as $champion) {
-            $this->assertArrayHasKey('win', $champion);
-            $this->assertArrayHasKey('winrate', $champion);
-            $this->assertArrayHasKey('lose', $champion);
-            $this->assertArrayHasKey('count', $champion);
+            $this->assertArrayHasKey('win', $champion, 'Each champion should have a "win" key.');
+            $this->assertArrayHasKey('winrate', $champion, 'Each champion should have a "winrate" key.');
+            $this->assertArrayHasKey('lose', $champion, 'Each champion should have a "lose" key.');
+            $this->assertArrayHasKey('count', $champion, 'Each champion should have a "count" key.');
         }
+
+        $this->assertIsArray($testHighestWinrateLane, 'Highest winrate against lane should be an array.');
+        $this->assertNotEmpty($testHighestWinrateLane, 'Highest winrate against lane should not be empty.');
         foreach ($testHighestWinrateLane as $champion) {
-            $this->assertArrayHasKey('win', $champion);
-            $this->assertArrayHasKey('winrate', $champion);
-            $this->assertArrayHasKey('lose', $champion);
-            $this->assertArrayHasKey('count', $champion);
+            $this->assertArrayHasKey('win', $champion, 'Each champion should have a "win" key.');
+            $this->assertArrayHasKey('winrate', $champion, 'Each champion should have a "winrate" key.');
+            $this->assertArrayHasKey('lose', $champion, 'Each champion should have a "lose" key.');
+            $this->assertArrayHasKey('count', $champion, 'Each champion should have a "count" key.');
         }
     }
 
@@ -621,11 +622,11 @@ class FunctionsTest extends TestCase {
 
         $testMostPlayedWith = mostPlayedWith($matchData, $puuid);
 
-        $this->assertIsArray($testMostPlayedWith);
-        $this->assertNotEmpty($testMostPlayedWith);
+        $this->assertIsArray($testMostPlayedWith, 'Most played with should be an array.');
+        $this->assertNotEmpty($testMostPlayedWith, 'Most played with should not be empty.');
         foreach ($testMostPlayedWith as $player => $count) {
-            $this->assertTrue(isValidID($player));
-            $this->assertIsNumeric($count);
+            $this->assertTrue(isValidID($player), 'Player ID should be a valid ID.');
+            $this->assertIsNumeric($count, 'Count should be a numeric value.');
         }
     }
 
@@ -643,13 +644,14 @@ class FunctionsTest extends TestCase {
 
         $testGetHighestWinrateWith = getHighestWinrateWith('JUNGLE', $matchData, $puuid);
 
-        $this->assertIsArray($testGetHighestWinrateWith);
-        $this->assertNotEmpty($testGetHighestWinrateWith);
+        // Assertions for $testGetHighestWinrateWith
+        $this->assertIsArray($testGetHighestWinrateWith, 'Highest winrate with should be an array.');
+        $this->assertNotEmpty($testGetHighestWinrateWith, 'Highest winrate with should not be empty.');
         foreach ($testGetHighestWinrateWith as $champion) {
-            $this->assertArrayHasKey('win', $champion);
-            $this->assertArrayHasKey('winrate', $champion);
-            $this->assertArrayHasKey('lose', $champion);
-            $this->assertArrayHasKey('count', $champion);
+            $this->assertArrayHasKey('win', $champion, 'Champion should have a "win" key.');
+            $this->assertArrayHasKey('winrate', $champion, 'Champion should have a "winrate" key.');
+            $this->assertArrayHasKey('lose', $champion, 'Champion should have a "lose" key.');
+            $this->assertArrayHasKey('count', $champion, 'Champion should have a "count" key.');
         }
     }
 
@@ -811,42 +813,45 @@ class FunctionsTest extends TestCase {
         $suggestedBanMatchData = getMatchData($matchIDTeamArray);
         $suggestedPicksAndTeamstatsArray = getSuggestedPicksAndTeamstats(array_keys($playerSumidTeamArray), $matchIDTeamArray, $suggestedBanMatchData);
 
-        $this->assertIsArray($suggestedPicksAndTeamstatsArray);
-        $this->assertNotEmpty($suggestedPicksAndTeamstatsArray);
-        $this->assertArrayHasKey('Teamstats', $suggestedPicksAndTeamstatsArray);
-        $this->assertArrayHasKey('TeamIsWeakAgainst', $suggestedPicksAndTeamstatsArray);
-        $this->assertArrayHasKey('TeamIsStrongAgainst', $suggestedPicksAndTeamstatsArray);
+        // Assertions for $suggestedPicksAndTeamstatsArray
+        $this->assertIsArray($suggestedPicksAndTeamstatsArray, 'Suggested picks and team stats should be an array.');
+        $this->assertNotEmpty($suggestedPicksAndTeamstatsArray, 'Suggested picks and team stats should not be empty.');
+        $this->assertArrayHasKey('Teamstats', $suggestedPicksAndTeamstatsArray, 'Suggested picks and team stats should have "Teamstats" key.');
+        $this->assertArrayHasKey('TeamIsWeakAgainst', $suggestedPicksAndTeamstatsArray, 'Suggested picks and team stats should have "TeamIsWeakAgainst" key.');
+        $this->assertArrayHasKey('TeamIsStrongAgainst', $suggestedPicksAndTeamstatsArray, 'Suggested picks and team stats should have "TeamIsStrongAgainst" key.');
 
-        $this->assertArrayHasKey('Wins', $suggestedPicksAndTeamstatsArray['Teamstats']);
-        $this->assertArrayHasKey('Losses', $suggestedPicksAndTeamstatsArray['Teamstats']);
-        $this->assertArrayHasKey('Winrate', $suggestedPicksAndTeamstatsArray['Teamstats']);
-        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Wins']);
-        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Losses']);
-        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Winrate']);
-        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Wins']);
-        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Winrate']);
-        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Losses']);
+        // Assertions for 'Teamstats'
+        $this->assertArrayHasKey('Wins', $suggestedPicksAndTeamstatsArray['Teamstats'], 'Teamstats should have "Wins" key.');
+        $this->assertArrayHasKey('Losses', $suggestedPicksAndTeamstatsArray['Teamstats'], 'Teamstats should have "Losses" key.');
+        $this->assertArrayHasKey('Winrate', $suggestedPicksAndTeamstatsArray['Teamstats'], 'Teamstats should have "Winrate" key.');
+        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Wins'], 'Wins should be numeric.');
+        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Losses'], 'Losses should be numeric.');
+        $this->assertIsNumeric($suggestedPicksAndTeamstatsArray['Teamstats']['Winrate'], 'Winrate should be numeric.');
+        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Wins'], 'Wins should be greater than or equal to 0.');
+        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Winrate'], 'Winrate should be greater than or equal to 0.');
+        $this->assertGreaterThanOrEqual(0, $suggestedPicksAndTeamstatsArray['Teamstats']['Losses'], 'Losses should be greater than or equal to 0.');
 
+        // Assertions for 'TeamIsWeakAgainst'
         foreach ($suggestedPicksAndTeamstatsArray['TeamIsWeakAgainst'] as $index => $champArray) {
-            $this->assertIsArray($champArray);
-            $this->assertNotEmpty($champArray);
-            $this->assertArrayHasKey('Champion', $champArray);
-            $this->assertArrayHasKey('Matchscore', $champArray);
-            $this->assertIsString($champArray['Champion']);
-            $this->assertIsNumeric($champArray['Matchscore']);
-            $this->assertGreaterThanOrEqual(0, $champArray['Matchscore']);
+            $this->assertIsArray($champArray, 'Champion array in TeamIsWeakAgainst should be an array.');
+            $this->assertNotEmpty($champArray, 'Champion array in TeamIsWeakAgainst should not be empty.');
+            $this->assertArrayHasKey('Champion', $champArray, 'Champion array should have "Champion" key.');
+            $this->assertArrayHasKey('Matchscore', $champArray, 'Champion array should have "Matchscore" key.');
+            $this->assertIsString($champArray['Champion'], 'Champion should be a string.');
+            $this->assertIsNumeric($champArray['Matchscore'], 'Matchscore should be numeric.');
+            $this->assertGreaterThanOrEqual(0, $champArray['Matchscore'], 'Matchscore should be greater than or equal to 0.');
         }
 
+        // Assertions for 'TeamIsStrongAgainst'
         foreach ($suggestedPicksAndTeamstatsArray['TeamIsStrongAgainst'] as $index => $champArray) {
-            $this->assertIsArray($champArray);
-            $this->assertNotEmpty($champArray);
-            $this->assertArrayHasKey('Champion', $champArray);
-            $this->assertArrayHasKey('Matchscore', $champArray);
-            $this->assertIsString($champArray['Champion']);
-            $this->assertIsNumeric($champArray['Matchscore']);
-            $this->assertGreaterThanOrEqual(0, $champArray['Matchscore']);
+            $this->assertIsArray($champArray, 'Champion array in TeamIsStrongAgainst should be an array.');
+            $this->assertNotEmpty($champArray, 'Champion array in TeamIsStrongAgainst should not be empty.');
+            $this->assertArrayHasKey('Champion', $champArray, 'Champion array should have "Champion" key.');
+            $this->assertArrayHasKey('Matchscore', $champArray, 'Champion array should have "Matchscore" key.');
+            $this->assertIsString($champArray['Champion'], 'Champion should be a string.');
+            $this->assertIsNumeric($champArray['Matchscore'], 'Matchscore should be numeric.');
+            $this->assertGreaterThanOrEqual(0, $champArray['Matchscore'], 'Matchscore should be greater than or equal to 0.');
         }
-
     }
 
     /**
@@ -883,7 +888,7 @@ class FunctionsTest extends TestCase {
                 $masteryDataTeamArray[$playerSumid] = $playerDataJSON["MasteryData"];
                 $playerLanesTeamArray[$playerSumid]["Mainrole"] = $playerDataJSON["LanePercentages"][0] ?? "";
                 $playerLanesTeamArray[$playerSumid]["Secrole"] = $playerDataJSON["LanePercentages"][1] ?? "";
-    
+
                 foreach ($playerNameTeamArray as $singleSumid => $index) {
                     if($playerDataJSON["PlayerData"]["SumID"] == $singleSumid){
                         $playerNameTeamArray[$singleSumid] = $playerDataJSON["PlayerData"]["GameName"];
@@ -894,97 +899,94 @@ class FunctionsTest extends TestCase {
         $suggestedBanMatchData = getMatchData($matchIDTeamArray);
         $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
 
-        $this->assertIsArray($suggestedBanArray);
-        $this->assertNotEmpty($suggestedBanArray);
-        $this->assertCount(10, $suggestedBanArray);
+        // Assertions for $suggestedBanArray
+        $this->assertIsArray($suggestedBanArray, 'Suggested bans should be an array.');
+        $this->assertNotEmpty($suggestedBanArray, 'Suggested bans should not be empty.');
+        $this->assertCount(10, $suggestedBanArray, 'There should be 10 suggested bans.');
         foreach($suggestedBanArray as $singleChampion){
-            $this->assertIsArray($singleChampion);
-            $this->assertNotEmpty($singleChampion);
-            $this->assertArrayHasKey('TotalTeamPoints', $singleChampion);
-            $this->assertIsArray($singleChampion['TotalTeamPoints']);
-            $this->assertNotEmpty($singleChampion['TotalTeamPoints']);
-            $this->assertArrayHasKey('Value', $singleChampion['TotalTeamPoints']);
-            $this->assertArrayHasKey('Add', $singleChampion['TotalTeamPoints']);
-            $this->assertIsNumeric($singleChampion['TotalTeamPoints']['Value']);
-            $this->assertGreaterThan(0, $singleChampion['TotalTeamPoints']['Value']);
-            $this->assertIsNumeric($singleChampion['TotalTeamPoints']['Add']);
+            // Assertions for each single champion in $suggestedBanArray
+            $this->assertIsArray($singleChampion, 'Each suggested ban should be an array.');
+            $this->assertNotEmpty($singleChampion, 'Each suggested ban should not be empty.');
+            $this->assertArrayHasKey('TotalTeamPoints', $singleChampion, 'Each suggested ban should have "TotalTeamPoints" key.');
+            $this->assertIsArray($singleChampion['TotalTeamPoints'], 'TotalTeamPoints should be an array.');
+            $this->assertNotEmpty($singleChampion['TotalTeamPoints'], 'TotalTeamPoints should not be empty.');
+            $this->assertArrayHasKey('Value', $singleChampion['TotalTeamPoints'], 'TotalTeamPoints should have "Value" key.');
+            $this->assertArrayHasKey('Add', $singleChampion['TotalTeamPoints'], 'TotalTeamPoints should have "Add" key.');
+            $this->assertIsNumeric($singleChampion['TotalTeamPoints']['Value'], 'TotalTeamPoints Value should be numeric.');
+            $this->assertGreaterThan(0, $singleChampion['TotalTeamPoints']['Value'], 'TotalTeamPoints Value should be greater than 0.');
+            $this->assertIsNumeric($singleChampion['TotalTeamPoints']['Add'], 'TotalTeamPoints Add should be numeric.');
 
-            $this->assertArrayHasKey('MatchingLanersPrio', $singleChampion);
-            $this->assertIsArray($singleChampion['MatchingLanersPrio']);
-            $this->assertNotEmpty($singleChampion['MatchingLanersPrio']);
-            $this->assertArrayHasKey('Add', $singleChampion['MatchingLanersPrio']);
-            $this->assertArrayHasKey('Value', $singleChampion['MatchingLanersPrio']);
-            $this->assertIsNumeric($singleChampion['MatchingLanersPrio']['Add']);
-            $this->assertIsNumeric($singleChampion['MatchingLanersPrio']['Value']);
+            $this->assertArrayHasKey('MatchingLanersPrio', $singleChampion, 'Each suggested ban should have "MatchingLanersPrio" key.');
+            $this->assertIsArray($singleChampion['MatchingLanersPrio'], 'MatchingLanersPrio should be an array.');
+            $this->assertNotEmpty($singleChampion['MatchingLanersPrio'], 'MatchingLanersPrio should not be empty.');
+            $this->assertArrayHasKey('Add', $singleChampion['MatchingLanersPrio'], 'MatchingLanersPrio should have "Add" key.');
+            $this->assertArrayHasKey('Value', $singleChampion['MatchingLanersPrio'], 'MatchingLanersPrio should have "Value" key.');
+            $this->assertIsNumeric($singleChampion['MatchingLanersPrio']['Add'], 'MatchingLanersPrio Add should be numeric.');
+            $this->assertIsNumeric($singleChampion['MatchingLanersPrio']['Value'], 'MatchingLanersPrio Value should be numeric.');
             if(array_key_exists('Cause', $singleChampion['MatchingLanersPrio'])){
-                $this->assertGreaterThan(0, $singleChampion['MatchingLanersPrio']['Value']);
-                $this->assertArrayHasKey('Lanes', $singleChampion['MatchingLanersPrio']);
-                $this->assertIsArray($singleChampion['MatchingLanersPrio']['Cause']);
-                $this->assertNotEmpty($singleChampion['MatchingLanersPrio']['Cause']);
-                foreach ($singleChampion['MatchingLanersPrio']['Cause'] as $index => $id) {
-                    $this->assertTrue(isValidID($id));
-                }
-                $this->assertIsArray($singleChampion['MatchingLanersPrio']['Lanes']);
-                $this->assertNotEmpty($singleChampion['MatchingLanersPrio']['Lanes']);
+                $this->assertGreaterThan(0, $singleChampion['MatchingLanersPrio']['Value'], 'MatchingLanersPrio Value should be greater than 0.');
+                $this->assertArrayHasKey('Lanes', $singleChampion['MatchingLanersPrio'], 'MatchingLanersPrio should have "Lanes" key.');
+                $this->assertIsArray($singleChampion['MatchingLanersPrio']['Lanes'], 'MatchingLanersPrio Lanes should be an array.');
+                $this->assertNotEmpty($singleChampion['MatchingLanersPrio']['Lanes'], 'MatchingLanersPrio Lanes should not be empty.');
                 foreach ($singleChampion['MatchingLanersPrio']['Lanes'] as $index => $lane) {
-                    $this->assertTrue(isValidPosition($lane));
+                    $this->assertTrue(isValidPosition($lane), 'Each lane in MatchingLanersPrio should be a valid position.');
                 }
             }
 
             if(array_key_exists('OccurencesInLastGames', $singleChampion)){
-                $this->assertIsArray($singleChampion['OccurencesInLastGames']);
-                $this->assertNotEmpty($singleChampion['OccurencesInLastGames']);
-                $this->assertArrayHasKey('Count', $singleChampion['OccurencesInLastGames']);
-                $this->assertArrayHasKey('Add', $singleChampion['OccurencesInLastGames']);
-                $this->assertArrayHasKey('Games', $singleChampion['OccurencesInLastGames']);
-                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Count']);
-                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Add']);
-                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Games']);
-                $this->assertGreaterThan(0, $singleChampion['OccurencesInLastGames']['Count']);
-                $this->assertGreaterThan(0, $singleChampion['OccurencesInLastGames']['Games']);
+                $this->assertIsArray($singleChampion['OccurencesInLastGames'], 'OccurencesInLastGames should be an array.');
+                $this->assertNotEmpty($singleChampion['OccurencesInLastGames'], 'OccurencesInLastGames should not be empty.');
+                $this->assertArrayHasKey('Count', $singleChampion['OccurencesInLastGames'], 'OccurencesInLastGames should have "Count" key.');
+                $this->assertArrayHasKey('Add', $singleChampion['OccurencesInLastGames'], 'OccurencesInLastGames should have "Add" key.');
+                $this->assertArrayHasKey('Games', $singleChampion['OccurencesInLastGames'], 'OccurencesInLastGames should have "Games" key.');
+                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Count'], 'Count in OccurencesInLastGames should be numeric.');
+                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Add'], 'Add in OccurencesInLastGames should be numeric.');
+                $this->assertIsNumeric($singleChampion['OccurencesInLastGames']['Games'], 'Games in OccurencesInLastGames should be numeric.');
+                $this->assertGreaterThan(0, $singleChampion['OccurencesInLastGames']['Count'], 'Count in OccurencesInLastGames should be greater than 0.');
+                $this->assertGreaterThan(0, $singleChampion['OccurencesInLastGames']['Games'], 'Games in OccurencesInLastGames should be greater than 0.');
             }
 
-            $this->assertArrayHasKey('Points', $singleChampion);
-            $this->assertArrayHasKey('Add', $singleChampion['Points']);
-            $this->assertArrayHasKey('Value', $singleChampion['Points']);
-            $this->assertArrayHasKey('Cause', $singleChampion['Points']);
-            $this->assertIsNumeric($singleChampion['Points']['Add']);
-            $this->assertIsNumeric($singleChampion['Points']['Value']);
-            $this->assertGreaterThan(0, $singleChampion['Points']['Value']);
-            $this->assertTrue(isValidID($singleChampion['Points']['Cause']));
+            $this->assertArrayHasKey('Points', $singleChampion, 'Each suggested ban should have "Points" key.');
+            $this->assertArrayHasKey('Add', $singleChampion['Points'], 'Points should have "Add" key.');
+            $this->assertArrayHasKey('Value', $singleChampion['Points'], 'Points should have "Value" key.');
+            $this->assertArrayHasKey('Cause', $singleChampion['Points'], 'Points should have "Cause" key.');
+            $this->assertIsNumeric($singleChampion['Points']['Add'], 'Points Add should be numeric.');
+            $this->assertIsNumeric($singleChampion['Points']['Value'], 'Points Value should be numeric.');
+            $this->assertGreaterThan(0, $singleChampion['Points']['Value'], 'Points Value should be greater than 0.');
+            $this->assertTrue(isValidID($singleChampion['Points']['Cause']), 'Cause in Points should be a valid ID.');
 
-            $this->assertArrayHasKey('CapablePlayers', $singleChampion);
-            $this->assertArrayHasKey('Add', $singleChampion['CapablePlayers']);
-            $this->assertArrayHasKey('Value', $singleChampion['CapablePlayers']);
-            $this->assertIsNumeric($singleChampion['CapablePlayers']['Add']);
-            $this->assertIsNumeric($singleChampion['CapablePlayers']['Value']);
-            $this->assertGreaterThan(0, $singleChampion['CapablePlayers']['Value']);
+            $this->assertArrayHasKey('CapablePlayers', $singleChampion, 'Each suggested ban should have "CapablePlayers" key.');
+            $this->assertArrayHasKey('Add', $singleChampion['CapablePlayers'], 'CapablePlayers should have "Add" key.');
+            $this->assertArrayHasKey('Value', $singleChampion['CapablePlayers'], 'CapablePlayers should have "Value" key.');
+            $this->assertIsNumeric($singleChampion['CapablePlayers']['Add'], 'CapablePlayers Add should be numeric.');
+            $this->assertIsNumeric($singleChampion['CapablePlayers']['Value'], 'CapablePlayers Value should be numeric.');
+            $this->assertGreaterThan(0, $singleChampion['CapablePlayers']['Value'], 'CapablePlayers Value should be greater than 0.');
 
             if(array_key_exists('LastPlayed', $singleChampion)){
-                $this->assertIsArray($singleChampion['LastPlayed']);
-                $this->assertNotEmpty($singleChampion['LastPlayed']);
-                $this->assertArrayHasKey('Add', $singleChampion['LastPlayed']);
-                $this->assertArrayHasKey('Value', $singleChampion['LastPlayed']);
-                $this->assertIsNumeric($singleChampion['LastPlayed']['Add']);
-                $this->assertIsNumeric($singleChampion['LastPlayed']['Value']);
-                $this->assertGreaterThan(0, $singleChampion['LastPlayed']['Value']);
+                $this->assertIsArray($singleChampion['LastPlayed'], 'LastPlayed should be an array.');
+                $this->assertNotEmpty($singleChampion['LastPlayed'], 'LastPlayed should not be empty.');
+                $this->assertArrayHasKey('Add', $singleChampion['LastPlayed'], 'LastPlayed should have "Add" key.');
+                $this->assertArrayHasKey('Value', $singleChampion['LastPlayed'], 'LastPlayed should have "Value" key.');
+                $this->assertIsNumeric($singleChampion['LastPlayed']['Add'], 'LastPlayed Add should be numeric.');
+                $this->assertIsNumeric($singleChampion['LastPlayed']['Value'], 'LastPlayed Value should be numeric.');
+                $this->assertGreaterThan(0, $singleChampion['LastPlayed']['Value'], 'LastPlayed Value should be greater than 0.');
             }
 
-            $this->assertArrayHasKey('Filename', $singleChampion);
-            $this->assertNotEmpty($singleChampion['Filename']);
+            $this->assertArrayHasKey('Filename', $singleChampion, 'Each suggested ban should have "Filename" key.');
+            $this->assertNotEmpty($singleChampion['Filename'], 'Filename should not be empty.');
 
             if(array_key_exists('AverageMatchScore', $singleChampion)){
-                $this->assertArrayHasKey('AverageMatchScore', $singleChampion);
-                $this->assertIsArray($singleChampion['AverageMatchScore']);
-                $this->assertNotEmpty($singleChampion['AverageMatchScore']);
-                $this->assertArrayHasKey('Add', $singleChampion['AverageMatchScore']);
-                $this->assertArrayHasKey('Value', $singleChampion['AverageMatchScore']);
-                $this->assertIsNumeric($singleChampion['AverageMatchScore']['Add']);
-                $this->assertIsNumeric($singleChampion['AverageMatchScore']['Value']);
+                $this->assertArrayHasKey('AverageMatchScore', $singleChampion, 'Each suggested ban should have "AverageMatchScore" key.');
+                $this->assertIsArray($singleChampion['AverageMatchScore'], 'AverageMatchScore should be an array.');
+                $this->assertNotEmpty($singleChampion['AverageMatchScore'], 'AverageMatchScore should not be empty.');
+                $this->assertArrayHasKey('Add', $singleChampion['AverageMatchScore'], 'AverageMatchScore should have "Add" key.');
+                $this->assertArrayHasKey('Value', $singleChampion['AverageMatchScore'], 'AverageMatchScore should have "Value" key.');
+                $this->assertIsNumeric($singleChampion['AverageMatchScore']['Add'], 'AverageMatchScore Add should be numeric.');
+                $this->assertIsNumeric($singleChampion['AverageMatchScore']['Value'], 'AverageMatchScore Value should be numeric.');
             }
-            $this->assertArrayHasKey('FinalScore', $singleChampion);
-            $this->assertIsNumeric($singleChampion['FinalScore']);
-            $this->assertGreaterThan(0, $singleChampion['FinalScore']);
+            $this->assertArrayHasKey('FinalScore', $singleChampion, 'Each suggested ban should have "FinalScore" key.');
+            $this->assertIsNumeric($singleChampion['FinalScore'], 'FinalScore should be numeric.');
+            $this->assertGreaterThan(0, $singleChampion['FinalScore'], 'FinalScore should be greater than 0.');
         }
     }
 

@@ -54,7 +54,9 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
             $matchIDs = getMatchIDs($puuid, 15);
             // addToQueue('api_queue', 'matchIds', ['puuid' => $puuid, 'maxMatchIDs' => 15]);// DEPRECATED
         } else {
+            // @codeCoverageIgnoreStart
             $matchIDs = $tempMatchIDs;
+            // @codeCoverageIgnoreEnd
         }
         $ajaxArray = [];
         foreach ($matchIDs as $matchID) {
@@ -141,8 +143,10 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 }
 
             } else { 
+                // @codeCoverageIgnoreStart
                 // else empty $existingJson string so following if-statement forced into its else part
                 $existingJson = ""; 
+                // @codeCoverageIgnoreEnd
             }
 
             /**
@@ -160,11 +164,14 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
             }
             foreach(array_keys($playerDataArray["MatchIDs"]) as $match){
                 if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $match)["success"]){
+                    // @codeCoverageIgnoreStart
                     $tempAjaxMatchIDArray[] = $match;
+                    // @codeCoverageIgnoreEnd
                 }
             }
             
             if($existingJson == ""){
+                // @codeCoverageIgnoreStart
                 if(empty($tempAjaxMatchIDArray)){
                     $returnScriptContent .= "console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
@@ -209,6 +216,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 xhr".$requestIterator.".send(data);
                 
                 ";
+                // @codeCoverageIgnoreEnd
                 }
             }
         }
@@ -217,9 +225,6 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
     return $returnScriptContent;
 }
 
-/**
- * @codeCoverageIgnore
- */
 function processResponseData($ajaxUniquifier){
     return "
     var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
@@ -287,9 +292,6 @@ function processResponseData($ajaxUniquifier){
     };";
 }
 
-/**
- * @codeCoverageIgnore
- */
 function callAllFinish($requestIterator, $teamID) {
     return "
     console.log('ALL PLAYERS FINISHED');
