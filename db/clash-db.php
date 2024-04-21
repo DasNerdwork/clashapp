@@ -362,6 +362,26 @@ class DB {
         }
     } 
 
+    public function deactivate_account($username, $email, $password) {
+        $check = $this->check_credentials($email, $password);
+        if($check['status'] == 'success'){
+            $sql = $this->db->prepare("UPDATE users SET status = '0' WHERE username = ? AND email = ? AND (status = '1' OR status = '2')");
+            $sql->bind_param('ss', $username, $email);
+            $sql->execute();
+            $result = $sql->affected_rows;
+
+            if($result > 0) {
+                return array('status' => 'success', 'message' => 'Account successfully deactivated!');
+            } else {
+                // @codeCoverageIgnoreStart
+                return array('status' => 'error', 'message' => 'Unable to deactivate account. Please contact an administrator.');
+                // @codeCoverageIgnoreEnd
+            }
+        } else {
+            return array('status' => 'error', 'message' => 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" style="cursor: pointer;">reset</u> your password.');
+        }
+    }
+
     public function delete_account($id, $username, $region, $email, $password) { // Accounts will be set to inactive for 48-72 hours and then automatically deleted by a mysql event
         $check = $this->check_credentials($email, $password);
         $currentTime = time();

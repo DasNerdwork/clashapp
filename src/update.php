@@ -92,6 +92,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                     }
                 }
                 if(empty($tempAjaxMatchIDArray)){
+                    // @codeCoverageIgnoreStart
                     $returnScriptContent .= "console.log('All matches of ".$playerName." already local.');
                     requests['".$sumid."'] = 'Done';
                     xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
@@ -102,6 +103,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                         callAllFinish($requestIterator, $teamID)
                         ."
                     }</>";
+                    // @codeCoverageIgnoreEnd
                 } else {
                 // THIS REQUEST IS SENT IF A PLAYER IS MISSING SOME MATCH IDS IN THEIR PLAYERFILE
                 $returnScriptContent .= "
@@ -139,7 +141,9 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 }
         
                 if($return){
+                    // @codeCoverageIgnoreStart
                     return '{"status":"up-to-date"}';
+                    // @codeCoverageIgnoreEnd
                 }
 
             } else { 

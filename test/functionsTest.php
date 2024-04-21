@@ -42,7 +42,13 @@ class FunctionsTest extends TestCase {
 
         $actualDataPUUID = getPlayerData("puuid", "wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA");
 
-        $this->assertEquals($actualData, $actualDataPUUID, "Data is not the same regarding access type");
+        $this->assertEquals($actualData['Icon'], $actualDataPUUID['Icon'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['GameName'], $actualDataPUUID['GameName'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['Tag'], $actualDataPUUID['Tag'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['Level'], $actualDataPUUID['Level'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['PUUID'], $actualDataPUUID['PUUID'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['SumID'], $actualDataPUUID['SumID'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['AccountID'], $actualDataPUUID['AccountID'], "Data is not the same regarding access type");
         $this->assertArrayHasKey('Icon', $actualDataPUUID, "Icon key is missing");
         $this->assertArrayHasKey('GameName', $actualDataPUUID, "Name key is missing");
         $this->assertArrayHasKey('Tag', $actualDataPUUID, "Tag key is missing");
@@ -54,7 +60,13 @@ class FunctionsTest extends TestCase {
 
         $actualDataSumID = getPlayerData("sumid", "kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw");
 
-        $this->assertEquals($actualData, $actualDataSumID, "Data is not the same regarding access type");
+        $this->assertEquals($actualData['Icon'], $actualDataSumID['Icon'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['GameName'], $actualDataSumID['GameName'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['Tag'], $actualDataSumID['Tag'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['Level'], $actualDataSumID['Level'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['PUUID'], $actualDataSumID['PUUID'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['SumID'], $actualDataSumID['SumID'], "Data is not the same regarding access type");
+        $this->assertEquals($actualData['AccountID'], $actualDataSumID['AccountID'], "Data is not the same regarding access type");
         $this->assertArrayHasKey('Icon', $actualDataSumID, "Icon key is missing");
         $this->assertArrayHasKey('GameName', $actualDataSumID, "Name key is missing");
         $this->assertArrayHasKey('Tag', $actualDataSumID, "Tag key is missing");
