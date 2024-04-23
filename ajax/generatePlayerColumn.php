@@ -89,7 +89,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
         $playerDataJSONString = json_encode($playerDataRequest["data"]);
         $playerDataJSON = json_decode($playerDataJSONString, true);
         if(isset($tempTeamJSON) && (((time() - $tempTeamJSON["LastUpdate"]) > 1800) || ($tempTeamJSON["LastUpdate"] == 0) || ($forceReload))){
-            $tempMatchIDs = getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);                                           
+            $tempMatchIDs = API::getMatchIDs($playerDataJSON["PlayerData"]["PUUID"], 15);                                           
             $matchInPlayerJsonButNotExistent = false;
             foreach(array_keys($playerDataJSON["MatchIDs"]) as $matchid) {
                 if(!$mdb->findDocumentByField("matches", 'metadata.matchId', $matchid)["success"]){

@@ -13,7 +13,7 @@ require_once '/hdd1/clashapp/db/mongo-db.php';
  * @copyright Copyright (c) date("Y"), Florian Falk
  * 
  * @param mixed $id As we can fetch the $playerData in three different ways (by summonername, sumid or puuid) we define the input here as $id and provide what kind of $id it is
- *                     via the $type argument. If none is provided we switch to the default of getPlayerData by summonername
+ *                     via the $type argument. If none is provided we switch to the default of API::getPlayerData by summonername
  * @param int $maxMatchIds The maximum amount of matchids we want to update to/from via an API request
  * @param mixed $type Usually by "name" but can also be PUUID or SumID. Used for player data request variants
  * @var array $playerData API requested return json consisting of the entries Name (Playername in clean text), Playerlevel, PUUID, SumID, AccountID & the last change date
@@ -41,17 +41,17 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
     if($id != ""){
         $returnScriptContent = "";
         $mdb = new MongoDBHelper();
-        $playerData = getPlayerData($type,$id);
+        $playerData = API::getPlayerData($type,$id);
         // addToQueue('api_queue', 'playerData', ['type' => $type, 'id' => $id]); // DEPRECATED
         $playerName = $playerData["GameName"];
         $sumid = $playerData["SumID"];
         $puuid = $playerData["PUUID"];
-        $masteryData = getMasteryScores($puuid);
+        $masteryData = API::getMasteryScores($puuid);
         // addToQueue('api_queue', 'masteryScores', ['puuid' => $puuid]);// DEPRECATED
-        $rankData = getCurrentRank($sumid);
+        $rankData = API::getCurrentRank($sumid);
         // addToQueue('api_queue', 'currentRank', ['sumid' => $sumid]);// DEPRECATED
         if($tempMatchIDs == null){
-            $matchIDs = getMatchIDs($puuid, 15);
+            $matchIDs = API::getMatchIDs($puuid, 15);
             // addToQueue('api_queue', 'matchIds', ['puuid' => $puuid, 'maxMatchIDs' => 15]);// DEPRECATED
         } else {
             // @codeCoverageIgnoreStart

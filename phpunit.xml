@@ -4,6 +4,9 @@
     <testsuite name="Functions">
       <file>test/functionsTest.php</file>
     </testsuite>
+    <testsuite name="API">
+      <file>test/apiFunctionsTest.php</file>
+    </testsuite>
     <testsuite name="MySQL">
       <file>test/clashDBTest.php</file>
     </testsuite>

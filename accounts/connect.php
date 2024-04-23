@@ -7,7 +7,7 @@ if (isset($_SESSION['user'])) {
 }
 
 if (isset($_POST['icon'])) {
-    $playerDataArray = getPlayerData("riot-id", $_POST['name']); # TODO: PlayerData direkt aus request in settings.php übergeben
+    $playerDataArray = API::getPlayerData("riot-id", $_POST['name']); # TODO: PlayerData direkt aus request in settings.php übergeben
     if($playerDataArray["Icon"] == $_POST['icon']){
         $db = new DB();
         if($db->connect_account($playerDataArray["PUUID"], $_POST['sessionUsername'])){

@@ -247,7 +247,7 @@ if (!empty($success_message)) {
                 </form>
             </div>
             <?php } else { 
-                $currentPlayerData = getPlayerData("puuid", $_SESSION['user']['puuid']);
+                $currentPlayerData = API::getPlayerData("puuid", $_SESSION['user']['puuid']);
                 echo '<div class="account-link mt-2" id="account-link"><span class="block">Linked to:</span>
                     <img src="/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$currentPlayerData["Icon"].'.avif" class="m-auto inline-flex justify-center max-w-[32px] max-h-[32px]" width="32" loading="lazy">
                     '.$currentPlayerData["GameName"]."#".$currentPlayerData["Tag"].'</div>';
@@ -298,7 +298,7 @@ if (!empty($success_message)) {
             } else if(!$validName) {
                 echo '<script>setError("Summoner Name incorrect: Allowed characters are a-Z, 0-9 and alphabets of other languages.");</script>';
             } else {
-                $playerDataArray = getPlayerData("riot-id", $_POST['connectname']);
+                $playerDataArray = API::getPlayerData("riot-id", $_POST['connectname']);
                 if($playerDataArray['Icon'] != ""){
                     $randomIcon = getRandomIcon($playerDataArray["Icon"]);
                     echo '

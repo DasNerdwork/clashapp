@@ -73,7 +73,7 @@ if (($teamID == null || (strlen($teamID) <= 6 && !in_array($teamID, array("404",
     header('Location: /team/404');
     exit;
 } else {
-    $teamDataArray = getTeamByTeamID($teamID);
+    $teamDataArray = API::getTeamByTeamID($teamID);
     if($teamDataArray["Status"] == "404" && $teamID != "404"){ // necessary to check against 404 to prevent loop-redirect
         header('Location: /team/404');
         exit;

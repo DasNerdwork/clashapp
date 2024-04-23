@@ -16,7 +16,7 @@ if(isset($_POST['matches'], $_POST['playerName'])){
         file_put_contents($logPath, $errMsg.PHP_EOL , FILE_APPEND | LOCK_EX);
         die("Invalid playerName: " . $_POST['playerName']);
     }
-    downloadMatchesByID(json_decode($_POST['matches']), $_POST['playerName']); // asynchronously downloads all matches by matchid after page has loaded
+    API::downloadMatchesByID(json_decode($_POST['matches']), $_POST['playerName']); // asynchronously downloads all matches by matchid after page has loaded
     // addToQueue('api_queue', 'downloadMatches', ['matchids' => $_POST['matches'], 'username' => $_POST['playerName']]); // DEPRECATED
     clearstatcache(true, $logPath); // Used for proper filesize calculation
     $endofup = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - INFO]: End of update for \"" . $_POST['playerName'] . "\" - (Final Matchcount: ".count(json_decode($_POST['matches'])).", Approximate Logsize: ".number_format((filesize($logPath)/1048576), 3)." MB)";

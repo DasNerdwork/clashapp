@@ -547,7 +547,7 @@ function createAutosuggestItem(key, icon, currentPatch, variant) {
       if(key2 == "flokrastinator" || key2 == "jnnstv" || key2 == "5 min deathtimer" || key2 == "ilealori" || key2 == "vollbard" || key2 == "bard bard bard bard#brd" || key2 == "dasnerdwork#nerdy"){
         window.location.href="https://clashscout.com/team/test";
       } else {
-        postAjax(`${window.location.protocol}//${window.location.hostname}/clashapp/src/functions.php`, { sumname: key }, function(data){
+        postAjax(`${window.location.protocol}//${window.location.hostname}/clashapp/src/apiFunctions.php`, { sumname: key }, function(data){
           if(data == "404"){
               window.location.href="https://clashscout.com/404";
           } else {

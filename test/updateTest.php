@@ -13,12 +13,12 @@ class UpdateTest extends TestCase {
      * @uses isValidMatchID
      * @uses championIdToFilename
      * @uses championIdToName
-     * @uses getCurrentRank
-     * @uses getMasteryScores
-     * @uses getMatchIDs
-     * @uses getPlayerData
+     * @uses API::getCurrentRank
+     * @uses API::getMasteryScores
+     * @uses API::getMatchIDs
+     * @uses API::getPlayerData
      * @uses objectToArray
-     * @uses downloadMatchesByID
+     * @uses API::downloadMatchesByID
      */
     public function testUpdateProfile() {
         $mdb = new MongoDBHelper();
@@ -89,7 +89,7 @@ class UpdateTest extends TestCase {
             }
 
             if($tryUpdateAgain){ // If we manually removed data for test, reset to previous
-                $this->assertTrue(downloadMatchesByID([$matchToDelete], 'PHPUnit'), 'Downloading the match we deleted for testing before was not successful');
+                $this->assertTrue(API::downloadMatchesByID([$matchToDelete], 'PHPUnit'), 'Downloading the match we deleted for testing before was not successful');
                 $resetMatchData = $mdb->addElementToDocument('players', 'PlayerData.PUUID', $puuid, 'MatchIDs', $matchDataBeforeTest); // Reset matchdata in playerdata
                 $this->assertTrue($resetMatchData['success'], 'Resetting playerdata matchdata was not successful');
             }
