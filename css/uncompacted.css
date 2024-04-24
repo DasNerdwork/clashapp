@@ -2363,8 +2363,6 @@ ul.moveable {
   float: left;
 }
 
-/* TODO: add css tailwind changes to javascript generated errors or successes */
-
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, textarea:-webkit-autofill, textarea:-webkit-autofill:hover, textarea:-webkit-autofill:focus {
   -webkit-text-fill-color: #fff;
   font-size: 1rem;

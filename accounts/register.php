@@ -20,8 +20,6 @@ require '/hdd1/clashapp/plugins/phpmailer/src/Exception.php';
 require '/hdd1/clashapp/plugins/phpmailer/src/PHPMailer.php';
 require '/hdd1/clashapp/plugins/phpmailer/src/SMTP.php';
 
-// ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL); // TODO rausnehmen
-
 $db = new DB();
 // $response = $db->account_exists("john.doe@example.com");
 
@@ -71,7 +69,7 @@ if (isset($_POST['submit'])) {
     } else if(!(in_array($_POST['region'], array("EUW")))) { // full array: array("EUW", "EUN", "NA", "KR", "BR", "JP", "RU", "OCE", "TR", "LAN", "LAS")
         $error_message[] = 'The selected region is currently not supported.';
     } else if($db->account_exists($_POST['email'], $_POST['username'])) {
-        $error_message[] = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" class="cursor-pointer">forgotten your password</u>?'; // TODO change to password reset mail instead of onclick open 
+        $error_message[] = 'This account already exists. Have you <u type="button" onclick="resetPassword(true);" class="cursor-pointer">forgotten your password</u>?'; // TODO: change to password reset mail instead of onclick open 
     } else if(isset($_POST['hnypt']) && $_POST['hnypt'] != ""){
         $error_message[] = 'Honeypot-Detection triggered. If you believe this is an error please contact an administrator.';
     } else {

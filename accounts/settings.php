@@ -41,7 +41,7 @@ if (isset($_POST['current-password']) && isset($_POST['new-password']) && isset(
     $number    = preg_match('@[0-9]@', $_POST['new-password']);
     $specialChars = preg_match('@[^\w]@', $_POST['new-password']);
     if ($db->check_credentials($_SESSION['user']['email'], $_POST['current-password'])['status'] != 'success') {
-        $error_message[] = 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" class="cursor-pointer">reset</u> your password.'; // TODO change to password reset mail instead of onclick open
+        $error_message[] = 'Incorrect password. You can try again or <u type="button" onclick="resetPassword(true);" class="cursor-pointer">reset</u> your password.'; // TODO: change to password reset mail instead of onclick open
     } else {
          if ($_POST["new-password"] !== $_POST["confirm-new-password"]) {
             $error_message[] = "The entered passwords do not match.";

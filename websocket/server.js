@@ -11,6 +11,7 @@ import mongodb from 'mongodb';
 const mongoURL = process.env.MDB_URL;
 const logStream = fs.createWriteStream('/hdd1/clashapp/data/logs/server.log', { flags: 'a' });
 const logPath = '/hdd1/clashapp/data/logs/server.log';
+const attackLogPath = '/hdd1/clashapp/logs/attacks.log';
 const maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
 const roomPlayers = {}; // Initializes an object to store connected players for each room
 const roomSettings = {};
@@ -296,8 +297,10 @@ wss.on('connection', function connection(ws, req) {
             }
           }
           if(checkForInjection){ // if the var is still true (shouldn't be if id AND name found in champion.json)
-            console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Code Injection Deteced, either champname or champid is invalid -> Logging IP (%s)", new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]); // TODO: Log and Save IP adress of attacker
+            console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Code Injection Deteced, either champname or champid is invalid -> Logging IP (%s)", new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]);
             ws.send('{"status":"CodeInjectionDetected"}');
+            var attackMessage = `[${new Date()}] IP: ${req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]}, Team ID: ${dataAsJSON.teamid}\n`;
+            fs.appendFileSync(attackLogPath, attackMessage, 'utf8');
           } else {
             readTeamData(dataAsJSON.teamid)
               .then((localDataAsJson) => {
@@ -360,8 +363,10 @@ wss.on('connection', function connection(ws, req) {
             }
           }
           if(checkForInjection){ // if the var is still true (shouldn't be if id AND name found in champion.json)
-            console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Code Injection Deteced, either champname or champid is invalid -> Logging IP (%s)", new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]); // TODO: Log and Save IP adress of attacker
+            console.log("\x1b[2m[%s]\x1b[0m [\x1b[35mWS-Server\x1b[0m]: Code Injection Deteced, either champname or champid is invalid -> Logging IP (%s)", new Date().toLocaleTimeString(), req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]);
             ws.send('{"status":"CodeInjectionDetected"}');
+            var attackMessage = `[${new Date()}] IP: ${req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]}, Team ID: ${dataAsJSON.teamid}\n`;
+            fs.appendFileSync(attackLogPath, attackMessage, 'utf8');
           } else {    
               readTeamData(dataAsJSON.teamid)
               .then((localDataAsJson) => {

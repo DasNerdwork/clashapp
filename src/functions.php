@@ -459,7 +459,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray,
                             if (($inhalt->info->participants[$i]->teamPosition == $matchLane) && ($inhalt->info->participants[$i]->championName != $champion)){
                             $returnString .= '<div class="lane-opponent col-span-1 row-span-1 h-full flex justify-center items-center gap-2"><span>vs. </span>';
                             $enemyChamp = $inhalt->info->participants[$i]->championName;
-                            if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";} /** @todo One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
+                            if($enemyChamp == "FiddleSticks"){$enemyChamp = "Fiddlesticks";}
                             if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif')){
                                 $returnString .= '<img src="/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$enemyChamp.'.avif').'" width="32" height="32" class="twok:max-w-[32px] fullhd:max-w-[26px]" loading="lazy" alt="This icon represents the champion '.$enemyChamp.', but tinier as a normal champion icon as it shows the enemy laner"></div>';
                             } else {

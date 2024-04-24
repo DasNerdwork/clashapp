@@ -78,7 +78,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
         /**
          * STEP 1: Check if up-to-date
          */
-        if($sumid != "" || $sumid != "/"){ /** @todo additional sanitizing regex check for valid $sumid variants */
+        if(($sumid != "" || $sumid != "/") && isValidID($sumid)){
             $playerDataRequest = $mdb->getPlayerBySummonerId($sumid);
             if($playerDataRequest["success"]){
                 $playerDataJSONString = json_encode($playerDataRequest["data"]);

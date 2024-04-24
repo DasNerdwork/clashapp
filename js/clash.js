@@ -44,7 +44,8 @@ ready(function() {
       if(!laneFilter){ // if we don't have an active lane filter
         for (j = 0; j < championList.length; j++) { // -> Sort if input matches element span name or abbreviation data tag
           span = championList[j].getElementsByTagName("span")[0].innerText; // the current champion names in a list
-          if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase())))) { 
+          abbreviations = championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",");
+          if (span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1 || abbreviations.some(abbr => abbr.includes(champInput.value.toUpperCase()))) { 
             championList[j].style.display = "";
             showNone = false;
           } else {
@@ -53,8 +54,8 @@ ready(function() {
         }
       } else { // if we have an active lane filter
         for (j = 0; j < championList.length; j++) { // -> Sort if input matches element span name or abbreviation data tag AND either also matches the active lane filter
-          span = championList[j].getElementsByTagName("span")[0].innerText; // the current champion names in a list
-          if (((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1) || (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(champInput.value.toUpperCase()))) && (championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",").includes(laneFilter))) {
+          abbreviations = championList[j].getElementsByTagName("img")[0].dataset.abbr.toUpperCase().split(",");
+          if ((span.toUpperCase().indexOf(champInput.value.toUpperCase()) > -1 || abbreviations.some(abbr => abbr.includes(champInput.value.toUpperCase()))) && abbreviations.includes(laneFilter)) {
             championList[j].style.display = "";
             showNone = false;
           } else {
