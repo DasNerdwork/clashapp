@@ -89,7 +89,7 @@ if (isset($_POST['dcpassword'])) {
             unset($_SESSION['user']["puuid"]);
             Header('Location: https://clashscout.com/settings?verified=false');
         } else {
-            echo "<script>setError('Unable to locally disconnected accounts. Please reach out to an administrator.');</script>"; // TODO: Fix error banner display
+            echo "<script>setError('Unable to locally disconnected accounts. Please reach out to an administrator.');</script>";
         }
     } else {
         echo "<script>setError('Incorrect password. You can try again or <u type=\"button\" onclick=\"resetPassword(true);\" class=\"cursor-pointer\">reset</u> your password.');</script>"; // TODO: change to password reset mail instead of onclick open

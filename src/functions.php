@@ -294,7 +294,7 @@ function printTeamMatchDetailsByPUUID($matchIDArray, $puuid, $matchRankingArray,
                                     $returnString .= '<div class="champion-data flex gap-2 twok:h-[68px] fullhd:h-[56px] justify-between px-2"><div class="champion-data-left inline-flex gap-2"><div class="champion-icon">';
                                     if ($inhalt->info->participants[$in])
                                     $champion = $inhalt->info->participants[$in]->championName;
-                                    if($champion == "FiddleSticks"){$champion = "Fiddlesticks";} /** TODO: One-Line fix for Fiddlesticks naming done, still missing renaming of every other champ */
+                                    if($champion == "FiddleSticks"){$champion = "Fiddlesticks";}
                                     if($champion == "Kayn"){
                                         if($inhalt->info->participants[$in]->championTransform == "1"){
                                             if(fileExistsWithCache('/hdd1/clashapp/data/misc/webp/kayn_rhaast_darkin.avif')){
@@ -596,7 +596,7 @@ function runeIconFetcher($id){
             }
         }
     }
-    return ""; // TODO: Error handling / add missing rune image
+    return "";
 }
 
 /** Returning random icon ID between 1 - 28 except for the current given icon ID
@@ -657,7 +657,7 @@ function runeTreeIconFetcher($id){
             return substr($runetree->icon, 0, -4);
         }
     }
-    return ""; // TODO: Error handling / add missing rune image
+    return "";
 }
 
 /** Resolving a championid to the champions clean name
@@ -712,7 +712,7 @@ function championIdToFilename($id){
  * @param int $counter An input counter used for getting the selected data in the second part of this function
  *
  * Returnvalue:
- * @return array $mostCommonReturn Array containing the sorted most common of specific attributes TODO: Testcases for this function and/or implement from profile into team
+ * @return array $mostCommonReturn Array containing the sorted most common of specific attributes
  */
 function getMostCommon($attributesArray, $matchDataArray, $puuid, $counter){
     $mostCommonArray = array();
@@ -897,10 +897,10 @@ function getPlayerTags($matchDaten, $puuid){
  * @param array $matchDataArray Inputarray of all MatchIDs of the user (PUUID) over which we iterate
  * @param string $puuid The summoners PUUID necessary to confirm that the users matches are in our local stored data
  * @param string $lane The lane on where this function should fetch/get the averages from, as we collect the values for each lane separately
- * @var array $averageArray The returnvalue array but not printed
+ * @var array $averageArray The returnvalue
  *
  * Returnvalue:
- * @return void N/A, only direct printing to page TODO: testfunction for printing function
+ * @return array $averageArray
  */
 function getAverage($attributesArray, $matchDataArray, $puuid, $lane){
     $averageArray = array();
@@ -1543,7 +1543,7 @@ function showBanSelector(){
  * Returnvalue:
  * @return string $abbreviations is the return string that will get split by "," separator and added into the data-abbr attribute in the html code above
  */
-function abbreviationFetcher($champName){ // TODO: Change abbreviation working from dark,darki,darkin -> darkin only
+function abbreviationFetcher($champName){
     $abbreviations = [];
     $abbrArray = json_decode(file_get_contents('/hdd1/clashapp/data/misc/abbreviations.json'));
     if (isset($abbrArray->{$champName})) {
