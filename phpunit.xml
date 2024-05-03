@@ -22,7 +22,7 @@
     <testsuite name="Accounts">
       <file>test/accountsTest.php</file>
     </testsuite>
-    <testsuite name="Language">
+    <testsuite name="Languages">
       <file>test/translateTest.php</file>
     </testsuite>
   </testsuites>
