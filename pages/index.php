@@ -1,5 +1,6 @@
 <?php if (session_status() === PHP_SESSION_NONE) session_start(); 
 include_once('/hdd1/clashapp/src/functions.php');
+include_once('/hdd1/clashapp/src/apiFunctions.php');
 require_once '/hdd1/clashapp/db/mongo-db.php';
 
 ini_set('display_errors', 1);

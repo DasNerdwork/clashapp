@@ -230,6 +230,8 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
 
     if(fileExistsWithCache('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif')){
         $profileIconSrc = '/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/'.$playerData["Icon"].'.avif');
+    } else {
+        $profileIconSrc = '/clashapp/data/patch/'.$currentPatch.'/img/profileicon/29.avif?version='.md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/profileicon/29.avif');
     }
 
     $rankOrLevelArray = getRankOrLevel($rankData, $playerData);
@@ -359,7 +361,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
 
     $responseArray["script"] = $scriptContent;
     $responseArray["recalcSBD"] = $recalculateSuggestedBanData;
-    $responseArray["profileIconSrc"] = $profileIconSrc;
+    if(isset($profileIconSrc)) $responseArray["profileIconSrc"] = $profileIconSrc;
     if(isset($upperPlate)) $responseArray["upperPlate"] = $upperPlate;
     if(isset($upperContent)) $responseArray["upperContent"] = $upperContent;
     if(isset($lowerPlate)) $responseArray["lowerPlate"] = $lowerPlate;
@@ -376,6 +378,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
     if($tagList !== "") $responseArray["tagList"] = $tagList;
     if($matchHistoryContent !== "") $responseArray["matchHistoryContent"] = $matchHistoryContent;
     if(isset($_POST['csrf_token'])) $responseArray["csrfToken"] = $_POST['csrf_token'];
+    if(isset($rankOrLevelArray)) $responseArray["highestRank"] = $rankOrLevelArray;
 
     echo json_encode($responseArray);
 }

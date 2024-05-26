@@ -373,6 +373,9 @@ class API {
                         $rankDataArray["LP"] = $requestArray["leaguePoints"];
                         $rankDataArray["Wins"] = $requestArray["wins"];
                         $rankDataArray["Losses"] = $requestArray["losses"];
+                        if($rankDataArray["Wins"] + $rankDataArray["Losses"] > 0){
+                            $rankDataArray["Winrate"] = round(($rankDataArray["Wins"] / ($rankDataArray["Wins"] + $rankDataArray["Losses"])) * 100, 2);
+                        }
                         $rankReturnArray[] = $rankDataArray;
                     }
                 }
@@ -792,14 +795,13 @@ class API {
                 $clashData = json_decode($clashOutput, true);
                 if(isset($clashData[0]["teamId"])){
                     // @codeCoverageIgnoreStart
-                    return $clashData[0]["teamId"];
+                    echo $clashData[0]["teamId"];
                 } else {
-                    return '404';
+                    echo '404';
                     // @codeCoverageIgnoreEnd
                 }
             }
         }
-        return '404';
     }
 }
 

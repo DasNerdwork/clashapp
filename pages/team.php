@@ -62,6 +62,7 @@ $matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'
 echo "
 <script>
 const requests = {};
+const inTeamRanking = {};
 var cached = 0;
 </script>";
 

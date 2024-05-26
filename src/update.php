@@ -271,6 +271,7 @@ function processResponseData($ajaxUniquifier){
                         }
                         var averageScore = (sum / scoresArray.length).toFixed(2);
                         avgScorePath.innerText = averageScore;
+                        inTeamRanking[response.sumid] = averageScore;
                         setTimeout(function() {
                             avgScorePath.classList.remove('opacity-0');
                         }, 100);

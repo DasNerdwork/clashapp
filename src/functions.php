@@ -2055,6 +2055,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
 function getRankOrLevel($rankData, $playerData){
     $rankVal = 0; // This score is used to find the highest Rank from both Flex and Solo Queue | Local Variable
     $highEloLP = ""; // If the user has reached high elo the LP count is important (just for Master, Grandmaster and Challenger)
+    $winrate = 0; // Initialize winrate variable
 
     foreach($rankData as $rankedQueue){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution)
         if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
@@ -2062,54 +2063,64 @@ function getRankOrLevel($rankData, $playerData){
                 $rankVal = 3;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
             } else if($rankedQueue["Tier"] == "GOLD" && $rankVal < 4){
                 // @codeCoverageIgnoreStart
                 $rankVal = 4;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
             } else if($rankedQueue["Tier"] == "BRONZE" && $rankVal < 2){
                 $rankVal = 2;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
             } else if($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 5){
                 $rankVal = 5;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
             } else if($rankedQueue["Tier"] == "EMERALD" && $rankVal < 6){
                 $rankVal = 6;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
             } else if($rankedQueue["Tier"] == "IRON" && $rankVal < 1){
                 $rankVal = 1;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
             } else if($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 7){
                 $rankVal = 7;
                 $rankNumber = $rankedQueue["Rank"];
                 $highestRank = $rankedQueue["Tier"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
             } else if($rankedQueue["Tier"] == "MASTER" && $rankVal < 8){
                 $rankVal = 8;
                 $rankNumber = "";
                 $highestRank = $rankedQueue["Tier"];
                 $highEloLP = $rankedQueue["LP"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
                 // @codeCoverageIgnoreEnd
             } else if($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 9){
                 $rankVal = 9;
                 $rankNumber = "";
                 $highestRank = $rankedQueue["Tier"];
                 $highEloLP = $rankedQueue["LP"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
                 // @codeCoverageIgnoreStart
             } else if($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 10){
                 $rankVal = 10;
                 $rankNumber = "";
                 $highestRank = $rankedQueue["Tier"];
                 $highEloLP = $rankedQueue["LP"];
+                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
                 // @codeCoverageIgnoreEnd
             }
         }
     }
     if($rankVal != 0){
-        return array("Type" => "Rank", "HighestRank" => $highestRank, "HighEloLP" => $highEloLP, "RankNumber" => $rankNumber);
+        return array("Type" => "Rank", "HighestRank" => $highestRank, "HighEloLP" => $highEloLP, "RankNumber" => $rankNumber, "Winrate" => $winrate);
     } else {
         if($playerData["Level"] < 30){
             $levelFileName = "001";
@@ -2682,6 +2693,9 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
                 loadingTextElements.forEach(function(element) {
                     element.classList.remove('text-loading-light');
                 });
+                if (!inTeamRanking['".$sumid."']) {
+                    inTeamRanking['".$sumid."'] = {};
+                }
                 if(response.profileIconSrc){
                     let profileIcon = document.getElementById('profileicon-".$requestIterator."');
                     profileIcon.removeAttribute('style');
@@ -2737,9 +2751,13 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
                 }
                 if(response.matchScore){
                     document.getElementById('matchscore-".$requestIterator."').innerText = response.matchScore;
+                    inTeamRanking['".$sumid."']['Matchscore'] = response.matchScore;
                 }
                 if(response.rankedContent){
                     document.getElementById('rankcontent-".$requestIterator."').innerHTML = response.rankedContent;
+                }
+                if(response.highestRank){
+                    inTeamRanking['".$sumid."']['RankedData'] = response.highestRank;
                 }
                 if(response.masteryContent){
                     let masteryContent =  document.getElementById('masterycontent-".$requestIterator."');
@@ -2756,6 +2774,45 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
                 }
                 if(response.matchHistoryContent){
                     document.getElementById('matchhistory-".$requestIterator."').innerHTML = response.matchHistoryContent;
+                }
+                
+                if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {
+                    var xhrCalc".$requestIterator." = new XMLHttpRequest();
+                    xhrCalc".$requestIterator.".open('POST', '/ajax/calcTeamRanking.php', true);
+                    xhrCalc".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                
+                    xhrCalc".$requestIterator.".onreadystatechange = function() {
+                        if (xhrCalc".$requestIterator.".readyState === 4 && xhrCalc".$requestIterator.".status === 200) {
+                            var calcResponse = JSON.parse(xhrCalc".$requestIterator.".responseText);
+                            if(calcResponse.csrfToken == '".$_SESSION['csrf_token']."'){
+                                if(calcResponse.inTeamRanking){
+                                    var colors = ['#ff0000', '#ffa500', '#008000', '#0000ff', '#800080'];
+
+                                    calcResponse.inTeamRanking.forEach(function(id, index) {
+                                        var columnParent = document.querySelector('.single-player-column[data-sumid=\"' + id + '\"]');
+                                        if (columnParent) {
+                                            var triangleContainer = document.createElement('div');
+                                            
+                                            triangleContainer.style.borderBottom = '40px solid transparent';
+                                            triangleContainer.style.borderLeft = '40px solid ' + colors[index % colors.length];;
+                                            triangleContainer.style.marginBottom = '-40px';
+
+                                            var inTeamRank = document.createElement('div');
+                                            inTeamRank.textContent = index + 1;
+                                            inTeamRank.classList.add('absolute', 'font-bold');
+                                            inTeamRank.style.marginLeft = '-7%';
+
+                                            triangleContainer.appendChild(inTeamRank);
+                                            
+                                            columnParent.parentNode.insertBefore(triangleContainer, columnParent);
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    };
+                    var calcData = 'inTeamRanking=' + JSON.stringify(inTeamRanking) + '&csrf_token=".$_SESSION['csrf_token']."';
+                    xhrCalc".$requestIterator.".send(calcData);
                 }
             }
         }
