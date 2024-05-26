@@ -261,7 +261,7 @@ echo '
                 $playerSpawnDelay = 0;
                 $forceReload = isset($_GET["reload"]) ? true : false;
                 foreach($teamDataArray["Players"] as $key => $player){ 
-                    echo generatePlayerColumnData($xhrPCDcount, $player["summonerId"], $teamID, $player["position"], $forceReload);
+                    echo generatePlayerColumnData($xhrPCDcount, $player["summonerId"], $teamID, $player["position"], $forceReload, $_SESSION['csrf_token']);
                     $xhrPCDcount++;
                     $startFetchPlayer[$key] = microtime(true);
                     $memFetchPlayer[$key] = memory_get_usage();
