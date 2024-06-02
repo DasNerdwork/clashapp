@@ -1,12 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./*.{html,js,php}",
     "./accounts/*.php",
-    "./js/*.js",
-    "./live/*.php",
-    "./templates/*.{html,php}",
     "./ajax/*.php",
+    "./db/*.php",
+    "./js/*.js",
+    "./pages/*.php",
+    "./src/*.php",
+    "./templates/*.php",
+    "./test/*.php",
+    "./websocket/*.{html,js,php}",
   ],
   safelist: [
     'bg-lose',

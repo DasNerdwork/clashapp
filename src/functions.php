@@ -660,6 +660,46 @@ function runeTreeIconFetcher($id){
     return "";
 }
 
+function randRuneTreeIcon(){
+    global $currentPatch;
+    $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/runesReforged.json');
+    $json = json_decode($data, true);
+    $randomPath = $json[array_rand($json)];
+    $runes = $randomPath['slots'][0]['runes'];
+    $icons = array_column($runes, 'icon');
+    $randomIcon = $icons[array_rand($icons)];
+    return $randomIcon;
+}
+
+function randSummonerSpell(){
+    $summonerSpells = array(
+        "SummonerBarrier",
+        "SummonerDot",
+        "SummonerExhaust",
+        "SummonerHaste",
+        "SummonerHeal",
+        "SummonerSmite",
+        "SummonerTeleport"
+    );
+    $randomSpell = $summonerSpells[array_rand($summonerSpells)];
+
+    return $randomSpell;
+}
+
+function randGameLane(){
+    $lanes = array(
+        "BOTTOM",
+        "UTILITY",
+        "MIDDLE",
+        "TOP",
+        "JUNGLE",
+    );
+    $randomLane = $lanes[array_rand($lanes)];
+
+    return $randomLane;
+}
+
+
 /** Resolving a championid to the champions clean name
  * This function iterates through the current patches champion.json and returns the name of the champion given by id
  *
@@ -2632,6 +2672,14 @@ function fileExistsWithCache($filePath)
     $fileExistsCache[$filePath] = $exists;
 
     return $exists;
+}
+
+function weightedRand($range1, $range2, $power = 1.5) {
+	$min = round(min($range1, $range2));
+	$max = round(max($range1, $range2)) + 1;
+	$random = floor($min + ($max - $min) * pow((rand(0,10000)/10000), $power));
+	
+	return $random;
 }
 
 /**

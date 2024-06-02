@@ -486,18 +486,97 @@ echo '
                     <div class='bg-dark w-full rounded-t h-8 -mb-[1.15rem]'></div>
                 </td>
             </tr>
+
             <tr id='match-history'>";
             for ($i=1; $i <= count($teamDataArray["Players"]); $i++) { 
                 echo "
                     <td class='align-top w-1/5 opacity-0' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
                         <table class='rounded-b bg-[#141624] w-full'>
                             <tr id='matchhistory-{$i}'>
+                                <td x-data='{ open: true }' class='single-player-match-history' data-puuid='data-puuid' data-sumid='data-sumid'>
+                                    <button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full'
+                                        :aria-label='(open ? \"&#11167;\" : \"&#11165;\")'
+                                        @click='open = !open'
+                                        x-text='open ? \"&#11167;\" : \"&#11165;\" '>
+                                    </button>
+                                    <div class='smooth-transition w-full overflow-hidden' x-show='open' x-transition>";
+                                        for ($j=0; $j < 15; $j++) { 
+                                            $randomChampPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/champion/*.avif"))];
+                                            $randomKeyRune = randRuneTreeIcon();
+                                            $randomSecRune = glob("/hdd1/clashapp/data/patch/img/perk-images/Styles/720*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/img/perk-images/Styles/720*.avif"))];
+                                            $randKills = weightedRand(0, 18, 4);
+                                            $randDeaths = weightedRand(1, 18, 4);
+                                            $randAssists = weightedRand(0, 18, 4);
+                                            $randItemCount = rand(1, 6);
+                                            $randNoItemCount = 6 - $randItemCount;
+                                            echo "
+                                            <div class='w-full bg-gray-800 border-b border-[4px] border-dark' x-data='{ advanced: false }' @page-advanced='advanced = true' style='content-visibility: auto;' data-matchid='EUW1_6927677011'>
+                                                <div id='match-header' class='inline-flex w-full gap-2 pt-2 px-2'>
+                                                    <div class='match-result mb-2'>
+                                                        <span class='text-white font-bold'>?</span>
+                                                    </div>
+                                                    <div class='match-type-and-time'>
+                                                        <span>Clash ".sprintf('%02d:%02d', $m = rand(15, 59), rand(0, 59))."</span>
+                                                    </div>
+                                                    <div id='match-time-ago' class='ml-auto'>
+                                                        <span>".secondsToTime(rand(1, time() - strtotime('-12 months')))."</span>
+                                                    </div>
+                                                </div>
+                                                <div class='champion-data flex gap-2 twok:h-[68px] fullhd:h-[56px] justify-between px-2'>
+                                                    <div class='champion-data-left inline-flex gap-2'>
+                                                        <div class='champion-icon'>
+                                                            <img src='".str_replace('/hdd1', '', $randomChampPath)."?version=".md5_file("{$randomChampPath}")."' width='68' height='68' style='filter: grayscale(100%)' class='twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative z-0 rounded' loading='lazy' alt='Main icon of the league of legends champion Aphelios'>
+                                                            <img src='/clashapp/data/misc/LevelAndLaneOverlay.avif' width='68' height='68' class='twok:max-w-[68px] twok:min-w-[68px] fullhd:max-w-[56px] fullhd:min-w-[56px] flex align-middle relative twok:bottom-16 fullhd:bottom-[3.5rem] -mb-16 z-10 rounded' loading='lazy' alt='Overlay image as background for level and lane icon'>
+                                                            <div class='champion-level flex relative w-4 h-4 max-w-[16px] min-w-[16px] z-20 -ml-4 twok:bottom-[17px] twok:-right-[17px] twok:text-[13px] fullhd:bottom-[8px] fullhd:-right-[15px] fullhd:text-[12px] justify-center items-center'>".rand(7, 18)."</div>
+                                                            <div class='champion-lane flex relative w-4 h-4 twok:max-w-[16px] twok:min-w-[16px] z-20 -ml-4 twok:bottom-[33px] twok:-right-[66px] fullhd:max-w-[14px] fullhd:min-w-[14px] fullhd:bottom-[25px] fullhd:-right-[56px] justify-center items-center'>
+                                                                <img src='/clashapp/data/misc/lanes/".randGameLane().".avif' width='16' height='16' loading='lazy' class='max-w-[16px] min-w-[16px] saturate-0 brightness-150' alt='Icon of a league of legends position for BOTTOM'>
+                                                            </div>
+                                                        </div>
+                                                        <div class='summoner-spells grid grid-rows-2 gap-1 twok:max-w-[32px] fullhd:max-w-[26px]'>
+                                                            <img src='/clashapp/data/misc/summoners/SummonerFlash.avif' width='32' height='32' style='filter: grayscale(100%)' class='rounded' loading='lazy' alt='Icon of a players first selected summoner spell'>
+                                                            <img src='/clashapp/data/misc/summoners/".randSummonerSpell().".avif' width='32' height='32' style='filter: grayscale(100%)' class='rounded' loading='lazy' alt='Icon of a players second selected summoner spell'>
+                                                        </div>
+                                                        <div class='rune-container grid grid-cols-2 grid-rows-2 gap-y-1'>
+                                                            <div class='flex col-span-2 row-span-1 justify-start items-center gap-1'>
+                                                                <img src='/clashapp/data/patch/img/".$randomKeyRune."' width='32' height='32' loading='lazy' alt='Icon of a players first selected rune' style='filter: grayscale(100%)' class='fullhd:max-w-[26px] twok:max-w-[32px]'>
+                                                                <img src='".str_replace('/hdd1', '', $randomSecRune)."' height='18' width='18' style='filter: grayscale(100%)' class='m-auto' loading='lazy' alt='Icon of a players second selected rune'>
+                                                            </div>
+                                                            <div class='matchscore-container flex row-span-1 col-span-2 justify-center items-center'>
+                                                                <span>Ø ".rand(3, 8).".".rand(10, 99)."</span>
+                                                            </div> 
+                                                        </div>
+                                                    </div>
+                                                    <div class='kda-stats flex flex-col justify-center items-center'>
+                                                        <div class='stats twok:text-[1.75rem] twok:tracking-tighter fullhd:text-[1.3rem] fullhd:-tracking-[.15rem]'>".$randKills." / 
+                                                            <div class='inline text-gray-400'>".$randDeaths."</div> / ".$randAssists."
+                                                        </div>
+                                                        <div class='kda text-xs'>KTU: ".number_format(($randKills+$randAssists)/$randDeaths, 2)."</div>
+                                                    </div>
+                                                    <div class='items grid grid-rows-2 grid-cols-3 twok:max-w-[104px] twok:min-w-[104px] fullhd:max-w-[84.5px] fullhd:min-w-[84.5px] gap-1'>
+                                                        <div class='item0'><img src='".str_replace('/hdd1', '', glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif"))])."' width='32' height='32' loading='lazy' style='filter: grayscale(100%)' class='rounded' alt='This icon represents an equipped item at the end of a game'></div>
+                                                        <div class='item1'><img src='".str_replace('/hdd1', '', glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif"))])."' width='32' height='32' loading='lazy' style='filter: grayscale(100%)' class='rounded' alt='This icon represents an equipped item at the end of a game'></div>
+                                                        <div class='item2'><img src='".str_replace('/hdd1', '', glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif"))])."' width='32' height='32' loading='lazy' style='filter: grayscale(100%)' class='rounded' alt='This icon represents an equipped item at the end of a game'></div>
+                                                        <div class='item3'><img src='".str_replace('/hdd1', '', glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif"))])."' width='32' height='32' loading='lazy' style='filter: grayscale(100%)' class='rounded' alt='This icon represents an equipped item at the end of a game'></div>
+                                                        <div class='item4'><img src='".str_replace('/hdd1', '', glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/item/*.avif"))])."' width='32' height='32' loading='lazy' style='filter: grayscale(100%)' class='rounded' alt='This icon represents an equipped item at the end of a game'></div>
+                                                        <div class='emptySlot block w-8 h-8 rounded bg-dark opacity-40'></div>
+                                                    </div>
+                                                </div>
+                                                <div class='additional-info px-2' x-show='advanced || advancedGlobal' x-transition='' style='display: none;'>
+                                                    <div class='additional-info-1 grid twok:grid-cols-[1fr_1fr_1fr_1fr_46px_auto] fullhd:twok:grid-cols-[1fr_1fr_1fr_1fr_37.375px_auto] twok:text-base fullhd:text-[13px] grid-rows-3 justify-center items-center gap-1 mt-2 text-sm'>
+                                                </div>
+                                            </div>
+                                            <button type='button' :aria-label='(advanced ? &quot;⮝&quot; : &quot;⮟&quot;)' class='collapsible bg-[#0e0f18] cursor-pointer h-6 w-full opacity-50 mt-4' x-text='advanced ? &quot;⮝&quot; : &quot;⮟&quot;' aria-label='⮟'>⮟</button>
+                                        </div>";
+                                    }
+                                    echo "
+                                    </div>
+                                </td>
                             </tr>
                         </table>
                     </td>";
-                } echo "
-                </tr>
-            </table>";
+            } echo "
+            </tr>
+        </table>";
         $timeAndMemoryArray["FetchPlayerTotal"]["Time"] = number_format((microtime(true) - $startFetchPlayerTotal), 2, ',', '.')." s";
         $timeAndMemoryArray["FetchPlayerTotal"]["Memory"] = number_format((memory_get_usage() - $memFetchPlayerTotal)/1024, 2, ',', '.')." kB";
 
