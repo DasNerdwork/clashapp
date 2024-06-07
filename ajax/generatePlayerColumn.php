@@ -358,10 +358,11 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
     <td x-data='{ open: true }' class='single-player-match-history' data-puuid='".$puuid."' data-sumid='".$sumid."'>";
         if($upToDate){
             if(isset($_POST['sumid'])){
-                $matchHistoryContent .= printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $playerDataJSON["MatchIDs"]);
+                $matchDetails = printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $playerDataJSON["MatchIDs"]);
             } else {
-                $matchHistoryContent .= printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $playerDataJSON["MatchIDs"], false);
+                $matchDetails = printTeamMatchDetailsByPUUID($matchids_sliced, $puuid, $playerDataJSON["MatchIDs"], false);
             }
+            $matchHistoryContent .= $matchDetails['OldString'];
         }
         $matchHistoryContent .= "
     </td>";
@@ -385,6 +386,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
     if($masteryContent !== "") $responseArray["masteryContent"] = $masteryContent;
     if($tagList !== "") $responseArray["tagList"] = $tagList;
     if($matchHistoryContent !== "") $responseArray["matchHistoryContent"] = $matchHistoryContent;
+    if($matchHistoryContent !== "") $responseArray["newContent"] = $matchDetails;
     if(isset($_POST['csrf_token'])) $responseArray["csrfToken"] = $_POST['csrf_token'];
     if(isset($rankOrLevelArray)) $responseArray["highestRank"] = $rankOrLevelArray;
 

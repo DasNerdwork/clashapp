@@ -24,7 +24,6 @@ if(isset($_POST['csrf_token'])){
 }
 // End of Data Validation checks
 
-
 $responseArray = array();
 $ranks = [
     'IRON' => 1, 'BRONZE' => 2, 'SILVER' => 3, 'GOLD' => 4, 'PLATINUM' => 5,
@@ -33,28 +32,48 @@ $ranks = [
 $tiers = [ 'IV' => 1, 'III' => 2, 'II' => 3, 'I' => 4 ];
 
 uasort($inTeamRankingArray, function ($a, $b) use ($ranks, $tiers) {
-    $rankA = $ranks[$a['RankedData']['HighestRank']];
-    $rankB = $ranks[$b['RankedData']['HighestRank']];
+    $hasRankA = isset($a['RankedData']['HighestRank']);
+    $hasRankB = isset($b['RankedData']['HighestRank']);
 
-    if ($rankA != $rankB) {
-        return $rankB <=> $rankA;
+    if ($hasRankA && $hasRankB) {
+        $rankA = $ranks[$a['RankedData']['HighestRank']];
+        $rankB = $ranks[$b['RankedData']['HighestRank']];
+
+        if ($rankA != $rankB) {
+            return $rankB <=> $rankA;
+        }
     }
 
-    $rankNumberA = $tiers[$a['RankedData']['RankNumber']];
-    $rankNumberB = $tiers[$b['RankedData']['RankNumber']];
+    $hasRankNumberA = isset($a['RankedData']['RankNumber']);
+    $hasRankNumberB = isset($b['RankedData']['RankNumber']);
 
-    if ($rankNumberA != $rankNumberB) {
-        return $rankNumberB <=> $rankNumberA;
+    if ($hasRankNumberA && $hasRankNumberB) {
+        $rankNumberA = $tiers[$a['RankedData']['RankNumber']];
+        $rankNumberB = $tiers[$b['RankedData']['RankNumber']];
+
+        if ($rankNumberA != $rankNumberB) {
+            return $rankNumberB <=> $rankNumberA;
+        }
     }
 
-    $matchscoreComparison = $b['Matchscore'] <=> $a['Matchscore'];
-    if ($matchscoreComparison !== 0) {
-        return $matchscoreComparison;
+    $hasMatchscoreA = isset($a['Matchscore']);
+    $hasMatchscoreB = isset($b['Matchscore']);
+
+    if ($hasMatchscoreA && $hasMatchscoreB) {
+        $matchscoreComparison = $b['Matchscore'] <=> $a['Matchscore'];
+        if ($matchscoreComparison !== 0) {
+            return $matchscoreComparison;
+        }
     }
 
-    $winrateA = (float) $a['RankedData']['Winrate'];
-    $winrateB = (float) $b['RankedData']['Winrate'];
-    return $winrateB <=> $winrateA;
+    $hasWinrateA = isset($a['RankedData']['Winrate']);
+    $hasWinrateB = isset($b['RankedData']['Winrate']);
+
+    if ($hasWinrateA && $hasWinrateB) {
+        $winrateA = (float) $a['RankedData']['Winrate'];
+        $winrateB = (float) $b['RankedData']['Winrate'];
+        return $winrateB <=> $winrateA;
+    }
 });
 
 $keys = array_keys($inTeamRankingArray);
