@@ -386,7 +386,7 @@ if(isset($_POST['sumid']) || isset($_POST['name'])){
     if($masteryContent !== "") $responseArray["masteryContent"] = $masteryContent;
     if($tagList !== "") $responseArray["tagList"] = $tagList;
     if($matchHistoryContent !== "") $responseArray["matchHistoryContent"] = $matchHistoryContent;
-    if($matchHistoryContent !== "") $responseArray["newContent"] = $matchDetails;
+    if(isset($matchDetails)) $responseArray["newContent"] = $matchDetails;
     if(isset($_POST['csrf_token'])) $responseArray["csrfToken"] = $_POST['csrf_token'];
     if(isset($rankOrLevelArray)) $responseArray["highestRank"] = $rankOrLevelArray;
 
