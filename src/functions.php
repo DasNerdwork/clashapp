@@ -2863,7 +2863,6 @@ function isValidPlayerName($playerName) {
     return preg_match('/^[\p{L}0-9_\s\-#]{3,22}$/u', $playerName) === 1;
 }
 
-
 /**
  * Match pattern: letters from any alphabet, length between 3 and 5
  * 
@@ -2875,5 +2874,34 @@ function isValidPlayerName($playerName) {
 function isValidPlayerTag($playerTag) {
     // Match pattern: letters from any alphabet, length between 3 and 5
     return preg_match('/^[\p{L}0-9_\s-]{3,5}$/u', $playerTag) === 1;
+}
+
+function doesChampionExist($input, $lang) {
+    global $currentPatch;
+    $returnArray = array(
+        "success" => false,
+        "data" => []
+    );
+    $formattedChampion = strtolower(preg_replace('/[\'\-\s]+/', '', $input));
+    if($lang != null){
+        $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/'.$lang.'/champion.json');
+    } else { // Fallback in case no lang cookie exists
+        $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/en_US/champion.json');
+    }
+    $json = json_decode($data);
+    foreach($json->data as $champion){
+        $formattedChampID = strtolower(preg_replace('/[\'\-\s]+/', '', $champion->id));
+        if($formattedChampion == $formattedChampID){
+            if($lang != null){
+                $champData = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/'.$lang.'/champion/'.$champion->id.'.json');
+            } else { // Fallback in case no lang cookie exists
+                $champData = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/en_US/champion/'.$champion->id.'.json');
+            }
+            $returnArray["success"] = true;
+            $returnArray["data"] = json_decode($champData, true);
+            break;
+        }
+    }
+    return $returnArray;
 }
 ?>

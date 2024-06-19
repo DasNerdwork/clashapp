@@ -563,8 +563,7 @@ function createAutosuggestItem(key, icon, currentPatch, variant) {
     });
     liElement.addEventListener('click', function() {
       updateSearchHistory(key);
-      // window.location.href="https://clashscout.com/team/test";
-      alert("Error: Champion pages not implemented yet.");
+      window.location.href="https://clashscout.com/champion/"+key;
     });
   }
 
