@@ -46,10 +46,13 @@ const containerTitle = '" . __("Summoner") . "';
 const searchHistoryTitle = '" . __("Recently Searched") . "';
 </script>";
 
+$mainChampImgPath = str_replace(".png", ".avif", $champData["data"]["image"]["full"]);
+
+echo "<img src='/clashapp/data/patch/".$currentPatch."/img/champion/".$mainChampImgPath."?version=".md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$mainChampImgPath)."' alt='A league of legends champion icon of ".$champData["data"]["name"]."'>";
+
 echo "<pre>";
 print_r($champData["data"]);
 echo "</pre>";
-
 
 
 

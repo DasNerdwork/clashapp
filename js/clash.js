@@ -563,7 +563,7 @@ function createAutosuggestItem(key, icon, currentPatch, variant) {
     });
     liElement.addEventListener('click', function() {
       updateSearchHistory(key);
-      window.location.href="https://clashscout.com/champion/"+key;
+      window.location.href="https://clashscout.com/champion/"+key.replace('.png', '').toLowerCase().replace(/['\-\s]+/g, '');
     });
   }
 

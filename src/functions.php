@@ -2882,7 +2882,7 @@ function doesChampionExist($input, $lang) {
         "success" => false,
         "data" => []
     );
-    $formattedChampion = strtolower(preg_replace('/[\'\-\s]+/', '', $input));
+    $formattedChampion = strtolower(preg_replace('/[.\'\-\s]+/', '', $input));
     if($lang != null){
         $data = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/'.$lang.'/champion.json');
     } else { // Fallback in case no lang cookie exists
@@ -2890,7 +2890,7 @@ function doesChampionExist($input, $lang) {
     }
     $json = json_decode($data);
     foreach($json->data as $champion){
-        $formattedChampID = strtolower(preg_replace('/[\'\-\s]+/', '', $champion->id));
+        $formattedChampID = strtolower(preg_replace('/[.\'\-\s]+/', '', $champion->name));
         if($formattedChampion == $formattedChampID){
             if($lang != null){
                 $champData = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/'.$lang.'/champion/'.$champion->id.'.json');
@@ -2898,7 +2898,7 @@ function doesChampionExist($input, $lang) {
                 $champData = file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/en_US/champion/'.$champion->id.'.json');
             }
             $returnArray["success"] = true;
-            $returnArray["data"] = json_decode($champData, true);
+            $returnArray["data"] = reset(json_decode($champData, true)["data"]);
             break;
         }
     }
