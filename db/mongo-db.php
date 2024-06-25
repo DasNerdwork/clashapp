@@ -65,6 +65,44 @@ class MongoDBHelper {
     }
 
     /**
+     * Count documents in a collection with optional conditions.
+     *
+     * @param string $collectionName - The name of the collection to query.
+     * @param array $conditions - An associative array of conditions to filter by (optional).
+     *
+     * @return array - An array with keys 'success', 'code', 'message', and 'count'.
+     *   'success' determines the success of the operation.
+     *   'code' provides a code for reference.
+     *   'message' describes the outcome of the operation.
+     *   'count' contains the number of matching documents.
+     */
+    public function countDocuments($collectionName, $conditions = []) {
+        $filter = [];
+
+        if (!empty($conditions)) {
+            $filter = $conditions;
+        }
+
+        $command = new MongoDB\Driver\Command([
+            'count' => $collectionName,
+            'query' => (object)$filter
+        ]);
+
+        try {
+            $cursor = $this->client->executeCommand($this->mdb, $command);
+            $result = current($cursor->toArray());
+
+            if ($result->n === 0) {
+                return array('success' => false, 'code' => 'LFGB29', 'message' => 'No documents found matching the criteria', 'count' => $result->n);
+            } else {
+                return array('success' => true, 'code' => '4J532N', 'message' => 'Successfully counted documents with given conditions', 'count' => $result->n);
+            }
+        } catch (MongoDB\Driver\Exception\Exception $e) {
+            return array('success' => false, 'code' => 'DBERR', 'message' => 'Database error: ' . $e->getMessage(), 'count' => 0);
+        }
+    }
+
+    /**
      * Find documents in a collection by an array of specific match IDs.
      *
      * @param string $collectionName - The name of the collection to query.
@@ -345,7 +383,7 @@ class MongoDBHelper {
         }
     }
 
-        /**
+    /**
      * Retrieve a player document based on the PlayerData.PUUID attribute.
      *
      * @param string $puuid - The PlayerData.PUUID value to search for.
