@@ -16,4 +16,5 @@ package-lock.json
 ads.txt
 robots.txt
 *.min.js
+*.pid
 /test/results.xml
