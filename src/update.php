@@ -289,7 +289,10 @@ function processResponseData($ajaxUniquifier){
             for (let historyColumn of matchHistories) {
                 if(response.sumid === historyColumn.dataset.sumid) {
                     if(response.matchHistory) {
-                        historyColumn.innerHTML = response.matchHistory;
+                        if(typeof response.matchHistory === 'object' && response.matchHistory !== null){
+                            console.log(response.matchHistory);
+                        }
+                        historyColumn.innerHTML = response.matchHistory.OldString;
                     }
                 }
             }
