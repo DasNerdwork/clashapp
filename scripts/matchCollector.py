@@ -42,6 +42,30 @@ def write_pid(puuid, filepath='/hdd1/clashapp/scripts/current.pid'):
     with open(filepath, 'w') as file:
         file.write(puuid)
 
+def get_timestamp_by_index(index):
+        version_history_path = '/hdd1/clashapp/data/patch/version_history.txt'
+        
+        if os.path.exists(version_history_path):
+            with open(version_history_path, 'r') as f:
+                version_history = json.load(f)
+            
+            if not version_history:
+                raise ValueError("Version history is empty")
+            
+            # Convert version_history to a list of tuples for indexing
+            sorted_versions = sorted(version_history.items(), key=lambda x: x[1])
+            
+            # Check if the index is valid
+            if index < 0 or index >= len(sorted_versions):
+                raise IndexError(f"Index {index} is out of range for version history")
+            
+            # Retrieve the version and timestamp at the specified index
+            version_at_index, timestamp_at_index = sorted_versions[index]
+            
+            return timestamp_at_index
+        else:
+            raise FileNotFoundError(f"{version_history_path} does not exist")
+
 class MongoDBHelper:
     def __init__(self):
         self.host = os.getenv('MDB_HOST')
@@ -137,6 +161,7 @@ class RiotAPI:
             'clash': 700
         }
         start = 0
+        start_time = get_timestamp_by_index(2)
         match_count = 100
         retry_attempts = 0
 
@@ -146,7 +171,7 @@ class RiotAPI:
 
             for queue_name, queue_id in queues.items():
                 if queues[queue_name] is not None and len(match_ids[queue_name]) < max_match_ids:
-                    url = f"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{current_puuid}/ids?queue={queue_id}&start={start}&count={match_count}"
+                    url = f"https://europe.api.riotgames.com/lol/match/v5/matches/by-puuid/{current_puuid}/ids?startTime={start_time}&queue={queue_id}&start={start}&count={match_count}"
                     response = requests.get(url, headers=self.headers)
                     time.sleep(0.051)
 
@@ -211,37 +236,54 @@ class RiotAPI:
         return True
 
 sys.excepthook = handle_exception
+
 mdb = MongoDBHelper()
 riotapi = RiotAPI()
-max_retries = 10
+max_retries = 3
 retry_count = 0
-while True:
-    # Check the current count of documents in the "matches" collection
-    match_count = mdb.count_documents('matches')['count']
-    
-    if match_count >= 20000:
-        break  # Exit the loop if the count is below 2000
-    
-    # If max retries exceeded, exit the script
-    if retry_count >= max_retries:
-        logger.error(f"Max retries exceeded ({max_retries}). Exiting the script.")
-        break
-    
-    # Fetch new match IDs and download matches
-    matchids = riotapi.get_match_ids(100)
-    riotapi.download_matches_by_id(matchids, read_pid())
-    
-    # Attempt to find a random EUW1 match and its content
-    random_match_id = random.choice(matchids)
-    random_match_content = mdb.find_document_by_field('matches', 'metadata.matchId', random_match_id)
-    
-    if random_match_content['success']:
-        # Select a random player's PUUID and write it to PID
-        random_player = random.choice(random_match_content['document']['info']['participants'])
-        write_pid(random_player['puuid'])
-    else:
-        # Increment retry count if finding the match content was unsuccessful
+
+while retry_count < max_retries:
+    try:
+        # Check the current count of documents in the "matches" collection
+        match_count = mdb.count_documents('matches')['count']
+        
+        if match_count >= 1000000:
+            break  # Exit the loop if the count is below 2000
+        
+        # Fetch new match IDs and download matches
+        matchids = riotapi.get_match_ids(100)
+
+        if not matchids:
+            logger.error("Unexpected Error: No match IDs could be fetched")
+            time.sleep(60)  # Wait for 60 seconds before retrying
+            retry_count += 1
+            continue
+
+        riotapi.download_matches_by_id(matchids, read_pid())
+        
+        # Attempt to find a random EUW1 match and its content
+        random_match_id = random.choice(matchids)
+        random_match_content = mdb.find_document_by_field('matches', 'metadata.matchId', random_match_id)
+        
+        if random_match_content['success']:
+            # Select a random player's PUUID and write it to PID
+            random_player = random.choice(random_match_content['document']['info']['participants'])
+            write_pid(random_player['puuid'])
+        else:
+            # Increment retry count if finding the match content was unsuccessful
+            retry_count += 1
+
+        # Reset retry count on successful execution
+        retry_count = 0
+
+    except Exception as e:
+        logger.error(f"An error occurred: {e}")
         retry_count += 1
+        if retry_count < max_retries:
+            logger.info(f"Retrying in 1 minute... (Attempt {retry_count + 1}/{max_retries})")
+            time.sleep(60)
+        else:
+            logger.error("Max retries reached. Exiting the script.")
 
 # Log the final count of documents in the "matches" collection
 logger.info(f"Final count of documents in 'matches' collection: {mdb.count_documents('matches')['count']}")

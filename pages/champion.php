@@ -51,9 +51,14 @@ $mainChampImgPath = str_replace(".png", ".avif", $champData["data"]["image"]["fu
 $currentPatchShort = substr($currentPatch, 0, strrpos($currentPatch, '.')); // E.g. 14.12
 $allMatches = $mdb->countDocuments('matches', ["info.gameVersion" => ['$regex' => "^$currentPatchShort"]]);
 $allCurrentMatches = $mdb->countDocuments('matches', ["info.gameVersion" => ['$regex' => "^$currentPatchShort"]]);
+// $allMatches = $mdb->countDocuments('matches');
+// $allCurrentMatches = $mdb->countDocuments('matches');
 $winCount = $mdb->countDocuments('matches', ["info.participants" => ['$elemMatch' => ["championName" => $champData["data"]["name"], "win" => true]], "info.gameVersion" => ['$regex' => "^$currentPatchShort"]]);
 $loseCount = $mdb->countDocuments('matches', ["info.participants" => ['$elemMatch' => ["championName" => $champData["data"]["name"], "win" => false]], "info.gameVersion" => ['$regex' => "^$currentPatchShort"]]);
 $banCount = $mdb->countDocuments('matches', ["info.teams" => ['$elemMatch' => ["bans" => ['$elemMatch' => ["championId" => (int)$champData["data"]["key"]]]]], "info.gameVersion" => ['$regex' => "^$currentPatchShort"]]);
+// $winCount = $mdb->countDocuments('matches', ["info.participants" => ['$elemMatch' => ["championName" => $champData["data"]["name"], "win" => true]]]);
+// $loseCount = $mdb->countDocuments('matches', ["info.participants" => ['$elemMatch' => ["championName" => $champData["data"]["name"], "win" => false]]]);
+// $banCount = $mdb->countDocuments('matches', ["info.teams" => ['$elemMatch' => ["bans" => ['$elemMatch' => ["championId" => (int)$champData["data"]["key"]]]]]]);
 
 echo "<img src='/clashapp/data/patch/".$currentPatch."/img/champion/".$mainChampImgPath."?version=".md5_file('/hdd1/clashapp/data/patch/'.$currentPatch.'/img/champion/'.$mainChampImgPath)."' alt='A league of legends champion icon of ".$champData["data"]["name"]."'>";
 

@@ -18,3 +18,4 @@ robots.txt
 *.min.js
 *.pid
 /test/results.xml
+/db/__pycache__/

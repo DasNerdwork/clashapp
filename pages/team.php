@@ -58,7 +58,7 @@ $xhrPCDcount = 1;
 $upToDate = false;
 $allUpToDate = 0;
 $emoteSources = array("/clashapp/data/misc/webp/ok.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/ok.avif"),"/clashapp/data/misc/webp/teemo.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/teemo.avif"),"/clashapp/data/misc/webp/priceless.avif?version=".md5_file("/hdd1/clashapp/data/misc/webp/priceless.avif"));
-$matchDownloadLog = '/var/www/html/clash/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
+$matchDownloadLog = '/hdd1/clashapp/data/logs/matchDownloader.log'; // The log patch where any additional info about this process can be found
 echo "
 <script>
 const requests = {};

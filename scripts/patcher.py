@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from PIL import Image
 from concurrent.futures import ThreadPoolExecutor
+from pymongo import MongoClient
 import fnmatch
 import pillow_avif
 import logging
@@ -16,6 +17,63 @@ import tarfile
 import shutil
 import time
 
+class MongoDBHelper:
+    def __init__(self):
+        self.host = os.getenv('MDB_HOST')
+        self.username = os.getenv('MDB_USER')
+        self.password = os.getenv('MDB_PW')
+        self.auth_source = os.getenv('MDB_DB')
+        self.tls_ca_file = os.getenv('MDB_PATH')
+        self.database_name = os.getenv('MDB_DB')
+        self.client = self._connect_to_mongodb()
+        self.db = self.client[self.database_name]
+
+    def _connect_to_mongodb(self):
+        connection_uri = f"mongodb://{self.username}:{self.password}@{self.host}/{self.auth_source}?authMechanism=SCRAM-SHA-1&tls=true&tlsCAFile={self.tls_ca_file}"
+        return MongoClient(connection_uri)
+    
+    def get_oldest_version_prefix(self):
+        version_history_path = '/hdd1/clashapp/data/patch/version_history.txt'
+        
+        if os.path.exists(version_history_path):
+            with open(version_history_path, 'r') as f:
+                version_history = json.load(f)
+            
+            if version_history:
+                oldest_version = sorted(version_history.items(), key=lambda x: x[1])[0][0]
+                oldest_version_prefix = oldest_version.split('.')[0] + '.' + oldest_version.split('.')[1]
+                return oldest_version_prefix
+            else:
+                logger.error("Version history is empty")
+                raise ValueError("Version history is empty")
+        else:
+            logger.error(f"{version_history_path} does not exist")
+            raise FileNotFoundError(f"{version_history_path} does not exist")
+    
+    def delete_outdated_documents(self, collection_name):
+        collection = self.db[collection_name]
+        try:
+            oldest_version_prefix = self.get_oldest_version_prefix()
+            result = collection.delete_many({
+                "info.gameVersion": {
+                    "$not": {"$regex": f"^{oldest_version_prefix}"}
+                }
+            })
+            return {
+                'success': True,
+                'count': result.deleted_count
+            }
+        except Exception as e:
+            return {
+                'success': False,
+            }
+
+def handle_exception(exc_type, exc_value, exc_traceback):
+    if issubclass(exc_type, KeyboardInterrupt):
+        sys.__excepthook__(exc_type, exc_value, exc_traceback)
+        return
+    logger.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
+    
 def convert_to_avif(source):
     try:
         with Image.open(source) as img:
@@ -84,7 +142,29 @@ def update_abbreviations(newPatch):
 
     return True
 
-# Start count of whole program time
+def update_version_history(current_version):
+    version_history_path = '/hdd1/clashapp/data/patch/version_history.txt'
+    
+    if os.path.exists(version_history_path):
+        with open(version_history_path, 'r') as f:
+            version_history = json.load(f)
+    else:
+        version_history = {}
+    
+    timestamp = int(time.time())
+    version_history[current_version] = timestamp
+    
+    # Keep only the last 5 versions
+    if len(version_history) > 5:
+        sorted_versions = sorted(version_history.items(), key=lambda x: x[1], reverse=True)
+        version_history = dict(sorted_versions[:5])
+    
+    with open(version_history_path, 'w') as f:
+        json.dump(version_history, f, separators=(",", ":"))
+
+
+# Start count of whole program time and set exception handling
+sys.excepthook = handle_exception
 start_patcher = time.time() 
 # Preparing code statements for logging, formatting of log and 2 rotating log files with max 10MB filesize
 logger = logging.getLogger('Patcher.py')
@@ -155,7 +235,7 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
         timed_out = True
 
     if timed_out:
-        logger.info("Time limit exceeded. Converted all available .png and .jpg to .avif")
+        logger.warning("Time limit exceeded. Converted all available .png and .jpg to .avif")
     else:
         logger.info("Converted all available .png and .jpg to .avif")
 
@@ -171,13 +251,23 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
     logger.info("Updating version.txt to current live patch")
     with open('/hdd1/clashapp/data/patch/version.txt', 'w') as f:
         f.write(variables[0])
+    logger.info("Updating version_history.txt")
+    update_version_history(variables[0])
 
     # Update abbreviations.json with newest information from champion.json of new patch
     abbr_updated = update_abbreviations(variables[0])
     if(abbr_updated):
         logger.info("Abbreviations.json updated successfully")
     else:
-        logger.info("Warning: Failed updating Abbreviations.json")
+        logger.warning("Failed updating Abbreviations.json")
+
+    # Delete all outdated matchids from database
+    mdb = MongoDBHelper()
+    delete_outdated = mdb.delete_outdated_documents('matches')
+    if(delete_outdated['success']):
+        logger.info(f"Successfully deleted {delete_outdated['count']} outdated match documents from database")
+    else:
+        logger.warning("Failed deleting outdated match documents")
 
     # Restart WebSocket Server after update
     try:
@@ -191,6 +281,8 @@ else:
     logger.info("Updating version.txt to current live patch")
     with open('/hdd1/clashapp/data/patch/version.txt', 'w') as f:
         f.write(variables[0])
+    logger.info("Updating version_history.txt")
+    update_version_history(variables[0])
     # End Patcher and calculate runtime
 endpatcher = str(round(time.time() - start_patcher, 2))
 logger.info("Ending patcher, run took: " + endpatcher + " seconds")
