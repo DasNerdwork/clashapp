@@ -156,7 +156,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
             /**
              * STEP 2: Rewrite file if it doesn't exist or has to be updated
              */
-            $mdb->insertDocument('players', $jsonArray);
+            $mdb->insertDocument('players', $jsonArray, ['PlayerData.PUUID' => $puuid]);
 
             /**
              * STEP 3: Fetch all given matchIDs and download each match via downloadMatchByID

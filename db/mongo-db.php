@@ -224,17 +224,27 @@ class MongoDBHelper {
      *   'code' provides a code for reference.
      *   'message' describes the outcome of the insert operation.
      */
-    public function insertDocument($collectionName, $document) {
+    public function insertDocument($collectionName, $document, $filter = []) {
         $bulk = new MongoDB\Driver\BulkWrite;
         try {
-            // Try to insert the document
-            $bulk->insert($document);
+            if (!empty($filter)) {
+                // Perform an upsert if a filter is provided
+                $bulk->update(
+                    $filter,         // Use the filter provided
+                    ['$set' => $document],  // Update the document with the new data
+                    ['upsert' => true] // If no document matches, insert the document
+                );
+            } else {
+                // Insert the document if no filter is provided
+                $bulk->insert($document);
+            }
+    
             $this->client->executeBulkWrite("{$this->mdb}.$collectionName", $bulk);
     
             return [
                 'success' => true,
                 'code' => '8AMZLM',
-                'message' => 'Successfully inserted document into ' . $collectionName,
+                'message' => 'Successfully inserted or updated document in ' . $collectionName,
             ];
         } catch (MongoDB\Driver\Exception\BulkWriteException $e) {
             if ($e->getCode() == 11000) {
@@ -245,13 +255,11 @@ class MongoDBHelper {
                     'message' => 'Document with the same key already exists in ' . $collectionName,
                 ];
             } else {
-                // @codeCoverageIgnoreStart
                 return [
                     'success' => false,
                     'code' => 'MXZZLM',
                     'message' => 'An error occurred: ' . $e->getMessage(),
                 ];
-                // @codeCoverageIgnoreEnd
             }
         }
     }
