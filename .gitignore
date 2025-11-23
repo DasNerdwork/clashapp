@@ -19,3 +19,4 @@ robots.txt
 *.pid
 /test/results.xml
 /db/__pycache__/
+*.crt

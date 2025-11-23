@@ -29,7 +29,7 @@ if ($_SERVER['SERVER_NAME'] === 'clashscout.com') {
             // Open the CSV file for the current language.
             $handle = fopen('/hdd1/clashapp/lang/' . $lang . '.csv', 'r');
             // Read the translations from the file and store them in an array.
-            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+            while (($data = fgetcsv($handle, 1000, ",", '"', "\\")) !== false) {
                 $translations[$lang][$data[0]] = $data[1];
             }
             // Close the CSV file.
