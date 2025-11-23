@@ -5,14 +5,13 @@ Dies ist das Backup & History Repository für die League of Legends Clash Webapp
 ## Intro
 
 Die ClashScout.com Webapplikation, kurz ClashScout, ist ein Projekt welches hauptsächlich von 
-Florian "DasNerdwork" Falk und Pascal Gnadt entwickelt wurde.
+Florian Falk und Pascal Gnadt entwickelt wurde.
 
 Sie stellt ein einfaches Tool zur Optimierung der Scouting- und Bannphase in League of Legends Clash
 Turnieren dar, indem sie komprimiert, effizient, schnell und dennoch simpel Daten von der League of 
 Legends API fetcht, verarbeitet und unterstützend repräsentiert.
 
-Das Projekt wurde im Januar 2022 ins Leben gerufen und zielt auf eine weltweite Livestellung inklusive
-Refinanzierung durch Werbeeinnahmen ab.
+Das Projekt wurde im Januar 2022 ins Leben gerufen.
 
 ## Feature Übersicht
 
@@ -54,7 +53,7 @@ und noch vieles mehr...
 
 ### Install
 
-Um aktiv remote an Projekt zu arbeiten kann das Repository mit folgendem Befehl geklont werden
+Um aktiv remote am Projekt zu arbeiten kann das Repository mit folgendem Befehl geklont werden
 
 ```
 git clone https://github.com/DasNerdwork/clashapp.git
@@ -75,9 +74,3 @@ git add .
 git commit --author "deine@email.com" -m "Beschreibung des neuen Features"
 git push main $branchname
 ```
-
-## Kontakt
-
-Bei weiteren Fragen kann Florian regelmäßig auf dem TeamSpeak Server "DasNerdwork.net" gefunden werden.
-Ansonsten per Discord an Flo | DasNerdwork#3182
-oder per E-Mail an dasnerdwork@gmail.com
