@@ -11,6 +11,10 @@ if (isset($_SESSION['user'])) {
 
 require_once '/hdd1/clashapp/db/clash-db.php';
 require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -96,19 +100,19 @@ if (isset($_POST['submit'])) {
                 try {
                     //Server settings
                     $mail = new PHPMailer();
-                    $mail->isSMTP();                                            //Send using SMTP
-                    $mail->Host       = 'smtp.sendgrid.net';                    //Set the SMTP server to send through
-                    $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-                    $mail->Username   = 'apikey';                               //SMTP username
-                    $mail->Password   = '***REMOVED***';                     //SMTP password
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-                    $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
-                
+                    $mail->isSMTP();
+                    $mail->Host       = $_ENV['SMTP_HOST'];
+                    $mail->SMTPAuth   = $_ENV['SMTP_AUTH'];
+                    $mail->Username   = $_ENV['SMTP_USERNAME'];
+                    $mail->Password   = $_ENV['SMTP_PASSWORD'];
+                    $mail->SMTPSecure = $_ENV['SMTP_ENCRYPTION'];
+                    $mail->Port       = $_ENV['SMTP_PORT'];
+
                     //Recipients
-                    $mail->setFrom('no-reply@clashscout.com', 'ClashScout.com');
+                    $mail->setFrom($_ENV['SMTP_FROM'], 'ClashScout.com');
                     $mail->addAddress($_POST['email']);              //Add a recipient
                     // $mail->addAddress('p.gnadt@gmx.de');                        //Add a recipient
-                    // $mail->addReplyTo('no-reply@dasnerdwork.net');
+                    $mail->addReplyTo('no-reply@dasnerdwork.net');
                     // $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
             
                     //Attachments

@@ -20,3 +20,4 @@ robots.txt
 /test/results.xml
 /db/__pycache__/
 *.crt
+.env
