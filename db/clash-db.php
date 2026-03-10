@@ -3,6 +3,12 @@
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
+require_once '/hdd1/clashapp/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
 
 class DB {
     private $dbHost;
@@ -220,10 +226,9 @@ class DB {
             $sql = $this->db->prepare("INSERT INTO users (username, region, email, password, verifier, status) VALUES (?, ?, ?, ?, ?, 2)"); 
             $sql->bind_param('sssss', $username, $region, $email, $password, $verifier);
             $sql->execute();
-            $result = $sql->get_result();
 
-            if(is_numeric($sql->insert_id)){
-                return array('status' => 'success', 'message' => 'Account successfully created!', 'id' => $sql->insert_id, 'region' => $region, 'username' => $username, 'email' => $email);
+            if(is_numeric($this->db->insert_id)){
+                return array('status' => 'success', 'message' => 'Account successfully created!', 'id' => $this->db->insert_id, 'region' => $region, 'username' => $username, 'email' => $email);
             } else {
                 // @codeCoverageIgnoreStart
                 return array('status' => 'error', 'message' => 'Unable to create account.');
