@@ -21,3 +21,4 @@ robots.txt
 /db/__pycache__/
 *.crt
 .env
+nginx.conf
