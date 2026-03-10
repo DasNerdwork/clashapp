@@ -23,7 +23,7 @@ function generateSinglePlayerData(playerName, playerTag, reload, csrf){
 }
 
 
-function generatePlayerColumnData(requestIterator, sumid, teamID, queuedAs, reload, csrf) {
+function generatePlayerColumnData(requestIterator, puuid, teamID, queuedAs, reload, csrf) {
     var xhrPCD = new XMLHttpRequest();
     xhrPCD.open('POST', '/ajax/generatePlayerColumn.php', true);
     xhrPCD.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -44,8 +44,8 @@ function generatePlayerColumnData(requestIterator, sumid, teamID, queuedAs, relo
                     element.classList.remove('text-loading-light');
                 });
 
-                if (!inTeamRanking[sumid]) {
-                    inTeamRanking[sumid] = {};
+                if (!inTeamRanking[puuid]) {
+                    inTeamRanking[puuid] = {};
                 }
 
                 if (response.profileIconSrc) {
@@ -110,7 +110,7 @@ function generatePlayerColumnData(requestIterator, sumid, teamID, queuedAs, relo
 
                 if (response.matchScore) {
                     document.getElementById('matchscore-' + requestIterator).innerText = response.matchScore;
-                    inTeamRanking[sumid]['Matchscore'] = response.matchScore;
+                    inTeamRanking[puuid]['Matchscore'] = response.matchScore;
                 }
 
                 if (response.rankedContent) {
@@ -118,7 +118,7 @@ function generatePlayerColumnData(requestIterator, sumid, teamID, queuedAs, relo
                 }
 
                 if (response.highestRank) {
-                    inTeamRanking[sumid]['RankedData'] = response.highestRank;
+                    inTeamRanking[puuid]['RankedData'] = response.highestRank;
                 }
 
                 if (response.masteryContent) {
@@ -153,7 +153,7 @@ function generatePlayerColumnData(requestIterator, sumid, teamID, queuedAs, relo
                                     var colors = ['#ff0000', '#ffa500', '#008000', '#0000ff', '#800080'];
 
                                     calcResponse.inTeamRanking.forEach(function(id, index) {
-                                        var columnParent = document.querySelector('.single-player-column[data-sumid="' + id + '"]');
+                                        var columnParent = document.querySelector('.single-player-column[data-puuid="' + id + '"]');
                                         if (columnParent) {
                                             var triangleContainer = document.createElement('div');
                                             triangleContainer.style.borderBottom = '40px solid transparent';
@@ -180,6 +180,6 @@ function generatePlayerColumnData(requestIterator, sumid, teamID, queuedAs, relo
         }
     };
 
-    var data = 'iteration=' + requestIterator + '&sumid=' + sumid + '&teamid=' + teamID + '&queuedas=' + queuedAs + '&reload=' + reload + '&csrf_token=' + csrf;
+    var data = 'iteration=' + requestIterator + '&puuid=' + puuid + '&teamid=' + teamID + '&queuedas=' + queuedAs + '&reload=' + reload + '&csrf_token=' + csrf;
     xhrPCD.send(data);
 }

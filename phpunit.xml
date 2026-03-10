@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" bootstrap="vendor/autoload.php" cacheDirectory=".phpunit.cache" executionOrder="depends,defects" requireCoverageMetadata="true" beStrictAboutCoverageMetadata="true" beStrictAboutOutputDuringTests="true" failOnRisky="true" failOnWarning="true" displayDetailsOnTestsThatTriggerWarnings="true" colors="true">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.5/phpunit.xsd" bootstrap="vendor/autoload.php" cacheDirectory=".phpunit.cache" executionOrder="depends,defects" requireCoverageMetadata="true" beStrictAboutCoverageMetadata="true" beStrictAboutOutputDuringTests="true" failOnRisky="true" failOnWarning="true" failOnDeprecation="true" displayDetailsOnTestsThatTriggerWarnings="true" colors="true">
   <testsuites>
     <testsuite name="Functions">
       <file>test/functionsTest.php</file>
@@ -32,7 +32,7 @@
       <text outputFile="php://stdout" showUncoveredFiles="false"/>
     </report>
   </coverage>
-  <source>
+  <source ignoreIndirectDeprecations="true">
     <include>
       <directory suffix=".php">.</directory>
     </include>

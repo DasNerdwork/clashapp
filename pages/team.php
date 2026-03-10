@@ -44,7 +44,7 @@ include('/hdd1/clashapp/templates/header.php');
 
 // These arrays are necessary and used for the getSuggestedBans function as parameters to retrieve the most accurate suggested ban data efficiently
 $mdb = new MongoDBHelper();
-$masteryDataTeamArray = array(); // collects mastery data per ["sumid"] to have them combined in a single array
+$masteryDataTeamArray = array(); // collects mastery data per ["puuid"] to have them combined in a single array
 $timeAndMemoryArray = array(); // saves the speed of every function and its  memory requirements
 $timeAndMemoryArray["InitializingAndHeader"]["Time"] = number_format((microtime(true) - $startInitialTime), 2, ',', '.')." s";
 $timeAndMemoryArray["InitializingAndHeader"]["Memory"] = number_format((memory_get_usage() - $memInitialTime)/1024, 2, ',', '.')." kB";
@@ -261,7 +261,8 @@ echo '
                 $playerSpawnDelay = 0;
                 $forceReload = isset($_GET["reload"]) ? true : false;
                 foreach($teamDataArray["Players"] as $key => $player){ 
-                    echo generatePlayerColumnData($xhrPCDcount, $player["summonerId"], $teamID, $player["position"], $forceReload, $_SESSION['csrf_token']);
+                    // Für Test-Team statische HTML-Spalten generieren (kein AJAX)
+                    echo generatePlayerColumnData($xhrPCDcount, $player["puuid"], $teamID, $player["position"], $forceReload, $_SESSION['csrf_token']);
                     $xhrPCDcount++;
                     $startFetchPlayer[$key] = microtime(true);
                     $memFetchPlayer[$key] = memory_get_usage();
@@ -272,8 +273,8 @@ echo '
                             <tr>
                                 <td class='w-1/5 text-center'>";
                                     $playerSpawnDelay += 0.2;
-                                    if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["FetchPlayerData"]["Time"] = number_format((microtime(true) - $startFetchPlayer[$key]), 2, ',', '.')." s";
-                                    if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["FetchPlayerData"]["Memory"] = number_format((memory_get_usage() - $memFetchPlayer[$key])/1024, 2, ',', '.')." kB";
+                                    if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["FetchPlayerData"]["Time"] = number_format((microtime(true) - $startFetchPlayer[$key]), 2, ',', '.')." s";
+                                    if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["FetchPlayerData"]["Memory"] = number_format((memory_get_usage() - $memFetchPlayer[$key])/1024, 2, ',', '.')." kB";
                                 
                                     // ----------------------------------------------------------------v- PROFILE ICON BORDERS -v---------------------------------------------------------------- //
 
@@ -281,15 +282,15 @@ echo '
                                     $memProfileIconBorders = memory_get_usage();
                                     $randomIconPath = glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.avif")[array_rand(glob("/hdd1/clashapp/data/patch/{$currentPatch}/img/profileicon/*.avif"))];
                                     echo "
-                                        <div id='single-player-column-".$currentPlayerNumber2."' class='h-40 mt-4 grid grid-cols-2 gap-4 single-player-column' data-sumid='".$player["summonerId"]."'>
+                                        <div id='single-player-column-".$currentPlayerNumber2."' class='h-40 mt-4 grid grid-cols-2 gap-4 single-player-column' data-puuid='".$player["puuid"]."'>
                                         <div class='relative flex justify-center'>
                                         <img id='profileicon-".$currentPlayerNumber2."' src='".str_replace('/hdd1', '', $randomIconPath)."?version=".md5_file($randomIconPath)."' width='84' height='84' style='filter: grayscale(100%)' class='rounded-full mt-6 z-0 max-h-[84px] max-w-[84px] pointer-events-none select-none' alt='The custom profile icon of a player'>
                                         <div class='playerlevel text-loading-light absolute mt-[6.8rem] text-xs z-[9]'>30</div>
                                         <img src='/clashapp/data/misc/levels/prestige_crest_lvl_030.avif?version=".md5_file("/hdd1/clashapp/data/misc/levels/prestige_crest_lvl_030.avif")."' width='190' height='190' style='filter: grayscale(100%)' class='profileborder-030 absolute -mt-[2.05rem] z-[8] pointer-events-none select-none' style='-webkit-mask-image: radial-gradient(circle at center, white 50%, transparent 70%); mask-image: radial-gradient(circle at center, white 50%, transparent 70%);' alt='The profile border corresponding to a players level'>
                                         <div class='absolute mt-[8.75rem] z-[9]'><span id='playername-".$currentPlayerNumber2."' class='text-loading-light'>".__("Player")." ".$currentPlayerNumber2."</span><span id='playertag-".$currentPlayerNumber2."' class='z-[9] bg-loading px-1 rounded ml-1 text-sm text-gray-300'>#EUW</span></div></div>";
 
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
 
                             // ------------------------------------------------------------------v- PRINT PLAYER LANES -v------------------------------------------------------------------ //
 
@@ -324,14 +325,14 @@ echo '
                                                 <span id='matchscore-".$currentPlayerNumber2."' class='transition-opacity duration-500 easy-in-out text-loading-light'>0.00</span>
                                             </div>
                                         </div>";
-                                        if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
-                                        if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["PrintAverageMatchscore"]["Memory"] = number_format((memory_get_usage() - $memPrintAverageMatchscore)/1024, 2, ',', '.')." kB"; echo "
+                                        if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["PrintAverageMatchscore"]["Time"] = number_format((microtime(true) - $startPrintAverageMatchscore), 2, ',', '.')." s";
+                                        if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["PrintAverageMatchscore"]["Memory"] = number_format((memory_get_usage() - $memPrintAverageMatchscore)/1024, 2, ',', '.')." kB"; echo "
                                     </div>
                                 </div>
                             </div>";
 
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["ProfileIconBorders"]["Time"] = number_format((microtime(true) - $startProfileIconBorders), 2, ',', '.')." s";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["ProfileIconBorders"]["Memory"] = number_format((memory_get_usage() - $memProfileIconBorders)/1024, 2, ',', '.')." kB";
 
                             // ------------------------------------------------------------------v- PRINT RANKED STATS -v------------------------------------------------------------------ //
 
@@ -345,8 +346,8 @@ echo '
                                     </div>
                                 </td>
                             </tr>";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["PrintRankedStats"]["Time"] = number_format((microtime(true) - $startPrintRankedStats), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["PrintRankedStats"]["Memory"] = number_format((memory_get_usage() - $memPrintRankedStats)/1024, 2, ',', '.')." kB";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["PrintRankedStats"]["Time"] = number_format((microtime(true) - $startPrintRankedStats), 2, ',', '.')." s";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["PrintRankedStats"]["Memory"] = number_format((memory_get_usage() - $memPrintRankedStats)/1024, 2, ',', '.')." kB";
                             
                             // ----------------------------------------------------------------v- PRINT MASTERY DATA -v---------------------------------------------------------------- //
                             
@@ -371,8 +372,8 @@ echo '
                                     </div>
                                 </td>
                             </tr>";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["PrintMasteryData"]["Time"] = number_format((microtime(true) - $startPrintMasteryData), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["PrintMasteryData"]["Memory"] = number_format((memory_get_usage() - $memPrintMasteryData)/1024, 2, ',', '.')." kB";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["PrintMasteryData"]["Time"] = number_format((microtime(true) - $startPrintMasteryData), 2, ',', '.')." s";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["PrintMasteryData"]["Memory"] = number_format((memory_get_usage() - $memPrintMasteryData)/1024, 2, ',', '.')." kB";
                             
                             // -------------------------------------------------------------------v- PRINT TAGS  -v------------------------------------------------------------------- //
 
@@ -388,8 +389,8 @@ echo '
                                     </div>
                                 </td>
                             </tr>";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["PrintTags"]["Time"] = number_format((microtime(true) - $startPrintTags), 2, ',', '.')." s";
-                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["summonerId"]]["PrintTags"]["Memory"] = number_format((memory_get_usage() - $memPrintTags)/1024, 2, ',', '.')." kB";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["PrintTags"]["Time"] = number_format((microtime(true) - $startPrintTags), 2, ',', '.')." s";
+                            if(!$execOnlyOnce) $timeAndMemoryArray["Player"][$player["puuid"]]["PrintTags"]["Memory"] = number_format((memory_get_usage() - $memPrintTags)/1024, 2, ',', '.')." kB";
 
                             // ---------------------------------------------------v- SAVE DATA FOR MATCH HISTORY AND END TOP PART PLAYER  -v---------------------------------------------------- //
 
@@ -399,8 +400,8 @@ echo '
                         </table>
                     </td>";
                     $execOnlyOnce = false;
-                    $timeAndMemoryArray["Player"][$player["summonerId"]]["TotalPlayer"]["Time"] = number_format((microtime(true) - $startFetchPlayer[$key]), 2, ',', '.')." s";
-                    $timeAndMemoryArray["Player"][$player["summonerId"]]["TotalPlayer"]["Memory"] = number_format((memory_get_usage() - $memFetchPlayer[$key])/1024, 2, ',', '.')." kB";
+                    $timeAndMemoryArray["Player"][$player["puuid"]]["TotalPlayer"]["Time"] = number_format((microtime(true) - $startFetchPlayer[$key]), 2, ',', '.')." s";
+                    $timeAndMemoryArray["Player"][$player["puuid"]]["TotalPlayer"]["Memory"] = number_format((memory_get_usage() - $memFetchPlayer[$key])/1024, 2, ',', '.')." kB";
                     // break; // Uncomment if we want only 1 player to render
                 }
                 unset($slicedPlayerDataMatchIDs);
@@ -493,7 +494,7 @@ echo '
                     <td class='align-top w-1/5 opacity-0' style='animation: .5s ease-in-out 0s 1 fadeIn; animation-fill-mode: forwards;'>
                         <table class='rounded-b bg-[#141624] w-full'>
                             <tr id='matchhistory-{$i}'>
-                                <td x-data='{ open: true }' class='single-player-match-history' data-puuid='data-puuid' data-sumid='data-sumid'>
+                                <td x-data='{ open: true }' class='single-player-match-history' data-puuid='data-puuid'>
                                     <button type='button' class='collapsible bg-dark cursor-pointer h-6 w-full'
                                         :aria-label='(open ? \"&#11167;\" : \"&#11165;\")'
                                         @click='open = !open'
@@ -597,10 +598,10 @@ echo '
             <div class="grid grid-cols-[35%_15%_auto] w-[27rem] bg-black/90 text-white text-center text-xs rounded-lg py-2 absolute ml-16 -mt-[5.5rem] px-3 z-50" x-show="showExplanation" x-transition x-transition:enter.delay.500ms x-cloak @mouseenter="showExplanation = true" @mouseleave="showExplanation = false">
             <div class="py-3 px-2 flex justify-end items-center font-bold border-b-2 border-r-2 border-solid border-dark text-end">'.__('Category').'</div><div class="py-3 px-2 flex justify-center items-center font-bold border-b-2 border-r-2 border-solid border-dark">'.__('Addition').'</div><div class="py-3 px-2 flex justify-start text-left font-bold border-b-2 border-solid border-dark">'.__('Explanation').'</div>';
             if (isset($suggestedBanArray->{$champname}->Points->Value)) {
-                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->Points->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">' . __('A player achieved a mastery score of') . ' ' . str_replace(',', '.', $suggestedBanArray->{$champname}->Points->Value) . ' ' . __('on') . ' ' . $champname . '.</div>';
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Highest Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . round($suggestedBanArray->{$champname}->Points->Add, 2) . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">' . __('A player achieved a mastery score of') . ' ' . str_replace(',', '.', $suggestedBanArray->{$champname}->Points->Value) . ' ' . __('on') . ' ' . $champname . '.</div>';
             }
             if (isset($suggestedBanArray->{$champname}->TotalTeamPoints->Value)) {
-                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Total Team Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . number_format($suggestedBanArray->{$champname}->TotalTeamPoints->Add, 2, '.', '') . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('This team has a combined mastery score of').' '.number_format($suggestedBanArray->{$champname}->TotalTeamPoints->Value, 0, ',', '.').' '.__('on').' '.$champname.'.</div>';
+                echo '<div class="py-3 px-2 flex justify-end items-center font-bold border-dashed border-r-2 border-b-2 border-dark text-end">'.__('Total Team Mastery').':</div><div class="py-3 px-2 flex justify-center items-center border-dashed border-r-2 border-b-2 border-dark">+ ' . round($suggestedBanArray->{$champname}->TotalTeamPoints->Add, 2) . '</div><div class="py-3 px-2 flex justify-center text-left border-dashed border-b-2 border-dark">'.__('This team has a combined mastery score of').' '.number_format($suggestedBanArray->{$champname}->TotalTeamPoints->Value, 0, ',', '.').' '.__('on').' '.$champname.'.</div>';
             }
             if (isset($suggestedBanArray->{$champname}->CapablePlayers->Value)) {
                 if ($suggestedBanArray->{$champname}->CapablePlayers->Value > 1) {

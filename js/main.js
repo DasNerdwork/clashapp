@@ -1,19 +1,21 @@
 // This file contains functions that are or have to be loaded on every page
 
 function postAjax(url, data, success) {
-    var params = typeof data == 'string' ? data : Object.keys(data).map(
-            function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) }
-        ).join('&');
+    var params = typeof data == "string" ? data : Object.keys(data).map(function(k) {
+        return encodeURIComponent(k) + "=" + encodeURIComponent(data[k]);
+    }).join("&");
 
-    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-    xhr.open('POST', url);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState>3 && xhr.status==200) { success(xhr.responseText); }
-    };
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send(params);
-    return xhr;
+    (window.csrfTokenReady || Promise.resolve()).then(function() {
+        var s = window.XMLHttpRequest ? new XMLHttpRequest : new ActiveXObject("Microsoft.XMLHTTP");
+        s.open("POST", url);
+        s.onreadystatechange = function() {
+            s.readyState > 3 && s.status == 200 && success(s.responseText);
+        };
+        s.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+        s.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        s.setRequestHeader("X-CSRF-Token", document.body.dataset.csrfToken || "");
+        s.send(params);
+    });
 }
 
 function sanitize(text){
@@ -155,3 +157,11 @@ if (typeof getCookie !== 'function') {
 function insertAfter(referenceNode, newNode) {
   referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
 }
+
+window.csrfTokenReady = fetch("/ajax/csrf-token.php")
+    .then(e => e.json())
+    .then(e => {
+        document.body.dataset.csrfToken = e.token;
+        return e.token;
+    })
+    .catch(e => console.error("Failed to load CSRF token:", e));
