@@ -6,16 +6,16 @@ require_once '/hdd1/clashapp/db/mongo-db.php';
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
-if(isset($_POST['sumids'])){
+if(isset($_POST['puuids'])){
     // Data Validation checks
     try {
-        $playerNameTeamArray = explode(',', $_POST['sumids']);
+        $playerNameTeamArray = explode(',', $_POST['puuids']);
     } catch (ValueError $e) {
-        die("Failed to explode sumids: " . $e->getMessage());
+        die("Failed to explode puuids: " . $e->getMessage());
     }
-    foreach ($playerNameTeamArray as $sumid) {
-        if (!isValidID($sumid)) {
-            die("Invalid sumid: " . $sumid);
+    foreach ($playerNameTeamArray as $puuid) {
+        if (!isValidID($puuid)) {
+            die("Invalid puuid: " . $puuid);
         }
     }
     if(isset($_POST['teamid'])){
@@ -30,29 +30,29 @@ if(isset($_POST['sumids'])){
     $matchIDTeamArray = array();
     $masteryDataTeamArray = array();
     $playerLanesTeamArray = array();
-    $playerNameTeamArray = explode(',', $_POST['sumids']);
-    $playerSumidTeamArray = array_flip($playerNameTeamArray);
+    $playerNameTeamArray = explode(',', $_POST['puuids']);
+    $playerPuuidTeamArray = array_flip($playerNameTeamArray);
     $returnString = "";
     global $currentPatch;
-    foreach(array_keys($playerSumidTeamArray) as $playerSumid){
-        if(!$mdb->getPlayerBySummonerId($playerSumid)["success"]){
-            echo "Could not find playerfile for ".$playerSumid;
+    foreach(array_keys($playerPuuidTeamArray) as $playerPuuid){
+        if(!$mdb->getPlayerByPUUID($playerPuuid)["success"]){
+            echo "Could not find playerfile for ".$playerPuuid;
             return;
         } else {
-            $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.SumID', $playerSumid)["document"]);
+            $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.PUUID', $playerPuuid)["document"]);
             $playerDataJSON = json_decode($playerDataJSONString, true);
             foreach(array_keys($playerDataJSON["MatchIDs"]) as $singleMatchID){
                 if(!in_array($singleMatchID, $matchIDTeamArray)){
                     $matchIDTeamArray[] = $singleMatchID;
                 }
             }
-            $masteryDataTeamArray[$playerSumid] = $playerDataJSON["MasteryData"];
-            $playerLanesTeamArray[$playerSumid]["Mainrole"] = $playerDataJSON["LanePercentages"][0] ?? "";
-            $playerLanesTeamArray[$playerSumid]["Secrole"] = $playerDataJSON["LanePercentages"][1] ?? "";
+            $masteryDataTeamArray[$playerPuuid] = $playerDataJSON["MasteryData"];
+            $playerLanesTeamArray[$playerPuuid]["Mainrole"] = $playerDataJSON["LanePercentages"][0] ?? "";
+            $playerLanesTeamArray[$playerPuuid]["Secrole"] = $playerDataJSON["LanePercentages"][1] ?? "";
 
-            foreach ($playerNameTeamArray as $singleSumid => $index) {
-                if($playerDataJSON["PlayerData"]["SumID"] == $singleSumid){
-                    $playerNameTeamArray[$singleSumid] = $playerDataJSON["PlayerData"]["GameName"];
+            foreach ($playerNameTeamArray as $singlePuuid => $index) {
+                if($playerDataJSON["PlayerData"]["PUUID"] == $singlePuuid){
+                    $playerNameTeamArray[$singlePuuid] = $playerDataJSON["PlayerData"]["GameName"];
                 }
             }
         }
@@ -61,12 +61,12 @@ if(isset($_POST['sumids'])){
     // $returnArray = array();
     // $returnArray["MatchIDs"] = $matchIDTeamArray;
     // $returnArray["PlayerLanes"] = $playerLanesTeamArray;
-    // $returnArray["PlayerSumids"] = $playerSumidTeamArray;
+    // $returnArray["PlayerPuuids"] = $playerPuuidTeamArray;
     // $returnArray["MasteryData"] = $masteryDataTeamArray;
     // echo json_encode($returnArray);
 
     $suggestedBanMatchData = getMatchData($matchIDTeamArray);
-    $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
+    $suggestedBanArray = getSuggestedBans(array_keys($playerPuuidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
     $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'LastUpdate', time());
     $mdb->addElementToDocument('teams', 'TeamID', $teamID, 'SuggestedBanData', $suggestedBanArray);
     // echo json_encode($suggestedBanArray);

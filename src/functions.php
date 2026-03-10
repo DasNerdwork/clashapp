@@ -32,7 +32,7 @@ $rankingAttributeArray = array("Kills", "Deaths", "Assists", "KDA", "KillPartici
 global $cleanAttributeArray;
 $cleanAttributeArray = array("kills", "deaths", "assists", "kda", "killParticipation", "totalMinionsKilled", "goldEarned", "visionScore", "wardTakedowns", "wardsPlaced", "wardsGuarded", "detectorWardsPlaced", "consumablesPurchased", "turretPlatesTaken",
 "takedowns", "turretTakedowns", "inhibitorTakedowns", "dragonTakedowns", "riftHeraldTakedowns", "damageDealtToBuildings", "damageDealtToObjectives", "damageSelfMitigated", "totalDamageDealtToChampions", "totalDamageTaken", "totalDamageShieldedOnTeammates",
-"totalHealsOnTeammates", "totalTimeCCDealt", "totalTimeSpentDead", "skillshotsDodged", "skillshotsHit", "championName", "championTransform", "individualPosition", "teamId", "teamPosition", "lane", "puuid", "summonerId","summonerName", "win", "neutralMinionsKilled");
+"totalHealsOnTeammates", "totalTimeCCDealt", "totalTimeSpentDead", "skillshotsDodged", "skillshotsHit", "championName", "championTransform", "individualPosition", "teamId", "teamPosition", "lane", "puuid","summonerName", "win", "neutralMinionsKilled");
 
 /** Important performance-saving function to collect locally stored matchdata into dynamically used array
  * This function loops through every given matchID's matchID.json and adds the data to a single $matchData array
@@ -1288,14 +1288,14 @@ function getHighestWinrateWith($lane, $matchDataArray, $puuid){
  *
  * @param array $matchIDArray An array containing all matchIDs of a player
  * @param array $matchDataArray Inputarray of all MatchIDs of the user (PUUID) over which we iterate
- * @param string $sumid The summoners SumID necessary to evaluate the player specific data
+ * @param string $puuid The summoners puuid necessary to evaluate the player specific data
  * @var array $rankingAttributeArray An array containing the names of the attriutes we use to check on for the final matchscore
  * @var int $maxRankScore The matchscore calculated for each match separately
  *
  * Returnvalue:
  * @return array $returnArray Contains the combination of matchID and matchScore for a given player
  */
-function getMatchRanking($matchIDArray, $matchData, $sumid){
+function getMatchRanking($matchIDArray, $matchData, $puuid){
     global $rankingAttributeArray;
     $returnArray = array();
     $reasonArray = array();
@@ -1306,48 +1306,48 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
         $maxRankScore = 0;
         unset($mainArray);
         unset($reasonArray);
-        //going through all matches to save all data in array per sumid
+        //going through all matches to save all data in array per puuid
         if(isset($matchData[$matchID])){ // Necessary check to secure that we have the matchdata of a matchid
             if($matchData[$matchID]->info->gameDuration > 600){
                 foreach ($matchData[$matchID]->info as $player) {
                     for ($i = 0; $i < 10; $i++){
-                        if (isset($player[$i]->summonerId)) { // Necessary to loop over every player to get comparable results
+                        if (isset($player[$i]->puuid)) { // Necessary to loop over every player to get comparable results
                             // echo $i."<br>";
                             // Ternary Operator == if(isset(playerStat)) then set "Attribute" to the playerStat else set the "Attribute" to 0
-                            isset($player[$i]->kills) ? $mainArray[$player[$i]->summonerId]["Kills"] = $player[$i]->kills : $mainArray[$player[$i]->summonerId]["Kills"] = 0;
-                            isset($player[$i]->deaths) ? $mainArray[$player[$i]->summonerId]["Deaths"] = $player[$i]->deaths : $mainArray[$player[$i]->summonerId]["Deaths"] = 0;
-                            isset($player[$i]->assists) ? $mainArray[$player[$i]->summonerId]["Assists"] = $player[$i]->assists : $mainArray[$player[$i]->summonerId]["Assists"] = 0;
-                            isset($player[$i]->challenges->kda) ? $mainArray[$player[$i]->summonerId]["KDA"] = $player[$i]->challenges->kda : $mainArray[$player[$i]->summonerId]["KDA"] = 0;
-                            isset($player[$i]->challenges->killParticipation) ? $mainArray[$player[$i]->summonerId]["KillParticipation"] = $player[$i]->challenges->killParticipation : $mainArray[$player[$i]->summonerId]["KillParticipation"] = 0;
-                            isset($player[$i]->totalMinionsKilled) ? $mainArray[$player[$i]->summonerId]["CS"] = $player[$i]->totalMinionsKilled+$player[$i]->neutralMinionsKilled : $mainArray[$player[$i]->summonerId]["CS"] = 0;
-                            isset($player[$i]->goldEarned) ? $mainArray[$player[$i]->summonerId]["Gold"] = $player[$i]->goldEarned : $mainArray[$player[$i]->summonerId]["Gold"] = 0;
-                            isset($player[$i]->visionScore) ? $mainArray[$player[$i]->summonerId]["VisionScore"] = $player[$i]->visionScore : $mainArray[$player[$i]->summonerId]["VisionScore"] = 0;
-                            isset($player[$i]->challenges->wardTakedowns) ? $mainArray[$player[$i]->summonerId]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns : $mainArray[$player[$i]->summonerId]["WardTakedowns"] = 0;
-                            isset($player[$i]->wardsPlaced) ? $mainArray[$player[$i]->summonerId]["WardsPlaced"] = $player[$i]->wardsPlaced : $mainArray[$player[$i]->summonerId]["WardsPlaced"] = 0;
-                            isset($player[$i]->challenges->wardsGuarded) ? $mainArray[$player[$i]->summonerId]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded : $mainArray[$player[$i]->summonerId]["WardsGuarded"] = 0;
-                            isset($player[$i]->detectorWardsPlaced) ? $mainArray[$player[$i]->summonerId]["VisionWards"] = $player[$i]->detectorWardsPlaced : $mainArray[$player[$i]->summonerId]["VisionWards"] = 0;
-                            isset($player[$i]->consumablesPurchased) ? $mainArray[$player[$i]->summonerId]["Consumables"] = $player[$i]->consumablesPurchased : $mainArray[$player[$i]->summonerId]["Consumables"] = 0;
-                            isset($player[$i]->challenges->turretPlatesTaken) ? $mainArray[$player[$i]->summonerId]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken : $mainArray[$player[$i]->summonerId]["TurretPlates"] = 0;
-                            isset($player[$i]->challenges->takedowns) ? $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = $player[$i]->challenges->takedowns : $mainArray[$player[$i]->summonerId]["TotalTakedowns"] = 0;
-                            isset($player[$i]->turretTakedowns) ? $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = $player[$i]->turretTakedowns : $mainArray[$player[$i]->summonerId]["TurretTakedowns"] = 0;
-                            isset($player[$i]->inhibitorTakedowns) ? $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns : $mainArray[$player[$i]->summonerId]["InhibitorTakedowns"] = 0;
-                            isset($player[$i]->challenges->dragonTakedowns) ? $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns : $mainArray[$player[$i]->summonerId]["DragonTakedowns"] = 0;
-                            isset($player[$i]->challenges->riftHeraldTakedowns) ? $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns : $mainArray[$player[$i]->summonerId]["HeraldTakedowns"] = 0;
-                            isset($player[$i]->damageDealtToBuildings) ? $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings : $mainArray[$player[$i]->summonerId]["DamageToBuildings"] = 0;
-                            isset($player[$i]->damageDealtToObjectives) ? $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives : $mainArray[$player[$i]->summonerId]["DamageToObjectives"] = 0;
-                            isset($player[$i]->damageSelfMitigated) ? $mainArray[$player[$i]->summonerId]["DamageMitigated"] = $player[$i]->damageSelfMitigated : $mainArray[$player[$i]->summonerId]["DamageMitigated"] = 0;
-                            isset($player[$i]->totalDamageDealtToChampions) ? $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions : $mainArray[$player[$i]->summonerId]["DamageDealtToChampions"] = 0;
-                            isset($player[$i]->totalDamageTaken) ? $mainArray[$player[$i]->summonerId]["DamageTaken"] = $player[$i]->totalDamageTaken : $mainArray[$player[$i]->summonerId]["DamageTaken"] = 0;
-                            isset($player[$i]->totalDamageShieldedOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates : $mainArray[$player[$i]->summonerId]["TeamShielded"] = 0;
-                            isset($player[$i]->totalHealsOnTeammates) ? $mainArray[$player[$i]->summonerId]["TeamHealed"] = $player[$i]->totalHealsOnTeammates : $mainArray[$player[$i]->summonerId]["TeamHealed"] = 0;
-                            isset($player[$i]->totalTimeCCDealt) ? $mainArray[$player[$i]->summonerId]["TimeCC"] = $player[$i]->totalTimeCCDealt : $mainArray[$player[$i]->summonerId]["TimeCC"] = 0;
-                            isset($player[$i]->totalTimeSpentDead) ? $mainArray[$player[$i]->summonerId]["DeathTime"] = $player[$i]->totalTimeSpentDead : $mainArray[$player[$i]->summonerId]["DeathTime"] = 0;
-                            isset($player[$i]->challenges->skillshotsDodged) ? $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged : $mainArray[$player[$i]->summonerId]["SkillshotsDodged"] = 0;
-                            isset($player[$i]->challenges->skillshotsHit) ? $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit : $mainArray[$player[$i]->summonerId]["SkillshotsHit"] = 0;
-                            if($player[$i]->summonerId == $sumid){
-                                $reasonArray[$matchID]["Sumid"] = $sumid;
+                            isset($player[$i]->kills) ? $mainArray[$player[$i]->puuid]["Kills"] = $player[$i]->kills : $mainArray[$player[$i]->puuid]["Kills"] = 0;
+                            isset($player[$i]->deaths) ? $mainArray[$player[$i]->puuid]["Deaths"] = $player[$i]->deaths : $mainArray[$player[$i]->puuid]["Deaths"] = 0;
+                            isset($player[$i]->assists) ? $mainArray[$player[$i]->puuid]["Assists"] = $player[$i]->assists : $mainArray[$player[$i]->puuid]["Assists"] = 0;
+                            isset($player[$i]->challenges->kda) ? $mainArray[$player[$i]->puuid]["KDA"] = $player[$i]->challenges->kda : $mainArray[$player[$i]->puuid]["KDA"] = 0;
+                            isset($player[$i]->challenges->killParticipation) ? $mainArray[$player[$i]->puuid]["KillParticipation"] = $player[$i]->challenges->killParticipation : $mainArray[$player[$i]->puuid]["KillParticipation"] = 0;
+                            isset($player[$i]->totalMinionsKilled) ? $mainArray[$player[$i]->puuid]["CS"] = $player[$i]->totalMinionsKilled+$player[$i]->neutralMinionsKilled : $mainArray[$player[$i]->puuid]["CS"] = 0;
+                            isset($player[$i]->goldEarned) ? $mainArray[$player[$i]->puuid]["Gold"] = $player[$i]->goldEarned : $mainArray[$player[$i]->puuid]["Gold"] = 0;
+                            isset($player[$i]->visionScore) ? $mainArray[$player[$i]->puuid]["VisionScore"] = $player[$i]->visionScore : $mainArray[$player[$i]->puuid]["VisionScore"] = 0;
+                            isset($player[$i]->challenges->wardTakedowns) ? $mainArray[$player[$i]->puuid]["WardTakedowns"] = $player[$i]->challenges->wardTakedowns : $mainArray[$player[$i]->puuid]["WardTakedowns"] = 0;
+                            isset($player[$i]->wardsPlaced) ? $mainArray[$player[$i]->puuid]["WardsPlaced"] = $player[$i]->wardsPlaced : $mainArray[$player[$i]->puuid]["WardsPlaced"] = 0;
+                            isset($player[$i]->challenges->wardsGuarded) ? $mainArray[$player[$i]->puuid]["WardsGuarded"] = $player[$i]->challenges->wardsGuarded : $mainArray[$player[$i]->puuid]["WardsGuarded"] = 0;
+                            isset($player[$i]->detectorWardsPlaced) ? $mainArray[$player[$i]->puuid]["VisionWards"] = $player[$i]->detectorWardsPlaced : $mainArray[$player[$i]->puuid]["VisionWards"] = 0;
+                            isset($player[$i]->consumablesPurchased) ? $mainArray[$player[$i]->puuid]["Consumables"] = $player[$i]->consumablesPurchased : $mainArray[$player[$i]->puuid]["Consumables"] = 0;
+                            isset($player[$i]->challenges->turretPlatesTaken) ? $mainArray[$player[$i]->puuid]["TurretPlates"] = $player[$i]->challenges->turretPlatesTaken : $mainArray[$player[$i]->puuid]["TurretPlates"] = 0;
+                            isset($player[$i]->challenges->takedowns) ? $mainArray[$player[$i]->puuid]["TotalTakedowns"] = $player[$i]->challenges->takedowns : $mainArray[$player[$i]->puuid]["TotalTakedowns"] = 0;
+                            isset($player[$i]->turretTakedowns) ? $mainArray[$player[$i]->puuid]["TurretTakedowns"] = $player[$i]->turretTakedowns : $mainArray[$player[$i]->puuid]["TurretTakedowns"] = 0;
+                            isset($player[$i]->inhibitorTakedowns) ? $mainArray[$player[$i]->puuid]["InhibitorTakedowns"] = $player[$i]->inhibitorTakedowns : $mainArray[$player[$i]->puuid]["InhibitorTakedowns"] = 0;
+                            isset($player[$i]->challenges->dragonTakedowns) ? $mainArray[$player[$i]->puuid]["DragonTakedowns"] = $player[$i]->challenges->dragonTakedowns : $mainArray[$player[$i]->puuid]["DragonTakedowns"] = 0;
+                            isset($player[$i]->challenges->riftHeraldTakedowns) ? $mainArray[$player[$i]->puuid]["HeraldTakedowns"] = $player[$i]->challenges->riftHeraldTakedowns : $mainArray[$player[$i]->puuid]["HeraldTakedowns"] = 0;
+                            isset($player[$i]->damageDealtToBuildings) ? $mainArray[$player[$i]->puuid]["DamageToBuildings"] = $player[$i]->damageDealtToBuildings : $mainArray[$player[$i]->puuid]["DamageToBuildings"] = 0;
+                            isset($player[$i]->damageDealtToObjectives) ? $mainArray[$player[$i]->puuid]["DamageToObjectives"] = $player[$i]->damageDealtToObjectives : $mainArray[$player[$i]->puuid]["DamageToObjectives"] = 0;
+                            isset($player[$i]->damageSelfMitigated) ? $mainArray[$player[$i]->puuid]["DamageMitigated"] = $player[$i]->damageSelfMitigated : $mainArray[$player[$i]->puuid]["DamageMitigated"] = 0;
+                            isset($player[$i]->totalDamageDealtToChampions) ? $mainArray[$player[$i]->puuid]["DamageDealtToChampions"] = $player[$i]->totalDamageDealtToChampions : $mainArray[$player[$i]->puuid]["DamageDealtToChampions"] = 0;
+                            isset($player[$i]->totalDamageTaken) ? $mainArray[$player[$i]->puuid]["DamageTaken"] = $player[$i]->totalDamageTaken : $mainArray[$player[$i]->puuid]["DamageTaken"] = 0;
+                            isset($player[$i]->totalDamageShieldedOnTeammates) ? $mainArray[$player[$i]->puuid]["TeamShielded"] = $player[$i]->totalDamageShieldedOnTeammates : $mainArray[$player[$i]->puuid]["TeamShielded"] = 0;
+                            isset($player[$i]->totalHealsOnTeammates) ? $mainArray[$player[$i]->puuid]["TeamHealed"] = $player[$i]->totalHealsOnTeammates : $mainArray[$player[$i]->puuid]["TeamHealed"] = 0;
+                            isset($player[$i]->totalTimeCCDealt) ? $mainArray[$player[$i]->puuid]["TimeCC"] = $player[$i]->totalTimeCCDealt : $mainArray[$player[$i]->puuid]["TimeCC"] = 0;
+                            isset($player[$i]->totalTimeSpentDead) ? $mainArray[$player[$i]->puuid]["DeathTime"] = $player[$i]->totalTimeSpentDead : $mainArray[$player[$i]->puuid]["DeathTime"] = 0;
+                            isset($player[$i]->challenges->skillshotsDodged) ? $mainArray[$player[$i]->puuid]["SkillshotsDodged"] = $player[$i]->challenges->skillshotsDodged : $mainArray[$player[$i]->puuid]["SkillshotsDodged"] = 0;
+                            isset($player[$i]->challenges->skillshotsHit) ? $mainArray[$player[$i]->puuid]["SkillshotsHit"] = $player[$i]->challenges->skillshotsHit : $mainArray[$player[$i]->puuid]["SkillshotsHit"] = 0;
+                            if($player[$i]->puuid == $puuid){
+                                $reasonArray[$matchID]["Puuid"] = $puuid;
                                 foreach($cleanNameArray as $attributeName){
-                                    $reasonArray[$matchID][$attributeName]["Value"] = $mainArray[$player[$i]->summonerId][$attributeName];
+                                    $reasonArray[$matchID][$attributeName]["Value"] = $mainArray[$player[$i]->puuid][$attributeName];
                                 }
                             }
                         }
@@ -1357,11 +1357,11 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                 // echo mb_strlen(serialize((array)$mainArray), '8bit');
                 foreach ($rankingAttributeArray as $attribute){
 
-                    foreach ($mainArray as $key => $playersumid) {
+                    foreach ($mainArray as $key => $playerpuuid) {
 
                         $tempArray[] = array (
-                            "SumID" => $key,
-                            $attribute => $playersumid[$attribute],
+                            "PUUID" => $key,
+                            $attribute => $playerpuuid[$attribute],
                         );
                     }
                     if ($attribute == "Deaths" || $attribute == "DeathTime") {
@@ -1377,7 +1377,7 @@ function getMatchRanking($matchIDArray, $matchData, $sumid){
                     // print_r($tempArray);
 
                     foreach($tempArray as $rank => $value){
-                        if ($value["SumID"] == $sumid){
+                        if ($value["PUUID"] == $puuid){
                             switch ($attribute){
                                 case "Kills":
                                     $maxRankScore += (($rank+1)*7);
@@ -1645,7 +1645,7 @@ function timeDiffToText($timestamp){
 
 /** Function that generates the teams win, lose and winrate stats, recommended picks against aswell as discommended picks against them
  *
- * @param array $sumidArray This array contains all 5 summonerIDs of each team member, which is later used to identifiy if one of them played and won/lost a game
+ * @param array $puuidArray This array contains all 5 summonerIDs of each team member, which is later used to identifiy if one of them played and won/lost a game
  * @param array $matchIDArray This array contains all matchIDs of all 5 clash team members without duplicates
  * @param array $matchData The compacted matchData of all IDs from the $matchIDArray, used for performance reasons (see getMatchData())
  * @var array $tempArray Temporary array used for array combination processes
@@ -1656,7 +1656,7 @@ function timeDiffToText($timestamp){
  * Returnvalue:
  * @return array $returnArray Contains all info about the teams stats (wins, loses & WR) aswell as 20 recommended and 20 discommended picks
  */
-function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
+function getSuggestedPicksAndTeamstats($puuidArray, $matchIDArray, $matchData){
     $matchscoreArray = array();
     $returnArray = array();
     $tempArray = array();
@@ -1666,14 +1666,14 @@ function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
 
     foreach($matchData as $matchID => $inhalt){
         foreach($inhalt->info->participants as $player){
-            if(in_array($player->summonerId, $sumidArray) && $player->win == true){
+            if(in_array($player->puuid, $puuidArray) && $player->win == true){
                 $teamId = $player->teamId;
-            } else if(in_array($player->summonerId, $sumidArray) && $player->win == false) {
+            } else if(in_array($player->puuid, $puuidArray) && $player->win == false) {
                 $teamId = $player->teamId;
                 foreach($inhalt->info->participants as $enemy){
                     if($enemy->teamId != $teamId){ // Select only enemy team
-                        $tempArray[$enemy->summonerId]["Champion"] = $enemy->championName;
-                        $tempArray[$enemy->summonerId]["Matchscore"] = implode("",getMatchRanking(array($matchID), $matchData, $enemy->summonerId));
+                        $tempArray[$enemy->puuid]["Champion"] = $enemy->championName;
+                        $tempArray[$enemy->puuid]["Matchscore"] = implode("",getMatchRanking(array($matchID), $matchData, $enemy->puuid));
                     }
                 }
                 $matchscoreArray[$matchID] = $tempArray;
@@ -1681,10 +1681,10 @@ function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
             }
         }
         foreach($inhalt->info->participants as $test){
-            if(in_array($test->summonerId, $sumidArray) && $test->win == false) {
+            if(in_array($test->puuid, $puuidArray) && $test->win == false) {
                 $counter++; // Team has lost a game
                 break;
-            } else if(in_array($test->summonerId, $sumidArray) && $test->win == true){
+            } else if(in_array($test->puuid, $puuidArray) && $test->win == true){
                 $counter2++; // Team has won a game
                 break;
             }
@@ -1732,7 +1732,7 @@ function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
 
 /** Function that generates the teams win, lose and winrate stats, recommended picks against aswell as discommended picks against them
  *
- * @param array $sumidArray This array contains all 5 summonerIDs of each team member, which is later used to identifiy if one of them played and won/lost a game
+ * @param array $puuidArray This array contains all 5 summonerIDs of each team member, which is later used to identifiy if one of them played and won/lost a game
  * @param array $matchIDArray This array contains all matchIDs of all 5 clash team members without duplicates
  * @param array $matchData The compacted matchData of all IDs from the $matchIDArray, used for performance reasons (see getMatchData())
  * @var array $tempArray Temporary array used for array combination processes
@@ -1743,7 +1743,7 @@ function getSuggestedPicksAndTeamstats($sumidArray, $matchIDArray, $matchData){
  * Returnvalue:
  * @return array $returnArray Contains all info about the teams stats (wins, loses & WR) aswell as 20 recommended and 20 discommended picks
  */
-function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, $matchIDArray, $matchData){
+function getSuggestedBans($puuidArray, $masterDataArray, $playerLanesTeamArray, $matchIDArray, $matchData){
     $sortedMasteryArray = array();
     $countArray = array();
     $returnAndExplainArray = array();
@@ -1781,12 +1781,12 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
     }
     // print_r($sortedMasteryArray); // This is now the sorted team mastery data array
 
-    // Count how many people play a champion by adding their sumid if they have at least 20k mastery points on a champ (eq. to average understanding and not just played once)
-    foreach($masterDataArray as $sumid => $playersMasteryData){
+    // Count how many people play a champion by adding their puuid if they have at least 20k mastery points on a champ (eq. to average understanding and not just played once)
+    foreach($masterDataArray as $puuid => $playersMasteryData){
         foreach($playersMasteryData as $data){
             $points = str_replace(',', '', $data["Points"]);
             if($points >= 20000){
-                $countArray[$data["Champion"]][] = $sumid;
+                $countArray[$data["Champion"]][] = $puuid;
             }
         }
     }
@@ -1929,7 +1929,7 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
     // Calculate the occurences of a champion in the last fetched games (E.g. Viktor played in 7 of 15 games is important information, many points on irelia too, but 0 occurences in 15 last games of that player less important)
     foreach($matchIDArray as $matchID){
         foreach($matchData[$matchID]->info->participants as $player){
-            if(in_array($player->summonerId, $sumidArray)){
+            if(in_array($player->puuid, $puuidArray)){
                 foreach($sortedMasteryArray as $key => $championData){
                     if($championData["Champion"] == $player->championName){
                         if(!isset($sortedMasteryArray[$key]["OccurencesInLastGames"])) $sortedMasteryArray[$key]["OccurencesInLastGames"] = 0;
@@ -1946,11 +1946,11 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
     // This block saves all matchscores achieved per champion per match if there were occurences in the last games. E.g. Kayn was played 3 times with scores [0] => 5.23, [1] => 6.77 [2] => 4.34
     foreach($matchData as $mainKey => $inhalt){
         foreach($inhalt->info->participants as $player){
-            if(in_array($player->summonerId, $sumidArray)){
+            if(in_array($player->puuid, $puuidArray)){
                 foreach($sortedMasteryArray as $key => $championData){
                     if($championData["Champion"] == $player->championName){
                         if(!isset($sortedMasteryArray[$key]["AverageMatchScore"])) $sortedMasteryArray[$key]["AverageMatchScore"] = [];
-                        $sortedMasteryArray[$key]["AverageMatchScore"][] = implode("",getMatchRanking(array($mainKey), $matchData, $player->summonerId));
+                        $sortedMasteryArray[$key]["AverageMatchScore"][] = implode("",getMatchRanking(array($mainKey), $matchData, $player->puuid));
                         break; // Break to prevent unnecessary loops
                     }
                 }
@@ -2045,6 +2045,8 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
         if($sortedMasteryArray[$key]["AverageMatchScore"] > 0){
             $sortedMasteryArray[$key]["FinalScore"] += number_format(($sortedMasteryArray[$key]["AverageMatchScore"]**1.75)/18.75,2,'.',''); // Exponential Function
             $banExplainArray[$championData["Champion"]]["AverageMatchScore"]["Add"] = number_format(($sortedMasteryArray[$key]["AverageMatchScore"]**1.75)/18.75,2,'.','');
+        } else {
+            $banExplainArray[$championData["Champion"]]["AverageMatchScore"]["Add"] = 0;
         }
 
         /**
@@ -2076,12 +2078,12 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
 
     // Fetch which player contributes most to single mastery points
     foreach($returnArray as $suggestedBan){
-        foreach($masterDataArray as $sumid => $data){
+        foreach($masterDataArray as $puuid => $data){
             foreach($data as $singleChamp){
                 if($singleChamp["Points"] == $suggestedBan["Points"]){
                     $banExplainArray[$suggestedBan["Champion"]]["Filename"] = $suggestedBan["Filename"];
                     $banExplainArray[$suggestedBan["Champion"]]["Points"]["Value"] = str_replace(',', '', $suggestedBan["Points"]);
-                    $banExplainArray[$suggestedBan["Champion"]]["Points"]["Cause"] = $sumid;
+                    $banExplainArray[$suggestedBan["Champion"]]["Points"]["Cause"] = $puuid;
                     $banExplainArray[$suggestedBan["Champion"]]["CapablePlayers"]["Value"] = $suggestedBan["CapablePlayers"];
                     $banExplainArray[$suggestedBan["Champion"]]["MatchingLanersPrio"]["Value"] = $suggestedBan["MatchingLanersPrio"];
                     $banExplainArray[$suggestedBan["Champion"]]["LastPlayed"]["Value"] = $suggestedBan["LastPlayed"]; // Also includes last time played in normals
@@ -2112,136 +2114,65 @@ function getSuggestedBans($sumidArray, $masterDataArray, $playerLanesTeamArray, 
     return $banExplainArray;
 }
 
-/** This function the necessary information for a correct profile icon + border display
- * @param array $rankData A players stored information about his rank, viewable in his sumid.json
+/**
+ * Determines the necessary information for profile icon and border display.
+ * Returns the highest rank across Solo and Flex queue, or falls back to level if unranked.
  *
- * @var int $rankVal The valuater, which saves a score to later determine the highest rank of a player if multiple are present
- * @var string $highestRank A playeholder variable which will be overwritten if another $rankVal is higher than the previous $rankVel
- *             This one holds the current highest rank tier, e.g. PLATINUM
- * @var string $rankNumber The roman form number of a give rank, e.g. IV
- * @var string $highEloLP Just to store the LP count in case the rank is high elo (Master+)
+ * @param array $rankData   A player's stored rank information (Queue, Tier, Rank, LP, Wins, Losses)
+ * @param array $playerData A player's stored general data, used for level fallback
  *
- * Returnvalue:
- * @return array The custom return array consists of a type which is either Rank or Level to determine the icon border
- *              Additionally it receives the necessary level filename or whole ranked data to further do stuff with it -> see team.php
+ * @return array Either:
+ *              ["Type" => "Rank", "HighestRank" => string, "HighEloLP" => string, "RankNumber" => string]
+ *              ["Type" => "Level", "LevelFileName" => string]
  */
-function getRankOrLevel($rankData, $playerData){
-    $rankVal = 0; // This score is used to find the highest Rank from both Flex and Solo Queue | Local Variable
-    $highEloLP = ""; // If the user has reached high elo the LP count is important (just for Master, Grandmaster and Challenger)
-    $winrate = 0; // Initialize winrate variable
+function getRankOrLevel($rankData, $playerData) {
+    $tierOrder = [
+        'IRON' => 1, 'BRONZE' => 2, 'SILVER' => 3, 'GOLD' => 4,
+        'PLATINUM' => 5, 'EMERALD' => 6, 'DIAMOND' => 7,
+        'MASTER' => 8, 'GRANDMASTER' => 9, 'CHALLENGER' => 10
+    ];
+    $highEloTiers = ['MASTER', 'GRANDMASTER', 'CHALLENGER'];
 
-    foreach($rankData as $rankedQueue){ // Sorted after rank distribution (https://www.leagueofgraphs.com/de/rankings/rank-distribution)
-        if($rankedQueue["Queue"] == "RANKED_SOLO_5x5" || $rankedQueue["Queue"] == "RANKED_FLEX_SR" ){
-            if($rankedQueue["Tier"] == "SILVER" && $rankVal < 3){
-                $rankVal = 3;
-                $rankNumber = $rankedQueue["Rank"];
-                $highestRank = $rankedQueue["Tier"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-            } else if($rankedQueue["Tier"] == "GOLD" && $rankVal < 4){
-                // @codeCoverageIgnoreStart
-                $rankVal = 4;
-                $rankNumber = $rankedQueue["Rank"];
-                $highestRank = $rankedQueue["Tier"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-            } else if($rankedQueue["Tier"] == "BRONZE" && $rankVal < 2){
-                $rankVal = 2;
-                $rankNumber = $rankedQueue["Rank"];
-                $highestRank = $rankedQueue["Tier"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-            } else if($rankedQueue["Tier"] == "PLATINUM" && $rankVal < 5){
-                $rankVal = 5;
-                $rankNumber = $rankedQueue["Rank"];
-                $highestRank = $rankedQueue["Tier"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-            } else if($rankedQueue["Tier"] == "EMERALD" && $rankVal < 6){
-                $rankVal = 6;
-                $rankNumber = $rankedQueue["Rank"];
-                $highestRank = $rankedQueue["Tier"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-            } else if($rankedQueue["Tier"] == "IRON" && $rankVal < 1){
-                $rankVal = 1;
-                $rankNumber = $rankedQueue["Rank"];
-                $highestRank = $rankedQueue["Tier"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-            } else if($rankedQueue["Tier"] == "DIAMOND" && $rankVal < 7){
-                $rankVal = 7;
-                $rankNumber = $rankedQueue["Rank"];
-                $highestRank = $rankedQueue["Tier"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-            } else if($rankedQueue["Tier"] == "MASTER" && $rankVal < 8){
-                $rankVal = 8;
-                $rankNumber = "";
-                $highestRank = $rankedQueue["Tier"];
-                $highEloLP = $rankedQueue["LP"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-                // @codeCoverageIgnoreEnd
-            } else if($rankedQueue["Tier"] == "GRANDMASTER" && $rankVal < 9){
-                $rankVal = 9;
-                $rankNumber = "";
-                $highestRank = $rankedQueue["Tier"];
-                $highEloLP = $rankedQueue["LP"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-                // @codeCoverageIgnoreStart
-            } else if($rankedQueue["Tier"] == "CHALLENGER" && $rankVal < 10){
-                $rankVal = 10;
-                $rankNumber = "";
-                $highestRank = $rankedQueue["Tier"];
-                $highEloLP = $rankedQueue["LP"];
-                if(isset($rankedQueue["Winrate"])) $winrate = $rankedQueue["Winrate"];
-                // @codeCoverageIgnoreEnd
-            }
+    $highestRankVal = 0;
+    $highestQueue = null;
+
+    foreach ($rankData as $queue) {
+        if (!in_array($queue["Queue"], ["RANKED_SOLO_5x5", "RANKED_FLEX_SR"])) continue;
+        $tier = $queue["Tier"] ?? null;
+        if (!isset($tierOrder[$tier])) continue;
+        if ($tierOrder[$tier] > $highestRankVal) {
+            $highestRankVal = $tierOrder[$tier];
+            $highestQueue = $queue;
         }
     }
-    if($rankVal != 0){
-        return array("Type" => "Rank", "HighestRank" => $highestRank, "HighEloLP" => $highEloLP, "RankNumber" => $rankNumber, "Winrate" => $winrate);
-    } else {
-        if($playerData["Level"] < 30){
-            $levelFileName = "001";
-        } else if($playerData["Level"] < 50){
-            // @codeCoverageIgnoreStart
-            $levelFileName = "030";
-        } else if($playerData["Level"] < 75){
-            $levelFileName = "050";
-        } else if($playerData["Level"] < 100){
-            $levelFileName = "075";
-        } else if($playerData["Level"] < 125){
-            $levelFileName = "100";
-        } else if($playerData["Level"] < 150){
-            $levelFileName = "125";
-        } else if($playerData["Level"] < 175){
-            $levelFileName = "150";
-        } else if($playerData["Level"] < 200){
-            $levelFileName = "175";
-        } else if($playerData["Level"] < 225){
-            $levelFileName = "200";
-        } else if($playerData["Level"] < 250){
-            $levelFileName = "225";
-        } else if($playerData["Level"] < 275){
-            $levelFileName = "250";
-        } else if($playerData["Level"] < 300){
-            $levelFileName = "275";
-        } else if($playerData["Level"] < 325){
-            $levelFileName = "300";
-        } else if($playerData["Level"] < 350){
-            $levelFileName = "325";
-        } else if($playerData["Level"] < 375){
-            $levelFileName = "350";
-        } else if($playerData["Level"] < 400){
-            $levelFileName = "375";
-        } else if($playerData["Level"] < 425){
-            $levelFileName = "400";
-        } else if($playerData["Level"] < 450){
-            $levelFileName = "425";
-        } else if($playerData["Level"] < 475){
-            $levelFileName = "450";
-        } else if($playerData["Level"] < 500){
-            $levelFileName = "475";
-            // @codeCoverageIgnoreEnd
-        } else if($playerData["Level"] >= 500){
-            $levelFileName = "500";
-        }
-        return array("Type" => "Level", "LevelFileName" => $levelFileName);
+
+    if ($highestQueue !== null) {
+        $tier = $highestQueue["Tier"];
+        return [
+            "Type"        => "Rank",
+            "HighestRank" => $tier,
+            "HighEloLP"   => in_array($tier, $highEloTiers) ? (string)$highestQueue["LP"] : "",
+            "RankNumber"  => in_array($tier, $highEloTiers) ? "" : $highestQueue["Rank"],
+            "Winrate"     => ($highestQueue["Wins"] + $highestQueue["Losses"]) > 0
+                            ? round(($highestQueue["Wins"] / ($highestQueue["Wins"] + $highestQueue["Losses"])) * 100, 2)
+                            : 0,
+        ];
     }
+
+    // No rank found — fall back to level
+    $level = $playerData["Level"];
+    $levelThresholds = [30, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500];
+    $levelFileNames  = ['001', '030', '050', '075', '100', '125', '150', '175', '200', '225', '250', '275', '300', '325', '350', '375', '400', '425', '450', '475', '500'];
+
+    $levelFileName = '500'; // default for >= 500
+    foreach ($levelThresholds as $i => $threshold) {
+        if ($level < $threshold) {
+            $levelFileName = $levelFileNames[$i];
+            break;
+        }
+    }
+
+    return ["Type" => "Level", "LevelFileName" => $levelFileName];
 }
 
 /** This function simply returns a color code corresponding to a textual rank input, e.g. "PLATINUM"
@@ -2754,7 +2685,7 @@ function sortByMatchIds($matchDataArray) {
 /**
  * @codeCoverageIgnore
  */
-function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, $reload, $csrf) {
+function generatePlayerColumnData($requestIterator, $puuid, $teamID, $queuedAs, $reload, $csrf) {
     static $scriptLoaded = false;
     $script = '';
     if (!$scriptLoaded) {
@@ -2764,7 +2695,7 @@ function generatePlayerColumnData($requestIterator, $sumid, $teamID, $queuedAs, 
 
     return $script . "
     <script>
-        generatePlayerColumnData('{$requestIterator}', '{$sumid}', '{$teamID}', '{$queuedAs}', '{$reload}', '{$csrf}');
+        generatePlayerColumnData('{$requestIterator}', '{$puuid}', '{$teamID}', '{$queuedAs}', '{$reload}', '{$csrf}');
     </script>";
 }
 
@@ -2826,7 +2757,7 @@ function isValidIterator($iterator) {
 /**
  * Match pattern: letters, numbers, underscores and hyphens
  *
- * @param string $id A string containing the to-be-checked sumid, puuid, accountid, etc.
+ * @param string $id A string containing the to-be-checked puuid, puuid, accountid, etc.
  *
  * @return boolean True | False depending on if the format is correct
  *
@@ -2874,6 +2805,14 @@ function isValidPlayerName($playerName) {
 function isValidPlayerTag($playerTag) {
     // Match pattern: letters from any alphabet, length between 3 and 5
     return preg_match('/^[\p{L}0-9_\s-]{3,5}$/u', $playerTag) === 1;
+}
+
+function formatNumber($number, $decimals = 0) {
+    $lang = $_COOKIE['lang'] ?? 'en_US';
+    if ($lang === 'de_DE') {
+        return number_format($number, $decimals, ',', '.');
+    }
+    return number_format($number, $decimals, '.', ',');
 }
 
 function doesChampionExist($input, $lang) {

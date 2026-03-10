@@ -41,36 +41,47 @@ $apiRequests = array(
 class API {
     /** General Summoner Info
      * This function retrieves all general playerdata of a given username or PUUID
-    * Eq. to https://developer.riotgames.com/apis#summoner-v4/GET_getBySummonerName
-    *
-    * @param string $type Determines if the request gets sent to the API with a username or a PUUID
-    * @param mixed $id Is the given username, SumID or PUUID
-    * @var array $output Contains the output of the curl request as string which we later convert using json_decode
-    * @var string $httpCode Contains the returncode of the curl request (e.g. 404 not found)
-    *
-    * Returnvalue:
-    * @return array $playerDataArray with keys "Icon", "GameName", "Tag", "Level", "PUUID", "SumID", "AccountID" and "LastChange" of the summoners profile
-    */
+     * Uses a two-stage API approach
+     *
+     * Stage 1: Get account info via /riot/account/v1/accounts/by-riot-id/ or /riot/account/v1/accounts/by-puuid/
+     * Stage 2: Get summoner info via /lol/summoner/v4/summoners/by-puuid/ using the PUUID from Stage 1
+     *
+     * @param string $type Determines if the request gets sent to the API with a riot-id or a PUUID
+     * @param mixed $id Is the given username (riot-id: gameName#tagLine) or PUUID
+     * @var array $accountData Contains the output of the first curl request (account data)
+     * @var string $httpCode Contains the returncode of the curl request (e.g. 404 not found)
+     *
+     * Returnvalue:
+     * @return array $playerDataArray with keys "Icon", "GameName", "Tag", "Level", "PUUID" and "LastChange" of the summoners profile
+     */
     public static function getPlayerData($type, $id){
         global $headers, $apiRequests;
         $playerDataArray = array();
         $retryAttempts = 0;
+        $puuid = null;
+        $accountData = null;
+        $httpCode = 0;
 
+        // ============================================================================
+        // STAGE 1: Get account data (riot-id or puuid)
+        // ============================================================================
+        $requestUrlVar = "";
+        
+        switch ($type) {
+            case "riot-id":
+                $id = str_replace("#","/",$id);
+                $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/";
+                break;
+            case "puuid":
+                $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
+                break;
+            default:
+                // Invalid type
+                return array();
+        }
+
+        // First API request - get account data
         do {
-            switch ($type) {
-                case "riot-id":
-                    $id = str_replace("#","/",$id);
-                    $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/";
-                    break;
-                case "puuid":
-                    $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
-                    break;
-                case "sumid":
-                    $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/";
-                    break;
-            }
-
-            // Curl API request block
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $id);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -79,11 +90,9 @@ class API {
             $response = curl_exec($ch);
             $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $responseHeader = substr($response, 0, $header_size);
-            $type == "sumid" ? $outputSummoners = substr($response, $header_size) : $output = substr($response, $header_size);
+            $output = substr($response, $header_size);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             $apiRequests["API::getPlayerData"]++; // Increment API requests count
-
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             // Check for 429 (Rate Limit Exceeded)
             if ($httpCode == 429) {
@@ -92,21 +101,14 @@ class API {
                 preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
                 $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
 
-                // Uncomment the line below if you want to keep track of the API requests count
-                // $apiRequests["API::getPlayerData"]++;
-
-                // Implement additional handling if needed
-                // For example, you may want to wait for a specific duration and then retry the request.
                 sleep($retryAfterValue);
-
-                // Retry the request
                 $retryAttempts++;
                 // @codeCoverageIgnoreEnd
             } else {
                 $retryAttempts = 0; // Reset retry attempts if successful response is received
             }
 
-            curl_close($ch);
+            ($ch);
 
             // 403 Access forbidden -> Outdated API Key
             if ($httpCode == 403) {
@@ -118,101 +120,72 @@ class API {
 
         } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
 
-        if ($httpCode == 200) {
-            if($type != "sumid"){
-                $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
-                
-                // Additional API requests with the same 429 treatment
-                do {
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, $requestUrlVar . json_decode($output)->puuid);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                    curl_setopt($ch, CURLOPT_HEADER, 1); // Include headers in the response
-                    $response = curl_exec($ch);
-                    $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-                    $responseHeader = substr($response, 0, $header_size);
-                    $outputSummoners = substr($response, $header_size);
-                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    $apiRequests["API::getPlayerData"]++; // Increment API requests count
+        if ($httpCode != 200) {
+            return array();
+        }
 
-                    // Check for 429 (Rate Limit Exceeded)
-                    if ($httpCode == 429) {
-                        // @codeCoverageIgnoreStart
-                        // Extract the Retry-After header value
-                        preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
-                        $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
+        $accountData = json_decode($output, true);
+        
+        // Extract PUUID from account data
+        $puuid = $accountData["puuid"];
 
-                        // Uncomment the line below if you want to keep track of the API requests count
-                        // $apiRequests["API::getPlayerData"]++;
+        // ============================================================================
+        // STAGE 2: Get summoner data using the PUUID
+        // ============================================================================
+        $requestUrlVar = "https://euw1.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/";
+        
+        $retryAttempts = 0;
+        
+        do {
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $requestUrlVar . $puuid);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_HEADER, 1); // Include headers in the response
+            $response = curl_exec($ch);
+            $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+            $responseHeader = substr($response, 0, $header_size);
+            $outputSummoners = substr($response, $header_size);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $apiRequests["API::getPlayerData"]++; // Increment API requests count
 
-                        // Implement additional handling if needed
-                        // For example, you may want to wait for a specific duration and then retry the request.
-                        sleep($retryAfterValue);
+            // Check for 429 (Rate Limit Exceeded)
+            if ($httpCode == 429) {
+                // @codeCoverageIgnoreStart
+                // Extract the Retry-After header value
+                preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
+                $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
 
-                        // Retry the request
-                        $retryAttempts++;
-                        // @codeCoverageIgnoreEnd
-                    } else {
-                        $retryAttempts = 0; // Reset retry attempts if successful response is received
-                    }
-
-                    curl_close($ch);
-
-                } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
+                sleep($retryAfterValue);
+                $retryAttempts++;
+                // @codeCoverageIgnoreEnd
             } else {
-                $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-puuid/";
-                
-                // Additional API requests with the same 429 treatment
-                do {
-                    $ch = curl_init();
-                    curl_setopt($ch, CURLOPT_URL, $requestUrlVar . json_decode($outputSummoners)->puuid);
-                    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-                    curl_setopt($ch, CURLOPT_HEADER, 1); // Include headers in the response
-                    $response = curl_exec($ch);
-                    $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-                    $responseHeader = substr($response, 0, $header_size);
-                    $output = substr($response, $header_size);
-                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    $apiRequests["API::getPlayerData"]++; // Increment API requests count
-
-                    // Check for 429 (Rate Limit Exceeded)
-                    if ($httpCode == 429) {
-                        // @codeCoverageIgnoreStart
-                        // Extract the Retry-After header value
-                        preg_match('/Retry-After: (\d+)/', $responseHeader, $matches);
-                        $retryAfterValue = isset($matches[1]) ? (int)$matches[1] : 10; // Default to 10 seconds if Retry-After is not present
-
-                        // Uncomment the line below if you want to keep track of the API requests count
-                        // $apiRequests["API::getPlayerData"]++;
-
-                        // Implement additional handling if needed
-                        // For example, you may want to wait for a specific duration and then retry the request.
-                        sleep($retryAfterValue);
-
-                        // Retry the request
-                        $retryAttempts++;
-                        // @codeCoverageIgnoreEnd
-                    } else {
-                        $retryAttempts = 0; // Reset retry attempts if successful response is received
-                    }
-
-                    curl_close($ch);
-
-                } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
+                $retryAttempts = 0; // Reset retry attempts if successful response is received
             }
 
-            // Collect requested values in returnarray
-            $playerDataArray["Icon"] = json_decode($outputSummoners)->profileIconId;
-            isset($playerDataArray["Name"]) ? json_decode($outputSummoners)->name : NULL; // DEPRECATED
-            $playerDataArray["GameName"] = json_decode($output)->gameName;
-            $playerDataArray["Tag"] = json_decode($output)->tagLine;
-            $playerDataArray["Level"] = json_decode($outputSummoners)->summonerLevel;
-            $playerDataArray["PUUID"] = json_decode($outputSummoners)->puuid;
-            $playerDataArray["SumID"] = json_decode($outputSummoners)->id;
-            $playerDataArray["AccountID"] = json_decode($outputSummoners)->accountId;
-            $playerDataArray["LastChange"] = json_decode($outputSummoners)->revisionDate;
+            ($ch);
+
+            // 403 Access forbidden -> Outdated API Key
+            if ($httpCode == 403) {
+                // @codeCoverageIgnoreStart
+                echo "<h2>403 Forbidden API::getPlayerData (Stage 2)</h2>";
+                die;
+                // @codeCoverageIgnoreEnd
+            }
+
+        } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
+
+        if ($httpCode == 200) {
+            $summonerData = json_decode($outputSummoners, true);
+            
+            // Collect requested values from summoner data (Stage 2 response)
+            // Note: gameName and tagLine come from Stage 1 (Account API), not Stage 2 (Summoner API)
+            $playerDataArray["Icon"] = $summonerData["profileIconId"];
+            $playerDataArray["GameName"] = $accountData["gameName"];
+            $playerDataArray["Tag"] = $accountData["tagLine"];
+            $playerDataArray["Level"] = $summonerData["summonerLevel"];
+            $playerDataArray["PUUID"] = $summonerData["puuid"];
+            $playerDataArray["LastChange"] = $summonerData["revisionDate"];
         }
 
         return $playerDataArray;
@@ -266,7 +239,7 @@ class API {
                 $retryAttempts = 0; // Reset retry attempts if successful response is received
             }
 
-            curl_close($ch);
+            ($ch);
 
             // 403 Forbidden
             if ($httpCode == 403) {
@@ -299,12 +272,12 @@ class API {
     }
 
 
-    /** Fetch ranked info of user via sumid
+    /** Fetch ranked info of user via puuid
      * This function retrieves the all available ranked info about a summoner
     *
     * Eq. to https://developer.riotgames.com/apis#league-v4/GET_getLeagueEntriesForSummoner
     *
-    * @param string $sumid The summoners encrypted summoner ID necessary to perform the API request
+    * @param string $puuid The summoners encrypted summoner ID necessary to perform the API request
     * @var array $rankDataArray Just a rename and rearrange of the API request return values
     * @var array $output Contains the output of the curl request as string which we later convert using json_decode
     * @var string $httpCode Contains the returncode of the curl request (e.g. 404 not found)
@@ -312,7 +285,7 @@ class API {
     * Returnvalue:
     * @return array $rankReturnArray Just a rename of the $rankDataArray
     */
-    public static function getCurrentRank($sumid) {
+    public static function getCurrentRank($puuid) {
         global $headers, $apiRequests;
         $rankDataArray = array();
         $rankReturnArray = array();
@@ -321,7 +294,7 @@ class API {
         do {
             // Curl API request block
             $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-summoner/".$sumid);
+            curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/".$puuid);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_HEADER, 1);
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -350,7 +323,7 @@ class API {
                 $retryAttempts = 0; // Reset retry attempts if successful response is received
             }
 
-            curl_close($ch);
+            ($ch);
 
             // 403 Forbidden
             if ($httpCode == 403) {
@@ -430,7 +403,7 @@ class API {
                     $responseHeader = substr($response, 0, $header_size);
                     $clashidOutput = substr($response, $header_size);
                     $httpCode1 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    curl_close($ch);
+                    ($ch);
                     $clashidOutputArray = json_decode($clashidOutput);
 
                     // 429 Too Many Requests
@@ -473,7 +446,7 @@ class API {
                     $responseHeader = substr($response, 0, $header_size);
                     $flexidOutput = substr($response, $header_size);
                     $httpCode2 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    curl_close($ch);
+                    ($ch);
                     $flexidOutputArray = json_decode($flexidOutput);
 
                     // 429 Too Many Requests
@@ -516,7 +489,7 @@ class API {
                     $responseHeader = substr($response, 0, $header_size);
                     $soloduoidOutput = substr($response, $header_size);
                     $httpCode3 = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    curl_close($ch);
+                    ($ch);
                     $soloduoidOutputArray = json_decode($soloduoidOutput);
 
                     // 429 Too Many Requests
@@ -582,7 +555,7 @@ class API {
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
             $teamOutput = curl_exec($ch); $apiRequests["API::getTeamByTeamID"]++;
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
+            ($ch);
 
             // 403 Access forbidden -> Outdated API Key
             if($httpCode == "403"){
@@ -598,7 +571,7 @@ class API {
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 $teamOutput = curl_exec($ch); $apiRequests["API::getTeamByTeamID"]++;
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
+                ($ch);
                 // @codeCoverageIgnoreEnd
             }
         } else {
@@ -650,7 +623,7 @@ class API {
                 file_put_contents($logPath, $file, LOCK_EX);
                 clearstatcache(true, $logPath);
                 $currentTime = new DateTime("now", new DateTimeZone('Europe/Berlin'));
-                $slimmed = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".number_format((filesize($logPath)/1048576), 3)." MB)";
+                $slimmed = "[" . $currentTime->format('d.m.Y H:i:s') . "] [matchDownloader - WARNING]: Maximum filesize exceeded, removed first half of logfile - Status: OK (Size ".formatNumber((filesize($logPath)/1048576), 3)." MB)";
                 file_put_contents($logPath, $slimmed.PHP_EOL , FILE_APPEND | LOCK_EX);
                 $counter = 0;
                 // @codeCoverageIgnoreEnd
@@ -665,7 +638,7 @@ class API {
                 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
                 $matchOutput = curl_exec($ch); $apiRequests["API::downloadMatchesByID"]++;
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
+                ($ch);
 
 
                 // 429 Too Many Requests -> HITTING LOWER RATE LIMIT OF --- 20 requests every 1 seconds ---
@@ -680,7 +653,7 @@ class API {
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                     $matchOutput = curl_exec($ch); $apiRequests["API::downloadMatchesByID"]++;
                     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    curl_close($ch);
+                    ($ch);
 
                     // 429 Too Many Requests -> HITTING HIGHER RATE LIMIT OF --- 100 requests every 2 minutes ---
                     if($httpCode == "429"){
@@ -693,7 +666,7 @@ class API {
                         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                         $matchOutput = curl_exec($ch); $apiRequests["API::downloadMatchesByID"]++;
                         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                        curl_close($ch);
+                        ($ch);
                         // @codeCoverageIgnoreEnd
                     }
                 }
@@ -742,7 +715,7 @@ class API {
      * following steps and e.g. the API::getTeamByTeamID($teamID) function.
      *
      * @var string $playerName A summoners ingame name, fetched by the POST (last part of URL)
-     * @var array $playerData Either the API requested playerdata or the locally stored one, used to retrieve the SumID
+     * @var array $playerData Either the API requested playerdata or the locally stored one, used to retrieve the PUUID
      *
      * Returnvalue:
      * @return void None, echo'ing teamID back to javascript to open new windows with it appended
@@ -760,34 +733,34 @@ class API {
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         $tournamentsOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
+        ($ch);
 
-        if($httpCode == "200" && isset($playerData["SumID"])){
+        if($httpCode == "200" && isset($playerData["PUUID"])){
 
             if(empty(json_decode($tournamentsOutput, true))){
                 // @codeCoverageIgnoreStart
                 return false;
                 // @codeCoverageIgnoreEnd
             } else {
-                // Curl API request block
+                // Curl API request block - Changed from by-summoner to by-puuid
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
+                curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-puuid/" . $playerData["PUUID"]);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
                 $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
                 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
+                ($ch);
 
                 // 429 Too Many Requests
                 if($httpCode == "429"){
                     // @codeCoverageIgnoreStart
                     sleep(5);
-                    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-summoner/" . $playerData["SumID"]);
+                    curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-puuid/" . $playerData["PUUID"]);
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                     curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
                     $clashOutput = curl_exec($ch); $apiRequests["postSubmit"]++;
                     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                    curl_close($ch);
+                    ($ch);
                     // @codeCoverageIgnoreEnd
                 }
 
@@ -795,12 +768,16 @@ class API {
                 $clashData = json_decode($clashOutput, true);
                 if(isset($clashData[0]["teamId"])){
                     // @codeCoverageIgnoreStart
-                    echo $clashData[0]["teamId"];
+                    return $clashData[0]["teamId"];
+                } else if($httpCode == "200"){
+                    return '200';
                 } else {
-                    echo '404';
+                    return '404';
                     // @codeCoverageIgnoreEnd
                 }
             }
+        } else {
+            return '404';
         }
     }
 }

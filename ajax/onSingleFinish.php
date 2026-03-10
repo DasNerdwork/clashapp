@@ -2,11 +2,6 @@
 include_once('/hdd1/clashapp/src/functions.php');
 require_once '/hdd1/clashapp/db/mongo-db.php';
 
-// ini_set('display_errors', 1);
-// ini_set('display_startup_errors', 1);
-// error_reporting(E_ALL);
-
-// Data Validation checks
 if(isset($_POST['mode'])){
     if(!in_array($_POST['mode'], ["both", "lanes", "scores"])){
         die("Invalid mode: " . $_POST['mode']);
@@ -29,29 +24,22 @@ if(isset($_POST['matchids'])){
         }
     }
 }
-if(isset($_POST['sumid'])){
-    if(!isValidID($_POST['sumid'])){
-        die("Invalid sumid: " . $_POST['sumid']);
-    }
-}
 if(isset($_POST['puuid'])){
     if(!isValidID($_POST['puuid'])){
         die("Invalid puuid: " . $_POST['puuid']);
     }
 }
-// End of Data Validation checks
 
 if(isset($_POST['mode'])){
     $mdb = new MongoDBHelper();
-    $response = array('sumid' => $_POST['sumid']);
+    $response = array('puuid' => $_POST['puuid']);
     $recalculatedMatchIDsArray = array();
-    // load players full match data into RAM array for fast access after page load
-    $matchData = getMatchData($matchids); 
-    $playerDataJSON = objectToArray($mdb->findDocumentByField('players', 'PlayerData.SumID', $response["sumid"])["document"]);
+    $matchData = getMatchData($matchids);
+    $playerDataJSON = objectToArray($mdb->findDocumentByField('players', 'PlayerData.PUUID', $_POST['puuid'])["document"]);
 
     if($_POST['mode'] == "both" || $_POST['mode'] == "lanes"){
-        $puuid = $_POST['puuid']; // grab puuid from ajax request
-        $playerLanes = getLanePercentages($matchData, $puuid); // Retrieves the two most played lanes of the give puuid
+        $puuid = $_POST['puuid'];
+        $playerLanes = getLanePercentages($matchData, $puuid);
         $playerDataJSON["LanePercentages"] = $playerLanes;
         $response['playerLanes'] = $playerDataJSON["LanePercentages"];
         $playerDataJSON["Tags"] = getPlayerTags($matchData, $puuid);
@@ -60,8 +48,8 @@ if(isset($_POST['mode'])){
     } 
     
     if($_POST['mode'] == "both" || $_POST['mode'] == "scores"){
-        $sumid = $_POST['sumid']; // grab sumid from ajax request
-        $matchRankingArray = getMatchRanking($matchids, $matchData, $sumid); // Fetches ALL match scores to use in section "PRINT AVERAGE MATCHSCORE"
+        $puuid = $_POST['puuid'];
+        $matchRankingArray = getMatchRanking($matchids, $matchData, $puuid);
 
         foreach($matchids as $index => $singleMatchID){
             foreach($matchRankingArray as $matchRankingID => $matchRankingScore){
@@ -73,18 +61,18 @@ if(isset($_POST['mode'])){
         $playerDataJSON["MatchIDs"] = array_slice($recalculatedMatchIDsArray, 0, 15);
         $response['matchScores'] = $playerDataJSON["MatchIDs"];
     }
-    // $mdb->insertDocument('players', $playerDataJSON);
-    $mdb->addElementToDocument('players', 'PlayerData.SumID', $response["sumid"], 'LanePercentages', $playerDataJSON["LanePercentages"]);
-    $mdb->addElementToDocument('players', 'PlayerData.SumID', $response["sumid"], 'Tags', $playerDataJSON["Tags"]);
-    $mdb->addElementToDocument('players', 'PlayerData.SumID', $response["sumid"], 'MatchIDs', $playerDataJSON["MatchIDs"]);
+
+    $mdb->addElementToDocument('players', 'PlayerData.PUUID', $_POST['puuid'], 'LanePercentages', $playerDataJSON["LanePercentages"]);
+    $mdb->addElementToDocument('players', 'PlayerData.PUUID', $_POST['puuid'], 'Tags', $playerDataJSON["Tags"]);
+    $mdb->addElementToDocument('players', 'PlayerData.PUUID', $_POST['puuid'], 'MatchIDs', $playerDataJSON["MatchIDs"]);
 
     if($_POST['mode'] == "both") {
         $matchHistoryAsHTML = printTeamMatchDetailsByPUUID($matchids, $puuid, $matchRankingArray);
         $response['matchHistory'] = $matchHistoryAsHTML;
     }
 
-    unset($recalculatedMatchIDsArray); // Necessary to reset the array for the next player iteration, otherwise everyone has the same matchids stored
-    unset($matchData); // Empty RAM
+    unset($recalculatedMatchIDsArray);
+    unset($matchData);
     
     echo json_encode($response);
 }

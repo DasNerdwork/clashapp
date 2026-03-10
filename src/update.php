@@ -12,14 +12,13 @@ require_once '/hdd1/clashapp/db/mongo-db.php';
  * @author Pascal Gnadt <p.gnadt@gmx.de>
  * @copyright Copyright (c) date("Y"), Florian Falk
  * 
- * @param mixed $id As we can fetch the $playerData in three different ways (by summonername, sumid or puuid) we define the input here as $id and provide what kind of $id it is
+ * @param mixed $id As we can fetch the $playerData in three different ways (by summonername or puuid) we define the input here as $id and provide what kind of $id it is
  *                     via the $type argument. If none is provided we switch to the default of API::getPlayerData by summonername
  * @param int $maxMatchIds The maximum amount of matchids we want to update to/from via an API request
- * @param mixed $type Usually by "name" but can also be PUUID or SumID. Used for player data request variants
- * @var array $playerData API requested return json consisting of the entries Name (Playername in clean text), Playerlevel, PUUID, SumID, AccountID & the last change date
+ * @param mixed $type Usually by "name" but can also be PUUID or PUUID. Used for player data request variants
+ * @var array $playerData API requested return json consisting of the entries Name (Playername in clean text), Playerlevel, PUUID, PUUID, AccountID & the last change date
  * @var string $playerName The name of a player, e.g. DasNerdwork
- * @var string $sumid A unique ID used for one specific summoner. Riot has multiple types of these ID's for different internal uses which is why we don't only use one
- * @var string $puuid See description for $sumid
+ * @var string $puuid A unique ID used for one specific player.
  * @var array $masteryData An array consisting of every necessery data to display the mastery scores of a summoners champions, consisting of the chamions Name, id, 
  *                              level, mastery points earned, the timestamp of the last time played aswell as any LvlUpTokens if available
  * @var array $rankData An array consisting of all rank specific data, including the queue type (solo due, flex, etc.), the tier, rank name, LP count & wins and loses
@@ -42,17 +41,16 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
         $returnScriptContent = "";
         $mdb = new MongoDBHelper();
         $playerData = API::getPlayerData($type,$id);
-        // addToQueue('api_queue', 'playerData', ['type' => $type, 'id' => $id]); // DEPRECATED
+        if(!isset($playerData["GameName"]) || !isset($playerData["PUUID"])){
+            // PlayerData ist ungültig
+            return '{"status":"error","message":"Player data not available. Please check the API key."}';
+        }
         $playerName = $playerData["GameName"];
-        $sumid = $playerData["SumID"];
         $puuid = $playerData["PUUID"];
         $masteryData = API::getMasteryScores($puuid);
-        // addToQueue('api_queue', 'masteryScores', ['puuid' => $puuid]);// DEPRECATED
-        $rankData = API::getCurrentRank($sumid);
-        // addToQueue('api_queue', 'currentRank', ['sumid' => $sumid]);// DEPRECATED
+        $rankData = API::getCurrentRank($puuid);
         if($tempMatchIDs == null){
             $matchIDs = API::getMatchIDs($puuid, 15);
-            // addToQueue('api_queue', 'matchIds', ['puuid' => $puuid, 'maxMatchIDs' => 15]);// DEPRECATED
         } else {
             // @codeCoverageIgnoreStart
             $matchIDs = $tempMatchIDs;
@@ -62,7 +60,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
         foreach ($matchIDs as $matchID) {
             $ajaxArray[$matchID] = "";
         }
-        $ajaxUniquifier = preg_replace("/[^a-zA-Z0-9]/", "", $sumid);
+        $ajaxUniquifier = preg_replace("/[^a-zA-Z0-9]/", "", $puuid);
         $jsonArray = array();
         $jsonArray["PlayerData"] = $playerData;
         $jsonArray["RankData"] = $rankData;
@@ -78,8 +76,8 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
         /**
          * STEP 1: Check if up-to-date
          */
-        if(($sumid != "" || $sumid != "/") && isValidID($sumid)){
-            $playerDataRequest = $mdb->getPlayerBySummonerId($sumid);
+        if(($puuid != "" || $puuid != "/") && isValidID($puuid)){
+            $playerDataRequest = $mdb->getPlayerByPUUID($puuid);
             if($playerDataRequest["success"]){
                 $playerDataJSONString = json_encode($playerDataRequest["data"]);
                 $existingJson = json_decode($playerDataJSONString, true);
@@ -94,8 +92,8 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 if(empty($tempAjaxMatchIDArray)){
                     // @codeCoverageIgnoreStart
                     $returnScriptContent .= "console.log('All matches of ".$playerName." already local.');
-                    requests['".$sumid."'] = 'Done';
-                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
+                    requests['".$puuid."'] = 'Done';
+                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&puuid=".$puuid."';".
                     processResponseData($ajaxUniquifier)
                     ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
@@ -107,35 +105,38 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 } else {
                 // THIS REQUEST IS SENT IF A PLAYER IS MISSING SOME MATCH IDS IN THEIR PLAYERFILE
                 $returnScriptContent .= "
-                var startTime".$requestIterator." = new Date().getTime();
-                var xhr".$requestIterator." = new XMLHttpRequest();
+                (window.csrfTokenReady || Promise.resolve()).then(function() {
+                    var startTime".$requestIterator." = new Date().getTime();
+                    var xhr".$requestIterator." = new XMLHttpRequest();
 
-                xhr".$requestIterator.".open('POST', '/ajax/downloadMatch.php', true);
+                    xhr".$requestIterator.".open('POST', '/ajax/downloadMatch.php', true);
 
-                xhr".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                    xhr".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                    xhr".$requestIterator.".setRequestHeader('X-CSRF-Token', document.body.dataset.csrfToken || '');
 
-                xhr".$requestIterator.".onreadystatechange = function() {
-                    if (xhr".$requestIterator.".readyState === 4 && xhr".$requestIterator.".status === 200) {
-                        var endTime".$requestIterator." = new Date().getTime();
-                        var elapsedTime".$requestIterator." = (endTime".$requestIterator." - startTime".$requestIterator.") / 1000;
-                        var playerName = xhr".$requestIterator.".responseText;
-                        console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
-                        requests['".$sumid."'] = 'Done';
-                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
-                        processResponseData($ajaxUniquifier)
-                        ."
-                        xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-                        if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
-                            callAllFinish($requestIterator, $teamID)
+                    xhr".$requestIterator.".onreadystatechange = function() {
+                        if (xhr".$requestIterator.".readyState === 4 && xhr".$requestIterator.".status === 200) {
+                            var endTime".$requestIterator." = new Date().getTime();
+                            var elapsedTime".$requestIterator." = (endTime".$requestIterator." - startTime".$requestIterator.") / 1000;
+                            var playerName = xhr".$requestIterator.".responseText;
+                            console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
+                            requests['".$puuid."'] = 'Done';
+                            xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."';".
+                            processResponseData($ajaxUniquifier)
                             ."
+                            xhrAfter".$ajaxUniquifier.".send(xhrMessage);
+                            if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
+                                callAllFinish($requestIterator, $teamID)
+                                ."
+                            }
                         }
-                    }
-                };
+                    };
 
-                var data = 'matches=".json_encode($tempAjaxMatchIDArray)."&playerName=".$playerName."';
+                    var data = 'matches=".json_encode($tempAjaxMatchIDArray)."&playerName=".$playerName."';
 
-                xhr".$requestIterator.".send(data);
-                
+                    xhr".$requestIterator.".send(data);
+
+                })
                 ";
                 $return = false;
                 }
@@ -161,7 +162,7 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
             /**
              * STEP 3: Fetch all given matchIDs and download each match via downloadMatchByID
              */
-            $playerDataArrayRequest = $mdb->getPlayerBySummonerId($sumid);
+            $playerDataArrayRequest = $mdb->getPlayerByPUUID($puuid);
             if($playerDataArrayRequest["success"]){
                 $playerDataJSONString = json_encode($playerDataArrayRequest["data"]);
                 $playerDataArray = json_decode($playerDataJSONString, true);
@@ -178,8 +179,8 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 // @codeCoverageIgnoreStart
                 if(empty($tempAjaxMatchIDArray)){
                     $returnScriptContent .= "console.log('All matches of ".$playerName." already local.');
-                    requests['".$sumid."'] = 'Done';
-                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
+                    requests['".$puuid."'] = 'Done';
+                    xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."';".
                     processResponseData($ajaxUniquifier)
                     ."
                     xhrAfter".$ajaxUniquifier.".send(xhrMessage);
@@ -190,36 +191,38 @@ function updateProfile($id, $teamID, $type="riot-id", $tempMatchIDs=null){
                 } else {
                 // THIS REQUEST IS SENT IF NO PLAYER FILE EXISTS / LINE 69 IS SKIPPED
                 $returnScriptContent .= "
-                var startTime".$requestIterator." = new Date().getTime();
-                var xhr".$requestIterator." = new XMLHttpRequest();
+                (window.csrfTokenReady || Promise.resolve()).then(function() {
+                    var startTime".$requestIterator." = new Date().getTime();
+                    var xhr".$requestIterator." = new XMLHttpRequest();
 
-                xhr".$requestIterator.".open('POST', '/ajax/downloadMatch.php', true);
+                    xhr".$requestIterator.".open('POST', '/ajax/downloadMatch.php', true);
 
-                xhr".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                    xhr".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                    xhr".$requestIterator.".setRequestHeader('X-CSRF-Token', document.body.dataset.csrfToken || '');
 
-                xhr".$requestIterator.".onreadystatechange = function() {
-                    if (xhr".$requestIterator.".readyState === 4 && xhr".$requestIterator.".status === 200) {
-                        var endTime".$requestIterator." = new Date().getTime();
-                        var elapsedTime".$requestIterator." = (endTime".$requestIterator." - startTime".$requestIterator.") / 1000;
-                        var playerName = xhr".$requestIterator.".responseText;
-                        console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
-                        requests['".$sumid."'] = 'Done';
-                        xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."&sumid=".$sumid."';".
-                        processResponseData($ajaxUniquifier)
-                        ."
-                        xhrAfter".$ajaxUniquifier.".send(xhrMessage);
-                        if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
-                            callAllFinish($requestIterator, $teamID)
+                    xhr".$requestIterator.".onreadystatechange = function() {
+                        if (xhr".$requestIterator.".readyState === 4 && xhr".$requestIterator.".status === 200) {
+                            var endTime".$requestIterator." = new Date().getTime();
+                            var elapsedTime".$requestIterator." = (endTime".$requestIterator." - startTime".$requestIterator.") / 1000;
+                            var playerName = xhr".$requestIterator.".responseText;
+                            console.log('Match Downloads for ' + playerName + ' completed after ' + elapsedTime".$requestIterator.".toFixed(2) + ' seconds');
+                            requests['".$puuid."'] = 'Done';
+                            xhrMessage = 'mode=both&matchids=".json_encode($ajaxArray)."&puuid=".$puuid."';".
+                            processResponseData($ajaxUniquifier)
                             ."
+                            xhrAfter".$ajaxUniquifier.".send(xhrMessage);
+                            if (Object.values(requests).every(value => value === 'Done') && Object.keys(requests).length === playerCount) {".
+                                callAllFinish($requestIterator, $teamID)
+                                ."
+                            }
                         }
-                    }
-                };
+                    };
 
-                var data = 'matches=".json_encode($tempAjaxMatchIDArray)."&playerName=".$playerName."';
+                    var data = 'matches=".json_encode($tempAjaxMatchIDArray)."&playerName=".$playerName."';
 
-                xhr".$requestIterator.".send(data);
-                
-                ";
+                    xhr".$requestIterator.".send(data);
+                    });
+                    ";
                 // @codeCoverageIgnoreEnd
                 }
             }
@@ -234,6 +237,7 @@ function processResponseData($ajaxUniquifier){
     var xhrAfter".$ajaxUniquifier." = new XMLHttpRequest();
     xhrAfter".$ajaxUniquifier.".open('POST', '/ajax/onSingleFinish.php', true);
     xhrAfter".$ajaxUniquifier.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+    xhrAfter".$ajaxUniquifier.".setRequestHeader('X-CSRF-Token', document.body.dataset.csrfToken || '');
     xhrAfter".$ajaxUniquifier.".onreadystatechange = function() {
         if (xhrAfter".$ajaxUniquifier.".readyState === 4 && xhrAfter".$ajaxUniquifier.".status === 200) {
             xhrAfter".$ajaxUniquifier.".responseText;
@@ -241,7 +245,7 @@ function processResponseData($ajaxUniquifier){
             var matchHistories = document.getElementsByClassName('single-player-match-history');
             var response = JSON.parse(xhrAfter".$ajaxUniquifier.".responseText);
             for (let item of playerColumns) {
-                if(response.sumid === item.dataset.sumid) {
+                if(response.puuid === item.dataset.puuid) {
                     if(response.playerLanes) {
                         response.playerLanes.forEach(function(singleLane) {
                             if(singleLane != ''){
@@ -271,7 +275,7 @@ function processResponseData($ajaxUniquifier){
                         }
                         var averageScore = (sum / scoresArray.length).toFixed(2);
                         avgScorePath.innerText = averageScore;
-                        inTeamRanking[response.sumid] = averageScore;
+                        inTeamRanking[response.puuid] = averageScore;
                         setTimeout(function() {
                             avgScorePath.classList.remove('opacity-0');
                         }, 100);
@@ -287,7 +291,7 @@ function processResponseData($ajaxUniquifier){
                 }
             }
             for (let historyColumn of matchHistories) {
-                if(response.sumid === historyColumn.dataset.sumid) {
+                if(response.puuid === historyColumn.dataset.puuid) {
                     if(response.matchHistory) {
                         if(typeof response.matchHistory === 'object' && response.matchHistory !== null){
                             console.log(response.matchHistory);
@@ -302,26 +306,27 @@ function processResponseData($ajaxUniquifier){
 
 function callAllFinish($requestIterator, $teamID) {
     return "
-    console.log('ALL PLAYERS FINISHED');
+        console.log('ALL PLAYERS FINISHED');
 
-    var xhrFinal".$requestIterator." = new XMLHttpRequest();
-    xhrFinal".$requestIterator.".open('POST', '/ajax/onAllFinish.php', true);
-    xhrFinal".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        var xhrFinal".$requestIterator." = new XMLHttpRequest();
+        xhrFinal".$requestIterator.".open('POST', '/ajax/onAllFinish.php', true);
+        xhrFinal".$requestIterator.".setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+        xhrFinal".$requestIterator.".setRequestHeader('X-CSRF-Token', document.body.dataset.csrfToken || '');
 
-    xhrFinal".$requestIterator.".onreadystatechange = function() {
-        if (xhrFinal".$requestIterator.".readyState === 4 && xhrFinal".$requestIterator.".status === 200) {
-            var finalResponse = xhrFinal".$requestIterator.".responseText;
-            var suggestedBanContainer = document.getElementById('suggestedBans');
-            suggestedBanContainer.innerHTML = finalResponse;
-            console.log('Suggested Bans generated dynamically');
-        }
-    };
-    sumids = Object.keys(requests).join(',');
-    teamID = '".$teamID."';
-    var data = 'sumids=' + sumids + '&teamid=' + teamID;
-    setTimeout(function() {
-        xhrFinal".$requestIterator.".send(data);
-    }, 100);";
+        xhrFinal".$requestIterator.".onreadystatechange = function() {
+            if (xhrFinal".$requestIterator.".readyState === 4 && xhrFinal".$requestIterator.".status === 200) {
+                var finalResponse = xhrFinal".$requestIterator.".responseText;
+                var suggestedBanContainer = document.getElementById('suggestedBans');
+                suggestedBanContainer.innerHTML = finalResponse;
+                console.log('Suggested Bans generated dynamically');
+            }
+        };
+        puuids = Object.keys(requests).join(',');
+        teamID = '".$teamID."';
+        var data = 'puuids=' + puuids + '&teamid=' + teamID;
+        setTimeout(function() {
+            xhrFinal".$requestIterator.".send(data);
+        }, 100);";
 }
 
 ?>
