@@ -22,14 +22,12 @@ class MongoDBHelper:
         self.host = os.getenv('MDB_HOST')
         self.username = os.getenv('MDB_USER')
         self.password = os.getenv('MDB_PW')
-        self.auth_source = os.getenv('MDB_DB')
-        self.tls_ca_file = os.getenv('MDB_PATH')
         self.database_name = os.getenv('MDB_DB')
         self.client = self._connect_to_mongodb()
         self.db = self.client[self.database_name]
 
     def _connect_to_mongodb(self):
-        connection_uri = f"mongodb://{self.username}:{self.password}@{self.host}/{self.auth_source}?authMechanism=SCRAM-SHA-1&tls=true&tlsCAFile={self.tls_ca_file}"
+        connection_uri = f"mongodb://{self.username}:{self.password}@{self.host}/{self.database_name}"
         return MongoClient(connection_uri)
     
     def get_oldest_version_prefix(self):

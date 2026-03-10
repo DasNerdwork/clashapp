@@ -8,10 +8,8 @@ class MongoDBHelper:
         self.host = os.getenv('MDB_HOST')
         self.username = os.getenv('MDB_USER')
         self.password = os.getenv('MDB_PW')
-        self.auth = os.getenv('MDB_AUTH')
-        self.tlsPath = os.getenv('MDB_TLS')
         self.databaseName = os.getenv('MDB_DB')
-        connection_string = f'mongodb://{self.username}:{self.password}@{self.host}/{self.auth}&{self.tlsPath}'
+        connection_string = f'mongodb://{self.username}:{self.password}@{self.host}/{self.databaseName}'
         self.client = MongoClient(connection_string)
         self.db = self.client[self.databaseName]
 
@@ -110,7 +108,7 @@ class MongoDBHelper:
             return {'success': False, 'code': 'CN4NA1', 'message': 'Getting document by newly added field was not successful.'}
 
     def get_player_by_summoner_id(self, summoner_id):
-        return self.get_document_field('players', 'PlayerData.SumID', summoner_id)
+        return self.get_document_field('players', 'PlayerData.PUUID', summoner_id)
 
     def get_player_by_riot_id(self, game_name, tag):
         collection = self.db['players']

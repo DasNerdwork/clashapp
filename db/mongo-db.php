@@ -4,7 +4,56 @@ require_once '/hdd1/clashapp/vendor/autoload.php';
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-        
+
+/**
+ * Sanitisiert MongoDB Query-Werte um Injection-Angriffe zu verhindern
+ * Erlaubt nur alphanumerische Zeichen, _, -, . und begrenzte Sonderzeichen
+ */
+function sanitizeMongoQueryValue($value) {
+    if ($value === null || $value === '') {
+        return null;
+    }
+    
+    // String-Werte
+    if (is_string($value)) {
+        // Nur alphanumerische Zeichen, _, -, . und begrenzte Sonderzeichen erlauben
+        if (preg_match('/^[a-zA-Z0-9_\-\.#\/\@\+\s:]*$/', $value)) {
+            return $value;
+        }
+        return null;
+    }
+    
+    // Integer-Werte
+    if (is_int($value) || is_numeric($value)) {
+        return (int)$value;
+    }
+    
+    // Array-Werte (jeden Element validieren)
+    if (is_array($value)) {
+        $sanitized = [];
+        foreach ($value as $item) {
+            $sanitizedItem = sanitizeMongoQueryValue($item);
+            if ($sanitizedItem !== null) {
+                $sanitized[] = $sanitizedItem;
+            }
+        }
+        return !empty($sanitized) ? $sanitized : null;
+    }
+    
+    // Boolean-Werte
+    if (is_bool($value)) {
+        return $value ? 1 : 0;
+    }
+    
+    return null; // Ungültiger Typ
+}
+
+/**
+ * MongoDB Helper Class
+ * 
+ * @author DasNerdwork
+ * @copyright 2026
+ */
 class MongoDBHelper {
     private $host;
     private $username;
@@ -17,23 +66,16 @@ class MongoDBHelper {
     
     /**
      * Constructor for MongoDBHelper.
-     *
-     * @param string $username - The MongoDB username for authentication.
-     * @param string $password - The MongoDB password for authentication.
-     * @param string $host - The MongoDB host and port.
-     * @param string $auth - The authentication parameters.
-     * @param string $tlsPath - The path to the TLS CA file.
-     * @param string $databaseName - The name of the MongoDB database.
-     * @codeCoverageIgnore
      */
     public function __construct() {
         $this->host = getenv('MDB_HOST');
         $this->username = getenv('MDB_USER');
         $this->password = getenv('MDB_PW');
-        $this->auth = getenv('MDB_AUTH');
-        $this->tlsPath = getenv('MDB_TLS');
         $this->databaseName = getenv('MDB_DB');
-        $connectionString = 'mongodb://'.$this->username.':'.$this->password.'@'.$this->host.'/'.$this->auth.'&'.$this->tlsPath;
+        
+        // Build connection string for local MongoDB without TLS
+        // Format: mongodb://user:pass@host/db
+        $connectionString = 'mongodb://'.$this->username.':'.$this->password.'@'.$this->host.'/'.$this->databaseName;
         $this->client = new MongoDB\Driver\Manager($connectionString);
         $this->mdb = $this->databaseName;
     }
@@ -46,13 +88,15 @@ class MongoDBHelper {
      * @param mixed $fieldValue - The value to filter by (e.g., 'EUW1_6270020637').
      *
      * @return array - An array with keys 'success', 'code', 'message', and 'document'.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the operation.
-     *   'document' contains the retrieved document (if found).
      */
     public function findDocumentByField($collectionName, $fieldName, $fieldValue) {
-        $filter = [$fieldName => $fieldValue];
+        // Sanitize den Query-Wert
+        $sanitizedValue = sanitizeMongoQueryValue($fieldValue);
+        if ($sanitizedValue === null) {
+            return array('success' => false, 'code' => 'INVALID_INPUT', 'message' => 'Invalid input value', 'document' => null);
+        }
+        
+        $filter = [$fieldName => $sanitizedValue];
         $query = new MongoDB\Driver\Query($filter);
         $cursor = $this->client->executeQuery("{$this->mdb}.$collectionName", $query);
         
@@ -71,16 +115,20 @@ class MongoDBHelper {
      * @param array $conditions - An associative array of conditions to filter by (optional).
      *
      * @return array - An array with keys 'success', 'code', 'message', and 'count'.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the operation.
-     *   'count' contains the number of matching documents.
      */
     public function countDocuments($collectionName, $conditions = []) {
         $filter = [];
 
         if (!empty($conditions)) {
-            $filter = $conditions;
+            // Sanitize alle Query-Werte
+            $sanitizedConditions = [];
+            foreach ($conditions as $key => $value) {
+                $sanitizedValue = sanitizeMongoQueryValue($value);
+                if ($sanitizedValue !== null) {
+                    $sanitizedConditions[$key] = $sanitizedValue;
+                }
+            }
+            $filter = $sanitizedConditions;
         }
 
         $command = new MongoDB\Driver\Command([
@@ -107,16 +155,25 @@ class MongoDBHelper {
      *
      * @param string $collectionName - The name of the collection to query.
      * @param string $fieldName - The field to filter by (e.g., 'metadata.matchId').
-     * @param array $matchIds - An array of match IDs to filter by (e.g., ['EUW1_6270020637', 'EUW1_6270020638']).
+     * @param array $matchIds - An array of match IDs to filter by.
      *
      * @return array - An array with keys 'success', 'code', 'message', and 'documents'.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the operation.
-     *   'documents' contains an array of retrieved documents (if found).
      */
     public function findDocumentsByMatchIds($collectionName, $fieldName, $matchIds, $fieldsToRetrieve = [], $returnAsArray = false) {
-        $filter = [$fieldName => ['$in' => $matchIds]];
+        // Sanitize alle Match IDs
+        $sanitizedMatchIds = [];
+        foreach ($matchIds as $matchId) {
+            $sanitizedMatchId = sanitizeMongoQueryValue($matchId);
+            if ($sanitizedMatchId !== null) {
+                $sanitizedMatchIds[] = $sanitizedMatchId;
+            }
+        }
+        
+        if (empty($sanitizedMatchIds)) {
+            return array('success' => false, 'code' => 'INVALID_INPUT', 'message' => 'No valid match IDs provided', 'documents' => []);
+        }
+        
+        $filter = [$fieldName => ['$in' => $sanitizedMatchIds]];
     
         $pipeline = [
             ['$match' => $filter],
@@ -185,16 +242,21 @@ class MongoDBHelper {
      * @param string $fieldName The field name used as a filter for deletion.
      * @param mixed $fieldValue The field value to match for deletion.
      *
-     * @return array An associative array containing the result of the delete operation:
-     *   - 'success' (bool): Indicates whether the operation was successful.
-     *   - 'code' (string): A code representing the result of the operation.
-     *   - 'message' (string): A message providing additional information about the operation result.
+     * @return array An associative array containing the result of the delete operation.
      */
     public function deleteDocumentByField($collectionName, $fieldName, $fieldValue) {
-        $documentExists = $this->findDocumentByField($collectionName, $fieldName, $fieldValue)['success'];
-        if(!$documentExists) return array('success' => false, 'code' => 'DL4MN2', 'message' => 'Unable to delete non-existent document');
-        $filter = [$fieldName => $fieldValue];
-        $options = ['limit' => 1]; // Limit to deleting one matching document
+        // Sanitize den Query-Wert
+        $sanitizedValue = sanitizeMongoQueryValue($fieldValue);
+        if ($sanitizedValue === null) {
+            return array('success' => false, 'code' => 'INVALID_INPUT', 'message' => 'Invalid input value for deletion');
+        }
+
+        if (!$this->findDocumentByField($collectionName, $fieldName, $fieldValue)['success']) {
+            return array('success' => false, 'code' => 'NOT_FOUND', 'message' => 'Document not found, nothing to delete');
+        }
+        
+        $filter = [$fieldName => $sanitizedValue];
+        $options = ['limit' => 1];
     
         $bulkWrite = new MongoDB\Driver\BulkWrite();
         $bulkWrite->delete($filter, $options);
@@ -216,23 +278,29 @@ class MongoDBHelper {
     /**
      * Insert a document into a collection, checking for and preventing duplicates based on 'metadata.matchId'.
      *
-     * @param string $collectionName - The name of the collection to insert into (e.g., 'matches', 'players', 'teams').
-     * @param array $document - The document to insert (e.g., 'EUW1_.json', 'playerdata.json', 'team.json').
+     * @param string $collectionName - The name of the collection to insert into.
+     * @param array $document - The document to insert.
+     * @param array $filter - Optional filter for upsert.
      *
      * @return array - An associative array with 'success', 'code', and 'message' keys.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the insert operation.
      */
     public function insertDocument($collectionName, $document, $filter = []) {
         $bulk = new MongoDB\Driver\BulkWrite;
         try {
             if (!empty($filter)) {
-                // Perform an upsert if a filter is provided
+                // Sanitize Filter-Werte
+                $sanitizedFilter = [];
+                foreach ($filter as $key => $value) {
+                    $sanitizedValue = sanitizeMongoQueryValue($value);
+                    if ($sanitizedValue !== null) {
+                        $sanitizedFilter[$key] = $sanitizedValue;
+                    }
+                }
+                $filter = !empty($sanitizedFilter) ? $sanitizedFilter : $filter;
                 $bulk->update(
-                    $filter,         // Use the filter provided
-                    ['$set' => $document],  // Update the document with the new data
-                    ['upsert' => true] // If no document matches, insert the document
+                    $filter,
+                    ['$set' => $document],
+                    ['upsert' => true]
                 );
             } else {
                 // Insert the document if no filter is provided
@@ -248,7 +316,6 @@ class MongoDBHelper {
             ];
         } catch (MongoDB\Driver\Exception\BulkWriteException $e) {
             if ($e->getCode() == 11000) {
-                // Duplicate key error
                 return [
                     'success' => false,
                     'code' => 'MXZ4P5',
@@ -267,19 +334,21 @@ class MongoDBHelper {
     /**
      * Retrieve a specific field from a specific document in a specific collection.
      *
-     * @param string $collectionName - The name of the collection to query (e.g., 'matches' or 'players').
-     * @param string $filterField - The field to filter by (e.g., 'metadata.matchId' or 'playerdata.puuid').
-     * @param mixed $filterValue - The value to filter by (e.g., 'EUW1_6270020637' or '3pA0ZcAi8b5LOgjZ...').
-     * @param string $fieldName - The field to retrieve from the document (e.g., 'info.gameDuration' or 'playerdata.name').
+     * @param string $collectionName - The name of the collection to query.
+     * @param string $filterField - The field to filter by.
+     * @param mixed $filterValue - The value to filter by.
+     * @param string $fieldName - The field to retrieve from the document.
      *
      * @return array - An array with keys 'success', 'code', 'message', and 'data'.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the operation.
-     *   'data' contains the retrieved data (if found).
      */
     public function getDocumentField($collectionName, $filterField, $filterValue, $fieldName = null) {
-        $filter = [$filterField => $filterValue];
+        // Sanitize den Query-Wert
+        $sanitizedValue = sanitizeMongoQueryValue($filterValue);
+        if ($sanitizedValue === null) {
+            return array('success' => false, 'code' => 'INVALID_INPUT', 'message' => 'Invalid filter value', 'data' => null);
+        }
+        
+        $filter = [$filterField => $sanitizedValue];
         $options = [];
         if ($fieldName !== null) $options['projection'] = [$fieldName => 1];
         $query = new MongoDB\Driver\Query($filter, $options);
@@ -305,27 +374,30 @@ class MongoDBHelper {
     /**
      * Add an element to a document in a specific collection.
      *
-     * @param string $collectionName - The name of the collection where the document exists.
-     * @param string $filterField - The field to filter by (e.g., 'metadata.matchId' or 'playerdata.puuid').
-     * @param mixed $filterValue - The value to filter by (e.g., 'EUW1_6270020637' or '3pA0ZcAi8b5LOgjZ...').
+     * @param string $collectionName - The name of the collection.
+     * @param string $filterField - The field to filter by.
+     * @param mixed $filterValue - The value to filter by.
      * @param string $arrayField - The field in the document where the element will be added.
      * @param mixed $elementToAdd - The value to add to the element field.
      *
      * @return array - An associative array with 'success', 'code', and 'message' keys.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the insert operation.
      */
     public function addElementToDocument($collectionName, $filterField, $filterValue, $arrayField, $elementToAdd) {
-        $filter = [$filterField => $filterValue];
+        // Sanitize den Query-Wert
+        $sanitizedValue = sanitizeMongoQueryValue($filterValue);
+        if ($sanitizedValue === null) {
+            return array('success' => false, 'code' => 'INVALID_INPUT', 'message' => 'Invalid filter value');
+        }
+        
+        $filter = [$filterField => $sanitizedValue];
         $update = ['$set' => [$arrayField => $elementToAdd]];
-        $options = ['upsert' => true]; // Create the document if it doesn't exist
+        $options = ['upsert' => true];
         $bulk = new MongoDB\Driver\BulkWrite;
         $bulk->update($filter, $update, $options);
     
         $this->client->executeBulkWrite("{$this->mdb}.$collectionName", $bulk);
 
-        $result = $this->findDocumentByField($collectionName, $arrayField, $elementToAdd);
+        $result = $this->findDocumentByField($collectionName, $filterField, $filterValue);
         if($result['success']) {
             return array('success' => true, 'code' => '8AMZLM', 'message' => 'Successfully added or updated element in '.$collectionName);
         } else {
@@ -336,44 +408,25 @@ class MongoDBHelper {
     }
     
     /**
-     * Retrieve a player document based on the PlayerData.SumID attribute.
+     * Retrieve a player document based on the PlayerData.GameName and PlayerData.Tag attributes.
      *
-     * @param string $summonerId - The PlayerData.SumID value to search for.
-     *
-     * @return array - An array with keys 'success', 'code', 'message', and 'data'.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the operation.
-     *   'data' contains the retrieved player document (if found).
-     */
-    public function getPlayerBySummonerId($summonerId) {
-        $filter = ['PlayerData.SumID' => $summonerId];
-        $query = new MongoDB\Driver\Query($filter);
-        $cursor = $this->client->executeQuery("{$this->mdb}.players", $query);
-
-        if (!$cursor->isDead()) {
-            $document = current($cursor->toArray());
-            return array('success' => true, 'code' => 'AK4MF0', 'message' => 'Successfully retrieved player document.', 'data' => $document);
-        } else {
-            return array('success' => false, 'code' => '0PPA1', 'message' => 'Player document not found.');
-        }
-    }
-    
-    /**
-     * Retrieve a player document based on the PlayerData.SumID attribute.
-     *
-     * @param string $riotId - The PlayerData.GameName value to search for.
+     * @param string $gameName - The PlayerData.GameName value to search for.
+     * @param string $tag - The PlayerData.Tag value to search for.
      *
      * @return array - An array with keys 'success', 'code', 'message', and 'data'.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the operation.
-     *   'data' contains the retrieved player document (if found).
      */
     public function getPlayerByRiotId($gameName, $tag) {
+        // Sanitize die Query-Werte
+        $sanitizedGameName = sanitizeMongoQueryValue($gameName);
+        $sanitizedTag = sanitizeMongoQueryValue($tag);
+        
+        if ($sanitizedGameName === null || $sanitizedTag === null) {
+            return array('success' => false, 'code' => 'INVALID_INPUT', 'message' => 'Invalid game name or tag');
+        }
+        
         // Case-insensitive regular expression for the gameName and tag
-        $gameNameRegex = new MongoDB\BSON\Regex("^$gameName$", 'i');
-        $tagRegex = new MongoDB\BSON\Regex("^$tag$", 'i');
+        $gameNameRegex = new MongoDB\BSON\Regex("^$sanitizedGameName$", 'i');
+        $tagRegex = new MongoDB\BSON\Regex("^$sanitizedTag$", 'i');
 
         $filter = [
             'PlayerData.GameName' => $gameNameRegex,
@@ -397,13 +450,15 @@ class MongoDBHelper {
      * @param string $puuid - The PlayerData.PUUID value to search for.
      *
      * @return array - An array with keys 'success', 'code', 'message', and 'data'.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the operation.
-     *   'data' contains the retrieved player document (if found).
      */
     public function getPlayerByPUUID($puuid) {
-        $filter = ['PlayerData.PUUID' => $puuid];
+        // Sanitize den Query-Wert
+        $sanitizedPUUID = sanitizeMongoQueryValue($puuid);
+        if ($sanitizedPUUID === null) {
+            return array('success' => false, 'code' => 'INVALID_INPUT', 'message' => 'Invalid PUUID');
+        }
+        
+        $filter = ['PlayerData.PUUID' => $sanitizedPUUID];
         $query = new MongoDB\Driver\Query($filter);
         $cursor = $this->client->executeQuery("{$this->mdb}.players", $query);
 
@@ -419,10 +474,6 @@ class MongoDBHelper {
      * Retrieve PlayerData.Name and PlayerData.Icon, sort them alphabetically, and format as specified.
      *
      * @return array - An array with keys 'success', 'code', 'message', and 'data'.
-     *   'success' determines the success of the operation.
-     *   'code' provides a code for reference.
-     *   'message' describes the outcome of the operation.
-     *   'data' contains the sorted data.
      */
     public function getAutosuggestAggregate() {
         // Aggregation pipeline
@@ -452,6 +503,9 @@ class MongoDBHelper {
         $result = [];
 
         foreach ($cursor as $document) {
+            if (!isset($document->PlayerData) || !isset($document->PlayerData->GameName)) {
+                continue;
+            }
             $result[$document->PlayerData->GameName.'#'.$document->PlayerData->Tag] = $document->PlayerData->Icon;
         }
 
