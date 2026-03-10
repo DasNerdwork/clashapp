@@ -1,11 +1,10 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
 require_once('/hdd1/clashapp/templates/head.php');
 
+#[CoversFunction('setCodeHeader')]
 class TemplatesTest extends TestCase {
-    /**
-     * @covers setCodeHeader
-     */
     public function testSetCodeHeader() {
         ob_start(); // Start output buffering to capture the output
         setCodeHeader("Test Title", true, true, true, true);

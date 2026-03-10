@@ -1,12 +1,11 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
 $_SERVER['SERVER_NAME'] = "clashscout.com";
 require_once('/hdd1/clashapp/lang/translate.php');
 
+#[CoversFunction('__')]
 class TranslateTest extends TestCase {
-    /**
-     * @covers __
-     */
     public function testTranslate() {
 
         $translatedString = __("This is a test translation for %s");

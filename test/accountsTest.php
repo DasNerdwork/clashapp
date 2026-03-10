@@ -1,12 +1,12 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\UsesClass;
 require_once('/hdd1/clashapp/accounts/qr-codes.php');
 
+#[CoversFunction('generateQR')]
+#[UsesClass(DB::class)]
 class AccountsTest extends TestCase {
-    /**
-     * @covers generateQR
-     * @uses DB
-     */
     public function testGenerateQR() {
         $actualData = generateQR("DasNerdwork");
 

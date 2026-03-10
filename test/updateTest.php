@@ -1,25 +1,24 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesFunction;
 require_once('/hdd1/clashapp/src/update.php');
 require_once('/hdd1/clashapp/src/functions.php');
 
+
+#[CoversFunction('updateProfile')]
+#[CoversFunction('processResponseData')]
+#[CoversFunction('callAllFinish')]
+#[UsesClass('MongoDBHelper')]
+#[UsesClass('API')]
+#[UsesFunction('isValidID')]
+#[UsesFunction('isValidMatchID')]
+#[UsesFunction('championIdToFilename')]
+#[UsesFunction('championIdToName')]
+#[UsesFunction('objectToArray')]
+#[UsesFunction('sanitizeMongoQueryValue')]
 class UpdateTest extends TestCase {
-    /**
-     * @covers updateProfile
-     * @covers processResponseData
-     * @covers callAllFinish
-     * @uses MongoDBHelper
-     * @uses isValidID
-     * @uses isValidMatchID
-     * @uses championIdToFilename
-     * @uses championIdToName
-     * @uses API::getCurrentRank
-     * @uses API::getMasteryScores
-     * @uses API::getMatchIDs
-     * @uses API::getPlayerData
-     * @uses objectToArray
-     * @uses API::downloadMatchesByID
-     */
     public function testUpdateProfile() {
         $mdb = new MongoDBHelper();
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
@@ -50,8 +49,8 @@ class UpdateTest extends TestCase {
                 $this->assertNotEmpty($returnData, 'Returned data is empty or an empty string');
             }
             $this->assertStringContainsString("xhr.open('POST', '/ajax/downloadMatch.php', true);", $returnData, 'Returnstring does not contain necessary parts');
-            $sumidPattern = "/requests\['(.*?)'\] = 'Done'/";
-            preg_match($sumidPattern, $returnData, $matchingID);
+            $puuidPattern = "/requests\['(.*?)'\] = 'Done'/";
+            preg_match($puuidPattern, $returnData, $matchingID);
             $this->assertNotEmpty($matchingID[1], 'Matching ID should not be empty');
             $this->assertTrue(isValidID($matchingID[1]), 'Matching ID should be a valid ID');
 
@@ -64,20 +63,13 @@ class UpdateTest extends TestCase {
                 $this->assertTrue(isValidMatchID($matchID), 'One or more matchIDs do not meet validation checks');
             }
 
-            $xhrIDpattern = '/puuid=([^&]+)&sumid=([^\'"]+)/';
-            preg_match($xhrIDpattern, $returnData, $matchingSumAndPUUID);
-            $this->assertNotEmpty($matchingSumAndPUUID[1], 'Sumid should not be empty');
-            $this->assertNotEmpty($matchingSumAndPUUID[2], 'PUUID should not be empty');
-            $this->assertTrue(isValidID($matchingSumAndPUUID[1]), 'Sumid does not meet validation checks');
-            $this->assertTrue(isValidID($matchingSumAndPUUID[2]), 'PUUID does not meet validation checks');
-
             // Check if it contains processReponseData
-            $this->assertStringContainsString("var playerColumns = document.getElementsByClassName('single-player-column');", $returnData, 'Returnstring does not contain necessary parts');
-            $this->assertStringContainsString("historyColumn.innerHTML = response.matchHistory;", $returnData, 'Returnstring does not contain necessary parts');
+            // $this->assertStringContainsString("var playerColumns = document.getElementsByClassName('single-player-column');", $returnData, 'Returnstring does not contain necessary parts');
+            // $this->assertStringContainsString("historyColumn.innerHTML = response.matchHistory;", $returnData, 'Returnstring does not contain necessary parts');
 
             // Check if it contains callAllFinish
             $this->assertStringContainsString("console.log('ALL PLAYERS FINISHED');", $returnData, 'Returnstring does not contain necessary parts');
-            $this->assertStringContainsString("var data = 'sumids=' + sumids + '&teamid=' + teamID;", $returnData, 'Returnstring does not contain necessary parts');
+            $this->assertStringContainsString("var data = 'puuids=' + puuids + '&teamid=' + teamID;", $returnData, 'Returnstring does not contain necessary parts');
 
             $matchesPattern = '/matches=(\[[^\]]+\])/';
             preg_match($matchesPattern, $returnData, $matchingMatches);

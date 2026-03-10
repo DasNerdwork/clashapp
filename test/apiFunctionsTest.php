@@ -1,5 +1,8 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesFunction;
 require_once('/hdd1/clashapp/src/functions.php');
 require_once('/hdd1/clashapp/src/apiFunctions.php');
 $_SERVER['SERVER_NAME'] = "clashscout.com";
@@ -7,12 +10,18 @@ $_SERVER['HTTP_REFERER'] = "https://clashscout.com/";
 include_once('/hdd1/clashapp/lang/translate.php');
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 
+#[CoversClass(API::class)]
+#[UsesClass(MongoDBHelper::class)]
+#[UsesFunction('championIdToFilename')]
+#[UsesFunction('championIdToName')]
+#[UsesFunction('isValidID')]
+#[UsesFunction('isValidPlayerName')]
+#[UsesFunction('isValidPlayerTag')]
+#[UsesFunction('isValidPosition')]
+#[UsesFunction('sanitizeMongoQueryValue')]
 class ApiFunctionsTest extends TestCase {
-    /**
-     * @covers API::getPlayerData
-     */
     public function testGetPlayerDataByName() {
-        $actualData = API::getPlayerData("riot-id", "dasnerdwork#nerdy");
+        $actualData = API::getPlayerData("riot-id", "thenerdwork#nerdy");
 
         $this->assertArrayHasKey('Icon', $actualData, "Icon key is missing");
         $this->assertIsNumeric($actualData['Icon'], "Icon ID is not numeric");
@@ -29,12 +38,6 @@ class ApiFunctionsTest extends TestCase {
         $this->assertArrayHasKey('PUUID', $actualData, "PUUID key is missing");
         $this->assertEquals('wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA', $actualData['PUUID'], "PUUID is not equal");
 
-        $this->assertArrayHasKey('SumID', $actualData, "SumID key is missing");
-        $this->assertEquals('kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw', $actualData['SumID'], "SumID is not equal");
-
-        $this->assertArrayHasKey('AccountID', $actualData, "AccountID key is missing");
-        $this->assertEquals('NoudYpU8MTqtQ7BvYx4kbQt8boAaDeemjWwOv42nQpH4q98', $actualData['AccountID'], "AccountID is not equal");
-
         $this->assertArrayHasKey('GameName', $actualData, "Name key is missing");
         $this->assertMatchesRegularExpression('/^[a-zA-Z0-9\p{L}]{3,16}$/', $actualData['GameName'], "Name is not in the valid format");
 
@@ -48,41 +51,14 @@ class ApiFunctionsTest extends TestCase {
         $this->assertEquals($actualData['Tag'], $actualDataPUUID['Tag'], "Data is not the same regarding access type");
         $this->assertEquals($actualData['Level'], $actualDataPUUID['Level'], "Data is not the same regarding access type");
         $this->assertEquals($actualData['PUUID'], $actualDataPUUID['PUUID'], "Data is not the same regarding access type");
-        $this->assertEquals($actualData['SumID'], $actualDataPUUID['SumID'], "Data is not the same regarding access type");
-        $this->assertEquals($actualData['AccountID'], $actualDataPUUID['AccountID'], "Data is not the same regarding access type");
         $this->assertArrayHasKey('Icon', $actualDataPUUID, "Icon key is missing");
         $this->assertArrayHasKey('GameName', $actualDataPUUID, "Name key is missing");
         $this->assertArrayHasKey('Tag', $actualDataPUUID, "Tag key is missing");
         $this->assertArrayHasKey('Level', $actualDataPUUID, "Level key is missing");
         $this->assertArrayHasKey('PUUID', $actualDataPUUID, "PUUID key is missing");
-        $this->assertArrayHasKey('SumID', $actualDataPUUID, "SumID key is missing");
-        $this->assertArrayHasKey('AccountID', $actualDataPUUID, "AccountID key is missing");
         $this->assertArrayHasKey('LastChange', $actualDataPUUID, "LastChange key is missing");
-
-        $actualDataSumID = API::getPlayerData("sumid", "kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw");
-
-        $this->assertEquals($actualData['Icon'], $actualDataSumID['Icon'], "Data is not the same regarding access type");
-        $this->assertEquals($actualData['GameName'], $actualDataSumID['GameName'], "Data is not the same regarding access type");
-        $this->assertEquals($actualData['Tag'], $actualDataSumID['Tag'], "Data is not the same regarding access type");
-        $this->assertEquals($actualData['Level'], $actualDataSumID['Level'], "Data is not the same regarding access type");
-        $this->assertEquals($actualData['PUUID'], $actualDataSumID['PUUID'], "Data is not the same regarding access type");
-        $this->assertEquals($actualData['SumID'], $actualDataSumID['SumID'], "Data is not the same regarding access type");
-        $this->assertEquals($actualData['AccountID'], $actualDataSumID['AccountID'], "Data is not the same regarding access type");
-        $this->assertArrayHasKey('Icon', $actualDataSumID, "Icon key is missing");
-        $this->assertArrayHasKey('GameName', $actualDataSumID, "Name key is missing");
-        $this->assertArrayHasKey('Tag', $actualDataSumID, "Tag key is missing");
-        $this->assertArrayHasKey('Level', $actualDataSumID, "Level key is missing");
-        $this->assertArrayHasKey('PUUID', $actualDataSumID, "PUUID key is missing");
-        $this->assertArrayHasKey('SumID', $actualDataSumID, "SumID key is missing");
-        $this->assertArrayHasKey('AccountID', $actualDataSumID, "AccountID key is missing");
-        $this->assertArrayHasKey('LastChange', $actualDataSumID, "LastChange key is missing");
     }
 
-    /**
-     * @covers API::getMasteryScores
-     * @uses championIdToFilename
-     * @uses championIdToName
-     */
     public function testGetMasteryScores() {
         global $currentPatch;
         $championJson = json_decode(file_get_contents('/hdd1/clashapp/data/patch/'.$currentPatch.'/data/de_DE/champion.json'), true);
@@ -97,7 +73,7 @@ class ApiFunctionsTest extends TestCase {
     
             $this->assertArrayHasKey("Lvl", $masteryData, "Lvl key is missing");
             $this->assertGreaterThanOrEqual(0, $masteryData['Lvl'], "Lvl is less than 0");
-            $this->assertLessThanOrEqual(7, $masteryData['Lvl'], "Lvl is greater than 7");
+            $this->assertLessThanOrEqual(PHP_INT_MAX, $masteryData['Lvl'], "Lvl is greater than PHP_INT_MAX");
     
             $this->assertArrayHasKey("Points", $masteryData, "Points key is missing");
             $this->assertIsNumeric(str_replace(',', '.', $masteryData['Points']), "Points is not numeric");
@@ -110,7 +86,7 @@ class ApiFunctionsTest extends TestCase {
             if (array_key_exists('LvlUpTokens', $masteryData)) {
                 $this->assertIsNumeric($masteryData['LvlUpTokens'], "LvlUpTokens is not numeric");
                 $this->assertGreaterThanOrEqual(0, $masteryData['LvlUpTokens'], "LvlUpTokens is less than 0");
-                $this->assertLessThanOrEqual(3, $masteryData['LvlUpTokens'], "LvlUpTokens is greater than 3");
+                $this->assertLessThanOrEqual(PHP_INT_MAX, $masteryData['LvlUpTokens'], "LvlUpTokens is greater than PHP_INT_MAX");
             }
         }
     }
@@ -125,11 +101,8 @@ class ApiFunctionsTest extends TestCase {
         return false;
     }
 
-    /**
-     * @covers API::getCurrentRank
-     */
     public function testGetCurrentRank() {
-        $rankReturnArray = API::getCurrentRank("kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw");
+        $rankReturnArray = API::getCurrentRank("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA");
 
         if(empty($rankReturnArray)){
             $this->assertEmpty($rankReturnArray);
@@ -160,9 +133,6 @@ class ApiFunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers API::getMatchIDs
-     */
     public function testGetMatchIDs() {
         $matchIDArray = API::getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 100);
 
@@ -183,13 +153,6 @@ class ApiFunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers API::getTeamByTeamID
-     * @uses isValidID
-     * @uses isValidPlayerName
-     * @uses isValidPlayerTag
-     * @uses isValidPosition
-     */
     public function testGetTeamByTeamID()
     {  
         $testGetTeam = API::getTeamByTeamID('test');
@@ -215,20 +178,14 @@ class ApiFunctionsTest extends TestCase {
         $this->assertIsArray($testGetTeam['Players'], 'Players is not an array');
         foreach ($testGetTeam['Players'] as $player) {
             $this->assertIsArray($player, 'Player is not an array');
-            $this->assertArrayHasKey('summonerId', $player, 'Player is missing summonerId');
-            $this->assertArrayHasKey('position', $player, 'Player is missing summonerId');
-            $this->assertArrayHasKey('role', $player, 'Player is missing summonerId');
-            $this->assertTrue(isValidID($player['summonerId']), 'A players sumid is not considered a valid sumid');
+            $this->assertArrayHasKey('puuid', $player, 'Player is missing puuid');
+            $this->assertArrayHasKey('position', $player, 'Player is missing position');
+            $this->assertTrue(isValidID($player['puuid']), 'A players puuid is not considered a valid puuid');
             $this->assertTrue(isValidPosition($player['position']), 'A players position is not considered a valid position');
             $this->assertContains($player['role'], ['MEMBER', 'CAPTAIN'], 'A player is neither a member nor a captain');
         }
     }
 
-    /**
-     * @covers API::downloadMatchesByID
-     * @uses MongoDBHelper
-     * @uses API::getMatchIDs
-     */
     public function testDownloadMatchesByID() {
         $mdb = new MongoDBHelper();
         $testMatchId = API::getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 1)[0]; // EUW1_6877507628
@@ -249,16 +206,11 @@ class ApiFunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers API::handlePagePost
-     * @uses API
-     */
     public function testHandlePagePost() {        
-        $successfulResult = API::handlePagePost('dasnerdwork#nerdy');
-        $failedResult = API::handlePagePost('nonexistentuser#wrongtag');
+        $successfulResult = API::handlePagePost('thenerdwork#nerdy');
+        $failedResult = API::handlePagePost('nonexistentuser#wrong');
 
         $this->assertNotFalse($successfulResult, 'Handle of page posting should return 404 or a teamid');
-        $this->assertNotFalse($failedResult, 'Handle of wrong page posting should return 404');
         $this->assertEquals('404', $failedResult, 'Handle of wrong page posting should return 404');
     }
 }

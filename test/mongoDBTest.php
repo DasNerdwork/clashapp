@@ -1,7 +1,11 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\UsesFunction;
 require_once('/hdd1/clashapp/db/mongo-db.php');
 
+#[CoversClass(MongoDBHelper::class)]
+#[UsesFunction('sanitizeMongoQueryValue')]
 class MongoDBTest extends TestCase {
     private static $mongoDBHelper;
 
@@ -9,27 +13,18 @@ class MongoDBTest extends TestCase {
         self::$mongoDBHelper = new MongoDBHelper();
     }
 
-    /**
-     * @covers MongoDBHelper::findDocumentByField
-     */
     public function testFindDocumentByField() {
-        $failFindByField = self::$mongoDBHelper->findDocumentByField('players', 'PlayerData.SumID', 'wrongsumid');
-        $successFindByField = self::$mongoDBHelper->findDocumentByField('players', 'PlayerData.SumID', 'kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw');
+        $failFindByField = self::$mongoDBHelper->findDocumentByField('players', 'PlayerData.PUUID', 'wrongpuuid');
+        $successFindByField = self::$mongoDBHelper->findDocumentByField('players', 'PlayerData.PUUID', 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA');
 
         $this->assertFalse($failFindByField['success'], 'Searching for a non-existing document returned successful, which it is not supposed to do');
-        $this->assertTrue($successFindByField['success'], 'Unable to find player Document for test sumid');
+        $this->assertTrue($successFindByField['success'], 'Unable to find player Document for test puuid, even though it should exist');
         $this->assertNotNull($successFindByField['document'], 'Successfully found document, but content is null');
         $this->assertIsArray($successFindByField['document'], 'Successfully found document, but content is not an array');
     }
 
-    /**
-     * @covers MongoDBHelper::findDocumentsByMatchIds
-     * @covers MongoDBHelper::createProjection
-     * @uses MongoDBHelper::findDocumentByField
-     * @uses MongoDBHelper
-     */
     public function testFindDocumentsByMatchIds() {
-        $testPlayerData = self::$mongoDBHelper->findDocumentByField('players', 'PlayerData.SumID', 'kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw');
+        $testPlayerData = self::$mongoDBHelper->findDocumentByField('players', 'PlayerData.PUUID', 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA');
         $testMatchIDsArray = array_keys(array_slice((array)$testPlayerData['document']['MatchIDs'], 0, 3)); // Gets the first thee match ids in a simple array (0 => euw_1, 1 => euw_2, ...)
         
         $failFindDocumentsByMatchIds = self::$mongoDBHelper->findDocumentsByMatchIds('matches', 'metadata.matchId', [0 => "EUW_12345", 1 => "EUW_23456"], ['info.gameDuration', 'info.queueId', 'info.gameEndTimestamp']);
@@ -44,13 +39,6 @@ class MongoDBTest extends TestCase {
         $this->assertEquals('D4NG3R', $wrongFieldFindDocumentsByMatchIds['code'], 'Expected error code D4NG3R for invalid fields operation');
     }
 
-    /**
-     * @covers MongoDBHelper::insertDocument
-     * @covers MongoDBHelper::getDocumentField
-     * @covers MongoDBHelper::deleteDocumentByField
-     * @covers MongoDBHelper::addElementToDocument
-     * @uses MongoDBHelper
-     */
     public function testHandleDocuments() {
         $testDocument = [
             'PlayerData' => ['GameName' => 'PHPUnitTest', 'Tag' => 'EUW', 'Code' => 'pjHFoMsLXIeY2O0n'],
@@ -96,36 +84,28 @@ class MongoDBTest extends TestCase {
         $this->assertFalse($testDeleteAgain['success'], 'Deleting an already deleted document should not be successful.');
     }
 
-    /**
-     * @covers MongoDBHelper::getPlayerBySummonerId
-     * @covers MongoDBHelper::getPlayerByRiotId
-     * @covers MongoDBHelper::getPlayerByPUUID
-     */
     public function testGetPlayerBy() {
-        $testFailBySumID = self::$mongoDBHelper->getPlayerBySummonerId('wrongsumid');
-        $testSuccessBySumID = self::$mongoDBHelper->getPlayerBySummonerId('kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw');
+        $testFailByPUUID = self::$mongoDBHelper->getPlayerByPUUID('wrongpuuid');
+        $testSuccessByPUUID = self::$mongoDBHelper->getPlayerByPUUID('wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA');
         $testFailByRiotID = self::$mongoDBHelper->getPlayerByRiotId('wronggamename', 'wrongtag');
-        $testSuccessByRiotID = self::$mongoDBHelper->getPlayerByRiotId('DasNerdwork', 'nerdy');
+        $testSuccessByRiotID = self::$mongoDBHelper->getPlayerByRiotId('TheNerdwork', 'nerdy');
         $testFailByPUUID = self::$mongoDBHelper->getPlayerByPUUID('wrongpuuid');
         $testSuccessByPUUID = self::$mongoDBHelper->getPlayerByPUUID('wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA');
         
-        $this->assertFalse($testFailBySumID['success'], 'Getting a document by sumid should return successful.');
-        $this->assertTrue($testSuccessBySumID['success'], 'Getting a document by a non-existing sumid should not return successful.');
+        $this->assertFalse($testFailByPUUID['success'], 'Getting a document by puuid should return successful.');
+        $this->assertTrue($testSuccessByPUUID['success'], 'Getting a document by a non-existing puuid should not return successful.');
         $this->assertFalse($testFailByRiotID['success'], 'Getting a document by riotid+tag should return successful.');
         $this->assertTrue($testSuccessByRiotID['success'], 'Getting a document by a non-existing riotid+tag should not return successful.');
         $this->assertFalse($testFailByPUUID['success'], 'Getting a document by puuid should return successful.');
         $this->assertTrue($testSuccessByPUUID['success'], 'Getting a document by a non-existing puuid should not return successful.');
-        $this->assertArrayHasKey('data', $testSuccessBySumID, 'The returned element should contain the necessary data attribute.');
+        $this->assertArrayHasKey('data', $testSuccessByPUUID, 'The returned element should contain the necessary data attribute.');
         $this->assertArrayHasKey('data', $testSuccessByRiotID, 'The returned element should contain the necessary data attribute.');
         $this->assertArrayHasKey('data', $testSuccessByPUUID, 'The returned element should contain the necessary data attribute.');
-        $this->assertEquals($testSuccessBySumID['data'], $testSuccessByRiotID['data'], 'Returned data should be the same regardless of operation.');
+        $this->assertEquals($testSuccessByPUUID['data'], $testSuccessByRiotID['data'], 'Returned data should be the same regardless of operation.');
         $this->assertEquals($testSuccessByRiotID['data'], $testSuccessByPUUID['data'], 'Returned data should be the same regardless of operation.');
-        $this->assertEquals($testSuccessBySumID['data'], $testSuccessByPUUID['data'], 'Returned data should be the same regardless of operation.');
+        $this->assertEquals($testSuccessByPUUID['data'], $testSuccessByPUUID['data'], 'Returned data should be the same regardless of operation.');
     }
 
-    /**
-     * @covers MongoDBHelper::getAutosuggestAggregate
-     */
     public function testGetAutosuggestAggregate() {
         $testAggregate = self::$mongoDBHelper->getAutosuggestAggregate();
         $this->assertTrue($testAggregate['success'], 'Retrieving the autosuggest aggregate should be successful.');
@@ -133,9 +113,6 @@ class MongoDBTest extends TestCase {
         $this->assertNotEmpty($testAggregate['data'], 'The returned elements data attribute should not be empty.');
     }
 
-    /**
-     * @covers MongoDBHelper::aggregate
-     */
     public function testAggregate() {
         $testSuccessAggregation = self::$mongoDBHelper->aggregate("teams", [['$project' => ['TeamID'  => 1]]], []);
 

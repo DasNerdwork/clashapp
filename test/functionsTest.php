@@ -1,17 +1,64 @@
 <?php
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversFunction;
+use PHPUnit\Framework\Attributes\UsesClass;
+use PHPUnit\Framework\Attributes\UsesFunction;
 require_once('/hdd1/clashapp/src/functions.php');
 $_SERVER['SERVER_NAME'] = "clashscout.com";
 $_SERVER['HTTP_REFERER'] = "https://clashscout.com/";
 include_once('/hdd1/clashapp/lang/translate.php');
 $currentPatch = file_get_contents("/hdd1/clashapp/data/patch/version.txt");
 
+#[CoversFunction('getMatchData')]
+#[CoversFunction('secondsToTime')]
+#[CoversFunction('getRandomIcon')]
+#[CoversFunction('summonerSpellFetcher')]
+#[CoversFunction('runeTreeIconFetcher')]
+#[CoversFunction('runeIconFetcher')]
+#[CoversFunction('championIdToName')]
+#[CoversFunction('championIdToFilename')]
+#[CoversFunction('getLanePercentages')]
+#[CoversFunction('getMostCommon')]
+#[CoversFunction('getPlayerTags')]
+#[CoversFunction('getAverage')]
+#[CoversFunction('getHighestWinrateOrMostLossesAgainst')]
+#[CoversFunction('getMostLossesAgainst')]
+#[CoversFunction('getHighestWinrateAgainst')]
+#[CoversFunction('mostPlayedWith')]
+#[CoversFunction('getHighestWinrateWith')]
+#[CoversFunction('getMatchRanking')]
+#[CoversFunction('unique_multidim_array')]
+#[CoversFunction('timeDiffToText')]
+#[CoversFunction('getSuggestedPicksAndTeamstats')]
+#[CoversFunction('getSuggestedBans')]
+#[CoversFunction('abbreviationFetcher')]
+#[CoversFunction('getRankOrLevel')]
+#[CoversFunction('getMasteryColor')]
+#[CoversFunction('calculateSmurfProbability')]
+#[CoversFunction('tagSelector')]
+#[CoversFunction('generateTag')]
+#[CoversFunction('generateCSRFToken')]
+#[CoversFunction('objectToArray')]
+#[CoversFunction('fileExistsWithCache')]
+#[CoversFunction('addToGlobalMatchDataCache')]
+#[CoversFunction('sortByMatchIds')]
+#[CoversFunction('isValidCSRF')]
+#[CoversFunction('isValidMatchID')]
+#[CoversFunction('isValidIterator')]
+#[CoversFunction('isValidID')]
+#[CoversFunction('isValidPosition')]
+#[CoversFunction('isValidPlayerName')]
+#[CoversFunction('isValidPlayerTag')]
+#[UsesClass('MongoDBHelper')]
+#[UsesFunction('__')]
+#[UsesFunction('isValidID')]
+#[UsesFunction('isValidMatchID')]
+#[UsesFunction('isValidPosition')]
+#[UsesFunction('getMatchData')]
+#[UsesFunction('getMatchRanking')]
+#[UsesFunction('sanitizeMongoQueryValue')]
+#[UsesClass('API')]
 class FunctionsTest extends TestCase {
-    /**
-     * @covers getMatchData
-     * @uses MongoDBHelper
-     * @uses API::getMatchIDs
-     */
     public function testGetMatchData() {
         $testMatchId = API::getMatchIDs("wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA", 1)[0];
         $matchData = (array) getMatchData([$testMatchId]);
@@ -79,7 +126,6 @@ class FunctionsTest extends TestCase {
                 'lane',
                 'neutralMinionsKilled',
                 'puuid',
-                'summonerId',
                 'summonerName',
                 'teamId',
                 'teamPosition',
@@ -107,10 +153,6 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers secondsToTime
-     * @uses __
-     */
     public function testSecondsToTime() {
         $timeStringNeg1 = secondsToTime(-1);
         $this->assertEquals("1 minute ago", $timeStringNeg1, "Time string for -1 second is incorrect");
@@ -174,9 +216,6 @@ class FunctionsTest extends TestCase {
         $this->assertNull($wrongInput, "Wrong input did not return as Null.");
     }    
 
-    /**
-     * @covers getRandomIcon
-     */
     public function testGetRandomIcon()
     {
         for ($currentIconID = 1; $currentIconID <= 28; $currentIconID++) {
@@ -198,9 +237,6 @@ class FunctionsTest extends TestCase {
         $this->assertTrue($randomIconIDHigh >= 1 && $randomIconIDHigh <= 28, "Random icon ID ($randomIconIDHigh) should be within the valid range (1 to 28).");
     }
 
-    /**
-     * @covers summonerSpellFetcher
-     */
     public function testSummonerSpellFetcher()
     {
         global $currentPatch;
@@ -221,9 +257,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals("", $emptyIconID, "Returned an icon ID although none was expected.");
     }
 
-    /**
-     * @covers runeTreeIconFetcher
-     */
     public function testRuneTreeIconFetcher()
     {
         global $currentPatch;
@@ -242,9 +275,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedIconPath, $actualIconPath, "Returned icon path ($actualIconPath) does not match the expected icon path ($expectedIconPath).");
     }
 
-    /**
-     * @covers runeIconFetcher
-     */
     public function testRuneIconFetcher()
     {
         global $currentPatch;
@@ -263,9 +293,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedIconPath, $actualIconPath, "Returned icon path ($actualIconPath) does not match the expected icon path ($expectedIconPath).");
     }
 
-    /**
-     * @covers championIdToName
-     */
     public function testChampionIdToName()
     {
         global $currentPatch;
@@ -285,9 +312,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedChampionName, $actualChampionName, "Returned champion name ($actualChampionName) does not match the expected champion name ($expectedChampionName).");
     }
 
-    /**
-     * @covers championIdToFilename
-     */
     public function testChampionIdToFilename()
     {
         global $currentPatch;
@@ -307,13 +331,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedChampionFilename, $actualChampionFilename, "Returned champion filename ($actualChampionFilename) does not match the expected champion filename ($expectedChampionFilename).");
     }
 
-    /**
-     * @covers getLanePercentages
-     * @covers getMostCommon
-     * @uses MongoDBHelper
-     * @uses getMatchData
-     * @uses API::getMatchIDs
-     */
     public function testGetLanePercentages()
     {
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
@@ -329,12 +346,6 @@ class FunctionsTest extends TestCase {
         $this->assertContains(getLanePercentages($matchData, $puuid)[1], $expectedResultArray, "Second lane in the lane percentage array is not within the expected result array.");
     }
 
-    /**
-     * @covers getPlayerTags
-     * @uses MongoDBHelper
-     * @uses getMatchData
-     * @uses API::getMatchIDs
-     */
     public function testPlayerTags()
     {
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
@@ -351,12 +362,6 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers getAverage
-     * @uses MongoDBHelper
-     * @uses getMatchData
-     * @uses API::getMatchIDs
-     */
     public function testGetAverage()
     {
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
@@ -383,14 +388,6 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers getHighestWinrateOrMostLossesAgainst
-     * @covers getMostLossesAgainst
-     * @covers getHighestWinrateAgainst
-     * @uses MongoDBHelper
-     * @uses getMatchData
-     * @uses API::getMatchIDs
-     */
     public function testGetHighestWinrateOrMostLossesAgainst()
     {
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
@@ -419,13 +416,6 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers mostPlayedWith
-     * @uses getMatchData
-     * @uses API::getMatchIDs
-     * @uses MongoDBHelper
-     * @uses isValidID
-     */
     public function testMostPlayedWith()
     {
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
@@ -442,12 +432,6 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers getHighestWinrateWith
-     * @uses MongoDBHelper
-     * @uses getMatchData
-     * @uses API::getMatchIDs
-     */
     public function testGetHighestWinrateWith()
     {
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
@@ -467,22 +451,15 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers getMatchRanking
-     * @uses MongoDBHelper
-     * @uses getMatchData
-     * @uses API::getMatchIDs
-     * @uses isValidMatchID
-     */
     public function testGetMatchRanking()
     {
         $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
-        $sumid = 'kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw';
+        $puuid = 'wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA';
         $testMatchIds = API::getMatchIDs($puuid, 15);
         $matchData = (array) getMatchData($testMatchIds);
         $matchIDArray = $testMatchIds;
 
-        $testGetMatchRanking = getMatchRanking($matchIDArray, $matchData, $sumid);
+        $testGetMatchRanking = getMatchRanking($matchIDArray, $matchData, $puuid);
 
         $this->assertEquals(15, count($testGetMatchRanking), 'Returned match ranking count does not equal input match count');
         foreach ($testGetMatchRanking as $matchId => $ranking) {
@@ -493,9 +470,6 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers unique_multidim_array
-     */
     public function testUniqueMultidimArray()
     {
         $inputArray = [
@@ -523,10 +497,6 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers timeDiffToText
-     * @uses __
-     */
     public function testTimeDiffToText()
     {
         $timestamps = [
@@ -554,25 +524,19 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers getSuggestedPicksAndTeamstats
-     * @uses MongoDBHelper
-     * @uses getMatchData
-     * @uses getMatchRanking
-     */
     public function testGetSuggestedPicksAndTeamstats()
     {
         $mdb = new MongoDBHelper();
-        $sumids = "MceGjIqeHx6ty7IFgkE7tkXVprFMlx-GiDY52e_9phuQrHHL,KBFbg5b5NWbOFdtOvq5Nr8R5lFHwCR4QS8cTJC6Oau_4Vn6HPW5pFGAiew,cvL-8gEPZWz45ttfrBnWvLF7jgEHzwrW-hz_fQsUyvKd6SH2,kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw,7_MlHF1XF5XJ-O0Hmy-Cjb6ACovIHg5irfmjFmP8lmA7qYyQ";
+        $puuids = "oVZQpfQsLwfMH_51ELBzHTKacqny1FgstxNzgiwnIsPY5AMBeYzJVpKX2noxikvgcqlwY9hEkaJE0Q,5YYmodI0FUXa_3QoxUnkLZQlY4BDg9WcIaUUEvv8_Pr7qGohVX9qFQpP5gmsgTJIJFVSKZZF2AaTmQ,H0Oyp424YjAF74JF66SMF2myTKcznIi4gXlIA3fiwwCb0dSJomzUXmtBmqM7FX7QiFsARJgSrzbBSQ,-ls0xBD9azVVN8u6glV3NgHvCPiIFJ0MTKb_d8Y9q4-YWK_aLavEWSEw4ahZYZKxxAepwETwvd2c2g,wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA";
         $matchIDTeamArray = array();
-        $playerSumidTeamArray = array_flip(explode(',', $sumids));
+        $playerPUUIDTeamArray = array_flip(explode(',', $puuids));
 
-        foreach(array_keys($playerSumidTeamArray) as $playerSumid){
-            if(!$mdb->getPlayerBySummonerId($playerSumid)["success"]){
-                echo "Could not find playerfile for ".$playerSumid;
+        foreach(array_keys($playerPUUIDTeamArray) as $playerPUUID){
+            if(!$mdb->getPlayerByPUUID($playerPUUID)["success"]){
+                echo "Could not find playerfile for ".$playerPUUID;
                 return;
             } else {
-                $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.SumID', $playerSumid)["document"]);
+                $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.PUUID', $playerPUUID)["document"]);
                 $playerDataJSON = json_decode($playerDataJSONString, true);
                 foreach(array_keys($playerDataJSON["MatchIDs"]) as $singleMatchID){
                     if(!in_array($singleMatchID, $matchIDTeamArray)){
@@ -582,7 +546,7 @@ class FunctionsTest extends TestCase {
             }
         }
         $suggestedBanMatchData = getMatchData($matchIDTeamArray);
-        $suggestedPicksAndTeamstatsArray = getSuggestedPicksAndTeamstats(array_keys($playerSumidTeamArray), $matchIDTeamArray, $suggestedBanMatchData);
+        $suggestedPicksAndTeamstatsArray = getSuggestedPicksAndTeamstats(array_keys($playerPUUIDTeamArray), $matchIDTeamArray, $suggestedBanMatchData);
 
         // Assertions for $suggestedPicksAndTeamstatsArray
         $this->assertIsArray($suggestedPicksAndTeamstatsArray, 'Suggested picks and team stats should be an array.');
@@ -625,50 +589,41 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers getSuggestedBans
-     * @uses MongoDBHelper
-     * @uses getMatchData
-     * @uses unique_multidim_array
-     * @uses isValidID
-     * @uses isValidPosition
-     * @uses getMatchRanking
-     */
     public function testGetSuggestedBans()
     {
         $mdb = new MongoDBHelper();
-        $sumids = "MceGjIqeHx6ty7IFgkE7tkXVprFMlx-GiDY52e_9phuQrHHL,KBFbg5b5NWbOFdtOvq5Nr8R5lFHwCR4QS8cTJC6Oau_4Vn6HPW5pFGAiew,cvL-8gEPZWz45ttfrBnWvLF7jgEHzwrW-hz_fQsUyvKd6SH2,kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw,7_MlHF1XF5XJ-O0Hmy-Cjb6ACovIHg5irfmjFmP8lmA7qYyQ";
+        $puuids = "oVZQpfQsLwfMH_51ELBzHTKacqny1FgstxNzgiwnIsPY5AMBeYzJVpKX2noxikvgcqlwY9hEkaJE0Q,5YYmodI0FUXa_3QoxUnkLZQlY4BDg9WcIaUUEvv8_Pr7qGohVX9qFQpP5gmsgTJIJFVSKZZF2AaTmQ,H0Oyp424YjAF74JF66SMF2myTKcznIi4gXlIA3fiwwCb0dSJomzUXmtBmqM7FX7QiFsARJgSrzbBSQ,-ls0xBD9azVVN8u6glV3NgHvCPiIFJ0MTKb_d8Y9q4-YWK_aLavEWSEw4ahZYZKxxAepwETwvd2c2g,wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA";
         $matchIDTeamArray = array();
         $masteryDataTeamArray = array();
         $playerLanesTeamArray = array();
-        $playerNameTeamArray = explode(',', $sumids);
-        $playerSumidTeamArray = array_flip($playerNameTeamArray);
+        $playerNameTeamArray = explode(',', $puuids);
+        $playerPUUIDTeamArray = array_flip($playerNameTeamArray);
 
-        foreach(array_keys($playerSumidTeamArray) as $playerSumid){
-            if(!$mdb->getPlayerBySummonerId($playerSumid)["success"]){
-                echo "Could not find playerfile for ".$playerSumid;
+        foreach(array_keys($playerPUUIDTeamArray) as $playerPUUID){
+            if(!$mdb->getPlayerByPUUID($playerPUUID)["success"]){
+                echo "Could not find playerfile for ".$playerPUUID;
                 return;
             } else {
-                $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.SumID', $playerSumid)["document"]);
+                $playerDataJSONString = json_encode($mdb->findDocumentByField('players', 'PlayerData.PUUID', $playerPUUID)["document"]);
                 $playerDataJSON = json_decode($playerDataJSONString, true);
                 foreach(array_keys($playerDataJSON["MatchIDs"]) as $singleMatchID){
                     if(!in_array($singleMatchID, $matchIDTeamArray)){
                         $matchIDTeamArray[] = $singleMatchID;
                     }
                 }
-                $masteryDataTeamArray[$playerSumid] = $playerDataJSON["MasteryData"];
-                $playerLanesTeamArray[$playerSumid]["Mainrole"] = $playerDataJSON["LanePercentages"][0] ?? "";
-                $playerLanesTeamArray[$playerSumid]["Secrole"] = $playerDataJSON["LanePercentages"][1] ?? "";
+                $masteryDataTeamArray[$playerPUUID] = $playerDataJSON["MasteryData"];
+                $playerLanesTeamArray[$playerPUUID]["Mainrole"] = $playerDataJSON["LanePercentages"][0] ?? "";
+                $playerLanesTeamArray[$playerPUUID]["Secrole"] = $playerDataJSON["LanePercentages"][1] ?? "";
 
-                foreach ($playerNameTeamArray as $singleSumid => $index) {
-                    if($playerDataJSON["PlayerData"]["SumID"] == $singleSumid){
-                        $playerNameTeamArray[$singleSumid] = $playerDataJSON["PlayerData"]["GameName"];
+                foreach ($playerNameTeamArray as $singlePuuid => $index) {
+                    if($playerDataJSON["PlayerData"]["PUUID"] == $singlePuuid){
+                        $playerNameTeamArray[$singlePuuid] = $playerDataJSON["PlayerData"]["GameName"];
                     }
                 }
             }
         }
         $suggestedBanMatchData = getMatchData($matchIDTeamArray);
-        $suggestedBanArray = getSuggestedBans(array_keys($playerSumidTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
+        $suggestedBanArray = getSuggestedBans(array_keys($playerPUUIDTeamArray), $masteryDataTeamArray, $playerLanesTeamArray, $matchIDTeamArray, $suggestedBanMatchData);
 
         // Assertions for $suggestedBanArray
         $this->assertIsArray($suggestedBanArray, 'Suggested bans should be an array.');
@@ -761,23 +716,17 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers abbreviationFetcher
-     */
     public function testAbbreviationFetcher()
     {
         $champName = "Aatrox";
 
-        $expectedResult = 'dark,darki,darkin,top,mid,fighter,ad,tank';
+        $expectedResult = 'darkin,top,mid,fighter,ad,tank';
         $this->assertEquals($expectedResult, abbreviationFetcher($champName), 'Requested abbreviations did not match returned ones.');
 
         $nonExistingChampName = "NonExistentChamp";
         $this->assertEmpty(abbreviationFetcher($nonExistingChampName), 'Found a non-existing champion in abbreviations.json');
     }
 
-    /**
-     * @covers getRankOrLevel
-     */
     public function testGetRankOrLevel()
     {
         $rankDataMid = [
@@ -809,6 +758,7 @@ class FunctionsTest extends TestCase {
             "HighestRank" => "SILVER",
             "HighEloLP" => "",
             "RankNumber" => "III",
+            "Winrate" => 44.78
         ];
         $this->assertEquals($expectedRankResult, getRankOrLevel($rankDataMid, $playerDataMid), 'Get Rank approach did not correctly return on sample data.');
 
@@ -833,6 +783,7 @@ class FunctionsTest extends TestCase {
             "HighestRank" => "GRANDMASTER",
             "HighEloLP" => "273",
             "RankNumber" => "",
+            "Winrate" => 47.44
         ];
         $this->assertEquals($expectedHighRankResult, getRankOrLevel($rankDataHighRank, $playerDataHighRank), 'Get High Rank did not correctly return necessary values.');
 
@@ -853,9 +804,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expectedHighLevelResult, getRankOrLevel($rankDataLevelHigh, $playerDataLevelHigh), 'Get High level did not correctly return high level filename.');
     }
 
-    /**
-     * @covers getMasteryColor
-     */
     public function testGetMasteryColor()
     {
         $testXXSValue = getMasteryColor(20000);
@@ -877,10 +825,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals("", $testFailValue, "Mastery points did not return correct corresponding threat level.");
     }
 
-    /**
-     * 
-     * @covers calculateSmurfProbability
-     */
     public function testCalculateSmurfProbability()
     {
         // Mocking player data, rank data, and mastery data for testing
@@ -930,11 +874,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals(0, calculateSmurfProbability($playerDataHigh, $rankDataHigh, $masteryDataHigh), 'Smurf Probability was not correclty calculated for no/low indicators.');
     }
 
-    /**
-     * @covers tagSelector
-     * @covers generateTag
-     * @uses __
-     */
     public function testTagSelectorWithTags()
     {
         $testTagArray1 = ['dragonTakedowns' => 0.5, 'kda' => 0.3];
@@ -980,10 +919,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals("Unknown tag option", $testTagGenerate3, 'Generating data was successful although it should not have been.');
     }
 
-    /**
-     * @covers generateCSRFToken
-     * @uses isValidCSRF
-     */
     public function testGenerateCSRFToken()
     {
         $testGenerateCSRF = generateCSRFToken();
@@ -994,9 +929,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($testGenerateCSRF, $_SESSION['csrf_token'], 'The CSRF token generated and set in the session do not match');
     }
 
-    /**
-     * @covers objectToArray
-     */
     public function testObjectToArray()
     {
         // Simple approach
@@ -1070,9 +1002,6 @@ class FunctionsTest extends TestCase {
         }
     }
 
-    /**
-     * @covers fileExistsWithCache
-     */
     public function testFileExistsWithCache()
     {
         global $fileExistsCache;
@@ -1100,9 +1029,6 @@ class FunctionsTest extends TestCase {
         $this->assertTrue($fileExistsCache[$filePath], 'Already existing cached existence answer is not the same as non-cached one.');
     }
 
-    /**
-     * @covers addToGlobalMatchDataCache
-     */
     public function testAddToGlobalMatchDataCache()
     {
         global $matchDataCache;
@@ -1116,9 +1042,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($testMatch, $matchDataCache['EUW1_6881740123'], 'Match data in cache is not the same as before.');
     }
 
-    /**
-     * @covers sortByMatchIds
-     */
     public function testSortByMatchIds()
     {
         $matchDataArray = [
@@ -1142,9 +1065,6 @@ class FunctionsTest extends TestCase {
         $this->assertEquals($expected, $result, 'Sorting matchids in descending ordner was not successful.');
     }
 
-    /**
-     * @covers isValidCSRF
-     */
     public function testIsValidCSRF()
     {
         $this->assertTrue(isValidCSRF('0123456789abcdef0123456789ABCDEF0123456789abcdef0123456789ABCDEF'), 'Valid CSRF did not pass validation.');
@@ -1158,9 +1078,6 @@ class FunctionsTest extends TestCase {
         $this->assertFalse(isValidCSRF(10), 'Invalid CSRF should not pass validation.');
     }
 
-    /**
-     * @covers isValidMatchID
-     */
     public function testIsValidMatchID()
     {
         $this->assertTrue(isValidMatchID('EUW1_6884397504'), 'Valid MatchID did not pass validation.');
@@ -1174,9 +1091,6 @@ class FunctionsTest extends TestCase {
         $this->assertFalse(isValidMatchID(10), 'Invalid MatchID should not pass validation.');
     }
 
-    /**
-     * @covers isValidIterator
-     */
     public function testIsValidIterator()
     {
         $this->assertTrue(isValidIterator(0), 'Valid Iterator did not pass validation.');
@@ -1190,15 +1104,12 @@ class FunctionsTest extends TestCase {
         $this->assertFalse(isValidIterator(10), 'Invalid Iterator should not pass validation.');
     }
 
-    /**
-     * @covers isValidID
-     */
     public function testIsValidID()
     {
         $this->assertTrue(isValidID('lMPVJegBts5TsSd7vKrf9j_oMPZN9N8ul2CBtviFNcuIzlGdWG1d4riiG9f4lNNoyzq-HVDRA8IzcA'), 'Valid ID did not pass validation.');
-        $this->assertTrue(isValidID('MceGjIqeHx6ty7IFgkE7tkXVprFMlx-GiDY52e_9phuQrHHL'), 'Valid ID did not pass validation.');
+        $this->assertTrue(isValidID('-ls0xBD9azVVN8u6glV3NgHvCPiIFJ0MTKb_d8Y9q4-YWK_aLavEWSEw4ahZYZKxxAepwETwvd2c2g'), 'Valid ID did not pass validation.');
         $this->assertTrue(isValidID('wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA'), 'Valid ID did not pass validation.');
-        $this->assertTrue(isValidID('kLIAKUzGnotwLAJbl-rdqOu_CQYjwW7OOMloEtRyM6oP-uw'), 'Valid ID did not pass validation.');
+        $this->assertTrue(isValidID('wZzROfU21vgztiGFq_trTZDeG89Q1CRGAKPktG83VKS-fkCISXhAWUptVVftbtVNIHMvgJo6nIlOyA'), 'Valid ID did not pass validation.');
 
         $this->assertFalse(isValidID('*.,-feddichisdasmondjesichd'), 'Invalid ID should not pass validation.');
         $this->assertFalse(isValidID('필릭스'), 'Invalid ID should not pass validation.');
@@ -1206,9 +1117,6 @@ class FunctionsTest extends TestCase {
         $this->assertFalse(isValidID('SQL DROP DATABASE;'), 'Invalid ID should not pass validation.');
     }
 
-    /**
-     * @covers isValidPosition
-     */
     public function testIsValidPosition()
     {
         $this->assertTrue(isValidPosition('bot'), 'Valid position did not pass validation.');
@@ -1222,9 +1130,6 @@ class FunctionsTest extends TestCase {
         $this->assertFalse(isValidPosition('SQL DROP DATABASE;'), 'Invalid position should not pass validation.');
     }
 
-    /**
-     * @covers isValidPlayerName
-     */
     public function testIsValidPlayerName()
     {
         $this->assertTrue(isValidPlayerName('DasNerdwork'), 'Valid player name did not pass validation.');
@@ -1238,9 +1143,6 @@ class FunctionsTest extends TestCase {
         $this->assertFalse(isValidPlayerName('SQL DROP DATABASE;'), 'Invalid player name should not pass validation.');
     }
 
-    /**
-     * @covers isValidPlayerTag
-     */
     public function testIsValidPlayerTag()
     {
         $this->assertTrue(isValidPlayerTag('KR1'), 'Valid player tag did not pass validation.');
