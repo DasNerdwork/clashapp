@@ -10,7 +10,6 @@ if (!isset($_SESSION['user'])) {
 }
 
 // print_r($_SESSION);
-
 require_once '/hdd1/clashapp/db/clash-db.php';
 require_once '/hdd1/clashapp/src/functions.php';
 require_once '/hdd1/clashapp/accounts/qr-codes.php';

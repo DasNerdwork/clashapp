@@ -6,14 +6,12 @@
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-require_once '/hdd1/clashapp/vendor/autoload.php';
+require_once '/hdd1/clashapp/db/clash-db.php';
 use PragmaRX\Google2FA\Google2FA;
 use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\Image\ImagickImageBackEnd;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
-
-require_once '/hdd1/clashapp/db/clash-db.php';
 
 function generateQR($username){
     $db = new DB();

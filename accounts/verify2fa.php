@@ -25,7 +25,7 @@ if (isset($_POST['submit'])) {
             $db = new DB();
             $response = $db->get_credentials_2fa($_SESSION['temp']['email']);
             if($response['status'] == 'success'){
-                $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email'], 'sumid' => $response['sumid'], '2fa' => $response['2fa']);
+                $_SESSION['user'] = array('id' => $response['id'], 'region' => $response['region'], 'username' => $response['username'], 'email' => $response['email'], 'puuid' => $response['puuid'], '2fa' => $response['2fa']);
                 unset($_SESSION['temp']);
                 echo '<script type="text/javascript">window.location.href="/";</script>';
             } else {
