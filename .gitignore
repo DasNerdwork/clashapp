@@ -22,5 +22,4 @@ robots.txt
 *.crt
 .env
 nginx.conf
-messages.db
-whatsapp.db
+/.clinerules
