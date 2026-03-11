@@ -22,4 +22,4 @@ robots.txt
 *.crt
 .env
 nginx.conf
-/.clinerules
+.clinerules/
