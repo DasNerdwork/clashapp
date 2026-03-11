@@ -11,7 +11,7 @@
 - Mit `--type php` / `--type py` / `--type js` für Typ-Filter
 
 ## WhatsApp Benachrichtigungen
-- Meine WhatsApp-Nummer: 491702287568
+- Notification-Ziel (Gruppe): 120363427307706468@g.us
 - Bei Phrasen wie "benachrichtige mich", "schick mir ne WhatsApp", 
   "meld dich wenn fertig", "notify me" → immer an meine Nummer senden
 - Tool: WhatsApp MCP `send_message` mit meiner Nummer als Empfänger
