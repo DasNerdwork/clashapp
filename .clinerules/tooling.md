@@ -10,13 +10,18 @@
 - Mit `-n` für Zeilennummern
 - Mit `--type php` / `--type py` / `--type js` für Typ-Filter
 
-## WhatsApp Benachrichtigungen
-- Notification-Ziel (Gruppe): 120363427307706468@g.us
-- Bei Phrasen wie "benachrichtige mich", "schick mir ne WhatsApp", 
-  "meld dich wenn fertig", "notify me" → immer an meine Nummer senden
-- Tool: WhatsApp MCP `send_message` mit meiner Nummer als Empfänger
+## Benachrichtigungen
+- IMMER Home Assistant nutzen, NIEMALS andere Wege für Benachrichtigungen
+- Bei "benachrichtige mich", "notify me", "schick mir", "meld dich wenn fertig" etc.
+- Befehl:
+  curl -X POST https://home.dasnerdwork.net/api/services/notify/mobile_app_flos_handy \
+    -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiIwM2JmYzgzYjdkYzY0MDNjYjAxNDk5NGZjYTNkOWM3OCIsImlhdCI6MTc3MzI1NjM2NSwiZXhwIjoyMDg4NjE2MzY1fQ.eJWmAR9SAaYwF_2kUKJidnKim4sYamb4-z4gsi8tzFg" \
+    -H "Content-Type: application/json" \
+    -d '{"title": "🤖 Cline", "message": "NACHRICHT"}'
+- Für dringende Tasks (lange Laufzeiten, Fehler): interruption-level critical hinzufügen:
+  -d '{"title": "🤖 Cline", "message": "NACHRICHT", "data": {"push": {"interruption-level": "critical"}}}'
 - Nachricht kurz halten, Status + was erledigt wurde
-- Beispiel: "✅ Task abgeschlossen: [kurze Beschreibung]"
+- Kein Nachdenken, direkt ausführen
 
 ## Browser
 - Für visuelle Checks / Screenshots: Clines eingebautes Browser-Tool
