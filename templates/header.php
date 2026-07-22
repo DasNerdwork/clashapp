@@ -60,7 +60,7 @@ const searchHistoryTitle = '" . __("Recently Searched") . "';
                 <form class="h-14 flex" action="" onsubmit="return false;" method="GET" autocomplete="off">
                     <div class="relative">
                         <div id="tagLineSuggest" class="absolute -z-10 px-2.5 text-xl w-full h-full bg-white flex items-center"></div>
-                        <input id="main-input" type="text" name="name" class="bg-transparent px-2.5 text-xl w-[45rem] h-full !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-xl" value="" placeholder='.__("'Search Teams, Players or Champions'").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false" maxlength="22">
+                        <input id="main-input" type="text" name="name" class="bg-transparent px-2.5 text-xl w-[45rem] h-full !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-xl" value="" placeholder='.__("'Search Teams, Players or Champions, e.g. \"DasNerdwork\"'").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false" maxlength="22">
                     </div>
                     <input type="submit" name="submitBtn" class="w-20 text-xl bg-white text-black cursor-pointer focus:text-xl active:bg-[#ccc]" value="'.__('Search').'" onclick="sanitize(this.form.name.value);">
                     <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
@@ -75,7 +75,7 @@ const searchHistoryTitle = '" . __("Recently Searched") . "';
                 <form class="h-10 flex" action="" onsubmit="return false;" method="GET" autocomplete="off">
                     <div class="relative">
                         <div id="tagLineSuggest" class="absolute -z-10 px-2.5 text-base w-full h-full bg-white flex items-center"></div>
-                        <input id="main-input" type="text" name="name" class="bg-transparent px-2.5 text-base w-80 h-full !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-base" value="" placeholder='.__("'Search Teams, Players or Champions'").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false" maxlength="22">
+                        <input id="main-input" type="text" name="name" class="bg-transparent px-2.5 text-base w-80 h-full !border-r border-solid border-gray-200 focus:!border-r focus:!border-solid focus:!border-gray-200 text-black focus:px-2.5 focus:text-base" value="" placeholder='.__("'Search Teams, Players or Champions, e.g. \"DasNerdwork\"'").' autocomplete="off" x-on:focus="autosuggest = true" x-on:focusout="autosuggest = false" maxlength="22">
                     </div>
                     <input type="submit" name="submitBtn" class="w-20 text-base bg-white text-black cursor-pointer focus:text-base active:bg-[#ccc]" value="'.__('Search').'" onclick="sanitize(this.form.name.value);">
                     <div class="w-10 h-10 items-center justify-center flex absolute -right-10 opacity-0" id="main-search-loading-spinner">
