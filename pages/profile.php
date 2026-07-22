@@ -1,7 +1,7 @@
 <?php 
 
 if (session_status() === PHP_SESSION_NONE) session_start();
-$_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+$_SESSION['csrf_token'] ??= bin2hex(random_bytes(32));
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -47,6 +47,13 @@ const searchHistoryTitle = '" . __("Recently Searched") . "';
 
 include_once('/hdd1/clashapp/src/functions.php');
 include_once('/hdd1/clashapp/src/update.php');
+require_once '/hdd1/clashapp/db/clash-db.php';
+
+$isPremium = false;
+if (isset($_SESSION['user']['email'])) {
+    $db = new DB();
+    $isPremium = (bool) $db->getPremium($_SESSION['user']['email']);
+}
 
 if (isset($_GET["name"])){
     // Format text field input to swap spaces with '+' for correct api requests
@@ -107,7 +114,7 @@ echo "
         <td class='w-[332px] min-w-[316px] align-top'>
             <div class='row-span-2 p-4 flex items-center justify-center rounded bg-[#141624]'>
                 <div class='h-[37.5rem] min-w-[300px] bg-black'>
-                    "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                    "; if ($isPremium) { echo "
                     <span class='h-[37.5rem] flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                     } else { echo "
                         <div class='lazyhtml' data-lazyhtml onvisible>
@@ -145,7 +152,7 @@ echo "
         <td class='w-[332px] min-w-[316px] align-top'>
             <div class='row-span-2 p-4 flex items-center justify-center rounded bg-[#141624]'>
                 <div class='h-[37.5rem] min-w-[300px] bg-black'>
-                    "; if (isset($_SESSION['user']['email']) && $db->getPremium($_SESSION['user']['email'])) { echo "
+                    "; if ($isPremium) { echo "
                     <span class='h-[37.5rem] flex items-center justify-center'><img src='".$emoteSources[rand(0,count($emoteSources)-1)]."' class='max-h-full max-w-[50%]' alt='A random premium emote'></span>"; 
                     } else { echo "
                         <div class='lazyhtml' data-lazyhtml onvisible>
