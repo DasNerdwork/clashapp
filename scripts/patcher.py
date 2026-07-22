@@ -160,6 +160,12 @@ def update_version_history(current_version):
     with open(version_history_path, 'w') as f:
         json.dump(version_history, f, separators=(",", ":"))
 
+def restart_ws_server():
+    try:
+        subprocess.run("pm2 restart 'WS-Server'", shell=True, check=True)
+        logger.info("WebSocket server restarted successfully.")
+    except subprocess.CalledProcessError as e:
+        logger.error(f"Error restarting WebSocket server: {e}")
 
 # Start count of whole program time and set exception handling
 sys.excepthook = handle_exception
@@ -251,6 +257,7 @@ elif (not os.path.isdir(folder + variables[0]) or not os.path.isdir(folder + "lo
         f.write(variables[0])
     logger.info("Updating version_history.txt")
     update_version_history(variables[0])
+    restart_ws_server()
 
     # Update abbreviations.json with newest information from champion.json of new patch
     abbr_updated = update_abbreviations(variables[0])
