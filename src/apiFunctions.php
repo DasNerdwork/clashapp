@@ -69,7 +69,13 @@ class API {
         
         switch ($type) {
             case "riot-id":
+                if (strpos($id, "#") === false) {
+                    $id .= "#EUW"; // Fallback, verhindert ungültigen API-Pfad -> 403
+                }
                 $id = str_replace("#","/",$id);
+                // Segmente einzeln encoden (Sonderzeichen/Leerzeichen im Namen!)
+                $parts = explode("/", $id, 2);
+                $id = rawurlencode($parts[0])."/".rawurlencode($parts[1]);
                 $requestUrlVar = "https://europe.api.riotgames.com/riot/account/v1/accounts/by-riot-id/";
                 break;
             case "puuid":
@@ -112,10 +118,8 @@ class API {
 
             // 403 Access forbidden -> Outdated API Key
             if ($httpCode == 403) {
-                // @codeCoverageIgnoreStart
-                echo "<h2>403 Forbidden API::getPlayerData</h2>";
-                die;
-                // @codeCoverageIgnoreEnd
+                error_log("[ClashApp] 403 in API::getPlayerData (Stage 1) für URL: ".$requestUrlVar.$id);
+                return array();
             }
 
         } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
@@ -167,11 +171,10 @@ class API {
 
             // 403 Access forbidden -> Outdated API Key
             if ($httpCode == 403) {
-                // @codeCoverageIgnoreStart
-                echo "<h2>403 Forbidden API::getPlayerData (Stage 2)</h2>";
-                die;
-                // @codeCoverageIgnoreEnd
+                error_log("[ClashApp] 403 in API::getPlayerData (Stage 2) für PUUID: ".$puuid);
+                return array();
             }
+
 
         } while ($retryAttempts < 3 && $httpCode == 429 && isset($retryAfterValue));
 
@@ -244,8 +247,8 @@ class API {
             // 403 Forbidden
             if ($httpCode == 403) {
                 // @codeCoverageIgnoreStart
-                echo "<h2>403 Forbidden MasteryScores</h2>";
-                die;
+                error_log("[ClashApp] 403 in API::getMasteryScores für PUUID: ".$puuid);
+                return array();
                 // @codeCoverageIgnoreEnd
             }
 
@@ -328,8 +331,8 @@ class API {
             // 403 Forbidden
             if ($httpCode == 403) {
                 // @codeCoverageIgnoreStart
-                echo "<h2>403 Forbidden CurrentRank</h2>";
-                die;
+                error_log("[ClashApp] 403 in API::getCurrentRank für PUUID: ".$puuid);
+                return array();
                 // @codeCoverageIgnoreEnd
             }
 
@@ -558,9 +561,11 @@ class API {
             ($ch);
 
             // 403 Access forbidden -> Outdated API Key
-            if($httpCode == "403"){
-                echo "<h2>403 Forbidden TeamByTeamID</h2>";
-                die;
+            if ($httpCode == 403) {
+                // @codeCoverageIgnoreStart
+                error_log("[ClashApp] 403 in API::getTeamByTeamID für teamID: ".$teamID);
+                return array("Status" => "403");
+                // @codeCoverageIgnoreEnd
             }
 
             // 429 Too Many Requests
@@ -779,6 +784,28 @@ class API {
         } else {
             return '404';
         }
+    }
+
+    public static function getTeamIdByPUUID($puuid){
+        global $headers, $apiRequests;
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-puuid/".$puuid);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        $output = curl_exec($ch); $apiRequests["postSubmit"]++;
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($httpCode == 429) {
+            sleep(5);
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, "https://euw1.api.riotgames.com/lol/clash/v1/players/by-puuid/".$puuid);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            $output = curl_exec($ch); $apiRequests["postSubmit"]++;
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        }
+        if ($httpCode != 200) return null;
+        $data = json_decode($output, true);
+        return $data[0]["teamId"] ?? null;
     }
 }
 
