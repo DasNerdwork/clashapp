@@ -312,45 +312,47 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
     const autosuggestContainer = document.getElementById('autosuggest-container');
     const tagLineSuggest = document.getElementById('tagLineSuggest');
     
-    const searchHistory = JSON.parse(localStorage.getItem("SearchHistory"));
+    const searchHistory = JSON.parse(localStorage.getItem("SearchHistory") || "[]");
 
-    if(searchHistory != null){
-      var historyUlElement = document.getElementById("autosuggest-history-parent");
-      if(!historyUlElement){
-        var historyTitleDiv = document.createElement('div');
-        historyTitleDiv.className = 'p-1.5 bg-searchtitle';
-        const historyTitleSpan = document.createElement('span');
-        historyTitleSpan.textContent = searchHistoryTitle;
-        historyTitleSpan.className = 'font-bold';
-        var historyUlElement = document.createElement('ul');
-        historyUlElement.id = 'autosuggest-history-parent';
-        historyTitleDiv.appendChild(historyTitleSpan);
-        for (let i = searchHistory.length - 1; i >= 0; i--) {
-          let normalizedSearchHistory = normalizeString(searchHistory[i]);
-          let handled = false;
-          if(autosuggestData !== ""){
-            for (let key in autosuggestData) {
-              const normalizedUserKey = normalizeString(key);
-              if (normalizedUserKey == normalizedSearchHistory) {
-                const liElement = createAutosuggestItem(key, autosuggestData[key], currentPatch, 'player');
-                historyUlElement.appendChild(liElement);
-                handled = true;
-              } 
-            }
-
-            if(!handled){
-              for (let key in championData) {
-                if (key.trim().toLowerCase() == normalizedSearchHistory) {
-                  const liElement = createAutosuggestItem(key, championData[key], currentPatch, 'champion');
+    if (Array.isArray(searchHistory) && searchHistory.length > 0) {
+      if(searchHistory != null){
+        var historyUlElement = document.getElementById("autosuggest-history-parent");
+        if(!historyUlElement){
+          var historyTitleDiv = document.createElement('div');
+          historyTitleDiv.className = 'p-1.5 bg-searchtitle';
+          const historyTitleSpan = document.createElement('span');
+          historyTitleSpan.textContent = searchHistoryTitle;
+          historyTitleSpan.className = 'font-bold';
+          var historyUlElement = document.createElement('ul');
+          historyUlElement.id = 'autosuggest-history-parent';
+          historyTitleDiv.appendChild(historyTitleSpan);
+          for (let i = searchHistory.length - 1; i >= 0; i--) {
+            let normalizedSearchHistory = normalizeString(searchHistory[i]);
+            let handled = false;
+            if(autosuggestData !== ""){
+              for (let key in autosuggestData) {
+                const normalizedUserKey = normalizeString(key);
+                if (normalizedUserKey == normalizedSearchHistory) {
+                  const liElement = createAutosuggestItem(key, autosuggestData[key], currentPatch, 'player');
                   historyUlElement.appendChild(liElement);
                   handled = true;
                 } 
               }
-            }
 
-            if(!handled) {
-              const liElement = createAutosuggestItem(searchHistory[i], '9', currentPatch, 'player');
-              historyUlElement.appendChild(liElement);
+              if(!handled){
+                for (let key in championData) {
+                  if (key.trim().toLowerCase() == normalizedSearchHistory) {
+                    const liElement = createAutosuggestItem(key, championData[key], currentPatch, 'champion');
+                    historyUlElement.appendChild(liElement);
+                    handled = true;
+                  } 
+                }
+              }
+
+              if(!handled) {
+                const liElement = createAutosuggestItem(searchHistory[i], '9', currentPatch, 'player');
+                historyUlElement.appendChild(liElement);
+              }
             }
           }
         }
@@ -377,7 +379,7 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
         innerDiv2.appendChild(titleDiv);
         innerDiv2.appendChild(ulElement);
       }
-      if(searchHistory != null){
+      if (Array.isArray(searchHistory) && searchHistory.length > 0) {
         innerDiv2.appendChild(historyTitleDiv);
         innerDiv2.appendChild(historyUlElement);
       }
@@ -388,7 +390,10 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
       if (inputElement.value.length > 2) {
         const inputValue = inputElement.value.trim().toLowerCase();
         const normalizedInputValue = normalizeString(inputValue);
-        const currentInputLi = createAutosuggestItem(inputElement.value, '9', currentPatch, 'player');
+        const displayKey = inputElement.value.includes('#')
+            ? inputElement.value
+            : inputElement.value + '#EUW';
+        const currentInputLi = createAutosuggestItem(displayKey, '9', currentPatch, 'player');
         ulElement.appendChild(currentInputLi);
         if(autosuggestData !== ""){
           for (let key in autosuggestData) {
@@ -422,7 +427,10 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
         }
       } else if(inputElement.value.length > 0) {
         ulElement.innerHTML = '';
-        const currentInputLi = createAutosuggestItem(inputElement.value, '9', currentPatch, 'player');
+        const displayKey = inputElement.value.includes('#')
+            ? inputElement.value
+            : inputElement.value + '#EUW';
+        const currentInputLi = createAutosuggestItem(displayKey, '9', currentPatch, 'player');
         ulElement.appendChild(currentInputLi);
       }
     }
@@ -435,11 +443,13 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
 
     inputElement.addEventListener('keydown', function(e) {
       if(e.key === 'Tab'){
-        e.preventDefault();
-        if(!inputElement.value.includes('#')){
-          inputElement.value += "#EUW";
-        }
-        tagLineSuggest.innerHTML = "";
+          e.preventDefault();
+          const parts = inputElement.value.split('#');
+          const tag = (parts[1] || '').toUpperCase();
+          if (parts.length === 1 || tag === '' || 'EUW'.startsWith(tag)) {
+              inputElement.value = parts[0] + "#EUW";
+          }
+          tagLineSuggest.innerHTML = "";
       }
     });
 
@@ -459,18 +469,18 @@ function searchAutosuggestData(autosuggestData, currentPatch, containerTitle) {
     });
 
     function checkForTagSuggest(e){
-      if (inputElement.value.length > 2 && !inputElement.value.includes('#')) {
-        let currentInput = inputElement.value;
-        tagLineSuggest.innerHTML = currentInput + "<span class='bg-searchtitle px-1 rounded ml-1 text-sm text-[#9ea4bd]'>#EUW</span>";
-      } else {
-        tagLineSuggest.innerHTML = "";
-        if(e.data === "#"){
-          inputElement.value = inputElement.value.split('#')[0] + "#" +inputElement.value.split('#')[1].slice(0, 5);
+        const val = inputElement.value;
+        if (val.length > 2 && !val.includes('#')) {
+            tagLineSuggest.innerHTML = escapeHtml(val) + "<span class='bg-searchtitle px-1 rounded ml-1 text-sm text-[#9ea4bd]'>#EUW</span>";
+        } else {
+            tagLineSuggest.innerHTML = "";
+            if (val.includes('#')) {
+                const parts = val.split('#');
+                if ((parts[1] || '').length > 5) {
+                    inputElement.value = parts[0] + "#" + parts[1].slice(0, 5);
+                }
+            }
         }
-        if(inputElement.value.includes('#') && inputElement.value.split('#')[1].length > 5){
-          inputElement.value = inputElement.value.split('#')[0] + "#" +inputElement.value.split('#')[1].slice(0, 5);
-        }
-      }
     }
 
     // Hilfsfunktion zur Normalisierung von Zeichenfolgen
@@ -500,6 +510,10 @@ function createAutosuggestItem(key, icon, currentPatch, variant) {
     imgElement.src = `/clashapp/data/patch/${currentPatch}/img/champion/${icon.replace("png", "avif")}`;
     imgElement.alt = `Current League of Legends Champion Icon of ${key}`;
   }
+  imgElement.onerror = function() {
+    this.onerror = null;
+    this.src = '/clashapp/data/misc/profile-icon.avif';
+  };
 
   const spanElement = document.createElement('span');
   spanElement.classList.add('text-sm');
@@ -537,32 +551,19 @@ function createAutosuggestItem(key, icon, currentPatch, variant) {
       localStorage.setItem("SearchHistory", JSON.stringify(searchHistory));
     }
   }
-
-  if(variant == 'player'){
+if(variant == 'player'){
     liElement.addEventListener('mousedown', function (event) {
       event.preventDefault(); // Prevents the blur event from immediately firing
     });
     liElement.addEventListener('click', function() {
-      updateSearchHistory(key);
-      key2 = key.toLowerCase();
-      if(key2 == "flokrastinator" || key2 == "jnnstv" || key2 == "5 min deathtimer" || key2 == "ilealori" || key2 == "vollbard" || key2 == "bard bard bard bard#brd" || key2 == "dasnerdwork#nerdy"){
-        window.location.href="https://clashscout.com/team/test";
-      } else {
-        postAjax(`${window.location.protocol}//${window.location.hostname}/clashapp/src/apiFunctions.php`, { sumname: key }, function(data){
-          if(data == "404"){
-              window.location.href="https://clashscout.com/404";
-          } else {
-              window.location.href="https://clashscout.com/team/" + data;
-          }
-        });
-      }
+      sanitize(key);
     });
   } else if(variant == 'champion'){
     liElement.addEventListener('mousedown', function (event) {
-      event.preventDefault(); // Prevents the blur event from immediately firing
+      event.preventDefault();
     });
     liElement.addEventListener('click', function() {
-      updateSearchHistory(key);
+      addToSearchHistory(key);
       window.location.href="https://clashscout.com/champion/"+key.replace('.png', '').toLowerCase().replace(/['\-\s]+/g, '');
     });
   }
