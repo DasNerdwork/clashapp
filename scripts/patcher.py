@@ -11,6 +11,10 @@ import logging
 import logging.handlers as handlers
 import json
 import subprocess
+from dotenv import load_dotenv
+
+# Load credentials from the project .env so the script also works under cron (no /etc/environment there)
+load_dotenv('/hdd1/clashapp/.env')
 import requests
 import os, sys
 import tarfile

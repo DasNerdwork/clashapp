@@ -1,14 +1,18 @@
-#!/usr/bin/env python3.10
+#!/usr/bin/env python3
 # Necessary import block
 from datetime import datetime
 from pathlib import Path
 from pymongo import MongoClient
+from dotenv import load_dotenv
 import logging
 import logging.handlers as handlers
 import json
 import os, sys
 import time
 import glob
+
+# Load credentials from the project .env so the script also works under cron (no /etc/environment there)
+load_dotenv('/hdd1/clashapp/.env')
 
 # Start count of whole program time
 start_fetcher = time.time() 
@@ -165,8 +169,9 @@ def championStatIterator():
     return sortedChampionDict
 
 start_champ = time.time() 
+championStats = championStatIterator() # Build first, so a failure cannot leave an empty file behind
 with open('/hdd1/clashapp/data/misc/averageChampionStats.json', 'w') as location:
-    json.dump(championStatIterator(), location)
+    json.dump(championStats, location)
 champ_filesize = str(os.path.getsize('/hdd1/clashapp/data/misc/averageChampionStats.json')/1024).split('.', 1)[0] # Get kB size of downloaded file
 end_champ = str(round(time.time() - start_champ, 2))
 logger.info("Successfully fetched champion averages. Time elapsed: " + end_champ + " seconds for " + champ_filesize + " kB")
