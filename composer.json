@@ -1,7 +1,7 @@
 {
     "require": {
         "pragmarx/google2fa": "8.0.1",
-        "mongodb/mongodb": "^2.0",
+        "mongodb/mongodb": "^2.5.1",
         "bacon/bacon-qr-code": "2.0.8",
         "fabianwennink/iconcaptcha": "4.0.3",
         "predis/predis": "2.2.2",
